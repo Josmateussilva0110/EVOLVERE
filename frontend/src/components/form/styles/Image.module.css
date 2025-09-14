@@ -1,0 +1,4 @@
+.rounded_image {
+  border-radius: 100%;
+  object-fit: cover; /* deixa a imagem bem ajustada */
+}

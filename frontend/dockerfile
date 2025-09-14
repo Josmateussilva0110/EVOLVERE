@@ -1,0 +1,18 @@
+FROM node:current-alpine3.22
+
+WORKDIR /app
+
+# Copia package.json e package-lock.json
+COPY package*.json ./
+
+# Instala dependências
+RUN npm install
+
+# Copia o código
+COPY . .
+
+# Expõe a porta do Vite
+EXPOSE 5173
+
+# Comando para rodar o Vite dev server
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
