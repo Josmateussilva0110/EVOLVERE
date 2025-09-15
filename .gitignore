@@ -152,10 +152,10 @@ dist
 .pnp.*
 
 # Ignora todos os arquivos dentro de public/images/users
-/public/images/users/*
+/images/users/*
 
 # Mas mantém o .gitkeep (ou qualquer outro arquivo que queira versionar)
-/public/images/users/.gitkeep
+/images/users/.gitkeep
 
 
 
