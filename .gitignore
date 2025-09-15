@@ -151,13 +151,13 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# Ignora todos os arquivos dentro de public/images/users
-/images/users/*
+#IMAGENS EM PUBLIC
+public/images/users/*
+!public/images/users/.gitkeep
 
-# Mas mantém o .gitkeep (ou qualquer outro arquivo que queira versionar)
-/images/users/.gitkeep
-
-
+/users/*
+!/users/.gitkeep
+**/users/
 
 
 ### CocoaPods ###
