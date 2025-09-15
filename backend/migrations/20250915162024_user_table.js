@@ -6,6 +6,7 @@ const up = function (knex) {
     table.string('password', 255).notNullable()
     table.string('registration').nullable()
     table.integer('role').notNullable()
+    table.string('photo',200).nullable()
     table.integer('status').defaultTo(1)
     table.timestamps(true, true)
   })
