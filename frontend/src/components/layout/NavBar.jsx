@@ -28,7 +28,9 @@ function Navbar() {
 
   return (
     <nav className="bg-[#060060] shadow-md px-6 py-4 flex justify-between items-center">
-      <Link to="/" className="text-xl font-bold text-white hover:text-yellow-300">Home</Link>
+    <Link to="/">
+      <Image src="/logo.png" alt="logo" size={70} />
+    </Link>
 
       <ul className="flex items-center space-x-6">
         {!authenticated ? (
