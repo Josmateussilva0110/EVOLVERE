@@ -7,7 +7,7 @@ export default function useAuth({ setAuthenticated, setUser }) {
   const { setFlashMessage } = useFlashMessage()
 
   async function login(credentials) {
-    const response = await requestData("/user/login", "POST", credentials, true)
+    const response = await requestData("/login", "POST", credentials, true)
     if (response.success) {
       setAuthenticated(true)
       setUser(response.data.user)

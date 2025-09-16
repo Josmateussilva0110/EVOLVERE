@@ -19,7 +19,7 @@ function Navbar() {
         if (response.success) {
           setRequestUser(response.data.user)
         } else {
-          setUser(null)
+          setRequestUser(null)
         }
       }
       fetchUser()
@@ -43,9 +43,9 @@ function Navbar() {
               className="flex items-center gap-2 text-yellow-400 hover:text-yellow-600 font-medium"
             >
               {requestUser?.photo ? (
-                <Image src={`${import.meta.env.VITE_API_URL}images/users/${requestUser.photo}`} alt={requestUser?.name} size={55}/>
+                <Image src={`${import.meta.env.VITE_API_URL}images/users/${requestUser.photo}`} alt={requestUser?.username} size={55}/>
               ) : (
-                <span>Olá, {requestUser?.name}</span>
+                <span>Olá, {requestUser?.username}</span>
               )}
               <ChevronDown className={`w-4 h-4 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
             </button>
