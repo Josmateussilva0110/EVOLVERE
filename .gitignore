@@ -151,15 +151,13 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-public/users/*
-!public/users/.gitkeep
-
+#IMAGENS EM PUBLIC
+public/images/users/*
+!public/images/users/.gitkeep
 
 /users/*
 !/users/.gitkeep
 **/users/
-
-
 
 
 ### CocoaPods ###

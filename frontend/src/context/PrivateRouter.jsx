@@ -1,7 +1,7 @@
 import { useContext } from "react"
 import { Outlet } from "react-router-dom"
 import { Context as UserContext } from "./UserContext"
-import SessionExpired from "../components/pages/Auth/SessionExpired"
+import SessionExpired from "../components/pages/auth/SessionExpired"
 
 function PrivateRoute() {
   const { authenticated, loading } = useContext(UserContext)

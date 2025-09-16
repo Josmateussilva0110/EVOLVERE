@@ -27,14 +27,14 @@ function Navbar() {
   }, [user])
 
   return (
-    <nav className="bg-red-800 shadow-md px-6 py-4 flex justify-between items-center">
-      <Link to="/" className="text-xl font-bold text-yellow-400">Home</Link>
+    <nav className="bg-[#060060] shadow-md px-6 py-4 flex justify-between items-center">
+      <Link to="/" className="text-xl font-bold text-white hover:text-yellow-300">Home</Link>
 
       <ul className="flex items-center space-x-6">
         {!authenticated ? (
           <>
-            <li><Link to="/register" className="text-yellow-400 hover:text-yellow-600">Registrar</Link></li>
-            <li><Link to="/login" className="text-yellow-400 hover:text-yellow-600">Login</Link></li>
+            <li><Link to="/register" className="text-white hover:text-yellow-300">Registrar</Link></li>
+            <li><Link to="/login" className="text-white hover:text-yellow-300">Login</Link></li>
           </>
         ) : (
           <li className="relative">
