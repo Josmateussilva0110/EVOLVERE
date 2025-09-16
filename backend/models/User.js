@@ -30,6 +30,21 @@ class User {
             return undefined
         }
     }
+
+    async findById(id) {
+        try {
+            const result = await knex.select(["id", "username", "email", "registration", "role", "photo", "created_at", "updated_at"]).where({id}).table("users")
+            if(result.length > 0) {
+                return result[0]
+            }
+            else {
+                return undefined
+            }
+        } catch(err) {
+            console.log('erro ao buscar usuário por id: ', err)
+            return undefined
+        }
+    }
 }
 
 module.exports = new User()

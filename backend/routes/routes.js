@@ -5,5 +5,7 @@ const userController = require("../controllers/userController")
 
 // rotas para o usuário
 router.post('/login', userController.login)
+router.get('/user/session', userController.session)
+router.get('/user/:id', userController.getUserById)
 
 module.exports = router
