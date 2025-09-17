@@ -61,6 +61,16 @@ class UserController {
             return response.status(401).json({ success: false, message: "Usuário não autenticado" })
         }
     }
+
+    async logout(request, response) {
+        request.session.destroy(err => {
+            if (err) {
+                return response.status(500).json({ success: false, message: "Erro ao sair" })
+            }
+            response.clearCookie('connect.sid')
+            return response.status(200).json({ success: true, message: "Logout feito com sucesso" })
+        })
+    }
 }
 
 module.exports = new UserController()
