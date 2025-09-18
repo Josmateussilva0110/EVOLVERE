@@ -24,8 +24,8 @@ export default function useAuth({ setAuthenticated, setUser }) {
     if (response.success) {
       setAuthenticated(true)
       setUser(response.data.user)
-      setFlashMessage(response.data.message, "success")
-      navigate("/")
+      //setFlashMessage(response.data.message, "success")
+      navigate("/user/account")
     } else {
       setFlashMessage(response.message, "error")
     }

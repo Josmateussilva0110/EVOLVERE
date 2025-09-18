@@ -27,9 +27,15 @@ class UserController {
 
             const valid = await User.save(data)
             if(!valid) {
-                return response.status(422).json({status: false, message: "Erro ao cadastrar usuário."})
+                return response.status(500).json({status: false, message: "Erro ao cadastrar usuário."})
             }
-            return response.status(200).json({status: true, message: "Dados salvo com sucesso."})
+            const user = await User.findByEmail(email)
+            if(!user) {
+                return response.status(400).json({status: false, message: "Erro ao criar token para usuário."})
+            }
+            
+            request.session.user = { id: user.id, name: user.username }
+            return response.status(200).json({status: true, message: "Dados salvo com sucesso.", user: { id: user.id, name: user.username }})
 
         } catch(err) {
             console.error("Erro no cadastro de usuários:", err)

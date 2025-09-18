@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"
 import Input from "../../form/Input"
 import { useState, useContext } from "react"
 import { Context } from "../../../context/UserContext"
@@ -5,6 +6,7 @@ import { Context } from "../../../context/UserContext"
 function Register() {
   const [user, setUser] = useState({})
   const { register } = useContext(Context)
+  const navigate = useNavigate()
 
   function handleChange(event) {
     setUser({ ...user, [event.target.name]: event.target.value })

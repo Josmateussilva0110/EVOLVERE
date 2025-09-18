@@ -1,37 +1,65 @@
 import { useNavigate } from "react-router-dom"
 import Input from "../../form/Input"
-import { useState, useContext } from "react"
+import FileUpload from "../../form/FileUpload"
+import { useState, useContext, useEffect } from "react"
 import { Context } from "../../../context/UserContext"
 import { FaUserGraduate, FaChalkboardTeacher, FaUniversity } from "react-icons/fa"
+import requestData from "../../../utils/requestApi"
 
 function UserAccount() {
   const [user, setUser] = useState({})
   const [role, setRole] = useState("aluno")
+  const [loading, setLoading] = useState(true)
   const { register } = useContext(Context)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    async function checkSession() {
+      const response = await requestData("/user/session", "GET", {}, true)
+      if (response.success) {
+        console.log("user requisição: ", response)
+        setUser(response.data.user)
+      } else {
+        setUser(null)
+      }
+      setLoading(false)
+    }
+    checkSession()
+  }, [])
 
   function handleChange(event) {
     setUser({ ...user, [event.target.name]: event.target.value })
   }
 
-  async function submitForm(e) {
-    e.preventDefault()
-    register({ ...user, role })
+  function handleFileChange(file) {
+    setUser({ ...user, diploma: file })
   }
+
+  async function submitForm(event) {
+    event.preventDefault()
+
+    const formData = new FormData()
+
+    if (user.id) formData.append("id", user.id)
+    if (user.institution) formData.append("institution", user.institution)
+    if (user.access_code) formData.append("access_code", user.access_code)
+    if (user.diploma) formData.append("diploma", user.diploma)
+
+    // aqui você pediu para chamar de cargo
+    formData.append("role", role)
+
+    // debug: ver os dados
+    for (const [key, value] of formData.entries()) {
+      console.log(key, value)
+    }
+
+    register(formData)
+  }
+
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#060060] px-4">
       <div className="bg-white rounded-xl shadow-lg p-6 sm:p-10 md:p-14 w-full max-w-xl text-center">
-
-        {/* Logo canto superior esquerdo */}
-        <div className="flex justify-start mb-4">
-          <img
-            src="/logo.png" // substitua pelo caminho do logo
-            alt="Logo"
-            className="w-10 h-10"
-          />
-        </div>
-
         {/* Título */}
         <h2 className="text-2xl sm:text-3xl font-bold text-[#060060] mb-3">
           Estamos quase lá
@@ -91,6 +119,11 @@ function UserAccount() {
               <span className="mt-1 font-semibold">Coordenação</span>
             </button>
           </div>
+
+          {/* Upload de diploma (apenas para professor ou coordenação) */}
+          {(role === "professor" || role === "coordenacao") && (
+            <FileUpload name="diploma" label="Anexar diploma (PDF)" onFileChange={handleFileChange} />
+          )}
 
           {/* Botão avançar */}
           <button
