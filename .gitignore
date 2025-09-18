@@ -155,9 +155,17 @@ dist
 public/images/users/*
 !public/images/users/.gitkeep
 
+
 /users/*
 !/users/.gitkeep
 **/users/
+
+public/diplomas/*
+!public/diplomas/.gitkeep
+
+/diplomas/*
+!/diplomas/.gitkeep
+**/diplomas/
 
 
 ### CocoaPods ###
