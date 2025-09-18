@@ -1,7 +1,10 @@
 const User = require("../models/User")
+const Account = require("../models/Account")
 const bcrypt = require("bcrypt")
 const UserFieldValidator = require("../utils/userValidator")
 require('dotenv').config({ path: '../.env' })
+const path = require("path")
+const validator = require('validator')
 
 class UserController {
 
@@ -109,6 +112,51 @@ class UserController {
             return response.status(200).json({ success: true, message: "Logout feito com sucesso" })
         })
     }
+
+    async addRole(request, response) {
+        try {
+            const { id, institution, access_code, role } = request.body
+            console.log(id)
+            console.log(institution)
+            console.log(access_code)
+            console.log(role)
+            let diplomaPath = null
+
+            if (request.file) {
+                diplomaPath = path.join('diplomas', request.file.filename)
+            }
+
+            if (!validator.isInt(id + '', { min: 1 })) {
+                return response.status(422).json({status: false, message: "Usuário invalido."})
+            }
+
+            if (!validator.isInt(access_code + '', { min: 1 })) {
+                return response.status(422).json({status: false, message: "Código de acesso invalido."})
+            }
+
+            if (validator.isEmpty(institution || '') || !validator.isLength(institution, { min: 3, max: 50 })) {
+                return response.status(422).json({status: false, message: "Nome de instituição invalido."})
+            }
+
+            const data = {
+                professional_id: id,
+                institution,
+                access_code,
+                diploma: diplomaPath, 
+                role
+            }
+
+            const valid = await Account.save(data)
+            if(!valid) {
+                return response.status(500).json({status: false, message: "Erro ao cadastrar usuário."})
+            }
+            return response.status(200).json({status: true, message: "Conta cadastrada com sucesso."})
+        } catch(err) {
+            console.error("Erro em addRole:", err)
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
 }
 
 module.exports = new UserController()

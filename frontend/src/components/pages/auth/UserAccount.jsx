@@ -1,23 +1,23 @@
 import { useNavigate } from "react-router-dom"
 import Input from "../../form/Input"
 import FileUpload from "../../form/FileUpload"
-import { useState, useContext, useEffect } from "react"
-import { Context } from "../../../context/UserContext"
+import { useState, useEffect } from "react"
 import { FaUserGraduate, FaChalkboardTeacher, FaUniversity } from "react-icons/fa"
 import requestData from "../../../utils/requestApi"
+import userService from "./service/userService"
+import useFlashMessage from "../../../hooks/useFlashMessage"
 
 function UserAccount() {
   const [user, setUser] = useState({})
-  const [role, setRole] = useState("aluno")
+  const [role, setRole] = useState(4)
   const [loading, setLoading] = useState(true)
-  const { register } = useContext(Context)
+  const { setFlashMessage } = useFlashMessage()
   const navigate = useNavigate()
 
   useEffect(() => {
     async function checkSession() {
       const response = await requestData("/user/session", "GET", {}, true)
       if (response.success) {
-        console.log("user requisição: ", response)
         setUser(response.data.user)
       } else {
         setUser(null)
@@ -39,21 +39,19 @@ function UserAccount() {
     event.preventDefault()
 
     const formData = new FormData()
-
     if (user.id) formData.append("id", user.id)
     if (user.institution) formData.append("institution", user.institution)
     if (user.access_code) formData.append("access_code", user.access_code)
     if (user.diploma) formData.append("diploma", user.diploma)
 
-    // aqui você pediu para chamar de cargo
     formData.append("role", role)
 
-    // debug: ver os dados
     for (const [key, value] of formData.entries()) {
       console.log(key, value)
     }
 
-    register(formData)
+
+    await userService.registerAccount(formData, navigate, setFlashMessage)
   }
 
 
@@ -91,9 +89,9 @@ function UserAccount() {
           <div className="flex justify-center gap-3 mt-4">
             <button
               type="button"
-              onClick={() => setRole("aluno")}
+              onClick={() => setRole(4)}
               className={`flex flex-col items-center px-6 py-3 rounded-lg border transition
-                ${role === "aluno" ? "bg-[#060060] text-white" : "border-gray-400 text-gray-700"}`}
+                ${role === 4 ? "bg-[#060060] text-white" : "border-gray-400 text-gray-700"}`}
             >
               <FaUserGraduate size={28} />
               <span className="mt-1 font-semibold">Aluno</span>
@@ -101,9 +99,9 @@ function UserAccount() {
 
             <button
               type="button"
-              onClick={() => setRole("professor")}
+              onClick={() => setRole(3)}
               className={`flex flex-col items-center px-6 py-3 rounded-lg border transition
-                ${role === "professor" ? "bg-[#060060] text-white" : "border-gray-400 text-gray-700"}`}
+                ${role === 3 ? "bg-[#060060] text-white" : "border-gray-400 text-gray-700"}`}
             >
               <FaChalkboardTeacher size={28} />
               <span className="mt-1 font-semibold">Professor</span>
@@ -111,9 +109,9 @@ function UserAccount() {
 
             <button
               type="button"
-              onClick={() => setRole("coordenacao")}
+              onClick={() => setRole(2)}
               className={`flex flex-col items-center px-6 py-3 rounded-lg border transition
-                ${role === "coordenacao" ? "bg-[#060060] text-white" : "border-gray-400 text-gray-700"}`}
+                ${role === 2 ? "bg-[#060060] text-white" : "border-gray-400 text-gray-700"}`}
             >
               <FaUniversity size={28} />
               <span className="mt-1 font-semibold">Coordenação</span>
@@ -121,7 +119,7 @@ function UserAccount() {
           </div>
 
           {/* Upload de diploma (apenas para professor ou coordenação) */}
-          {(role === "professor" || role === "coordenacao") && (
+          {(role === 2 || role === 3) && (
             <FileUpload name="diploma" label="Anexar diploma (PDF)" onFileChange={handleFileChange} />
           )}
 
