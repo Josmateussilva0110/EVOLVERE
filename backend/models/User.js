@@ -1,6 +1,17 @@
 const knex = require("../database/connection")
 
 class User {
+
+    async save(data) {
+        try {
+            await knex("users").insert(data)
+            return true
+        } catch(err) {
+            console.log('erro ao cadastrar usuário', err)
+            return false
+        }
+    }
+
     async emailExists(email) {
         try {
             const result = await knex.select(["email"]).where({email}).table("users")

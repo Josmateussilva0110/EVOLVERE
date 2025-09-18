@@ -5,6 +5,38 @@ require('dotenv').config({ path: '../.env' })
 
 class UserController {
 
+    async register(request, response) {
+        try {
+            const {username, email, password, confirm_password} = request.body
+            const error = UserFieldValidator.validate({username, email, password, confirm_password})
+            if (error) return response.status(422).json({ status: false, message: error })
+
+            const emailExist = await User.emailExists(email)
+            if(emailExist) {
+                return response.status(422).json({status: false, message: "Email já existe."})
+            }
+
+            const salt = await bcrypt.genSalt(10)
+            const passwordHash = await bcrypt.hash(password, salt)
+            const data = {}
+            data.username = username
+            data.email = email
+            data.password = passwordHash
+            data.role = 4
+            data.status = 2
+
+            const valid = await User.save(data)
+            if(!valid) {
+                return response.status(422).json({status: false, message: "Erro ao cadastrar usuário."})
+            }
+            return response.status(200).json({status: true, message: "Dados salvo com sucesso."})
+
+        } catch(err) {
+            console.error("Erro no cadastro de usuários:", err)
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
     async login(request, response) {
         try {
             const { email, password } = request.body
