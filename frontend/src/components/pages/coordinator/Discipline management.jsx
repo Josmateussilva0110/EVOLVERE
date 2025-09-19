@@ -32,7 +32,7 @@ function ManagementDisciplines() {
           Voltar
         </button>
 
-        <h2 className="text-2xl font-bold text-[#060060] text-center mb-8">
+        <h2 className="text-2xl font-bold text-[#060060] text-center mb-15">
           Gerenciamento de Disciplinas
         </h2>
         <form className="space-y-4" onSubmit={handleSubmit}>
