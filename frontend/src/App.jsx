@@ -3,6 +3,7 @@ import Register from "./components/pages/auth/Register"
 import Login from "./components/pages/auth/Login"
 import Home from "./components/pages/Home"
 import Profile from "./components/pages/Profile"
+import UserAccount from "./components/pages/auth/UserAccount"
 import FlashMessage from "./components/layout/Message"
 import Footer from "./components/layout/Footer"
 import Navbar from "./components/layout/NavBar"
@@ -14,7 +15,7 @@ function App() {
   const location = useLocation()
 
   // Rotas onde NÃO deve aparecer Navbar e Footer
-  const hideLayout = ["/login", "/register"].includes(location.pathname)
+  const hideLayout = ["/login", "/register", "/user/account"].includes(location.pathname)
 
   return (
     <>
@@ -26,6 +27,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<Home />} />
+          <Route path="/user/account" element={<UserAccount/>} />
 
           {/* Rotas privadas */}
           <Route element={<PrivateRoute />}>
