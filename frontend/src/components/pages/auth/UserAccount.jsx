@@ -37,21 +37,24 @@ function UserAccount() {
 
   async function submitForm(event) {
     event.preventDefault()
+    if(user) {
+      const formData = new FormData()
+      if (user.id) formData.append("id", user.id)
+      if (user.institution) formData.append("institution", user.institution)
+      if (user.access_code) formData.append("access_code", user.access_code)
+      if (user.diploma) formData.append("diploma", user.diploma)
 
-    const formData = new FormData()
-    if (user.id) formData.append("id", user.id)
-    if (user.institution) formData.append("institution", user.institution)
-    if (user.access_code) formData.append("access_code", user.access_code)
-    if (user.diploma) formData.append("diploma", user.diploma)
+      formData.append("role", role)
 
-    formData.append("role", role)
+      for (const [key, value] of formData.entries()) {
+        console.log(key, value)
+      }
 
-    for (const [key, value] of formData.entries()) {
-      console.log(key, value)
+      await userService.registerAccount(formData, navigate, setFlashMessage)
     }
-
-
-    await userService.registerAccount(formData, navigate, setFlashMessage)
+    else {
+      setFlashMessage("Usuário não autenticado", "error")
+    }
   }
 
 

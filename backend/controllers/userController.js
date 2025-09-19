@@ -116,10 +116,6 @@ class UserController {
     async addRole(request, response) {
         try {
             const { id, institution, access_code, role } = request.body
-            console.log(id)
-            console.log(institution)
-            console.log(access_code)
-            console.log(role)
             let diplomaPath = null
 
             if (request.file) {
@@ -138,6 +134,11 @@ class UserController {
                 return response.status(422).json({status: false, message: "Nome de instituição invalido."})
             }
 
+            const accountExists = await Account.accountExists(id)
+            if(accountExists) {
+                return response.status(422).json({status: false, message: "Usuário já tem conta."})
+            }
+ 
             const data = {
                 professional_id: id,
                 institution,
