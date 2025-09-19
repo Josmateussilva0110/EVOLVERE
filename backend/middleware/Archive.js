@@ -1,39 +1,23 @@
 const multer = require("multer")
-const path = require("path")
-const fs = require("fs")
 
-const pdfStorage = multer.diskStorage({
-  destination: function (request, file, callback) {
-    let folder = "documents"
-    const url = request.originalUrl.toLowerCase()
+// Armazena o arquivo apenas na memória (buffer)
+const storage = multer.memoryStorage()
 
-    if (url.startsWith("/user")) {
-      folder = '/diplomas'
-    }
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype === "application/pdf") {
+    cb(null, true)
+  } else {
+    cb(new Error("Apenas arquivos PDF são permitidos!"), false)
+  }
+}
 
-    const dest = path.join("public", folder)
-    fs.mkdirSync(dest, { recursive: true }) // garante que a pasta existe
 
-    callback(null, dest)
-  },
-  filename: function (request, file, callback) {
-    const uniqueName =
-      Date.now() + String(Math.floor(Math.random() * 100)) + path.extname(file.originalname)
-    callback(null, uniqueName)
-  },
-})
-
-const pdfUpload = multer({
-  storage: pdfStorage,
-  fileFilter(request, file, callback) {
-    if (!file.originalname.toLowerCase().endsWith(".pdf")) {
-      return callback(new Error("Só aceito arquivos PDF"))
-    }
-    callback(null, true)
-  },
+const upload = multer({
+  storage,
+  fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5 MB
-  },
+    fileSize: 5 * 1024 * 1024 // 5MB
+  }
 })
 
-module.exports = pdfUpload
+module.exports = upload

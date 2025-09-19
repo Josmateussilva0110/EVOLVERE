@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt")
 const UserFieldValidator = require("../utils/userValidator")
 require('dotenv').config({ path: '../.env' })
 const path = require("path")
+const fs = require("fs")
 const validator = require('validator')
 
 class UserController {
@@ -118,8 +119,8 @@ class UserController {
             const { id, institution, access_code, role } = request.body
             let diplomaPath = null
 
-            if (request.file) {
-                diplomaPath = path.join('diplomas', request.file.filename)
+            if (!request.file) {
+                return response.status(400).json({ status: false, message: "O upload de um PDF é obrigatório" })
             }
 
             if (!validator.isInt(id + '', { min: 1 })) {
@@ -138,6 +139,14 @@ class UserController {
             if(accountExists) {
                 return response.status(422).json({status: false, message: "Usuário já tem conta."})
             }
+
+            const uploadDir = path.join(__dirname, "..", "public", "diplomas")
+            fs.mkdirSync(uploadDir, { recursive: true })
+            const uniqueName = Date.now() + "_" + Math.floor(Math.random() * 100) + path.extname(request.file.originalname)
+            const finalPath = path.join(uploadDir, uniqueName)
+
+            // monta o caminho relativo para salvar no banco
+            diplomaPath = path.join("diplomas", uniqueName)
  
             const data = {
                 professional_id: id,
@@ -151,9 +160,9 @@ class UserController {
             if(!valid) {
                 return response.status(500).json({status: false, message: "Erro ao cadastrar usuário."})
             }
+            fs.writeFileSync(finalPath, request.file.buffer)
             return response.status(200).json({status: true, message: "Conta cadastrada com sucesso."})
         } catch(err) {
-            console.error("Erro em addRole:", err)
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
