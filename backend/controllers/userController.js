@@ -6,6 +6,7 @@ require('dotenv').config({ path: '../.env' })
 const path = require("path")
 const fs = require("fs")
 const validator = require('validator')
+const { customAlphabet } = require('nanoid')
 
 class UserController {
 
@@ -20,14 +21,28 @@ class UserController {
                 return response.status(422).json({status: false, message: "Email já existe."})
             }
 
+            const code = customAlphabet('0123456789', 8);
+
+            let registration
+            let isUnique = false
+
+            while (!isUnique) {
+                const newCode = code()
+                const exists = await User.registrationExists(newCode)
+                if (!exists) {
+                    registration = newCode
+                    isUnique = true
+                }
+            }
+
             const salt = await bcrypt.genSalt(10)
             const passwordHash = await bcrypt.hash(password, salt)
-            const data = {}
-            data.username = username
-            data.email = email
-            data.password = passwordHash
-            data.role = 4
-            data.status = 2
+            const data = {
+                username: username,
+                email: email,
+                password: passwordHash,
+                registration: registration,
+            }
 
             const valid = await User.save(data)
             if(!valid) {
@@ -91,7 +106,6 @@ class UserController {
             return response.status(200).json({status: true, user})
 
         } catch (err) {
-            console.error("Erro em getUserById:", err)
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }

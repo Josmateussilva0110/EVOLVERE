@@ -46,10 +46,6 @@ function UserAccount() {
 
       formData.append("role", role)
 
-      for (const [key, value] of formData.entries()) {
-        console.log(key, value)
-      }
-
       await userService.registerAccount(formData, navigate, setFlashMessage)
     }
     else {

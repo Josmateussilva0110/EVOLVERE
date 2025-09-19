@@ -27,6 +27,21 @@ class User {
         }
     }
 
+    async registrationExists(code) {
+        try {
+            const result = await knex.select(["registration"]).where({registration: code}).table("users")
+            if(result.length > 0) {
+                return true
+            }
+            else {
+                return false
+            }
+        } catch(err) {
+            console.log('erro ao verificar matricula: ', err)
+            return false
+        }
+    }
+
     async findByEmail(email) {
         try {
             const result = await knex.select("*").where({email}).table("users")
@@ -44,7 +59,7 @@ class User {
 
     async findById(id) {
         try {
-            const result = await knex.select(["id", "username", "email", "registration", "role", "photo", "created_at", "updated_at"]).where({id}).table("users")
+            const result = await knex.select(["id", "username", "email", "registration", "photo", "created_at", "updated_at"]).where({id}).table("users")
             if(result.length > 0) {
                 return result[0]
             }

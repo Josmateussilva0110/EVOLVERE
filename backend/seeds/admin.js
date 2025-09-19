@@ -6,28 +6,28 @@ exports.seed = async function (knex) {
       username: "Mateus",
       email: "mateus@evolvere.com",
       password: await bcrypt.hash("admin123", 10),
-      role: 1,
+      registration: 'admin',
       status: 1
     },
     {
       username: "Rai",
       email: "rai@evolvere.com",
       password: await bcrypt.hash("admin123", 10),
-      role: 1,
+      registration: 'admin',
       status: 1
     },
     {
       username: "Lucas",
       email: "lucas@evolvere.com",
       password: await bcrypt.hash("admin123", 10),
-      role: 1,
+      registration: 'admin',
       status: 1
     },
     {
       username: "Gabriel",
       email: "gabriel@evolvere.com",
       password: await bcrypt.hash("admin123", 10),
-      role: 1,
+      registration: 'admin',
       status: 1
     }
   ]

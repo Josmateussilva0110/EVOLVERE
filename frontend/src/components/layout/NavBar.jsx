@@ -16,7 +16,7 @@ function Navbar() {
     if(user) {
       async function fetchUser() {
         const response = await requestData(`/user/${user.id}`, "GET", {}, true)
-        if (response.status) {
+        if (response.success) {
           setRequestUser(response.data.user)
         } else {
           setRequestUser(null)
