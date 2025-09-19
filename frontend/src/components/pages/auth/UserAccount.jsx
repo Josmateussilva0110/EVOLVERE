@@ -6,11 +6,13 @@ import { FaUserGraduate, FaChalkboardTeacher, FaUniversity } from "react-icons/f
 import requestData from "../../../utils/requestApi"
 import userService from "./service/userService"
 import useFlashMessage from "../../../hooks/useFlashMessage"
+import Select from "../../form/Select"
 
 function UserAccount() {
   const [user, setUser] = useState({})
   const [role, setRole] = useState(4)
   const [loading, setLoading] = useState(true)
+  const [courses, setCourses] = useState([])
   const { setFlashMessage } = useFlashMessage()
   const navigate = useNavigate()
 
@@ -25,6 +27,19 @@ function UserAccount() {
       setLoading(false)
     }
     checkSession()
+  }, [])
+
+  useEffect(() => {
+    async function fetchCourses() {
+      const response = await requestData("/courses", "GET", {}, true)
+      if(response.success) {
+        setCourses(response.data.courses)
+      }
+      else {
+        setFlashMessage(response.message, 'error')
+      }
+    }
+    fetchCourses()
   }, [])
 
   function handleChange(event) {
@@ -68,13 +83,17 @@ function UserAccount() {
         </p>
 
         <form onSubmit={submitForm} className="space-y-4">
-          <Input
-            text=""
-            type="text"
+          {/* Lista suspensa de cursos */}
+          <Select
             name="institution"
-            placeholder="Nome da instituição"
-            handleOnChange={handleChange}
+            items={courses}
+            valueKey="name_IES"
+            labelKey="name_IES"
+            value={user.institution || ""}
+            onChange={handleChange}
+            label="Selecione sua instituição"
           />
+
 
           <Input
             text=""
