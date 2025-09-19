@@ -7,6 +7,7 @@ const up = function (knex) {
     table.string('access_code', 200).notNullable()
     table.string('diploma', 150).notNullable()
     table.integer('role').notNullable()
+    table.boolean('approved').defaultTo(false)
     table.timestamps(true, true)
   })
 }
