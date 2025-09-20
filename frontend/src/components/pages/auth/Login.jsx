@@ -18,7 +18,7 @@ function Login() {
   }
 
   return (
-    <div className="flex items-center justify-center grow bg-[#060060] px-4">
+    <div className="flex items-center justify-center justify-center min-h-screen bg-[#060060] px-4">
       <div className="bg-white rounded-xl shadow-lg p-6 sm:p-10 md:p-16 w-full max-w-md text-center">
         {/* Título */}
         <h2 className="text-xl sm:text-2xl font-bold text-[#060060] mb-8 sm:mb-10">
