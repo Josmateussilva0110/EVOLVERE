@@ -10,6 +10,8 @@ import Footer from "./components/layout/Footer"
 import Navbar from "./components/layout/NavBar"
 import Container from "./components/layout/Container"
 import PrivateRoute from "./context/PrivateRouter"
+import ManagementDisciplines from "./components/pages/coordinator/DisciplineManagement"
+import DisciplineList from "./components/pages/coordinator/ListDisciplines"
 
 function App() {
   const location = useLocation()
@@ -33,6 +35,8 @@ function App() {
           {/* Rotas privadas */}
           <Route element={<PrivateRoute />}>
             <Route path="/profile" element={<Profile />} />
+            <Route path="/managementdisciplines/registerdisciplines" element={<ManagementDisciplines />} />
+            <Route path="/managementdisciplines/listdisciplines" element={<DisciplineList />} />
           </Route>
           
         </Routes>
