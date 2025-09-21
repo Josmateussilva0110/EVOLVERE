@@ -10,7 +10,8 @@ import Footer from "./components/layout/Footer"
 import Navbar from "./components/layout/NavBar"
 import Container from "./components/layout/Container"
 import PrivateRoute from "./context/PrivateRouter"
-import ManagementDisciplines from "./components/pages/coordinator/Discipline management" 
+import ManagementDisciplines from "./components/pages/coordinator/DisciplineManagement"
+import DisciplineList from "./components/pages/coordinator/ListDisciplines" 
 
 /**
  * Componente principal da aplicação Evolvere.
@@ -46,11 +47,10 @@ function App() {
           {/* Rotas privadas */}
           <Route element={<PrivateRoute />}>
             <Route path="/profile" element={<Profile />} />
-            <Route path="/disciplinas/teste" element={<ManagementDisciplines />} />
+            <Route path="/ManagementDisciplines/registerdisciplines" element={<ManagementDisciplines />} />
+            <Route path="/ManagementDisciplines/listdisciplines" element={<DisciplineList />} />
           </Route>
           
-          {/* Rota temporária para visualizar Discipline Management */}
-          <Route path="/test-discipline" element={<ManagementDisciplines />} />
         </Routes>
       </Container>
       {!hideLayout && <Footer />}
