@@ -10,21 +10,7 @@ import Footer from "./components/layout/Footer"
 import Navbar from "./components/layout/NavBar"
 import Container from "./components/layout/Container"
 import PrivateRoute from "./context/PrivateRouter"
-import ManagementDisciplines from "./components/pages/coordinator/DisciplineManagement"
-import DisciplineList from "./components/pages/coordinator/ListDisciplines" 
 
-/**
- * Componente principal da aplicação Evolvere.
- * 
- * Gerencia o roteamento global e a renderização condicional de componentes de layout.
- * Define quais páginas devem exibir o Navbar e Footer, e quais devem ter layout próprio.
- * 
- * Estrutura de roteamento:
- * - Rotas públicas: login, register, home, about, user/account
- * - Rotas privadas: profile, disciplinas/teste (requer autenticação)
- * 
- * @returns {JSX.Element} Componente principal da aplicação
- */
 function App() {
   const location = useLocation()
 
@@ -47,8 +33,6 @@ function App() {
           {/* Rotas privadas */}
           <Route element={<PrivateRoute />}>
             <Route path="/profile" element={<Profile />} />
-            <Route path="/ManagementDisciplines/registerdisciplines" element={<ManagementDisciplines />} />
-            <Route path="/ManagementDisciplines/listdisciplines" element={<DisciplineList />} />
           </Route>
           
         </Routes>
