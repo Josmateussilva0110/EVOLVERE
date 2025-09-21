@@ -6,7 +6,7 @@ class UserService {
 
     if (response.success) {
       setFlashMessage(response.message, "success")
-      navigate("/")
+      navigate("/await/approval")
     } else {
       setFlashMessage(response.message, "error")
     }

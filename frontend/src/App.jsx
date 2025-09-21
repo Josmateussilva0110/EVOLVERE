@@ -10,7 +10,8 @@ import Footer from "./components/layout/Footer"
 import Navbar from "./components/layout/NavBar"
 import Container from "./components/layout/Container"
 import PrivateRoute from "./context/PrivateRouter"
-import ManagementDisciplines from "./components/pages/coordinator/Discipline management" 
+import ManagementDisciplines from "./components/pages/coordinator/Discipline management"
+import AccountValidation from './components/pages/auth/Waiting' 
 
 /**
  * Componente principal da aplicação Evolvere.
@@ -28,7 +29,7 @@ function App() {
   const location = useLocation()
 
   // Rotas onde NÃO deve aparecer Navbar e Footer
-  const hideLayout = ["/login", "/register", "/user/account", "/", "/about"].includes(location.pathname)
+  const hideLayout = ["/login", "/register", "/user/account", "/", "/about", "/await/approval"].includes(location.pathname)
 
   return (
     <>
@@ -42,6 +43,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/user/account" element={<UserAccount/>} />
+          <Route path="/await/approval" element={<AccountValidation/>} />
+
 
           {/* Rotas privadas */}
           <Route element={<PrivateRoute />}>

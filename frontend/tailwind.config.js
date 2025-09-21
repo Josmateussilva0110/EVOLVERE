@@ -1,11 +1,21 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: [
-    "./index.html",          
-    "./src/**/*.{js,ts,jsx,tsx}" // escaneia todos os arquivos dentro de src
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}"
   ],
   theme: {
-    extend: {}, // aqui você pode estender cores, fontes, espaçamentos, etc.
+    extend: {
+      keyframes: {
+        flip: {
+          '0%, 100%': { transform: 'rotate(0deg)' },
+          '50%': { transform: 'rotate(180deg)' },
+        },
+      },
+      animation: {
+        flip: 'flip 1.5s ease-in-out infinite',
+      },
+    },
   },
-  plugins: [], // aqui você adiciona plugins Tailwind se precisar
+  plugins: [],
 }
