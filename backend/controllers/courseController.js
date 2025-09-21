@@ -5,7 +5,6 @@ class courseController {
 
     async getCourses(request, response) {
         const courses = await Course.getAll()
-        console.log(courses)
         if(!courses) {
             return response.status(404).json({status: false, message: 'Nenhum curso encontrado.'})
         }
