@@ -12,12 +12,14 @@ import Container from "./components/layout/Container"
 import PrivateRoute from "./context/PrivateRouter"
 import ManagementDisciplines from "./components/pages/coordinator/DisciplineManagement"
 import DisciplineList from "./components/pages/coordinator/ListDisciplines"
+import AccountValidation from './components/pages/auth/Waiting' 
+
 
 function App() {
   const location = useLocation()
 
   // Rotas onde NÃO deve aparecer Navbar e Footer
-  const hideLayout = ["/login", "/register", "/user/account", "/", "/about"].includes(location.pathname)
+  const hideLayout = ["/login", "/register", "/user/account", "/", "/about", "/await/approval"].includes(location.pathname)
 
   return (
     <>
@@ -31,6 +33,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/user/account" element={<UserAccount/>} />
+          <Route path="/await/approval" element={<AccountValidation/>} />
+
 
           {/* Rotas privadas */}
           <Route element={<PrivateRoute />}>
