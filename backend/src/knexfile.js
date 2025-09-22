@@ -1,9 +1,6 @@
-// Update with your config settings.
+const path = require('path');
 require('dotenv').config({ path: '../.env' });
 
-/**
- * @type { Object.<string, import("knex").Knex.Config> }
- */
 module.exports = {
   development: {
     client: 'pg',
@@ -15,10 +12,10 @@ module.exports = {
     },
     migrations: {
       tableName: 'knex_migrations',
-      directory: './migrations'
+      directory: path.join(__dirname, 'migrations')
     },
     seeds: {
-      directory: './seeds'  
+      directory: path.join(__dirname, 'seeds')
     },
     timezone: 'America/Sao_Paulo'
   }

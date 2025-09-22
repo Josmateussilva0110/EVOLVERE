@@ -2,7 +2,7 @@ const XLSX = require("xlsx")
 const path = require("path")
 
 exports.seed = async function (knex) {
-  const filePath = path.resolve(__dirname, "../public/course_valid.xlsx")
+  const filePath = path.resolve(__dirname, "../../public/course_valid.xlsx")
   const workbook = XLSX.readFile(filePath)
   const sheetName = workbook.SheetNames[0] 
   const sheet = workbook.Sheets[sheetName]

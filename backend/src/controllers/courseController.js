@@ -10,7 +10,6 @@ class courseController {
         }
         return response.status(200).json({status: true, courses})
     }
-
 }
 
 module.exports = new courseController()

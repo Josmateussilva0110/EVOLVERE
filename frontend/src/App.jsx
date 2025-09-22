@@ -19,9 +19,8 @@ import AccountValidation from './components/pages/auth/Waiting'
 
 function App() {
   const location = useLocation()
-
   // Rotas onde NÃO deve aparecer Navbar e Footer
-  const hideLayout = ["/login", "/register", "/forgot_password", "/help", "/user/account", "/", "/about"].includes(location.pathname)
+  const hideLayout = ["/login", "/register", "/forgot_password", "/help", "/user/account", "/", "/about", "/await/approval"].includes(location.pathname)
 
 
   return (
@@ -44,8 +43,8 @@ function App() {
           {/* Rotas privadas */}
           <Route element={<PrivateRoute />}>
             <Route path="/profile" element={<Profile />} />
-            <Route path="/managementdisciplines/registerdisciplines" element={<ManagementDisciplines />} />
-            <Route path="/managementdisciplines/listdisciplines" element={<DisciplineList />} />
+            <Route path="/management/disciplines/register" element={<ManagementDisciplines />} />
+            <Route path="/management/disciplines/list" element={<DisciplineList />} />
           </Route>
           
         </Routes>

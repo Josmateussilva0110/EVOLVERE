@@ -24,8 +24,9 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./backend:/usr/src/app      # Sincroniza arquivos locais com o container
-      - /usr/src/app/node_modules   # Mantém node_modules do container
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules
+
     environment:
       - CHOKIDAR_USEPOLLING=true   # Hot-reload
       - WATCHPACK_POLLING=true     # Hot-reload
