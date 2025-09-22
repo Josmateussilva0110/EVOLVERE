@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom"
+import { ArrowLeft, Eye, EyeOff, User, Mail, Lock, Check, Sparkles, Star, Shield } from "lucide-react"
 import Input from "../../form/Input"
 import Image from "../../form/Image"
 import { useState, useContext } from "react"
@@ -6,6 +7,9 @@ import { Context } from "../../../context/UserContext"
 
 function Register() {
   const [user, setUser] = useState({})
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
   const { register } = useContext(Context)
   const navigate = useNavigate()
 
@@ -15,34 +19,51 @@ function Register() {
 
   async function submitForm(e) {
     e.preventDefault()
-    register(user)
+    if (acceptedTerms) {
+      register(user)
+    }
   }
 
   return (
     <div className="flex min-h-screen">
       {/* Lado Esquerdo (visível apenas em telas grandes) */}
       <div className="hidden lg:flex relative basis-[35%] bg-white px-8 sm:px-16">
-      <div className="absolute top-0 left-0">
-        <Image src={"/logo_preto.png"} alt="Evolvere Logo" size={160} />
-      </div>
+        <div className="absolute top-0 left-0">
+          <Image src={"/logo_preto.png"} alt="Evolvere Logo" size={160} />
+        </div>
 
-      <div className="flex flex-col justify-center items-start w-full">
-        <h1 className="text-5xl font-bold text-[#060060] mb-6 leading-tight mt-24">
-          Seja <br /> Bem-Vindo(a)
-        </h1>
+        <div className="flex flex-col justify-center items-start w-full">
+          <h1 className="text-5xl font-bold text-[#060060] mb-6 leading-tight mt-24">
+            Seja <br /> Bem-Vindo(a)
+          </h1>
 
-        <p className="text-gray-700 text-lg leading-relaxed max-w-sm">
-          A Evolvere é o espaço onde aprendizado, prática e feedback se encontram. 
-          Inscreva-se e descubra como organizar seus estudos de forma clara, evoluir 
-          com constância e alcançar seus objetivos acadêmicos.
-        </p>
+          <p className="text-gray-700 text-lg leading-relaxed max-w-sm">
+            A Evolvere é o espaço onde aprendizado, prática e feedback se encontram. 
+            Inscreva-se e descubra como organizar seus estudos de forma clara, evoluir 
+            com constância e alcançar seus objetivos acadêmicos.
+          </p>
+        </div>
       </div>
-    </div>
 
       {/* Lado Direito (sempre visível) */}
-      <div className="flex justify-center items-center w-full lg:basis-[65%] bg-[#060060] px-6 sm:px-12">
-        <div className="bg-white rounded-xl shadow-lg p-10 sm:p-12 md:p-16 w-full max-w-lg text-center">
-          
+      <div className="flex justify-center items-center w-full lg:basis-[65%] bg-[#060060] px-6 sm:px-12 relative">
+        {/* Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-yellow-400/10 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl"></div>
+        </div>
+
+        {/* Botão Voltar */}
+        <button
+          onClick={() => navigate("/")}
+          className="absolute top-6 left-6 flex items-center space-x-2 px-4 py-2 text-white hover:text-yellow-400 transition-colors duration-300 backdrop-blur-sm bg-white/10 rounded-lg z-10"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span>Voltar</span>
+        </button>
+
+        <div className="bg-white rounded-xl shadow-lg p-10 sm:p-12 md:p-16 w-full max-w-lg text-center relative z-10">
+          {/* Título */}
           <h2 className="text-2xl sm:text-3xl font-bold text-[#060060] mb-10">
             Novo por aqui ?
           </h2>
@@ -104,6 +125,8 @@ function Register() {
             <input
               type="checkbox"
               id="terms"
+              checked={acceptedTerms}
+              onChange={(e) => setAcceptedTerms(e.target.checked)}
               className="mr-2 w-4 h-4"
             />
             <label htmlFor="terms" className="text-base text-gray-600">

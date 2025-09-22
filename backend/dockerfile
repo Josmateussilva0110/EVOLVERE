@@ -1,5 +1,6 @@
 FROM node:current-alpine3.22
 
+# Define o diretório de trabalho
 WORKDIR /usr/src/app
 
 # Copia package.json e package-lock.json
@@ -11,18 +12,18 @@ RUN npm install
 # Instala nodemon globalmente
 RUN npm install -g nodemon
 
-# Instala client do PostgreSQL (para pg_isready)
+# Instala client do PostgreSQL (para pg_isready) e bash
 RUN apk add --no-cache postgresql-client bash
 
-# Copia scripts
+# Copia scripts de inicialização e dá permissão de execução
 COPY wait-for-it.sh start.sh ./
 RUN chmod +x wait-for-it.sh start.sh
 
-# Copia todo o código
+# Copia todo o código do backend
 COPY . .
 
 # Expõe a porta do backend
 EXPOSE 8080
 
-# Comando padrão
+# Comando padrão para iniciar o backend
 CMD ["./start.sh"]

@@ -1,7 +1,32 @@
 const validator = require('validator')
 
+/**
+ * Classe responsável por validar campos de usuário.
+ * Cada método retorna uma mensagem de erro caso a validação falhe, ou `null` se estiver válido.
+ * 
+ * Campos suportados: 
+ * - username
+ * - registration
+ * - email
+ * - password
+ * - confirm_password
+ * - id
+ * 
+ * @example
+ * const error = UserFieldValidator.validate({
+ *   username: "João",
+ *   email: "joao@email.com",
+ *   password: "123456",
+ *   confirm_password: "123456"
+ * })
+ */
 class UserFieldValidator {
 
+    /**
+     * Valida o nome de usuário.
+     * @param {string} username - Nome do usuário.
+     * @returns {string|null} Mensagem de erro ou `null` se válido.
+     */
     static username(username) {
         if (validator.isEmpty(username || '')) {
             return 'Nome obrigatório.'
@@ -12,17 +37,26 @@ class UserFieldValidator {
         return null
     }
 
+    /**
+     * Valida a matrícula do usuário.
+     * @param {string|number} registration - Matrícula do usuário.
+     * @returns {string|null} Mensagem de erro ou `null` se válido.
+     */
     static registration(registration) {
         if (validator.isEmpty(registration || '')) {
-            return 'Matricula obrigatório.'
+            return 'Matrícula obrigatória.'
         }
         if (!validator.isNumeric(registration) || !validator.isLength(registration, { min: 11, max: 11 })) {
             return 'Matrícula inválida.'
         }
-
         return null
     }
 
+    /**
+     * Valida o email do usuário.
+     * @param {string} email - Email do usuário.
+     * @returns {string|null} Mensagem de erro ou `null` se válido.
+     */
     static email(email) {
         if (validator.isEmpty(email || '')) {
             return 'Email obrigatório.'
@@ -33,6 +67,11 @@ class UserFieldValidator {
         return null
     }
 
+    /**
+     * Valida a senha do usuário.
+     * @param {string} password - Senha do usuário.
+     * @returns {string|null} Mensagem de erro ou `null` se válido.
+     */
     static password(password) {
         if (validator.isEmpty(password || '')) {
             return 'Senha obrigatória.'
@@ -43,7 +82,12 @@ class UserFieldValidator {
         return null
     }
 
-
+    /**
+     * Valida a confirmação de senha.
+     * @param {string} password - Senha original.
+     * @param {string} confirm_password - Confirmação da senha.
+     * @returns {string|null} Mensagem de erro ou `null` se válido.
+     */
     static confirmPassword(password, confirm_password) {
         if (validator.isEmpty(confirm_password || '')) {
             return 'Confirmação de senha obrigatória.'
@@ -54,6 +98,11 @@ class UserFieldValidator {
         return null
     }
 
+    /**
+     * Valida o ID do usuário.
+     * @param {number|string} id - ID do usuário.
+     * @returns {string|null} Mensagem de erro ou `null` se válido.
+     */
     static id(id) {
         if (!validator.isInt(id + '', { min: 1 })) {
             return 'ID inválido.'
@@ -61,6 +110,22 @@ class UserFieldValidator {
         return null
     }
 
+    /**
+     * Valida múltiplos campos de usuário.
+     * Retorna a primeira mensagem de erro encontrada ou `null` se todos forem válidos.
+     * 
+     * Campos suportados: `username`, `registration`, `email`, `password`, `confirm_password`, `id`.
+     * @param {Object} fields - Objeto com campos a validar.
+     * @returns {string|null} Mensagem de erro ou `null` se válido.
+     * 
+     * @example
+     * const error = UserFieldValidator.validate({
+     *   username: "João",
+     *   email: "joao@email.com",
+     *   password: "123456",
+     *   confirm_password: "123456"
+     * })
+     */
     static validate(fields) {
         for (const [field, value] of Object.entries(fields)) {
             let error = null
@@ -95,7 +160,6 @@ class UserFieldValidator {
 
         return null // sem erros
     }
-
 }
 
 module.exports = UserFieldValidator
