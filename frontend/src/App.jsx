@@ -1,6 +1,8 @@
 import { Routes, Route, useLocation } from "react-router-dom"
 import Register from "./components/pages/auth/Register"
 import Login from "./components/pages/auth/Login"
+import ForgotPassword from "./components/pages/auth/ForgotPassword"
+import HelpCenter from "./components/pages/auth/HelpCenter"
 import Home from "./components/pages/public/Home"
 import About from "./components/pages/public/About"
 import Profile from "./components/pages/Profile"
@@ -19,7 +21,8 @@ function App() {
   const location = useLocation()
 
   // Rotas onde NÃO deve aparecer Navbar e Footer
-  const hideLayout = ["/login", "/register", "/user/account", "/", "/about", "/await/approval"].includes(location.pathname)
+  const hideLayout = ["/login", "/register", "/forgot_password", "/help", "/user/account", "/", "/about"].includes(location.pathname)
+
 
   return (
     <>
@@ -30,6 +33,8 @@ function App() {
           {/* Rotas públicas */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot_password" element={<ForgotPassword />} />
+          <Route path="/help" element={<HelpCenter />} />
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/user/account" element={<UserAccount/>} />
