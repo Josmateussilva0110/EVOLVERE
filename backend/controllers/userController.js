@@ -7,6 +7,7 @@ const path = require("path")
 const fs = require("fs")
 const validator = require('validator')
 const { customAlphabet } = require('nanoid')
+const Course = require("../models/Course")
 
 class UserController {
 
@@ -133,6 +134,17 @@ class UserController {
             const { id, institution, access_code, role } = request.body
             let diplomaPath = null
 
+            if (id >= 1 && id <= 4) {
+                return response.status(422).json({
+                    status: false,
+                    message: "Não permitido, você já é admin",
+                })
+            }
+
+            const course_valid = await Course.getCourseByCode(access_code)
+            if(!course_valid) {
+                return response.status(404).json({status: false, message: "Nenhum curso encontrado com esse código"})
+            }
             if (!request.file) {
                 return response.status(400).json({ status: false, message: "O upload de um PDF é obrigatório" })
             }
