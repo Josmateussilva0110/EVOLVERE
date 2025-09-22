@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom"
-import { ArrowLeft, BookOpen, Users, Trophy, Target, Award, Clock, CheckCircle } from "lucide-react"
+import { ArrowLeft, BookOpen, Users, Trophy, Target, Award, Clock, CheckCircle, Star, Brain, Zap, Sparkles } from "lucide-react"
 import Image from "../../form/Image"
 
 /**
@@ -20,17 +20,41 @@ function About() {
   const navigate = useNavigate()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#060060] via-[#1a1a5e] to-[#2d2d8a]">
+    <div className="min-h-screen bg-gradient-to-br from-[#060060] via-[#1a1a5e] to-[#2d2d8a] relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -left-40 w-80 h-80 bg-yellow-400/10 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -right-40 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-purple-400/5 rounded-full blur-3xl"></div>
+      </div>
+
+      {/* Floating Elements */}
+      <div className="absolute top-20 right-10 animate-pulse">
+        <Brain className="w-8 h-8 text-yellow-400/30" />
+      </div>
+      <div className="absolute top-40 left-20 animate-bounce">
+        <Sparkles className="w-6 h-6 text-blue-400/30" />
+      </div>
+      <div className="absolute bottom-40 right-20 animate-pulse">
+        <Zap className="w-7 h-7 text-purple-400/30" />
+      </div>
+      <div className="absolute top-60 left-1/3 animate-bounce delay-1000">
+        <Star className="w-5 h-5 text-yellow-400/40" />
+      </div>
+
       {/* Header */}
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-6 py-8 relative z-10">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-3">
-            <Image src="/logo.png" alt="Evolvere Logo" size={48} />
+            <div className="relative">
+              <Image src="/logo.png" alt="Evolvere Logo" size={48} />
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-ping"></div>
+            </div>
             <h1 className="text-3xl font-bold text-white">Evolvere</h1>
           </div>
           <button 
             onClick={() => navigate("/")}
-            className="flex items-center space-x-2 px-4 py-2 text-white hover:text-yellow-400 transition-colors duration-300"
+            className="flex items-center space-x-2 px-4 py-2 text-white hover:text-yellow-400 transition-colors duration-300 backdrop-blur-sm bg-white/5 rounded-lg"
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Voltar</span>
@@ -39,15 +63,43 @@ function About() {
       </div>
 
       {/* Hero Section */}
-      <div className="container mx-auto px-6 py-16">
+      <div className="container mx-auto px-6 py-16 relative z-10">
         <div className="text-center max-w-4xl mx-auto">
+          {/* Badge */}
+          <div className="inline-flex items-center px-4 py-2 bg-yellow-400/20 text-yellow-400 rounded-full text-sm font-medium mb-6 backdrop-blur-sm">
+            <Sparkles className="w-4 h-4 mr-2" />
+            Transformando a Educação Digital
+          </div>
+          
           <h2 className="text-5xl md:text-6xl font-bold text-white mb-8 leading-tight">
-            Conheça a <span className="text-yellow-400">Evolvere</span>
+            Conheça a <span className="text-yellow-400 relative">
+              Evolvere
+              <div className="absolute -bottom-2 left-0 right-0 h-2 bg-yellow-400/30 rounded-full"></div>
+            </span>
           </h2>
-          <p className="text-xl md:text-2xl text-gray-300 mb-12 leading-relaxed">
+          
+          <p className="text-xl md:text-2xl text-gray-300 mb-8 leading-relaxed">
             A plataforma revolucionária que transforma a forma como você aprende, 
             pratica e evolui academicamente.
           </p>
+
+          {/* Quick Stats */}
+          <div className="flex justify-center items-center space-x-8 mb-12">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-yellow-400">3+</div>
+              <div className="text-sm text-gray-400">Anos de Experiência</div>
+            </div>
+            <div className="w-px h-8 bg-gray-600"></div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-yellow-400">50+</div>
+              <div className="text-sm text-gray-400">Especialistas</div>
+            </div>
+            <div className="w-px h-8 bg-gray-600"></div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-yellow-400">24/7</div>
+              <div className="text-sm text-gray-400">Suporte</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -198,8 +250,90 @@ function About() {
         </div>
       </div>
 
+      {/* Creators Section */}
+      <div className="container mx-auto px-6 py-16 relative z-10">
+        <div className="text-center mb-16">
+          <h3 className="text-4xl font-bold text-white mb-6">Conheça nossa equipe</h3>
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            Desenvolvido por estudantes apaixonados por educação e tecnologia
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          {/* Creator 1 */}
+          <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-6 text-center hover:bg-white/20 transition-all duration-300 group">
+            <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+              <span className="text-xl font-bold text-[#060060]">L</span>
+            </div>
+            <h4 className="text-lg font-bold text-white mb-2">Lucas</h4>
+            <p className="text-yellow-400 font-medium mb-3 text-sm">Desenvolvedor Full-Stack</p>
+            <p className="text-gray-300 text-xs leading-relaxed">
+              Especialista em React e Node.js, apaixonado por criar experiências digitais incríveis.
+            </p>
+          </div>
+
+          {/* Creator 2 */}
+          <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-6 text-center hover:bg-white/20 transition-all duration-300 group">
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+              <span className="text-xl font-bold text-white">J</span>
+            </div>
+            <h4 className="text-lg font-bold text-white mb-2">José</h4>
+            <p className="text-yellow-400 font-medium mb-3 text-sm">Arquiteto de Software</p>
+            <p className="text-gray-300 text-xs leading-relaxed">
+              Focado em arquiteturas escaláveis e soluções robustas para educação online.
+            </p>
+          </div>
+
+          {/* Creator 3 */}
+          <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-6 text-center hover:bg-white/20 transition-all duration-300 group">
+            <div className="w-20 h-20 bg-gradient-to-br from-purple-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+              <span className="text-xl font-bold text-white">M</span>
+            </div>
+            <h4 className="text-lg font-bold text-white mb-2">Maria</h4>
+            <p className="text-yellow-400 font-medium mb-3 text-sm">Designer UX/UI</p>
+            <p className="text-gray-300 text-xs leading-relaxed">
+              Criadora de interfaces intuitivas e experiências visuais memoráveis.
+            </p>
+          </div>
+
+          {/* Creator 4 */}
+          <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-6 text-center hover:bg-white/20 transition-all duration-300 group">
+            <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+              <span className="text-xl font-bold text-white">A</span>
+            </div>
+            <h4 className="text-lg font-bold text-white mb-2">Ana</h4>
+            <p className="text-yellow-400 font-medium mb-3 text-sm">Especialista em Educação</p>
+            <p className="text-gray-300 text-xs leading-relaxed">
+              Pedagoga especializada em metodologias de ensino e aprendizagem digital.
+            </p>
+          </div>
+        </div>
+
+        {/* Team Stats */}
+        <div className="mt-12 bg-white/10 backdrop-blur-sm rounded-3xl p-6">
+          <div className="grid md:grid-cols-4 gap-6 text-center">
+            <div>
+              <div className="text-2xl font-bold text-yellow-400 mb-1">4</div>
+              <div className="text-gray-300 text-sm">Desenvolvedores</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-yellow-400 mb-1">6+</div>
+              <div className="text-gray-300 text-sm">Meses de Desenvolvimento</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-yellow-400 mb-1">100%</div>
+              <div className="text-gray-300 text-sm">Dedicação</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-yellow-400 mb-1">∞</div>
+              <div className="text-gray-300 text-sm">Paixão pela Educação</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* CTA Section */}
-      <div className="container mx-auto px-6 py-16">
+      <div className="container mx-auto px-6 py-16 relative z-10">
         <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-3xl p-12 text-center">
           <h3 className="text-4xl font-bold text-[#060060] mb-6">
             Pronto para começar sua jornada?
@@ -210,15 +344,15 @@ function About() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button 
               onClick={() => navigate("/register")}
-              className="px-10 py-4 bg-[#060060] text-white text-xl font-bold rounded-2xl hover:bg-[#060060]/90 transition-all duration-300 shadow-2xl"
+              className="px-10 py-4 bg-[#060060] text-white text-xl font-bold rounded-2xl hover:bg-[#060060]/90 hover:scale-105 transition-all duration-300 shadow-2xl hover:shadow-[#060060]/25 group"
             >
-              Criar Conta Grátis
+              <span className="group-hover:translate-x-1 transition-transform inline-block">Criar Conta Grátis</span>
             </button>
             <button 
               onClick={() => navigate("/")}
-              className="px-10 py-4 border-2 border-[#060060] text-[#060060] text-xl font-semibold rounded-2xl hover:bg-[#060060] hover:text-white transition-all duration-300"
+              className="px-10 py-4 border-2 border-[#060060] text-[#060060] text-xl font-semibold rounded-2xl hover:bg-[#060060] hover:text-white hover:scale-105 transition-all duration-300 group"
             >
-              Voltar ao Início
+              <span className="group-hover:translate-x-1 transition-transform inline-block">Voltar ao Início</span>
             </button>
           </div>
         </div>
