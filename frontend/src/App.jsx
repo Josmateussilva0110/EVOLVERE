@@ -20,7 +20,7 @@ import AccountValidation from './components/pages/auth/Waiting'
 function App() {
   const location = useLocation()
   // Rotas onde NÃO deve aparecer Navbar e Footer
-  const hideLayout = ["/login", "/register", "/forgot_password", "/help", "/user/account", "/", "/about", "/await/approval"].includes(location.pathname)
+  const hideLayout = ["/login", "/register", "/forgot_password", "/help", "/", "/about", "/await/approval", "/user/account"].includes(location.pathname)
 
 
   return (

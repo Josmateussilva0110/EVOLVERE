@@ -3,6 +3,7 @@ const cors = require("cors")
 const session = require("express-session")
 const pgSession = require("connect-pg-simple")(session)
 const { Pool } = require("pg")
+const path = require("path")
 require('dotenv').config({ path: '../.env' })
 
 const router = require("./routes/routes")
@@ -19,7 +20,9 @@ const pgPool = new Pool({
 })
 
 app.use(express.json())
-app.use("/images", express.static("public/images"))
+app.use("/images", express.static(path.join(__dirname, "..", "public", "images")))
+app.use("/diplomas", express.static(path.join(__dirname, "..", "public", "diplomas")))
+
 
 app.use(
   cors({

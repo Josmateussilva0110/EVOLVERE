@@ -2,8 +2,8 @@ const User = require("../models/User")
 const Account = require("../models/Account")
 const bcrypt = require("bcrypt")
 const UserFieldValidator = require("../utils/userValidator")
-require('dotenv').config({ path: '../.env' })
 const path = require("path")
+require('dotenv').config({ path: '../.env' })
 const fs = require("fs")
 const validator = require('validator')
 const { customAlphabet } = require('nanoid')
@@ -53,7 +53,7 @@ class UserController {
             if(!user) {
                 return response.status(400).json({status: false, message: "Erro ao criar token para usuário."})
             }
-            
+            request.session.user = { id: user.id, name: user.username }
             return response.status(200).json({status: true, message: "Dados salvo com sucesso.", user: { id: user.id, name: user.username }})
 
         } catch(err) {
@@ -165,7 +165,9 @@ class UserController {
                 return response.status(422).json({status: false, message: "Usuário já tem conta."})
             }
 
-            const uploadDir = path.join(__dirname, "..", "public", "diplomas")
+            const rootDir = path.join(__dirname, "..", "..") // volta para backend/
+            const uploadDir = path.join(rootDir, "public", "diplomas")
+
             fs.mkdirSync(uploadDir, { recursive: true })
             const uniqueName = Date.now() + "_" + Math.floor(Math.random() * 100) + path.extname(request.file.originalname)
             const finalPath = path.join(uploadDir, uniqueName)
@@ -185,6 +187,7 @@ class UserController {
             if(!valid) {
                 return response.status(500).json({status: false, message: "Erro ao cadastrar usuário."})
             }
+
             fs.writeFileSync(finalPath, request.file.buffer)
             return response.status(200).json({status: true, message: "Conta cadastrada com sucesso."})
         } catch(err) {
