@@ -17,6 +17,37 @@ import DisciplineList from "./components/pages/coordinator/ListDisciplines"
 import AccountValidation from './components/pages/auth/Waiting' 
 
 
+/**
+ * Componente raiz da aplicação Evolvere.
+ *
+ * Responsável por:
+ * - Configurar todas as rotas públicas e privadas usando `react-router-dom`.
+ * - Exibir Navbar e Footer apenas em páginas públicas específicas.
+ * - Renderizar mensagens flash em todas as páginas.
+ *
+ * Rotas públicas:
+ * - "/" → Home
+ * - "/about" → About
+ * - "/login" → Login
+ * - "/register" → Register
+ * - "/forgot_password" → ForgotPassword
+ * - "/help" → HelpCenter
+ * - "/user/account" → UserAccount
+ * - "/await/approval" → AccountValidation
+ *
+ * Rotas privadas (protegidas pelo `PrivateRoute`):
+ * - "/profile" → Profile
+ * - "/management/disciplines/register" → ManagementDisciplines
+ * - "/management/disciplines/list" → DisciplineList
+ *
+ * @component
+ * @example
+ * return (
+ *   <App />
+ * )
+ *
+ * @returns {JSX.Element} Estrutura de roteamento da aplicação com layout condicional.
+ */
 function App() {
   const location = useLocation()
   // Rotas onde NÃO deve aparecer Navbar e Footer

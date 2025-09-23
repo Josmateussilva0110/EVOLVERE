@@ -4,16 +4,39 @@ import { ArrowLeft, Eye, EyeOff, Mail, Lock, Sparkles, Star } from "lucide-react
 import Input from "../../form/Input"
 import { Context } from "../../../context/UserContext"
 
+/**
+ * Componente de Login.
+ *
+ * Exibe um formulário de autenticação com campos de e-mail e senha,
+ * além de botões para login, voltar, criar conta e acessar a central de ajuda.
+ *
+ * @component
+ * @example
+ * return (
+ *   <Login />
+ * )
+ */
 function Login() {
   const [user, setUser] = useState({})
   const [showPassword, setShowPassword] = useState(false)
   const { login } = useContext(Context)
   const navigate = useNavigate()
 
+  /**
+   * Atualiza o estado `user` conforme o usuário digita nos campos.
+   *
+   * @param {React.ChangeEvent<HTMLInputElement>} event - Evento de mudança no input.
+   */
   function handleChange(event) {
     setUser({ ...user, [event.target.name]: event.target.value })
   }
 
+  /**
+   * Envia o formulário de login.
+   *
+   * @async
+   * @param {React.FormEvent<HTMLFormElement>} event - Evento de envio do formulário.
+   */
   async function submitForm(event) {
     event.preventDefault()
     login(user)

@@ -3,10 +3,57 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle, XCircle, X } from 'lucide-react'
 import bus from '../../utils/bus'
 
+
+
+/**
+ * Componente de mensagens rápidas (FlashMessage).
+ *
+ * Responsável por exibir notificações temporárias de sucesso ou erro
+ * em um canto da tela, com suporte a animações do `framer-motion`.
+ *
+ * Funcionamento:
+ * - Escuta eventos disparados no `bus` com a chave `"flash"`.
+ * - Exibe a mensagem com ícone correspondente (`success` ou `error`).
+ * - Remove automaticamente após 3 segundos ou manualmente via botão de fechar.
+ *
+ * Hooks utilizados:
+ * - `useState` e `useEffect` para controle de estado e timeout.
+ * - `framer-motion` (`AnimatePresence` e `motion.div`) para animações de entrada e saída.
+ *
+ * Estilização:
+ * - Posição fixa no canto superior direito.
+ * - Cores e ícones variam conforme o tipo da mensagem (`success` ou `error`).
+ *
+ * @component
+ * @example
+ * // Disparando uma mensagem de sucesso:
+ * import bus from "../../utils/bus";
+ *
+ * function handleSave() {
+ *   bus.emit("flash", { message: "Salvo com sucesso!", type: "success" });
+ * }
+ *
+ * // Disparando uma mensagem de erro:
+ * bus.emit("flash", { message: "Ocorreu um erro.", type: "error" });
+ *
+ * @returns {JSX.Element} Caixa de mensagem animada que aparece temporariamente na tela.
+ */
 function FlashMessage() {
   const [flashMessage, setFlashMessage] = useState(null)
   const [timeoutId, setTimeoutId] = useState(null)
 
+  /**
+   * Efeito colateral responsável por escutar eventos do `bus` com a chave `"flash"`.
+   *
+   * - Quando um evento é disparado, atualiza o estado `flashMessage` com os dados recebidos (`message` e `type`).
+   * - Cancela qualquer timeout anterior antes de criar um novo.
+   * - Define um timeout de 3 segundos para remover automaticamente a mensagem.
+   * - Faz a limpeza removendo o listener e limpando o timeout quando o componente é desmontado
+   *   ou quando `timeoutId` muda.
+   *
+   * @function useEffect
+   * @dependency [timeoutId] → garante que o timeout anterior seja sempre limpo e recriado.
+   */
   useEffect(() => {
     const handleFlash = (payload) => {
       const { message, type } = payload
@@ -26,6 +73,17 @@ function FlashMessage() {
     }
   }, [timeoutId])
 
+  /**
+   * Fecha manualmente a mensagem de flash.
+   *
+   * - Cancela o timeout em execução (se existir).
+   * - Remove imediatamente a mensagem chamando `setFlashMessage(null)`.
+   *
+   * Usado no botão de fechar (`X`) dentro da mensagem.
+   *
+   * @function closeMessage
+   * @returns {void}
+   */
   const closeMessage = () => {
     if (timeoutId) clearTimeout(timeoutId) 
     setFlashMessage(null)

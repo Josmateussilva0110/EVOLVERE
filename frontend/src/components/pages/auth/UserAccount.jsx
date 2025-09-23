@@ -8,6 +8,50 @@ import userService from "./service/userService"
 import useFlashMessage from "../../../hooks/useFlashMessage"
 import Select from "../../form/Select"
 
+
+/**
+ * Componente de criação de conta de usuário autenticado.
+ *
+ * Esta tela é exibida após o login inicial e permite que o usuário
+ * finalize o cadastro vinculando-se a uma instituição e escolhendo seu perfil.
+ *
+ * Funcionalidades:
+ * - Carrega a sessão atual do usuário para validar autenticação.
+ * - Busca lista de instituições/cursos disponíveis.
+ * - Permite selecionar a instituição e inserir o código de acesso.
+ * - Botões de escolha de perfil:
+ *   - Aluno (role = 4)
+ *   - Professor (role = 3)
+ *   - Coordenação (role = 2)
+ * - Upload de diploma em PDF (obrigatório para professor ou coordenação).
+ * - Submissão dos dados para a API via `userService.registerAccount`.
+ *
+ * Hooks utilizados:
+ * - `useState` para gerenciar dados do usuário, perfil, cursos e estado de carregamento.
+ * - `useEffect` para verificar sessão ativa e buscar lista de instituições.
+ * - `useNavigate` do `react-router-dom` para redirecionamentos.
+ * - `useFlashMessage` para exibir mensagens de feedback.
+ *
+ * Componentes filhos:
+ * - `Input`: campo de texto genérico.
+ * - `Select`: lista suspensa de instituições.
+ * - `FileUpload`: upload de arquivos (diploma).
+ *
+ * @component
+ * @example
+ * // Uso básico dentro de uma rota
+ * import UserAccount from "./pages/auth/UserAccount";
+ *
+ * function App() {
+ *   return (
+ *     <Routes>
+ *       <Route path="/account" element={<UserAccount />} />
+ *     </Routes>
+ *   );
+ * }
+ *
+ * @returns {JSX.Element} Formulário de configuração de conta do usuário.
+ */
 function UserAccount() {
   const [user, setUser] = useState({})
   const [role, setRole] = useState(4)
@@ -16,6 +60,17 @@ function UserAccount() {
   const { setFlashMessage } = useFlashMessage()
   const navigate = useNavigate()
 
+
+/**
+ * useEffect para verificar a sessão atual do usuário.
+ *
+ * Faz uma requisição GET para "/user/session" para obter os dados da sessão.
+ * - Se a sessão estiver ativa, atualiza o estado `user`.
+ * - Se não estiver, define `user` como `null`.
+ * Atualiza o estado `loading` para indicar que a verificação foi concluída.
+ *
+ * Executa apenas uma vez ao montar o componente.
+ */
   useEffect(() => {
     async function checkSession() {
       const response = await requestData("/user/session", "GET", {}, true)
@@ -29,6 +84,16 @@ function UserAccount() {
     checkSession()
   }, [])
 
+
+/**
+ * useEffect para buscar a lista de cursos/instituições disponíveis.
+ *
+ * Faz uma requisição GET para "/courses".
+ * - Se bem-sucedida, atualiza o estado `courses`.
+ * - Se houver erro, exibe uma mensagem de feedback via `setFlashMessage`.
+ *
+ * Executa apenas uma vez ao montar o componente.
+ */
   useEffect(() => {
     async function fetchCourses() {
       const response = await requestData("/courses", "GET", {}, true)
@@ -42,14 +107,42 @@ function UserAccount() {
     fetchCourses()
   }, [])
 
+  /**
+ * Atualiza os dados do usuário no estado local conforme o input é modificado.
+ *
+ * @param {React.ChangeEvent<HTMLInputElement | HTMLSelectElement>} event - Evento disparado pelo campo de input ou select.
+ * @param {string} event.target.name - Nome do campo que está sendo atualizado.
+ * @param {string} event.target.value - Valor atual do campo.
+ *
+ * @returns {void} Atualiza o estado `user` com o novo valor.
+ */
   function handleChange(event) {
     setUser({ ...user, [event.target.name]: event.target.value })
   }
 
+/**
+ * Atualiza o estado do usuário com o arquivo selecionado para upload.
+ *
+ * @param {File} file - Arquivo selecionado pelo usuário (geralmente PDF).
+ *
+ * @returns {void} Atualiza a propriedade `diploma` do objeto `user`.
+ */
   function handleFileChange(file) {
     setUser({ ...user, diploma: file })
   }
 
+/**
+ * Função disparada ao submeter o formulário de criação de conta.
+ *
+ * Constrói um objeto FormData contendo os dados do usuário, incluindo ID, instituição,
+ * código de acesso, diploma (se aplicável) e role selecionada. Envia para a API
+ * através do `userService.registerAccount`. Exibe mensagens de feedback via
+ * `setFlashMessage` caso o usuário não esteja autenticado.
+ *
+ * @param {React.FormEvent<HTMLFormElement>} event - Evento de submit do formulário.
+ *
+ * @returns {Promise<void>} Envia os dados para a API e navega conforme resposta.
+ */
   async function submitForm(event) {
     event.preventDefault()
     if(user) {

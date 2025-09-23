@@ -1,3 +1,43 @@
+
+/**
+ * Componente de lista suspensa (select) genérica.
+ *
+ * Funcionalidades:
+ * - Exibe um label e uma lista de opções.
+ * - Remove duplicados automaticamente com base no valor (`valueKey`).
+ * - Suporta valor controlado (`value`) e callback `onChange`.
+ * - Permite personalizar label, placeholder e nome do campo.
+ *
+ * Props:
+ * @param {Array<Object>} items - Lista de objetos que serão exibidos como opções.
+ * @param {string} valueKey - Nome da chave em cada item que será usado como value do option.
+ * @param {string} labelKey - Nome da chave em cada item que será exibido como label do option.
+ * @param {string|number} value - Valor atualmente selecionado (para controle do componente).
+ * @param {function} onChange - Função chamada quando o valor selecionado muda.
+ * @param {string} label - Texto do label exibido acima do select (padrão: "Selecione").
+ * @param {string} placeholder - Texto da opção vazia inicial (padrão: "-- Escolha uma opção --").
+ * @param {string} name - Nome do campo select (opcional, usa `valueKey` se não fornecido).
+ *
+ * @component
+ * @example
+ * const courses = [
+ *   { id: 1, name: "Engenharia" },
+ *   { id: 2, name: "Medicina" },
+ * ];
+ *
+ * <Select
+ *   items={courses}
+ *   valueKey="id"
+ *   labelKey="name"
+ *   value={selectedCourse}
+ *   onChange={(e) => setSelectedCourse(e.target.value)}
+ *   label="Curso"
+ *   placeholder="Selecione um curso"
+ *   name="course"
+ * />
+ *
+ * @returns {JSX.Element} Componente de select estilizado com label e opções únicas.
+ */
 export default function Select({
   items = [],
   valueKey,

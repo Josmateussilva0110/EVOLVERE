@@ -5,6 +5,43 @@ import Image from "../../form/Image"
 import { useState, useContext } from "react"
 import { Context } from "../../../context/UserContext"
 
+
+/**
+ * Componente de registro de usuários da aplicação Evolvere.
+ *
+ * Esta tela permite que novos usuários criem uma conta informando:
+ * - Nome completo
+ * - E-mail
+ * - Senha e confirmação de senha
+ *
+ * Recursos:
+ * - Botão para voltar à tela inicial.
+ * - Link para redirecionar ao login caso o usuário já possua conta.
+ * - Checkbox para aceitar os Termos de Serviço e Política de Privacidade (obrigatório para concluir o cadastro).
+ * - Layout responsivo com duas seções:
+ *   - Lado esquerdo (desktop): exibe a logo e um texto de boas-vindas.
+ *   - Lado direito: contém o formulário de cadastro.
+ *
+ * Hooks utilizados:
+ * - `useState` para controlar os dados do usuário, visibilidade das senhas e aceitação dos termos.
+ * - `useContext` para acessar a função `register` do contexto global de autenticação.
+ * - `useNavigate` do `react-router-dom` para redirecionamentos.
+ *
+ * @component
+ * @example
+ * // Uso básico dentro de uma rota React Router
+ * import Register from "./pages/auth/Register";
+ *
+ * function App() {
+ *   return (
+ *     <Routes>
+ *       <Route path="/register" element={<Register />} />
+ *     </Routes>
+ *   );
+ * }
+ *
+ * @returns {JSX.Element} Formulário de registro de usuários.
+ */
 function Register() {
   const [user, setUser] = useState({})
   const [showPassword, setShowPassword] = useState(false)
@@ -13,10 +50,30 @@ function Register() {
   const { register } = useContext(Context)
   const navigate = useNavigate()
 
+
+/**
+ * Atualiza os dados do usuário no estado local conforme o input é digitado.
+ *
+ * @param {React.ChangeEvent<HTMLInputElement>} event - Evento disparado pelo input.
+ * @param {string} event.target.name - Nome do campo que está sendo atualizado.
+ * @param {string} event.target.value - Valor atual do campo.
+ *
+ * @returns {void} Atualiza o estado `user` com o novo valor.
+ */
   function handleChange(event) {
     setUser({ ...user, [event.target.name]: event.target.value })
   }
 
+/**
+ * Função disparada ao submeter o formulário de registro.
+ *
+ * Previna o comportamento padrão do formulário e verifica se o usuário aceitou
+ * os Termos de Serviço antes de chamar a função de registro do contexto.
+ *
+ * @param {React.FormEvent<HTMLFormElement>} e - Evento de submit do formulário.
+ *
+ * @returns {Promise<void>} Chama a função `register(user)` se os termos forem aceitos.
+ */
   async function submitForm(e) {
     e.preventDefault()
     if (acceptedTerms) {

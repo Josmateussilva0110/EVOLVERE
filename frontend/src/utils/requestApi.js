@@ -1,9 +1,36 @@
 import api from './api'
 
-// endpoint: rota da API
-// method: GET, POST, PUT, DELETE
-// data: corpo da requisição (se houver)
-// withCredentials: envia cookies de sessão
+/**
+ * Função utilitária para requisições HTTP à API.
+ *
+ * Suporta GET, POST, PUT, DELETE e envia FormData quando necessário.
+ * Também trata sessão expirada disparando um evento global `SESSION_EXPIRED`.
+ *
+ * @async
+ * @function requestData
+ * @param {string} endpoint - Rota da API (ex: "/user/session").
+ * @param {string} [method='get'] - Método HTTP: GET, POST, PUT, DELETE.
+ * @param {object|FormData} [data={}] - Dados da requisição. Para GET, enviados como params.
+ * @param {boolean} [withCredentials=false] - Envia cookies de sessão se true.
+ *
+ * @returns {Promise<object>} Objeto com:
+ *  - `success` {boolean} indica se a requisição foi bem-sucedida
+ *  - `status` {number} código HTTP retornado
+ *  - `data` {any} dados retornados pela API
+ *  - `message` {string} mensagem de resposta ou erro
+ *
+ * @example
+ * // GET simples
+ * const response = await requestData('/user/session');
+ *
+ * // POST com corpo
+ * const response = await requestData('/login', 'POST', { email, password });
+ *
+ * // Enviar FormData
+ * const formData = new FormData();
+ * formData.append('photo', file);
+ * const response = await requestData('/user/1', 'PATCH', formData, true);
+ */
 async function requestData(endpoint, method = 'get', data = {}, withCredentials = false) {
   try {
     const config = {
