@@ -1,8 +1,40 @@
 import { useState } from "react"
 
+
+/**
+ * Componente para upload de arquivos.
+ *
+ * Permite que o usuário selecione um arquivo (por padrão PDF) e exibe
+ * o nome do arquivo selecionado. Também notifica o componente pai sobre
+ * a seleção do arquivo através do callback `onFileChange`.
+ *
+ * Props:
+ * @param {string} name - Nome do input, usado no formulário.
+ * @param {string} label - Texto do label exibido acima do input.
+ * @param {string} [accept=".pdf"] - Tipos de arquivo aceitos.
+ * @param {function} onFileChange - Função chamada quando o usuário seleciona um arquivo.
+ *
+ * @component
+ * @example
+ * <FileUpload 
+ *    name="diploma" 
+ *    label="Anexar diploma (PDF)" 
+ *    accept=".pdf" 
+ *    onFileChange={(file) => console.log(file)} 
+ * />
+ *
+ * @returns {JSX.Element} Componente de upload de arquivo com visualização do nome selecionado.
+ */
 function FileUpload({ name, label, accept = ".pdf", onFileChange }) {
   const [fileName, setFileName] = useState("")
 
+
+  /**
+   * Lida com a seleção de um arquivo pelo usuário.
+   * Atualiza o estado local com o nome do arquivo e dispara o callback para o pai.
+   *
+   * @param {React.ChangeEvent<HTMLInputElement>} e - Evento de mudança do input file.
+   */
   function handleFileChange(e) {
     const file = e.target.files[0]
     if (file) {

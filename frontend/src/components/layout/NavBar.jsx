@@ -6,12 +6,60 @@ import Image from '../form/Image'
 import requestData from '../../utils/requestApi'
 
 
+/**
+ * Componente de navegação principal (Navbar).
+ *
+ * Exibe o logotipo, links de autenticação ou menu do usuário,
+ * dependendo do estado de autenticação.
+ *
+ * Funcionalidades:
+ * - Se o usuário não estiver autenticado:
+ *   - Mostra links para **Registrar** e **Login**.
+ * - Se o usuário estiver autenticado:
+ *   - Busca os dados do usuário autenticado (nome, foto).
+ *   - Mostra saudação com nome ou foto de perfil.
+ *   - Exibe um menu dropdown com opções:
+ *     - **Perfil**
+ *     - **Sair**
+ *
+ * Hooks utilizados:
+ * - `useContext(Context)`: obtém informações de autenticação, usuário e função de logout.
+ * - `useState`: controla abertura/fechamento do dropdown e dados requisitados do usuário.
+ * - `useEffect`: faz requisição para carregar os dados do usuário sempre que `user` mudar.
+ *
+ * Dependências externas:
+ * - `react-router-dom/Link`: navegação entre páginas.
+ * - `lucide-react/ChevronDown`: ícone do menu dropdown.
+ * - `requestData`: utilitário para requisições HTTP autenticadas.
+ * - `Image`: componente customizado para exibir imagens.
+ *
+ * @component
+ * @example
+ * return (
+ *   <Navbar />
+ * )
+ *
+ * @returns {JSX.Element} Barra de navegação fixa no topo com logotipo, links ou menu do usuário.
+ */
 function Navbar() {
   const { authenticated, logout, user } = useContext(Context)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [requestUser, setRequestUser] = useState(null)
 
 
+  /**
+   * Efeito colateral responsável por buscar os dados do usuário autenticado.
+   *
+   * - Executa sempre que o valor de `user` mudar.
+   * - Se existir um usuário válido (`user`), faz uma requisição GET para
+   *   a rota `/user/:id` usando o utilitário `requestData`.
+   * - Caso a resposta seja bem-sucedida (`response.success === true`),
+   *   armazena os dados do usuário em `requestUser`.
+   * - Caso contrário, limpa o estado (`setRequestUser(null)`).
+   *
+   * @function useEffect
+   * @dependency [user] → dispara sempre que o objeto `user` mudar.
+   */
   useEffect(() => {
     if(user) {
       async function fetchUser() {
