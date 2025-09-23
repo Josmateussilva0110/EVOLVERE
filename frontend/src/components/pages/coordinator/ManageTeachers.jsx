@@ -1,9 +1,26 @@
 import React, { useState } from "react";
-import { FaTrash, FaEdit, FaArrowLeft, FaSearch } from "react-icons/fa";
+import { FaArrowLeft, FaSearch } from "react-icons/fa";
 
+/**
+ * Componente de gerenciamento de professores.
+ * Exibe uma tabela com os professores e suas disciplinas,
+ * incluindo busca, ações de editar e excluir, e botão de voltar.
+ *
+ * @component
+ * @example
+ * return <ProfessoresManagement />
+ */
 function ProfessoresManagement() {
+  /**
+   * Estado que armazena o valor do campo de busca.
+   * @type {[string, Function]}
+   */
   const [search, setSearch] = useState("");
 
+  /**
+   * Lista de professores com suas respectivas disciplinas.
+   * @type {Array<{id: number, nome: string, disciplina: string}>}
+   */
   const professores = [
     { id: 1, nome: "Professor 1", disciplina: "Estrutura de dados" },
     { id: 2, nome: "Professor 2", disciplina: "Algoritmos 1" },
@@ -11,12 +28,19 @@ function ProfessoresManagement() {
     { id: 4, nome: "Professor 4", disciplina: "Sistemas Inteligentes" },
   ];
 
+  /**
+   * Filtra a lista de professores com base no termo de busca.
+   * Inclui busca pelo nome ou disciplina do professor.
+   */
   const professoresFiltrados = professores.filter(
     (prof) =>
       prof.nome.toLowerCase().includes(search.toLowerCase()) ||
       prof.disciplina.toLowerCase().includes(search.toLowerCase())
   );
 
+  /**
+   * Função para voltar à página anterior no histórico do navegador.
+   */
   const handleVoltar = () => {
     window.history.back();
   };
@@ -26,7 +50,7 @@ function ProfessoresManagement() {
       {/* Botão Voltar fixo à esquerda */}
       <button
         onClick={handleVoltar}
-        className="absolute top-6 left-6 flex items-center bg-gray-100 text-gray-700 px-4 py-2 rounded-xl hover:bg-gray-200 transition-all"
+        className="absolute top-6 left-6 flex items-center bg-white-100 text-white-700 px-4 py-2 rounded-xl hover:bg-gray-100 transition-all"
       >
         <FaArrowLeft className="mr-2" /> Voltar
       </button>

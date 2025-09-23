@@ -14,7 +14,10 @@ import Container from "./components/layout/Container"
 import PrivateRoute from "./context/PrivateRouter"
 import ManagementDisciplines from "./components/pages/coordinator/DisciplineManagement"
 import DisciplineList from "./components/pages/coordinator/ListDisciplines"
-import AccountValidation from './components/pages/auth/Waiting' 
+import AccountValidation from './components/pages/auth/Waiting'
+import ViewCourses from "./components/pages/coordinator/ViewCourses"
+import ListStrudents from "./components/pages/coordinator/ListStudents"
+import ManageTeachers from "./components/pages/coordinator/ManageTeachers"
 
 
 function App() {
@@ -43,7 +46,11 @@ function App() {
           {/* Rotas privadas */}
           <Route element={<PrivateRoute />}>
             <Route path="/profile" element={<Profile />} />
-            <Route path="/disciplinas/teste" element={<ManagementDisciplines />} />
+            <Route path="/managementdisciplines/registerdisciplines" element={<ManagementDisciplines />} />
+            <Route path="/managementdisciplines/listdisciplines" element={<DisciplineList />} />
+            <Route path="/managementdisciplines/viewcourses" element={<ViewCourses />} />
+            <Route path="/managementdisciplines/liststudents" element={<ListStrudents />} />
+            <Route path="/managementdisciplines/manageteachers" element={<ManageTeachers />} />
           </Route>
           
         </Routes>
