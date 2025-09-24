@@ -61,6 +61,29 @@ class Account {
             return false
         }
     }
+
+    async getRequests() {
+        try {
+            const result = await knex.raw(`
+                select 
+                    split_part(diploma, '/', 2) as diploma, 
+                    u.username,
+                    vp.professional_id as id,
+                    cv.name as course
+                from validate_professionals vp
+                inner join users u
+                    on u.id = vp.professional_id
+                inner join course_valid cv
+                    on cv.course_code::text = vp.access_code
+                where vp.role = 3 and vp.approved = false
+            `)
+            const rows = result.rows
+             return rows.length > 0 ? rows : undefined
+        } catch(err) {
+            console.error('Erro ao buscar requests:', err)
+            return undefined
+        }
+    }
 }
 
 module.exports = new Account()

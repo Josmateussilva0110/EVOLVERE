@@ -21,6 +21,7 @@ import ManageTeachers from "./components/pages/coordinator/ManageTeachers"
 import ManageCourses from "./components/pages/coordinator/ManageCourses"
 import Coordinator from "./components/pages/coordinator/Coordinator"
 import DashboardCoordinator from "./components/pages/coordinator/DashboardCoordinator"
+import RequestsTeachers from "./components/pages/coordinator/Requests"
 
 
 /**
@@ -88,6 +89,7 @@ function App() {
             <Route path="/coordinator/course/manage" element={<ManageCourses />} />
             <Route path="/coordinator" element={<Coordinator />} />
             <Route path="/coordinator/dashboard" element={<DashboardCoordinator />} />
+            <Route path="/coordinator/requests" element={<RequestsTeachers />} />
           </Route>
           
         </Routes>

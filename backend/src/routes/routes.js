@@ -3,6 +3,7 @@ const pdfUpload = require("../middleware/Archive")
 const router = express.Router()
 const userController = require("../controllers/userController")
 const courseController = require("../controllers/courseController")
+const accountController = require("../controllers/accountController")
 
 /**
  * @module routes
@@ -45,6 +46,8 @@ router.post('/user/register', userController.register)
  */
 router.post('/user/logout', userController.logout)
 
+router.get('/user/requests', accountController.requestsTeachers)
+
 /**
  * @route GET /user/session
  * @summary Retorna informações da sessão atual do usuário
@@ -86,8 +89,10 @@ router.post(
       next()
     })
   },
-  userController.addRole
+  accountController.addRole
 )
+
+
 
 /**
  * ROTAS DE CURSOS
