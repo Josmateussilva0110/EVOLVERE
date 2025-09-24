@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { FaArrowLeft, FaSearch } from "react-icons/fa";
 
 /**

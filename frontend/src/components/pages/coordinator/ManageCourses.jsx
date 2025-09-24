@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import { useState } from "react"
 
 /**
  * Componente CoursesList
@@ -90,13 +90,6 @@ function CoursesList() {
             <span className="text-gray-400 ml-2">🔍</span>
           </div>
 
-          {/* Botão de adicionar curso */}
-          <button
-            onClick={() => alert("Adicionar curso")}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-semibold"
-          >
-            +
-          </button>
         </div>
 
         {/* Lista de cursos em grid 2x2 */}

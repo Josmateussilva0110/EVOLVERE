@@ -1,5 +1,5 @@
-import React from "react"
 import { FaUser, FaFileAlt, FaGraduationCap, FaUserGraduate } from "react-icons/fa"
+import { useNavigate } from "react-router-dom"
 
 /**
  * Componente DashboardPrincipal
@@ -15,12 +15,13 @@ import { FaUser, FaFileAlt, FaGraduationCap, FaUserGraduate } from "react-icons/
  * return <DashboardPrincipal />
  */
 function DashboardPrincipal() {
+  const navigate = useNavigate()
   return (
     <div className="min-h-[550px] flex flex-col items-center justify-start bg-[#060060] p-4">
-      
+
       {/* Container principal expandido para as laterais */}
       <div className="w-full max-w-6xl bg-white rounded-2xl p-8 shadow-lg flex flex-col gap-6">
-        
+
         {/* Cabeçalho */}
         <div className="flex justify-between items-center">
           <div>
@@ -40,19 +41,34 @@ function DashboardPrincipal() {
           Contém ícone, título e efeito hover.
         */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-gray-100 p-4 rounded-lg shadow flex flex-col items-center cursor-pointer hover:shadow-md transition-all border border-gray-300">
+          {/* Relatórios */}
+          <div
+            onClick={() => navigate("/coordinator/dashboard")}
+            className="bg-gray-100 p-4 rounded-lg shadow flex flex-col items-center cursor-pointer hover:shadow-md transition-all border border-gray-300"
+          >
             <FaFileAlt className="text-2xl mb-2" />
             <span className="font-semibold">Relatórios</span>
           </div>
-          <div className="bg-gray-100 p-4 rounded-lg shadow flex flex-col items-center cursor-pointer hover:shadow-md transition-all border border-gray-300">
+
+          {/* Disciplinas */}
+          <div
+            onClick={() => navigate("/coordinator/discipline/list")}
+            className="bg-gray-100 p-4 rounded-lg shadow flex flex-col items-center cursor-pointer hover:shadow-md transition-all border border-gray-300"
+          >
             <FaGraduationCap className="text-2xl mb-2" />
-            <span className="font-semibold">Curso(s)</span>
+            <span className="font-semibold">Disciplinas</span>
           </div>
-          <div className="bg-gray-100 p-4 rounded-lg shadow flex flex-col items-center cursor-pointer hover:shadow-md transition-all border border-gray-300">
+
+          {/* Alunos */}
+          <div
+            onClick={() => navigate("/coordinator/student/list")}
+            className="bg-gray-100 p-4 rounded-lg shadow flex flex-col items-center cursor-pointer hover:shadow-md transition-all border border-gray-300"
+          >
             <FaUserGraduate className="text-2xl mb-2" />
             <span className="font-semibold">Alunos</span>
           </div>
         </div>
+
 
         {/* KPIs */}
         {/*
@@ -67,7 +83,7 @@ function DashboardPrincipal() {
             <p className="font-bold text-2xl">320</p>
           </div>
           <div className="bg-gray-200 p-6 rounded-lg shadow">
-            <p className="text-gray-600">Cursos Cadastrados</p>
+            <p className="text-gray-600">Disciplinas Cadastradas</p>
             <p className="font-bold text-2xl">12</p>
           </div>
           <div className="bg-gray-200 p-6 rounded-lg shadow">

@@ -1,88 +1,133 @@
-import React, { useState } from "react";
-import { FaTrash, FaEdit, FaArrowLeft, FaSearch } from "react-icons/fa";
+import React, { useState } from "react"
 
-function ProfessoresManagement() {
-  const [search, setSearch] = useState("");
+/**
+ * Componente principal responsável pelo gerenciamento de disciplinas.
+ * Permite cadastrar uma disciplina associada a um curso e professor.
+ *
+ * @component
+ * @example
+ * return (
+ *   <DisciplineManagement />
+ * )
+ */
+function DisciplineManagement() {
+  /**
+   * Estado para armazenar o nome da disciplina.
+   * @type {[string, Function]}
+   */
+  const [nome, setNome] = useState("")
 
-  const professores = [
-    { id: 1, nome: "Professor 1", disciplina: "Estrutura de dados" },
-    { id: 2, nome: "Professor 2", disciplina: "Algoritmos 1" },
-    { id: 3, nome: "Professor 3", disciplina: "Algoritmos 2" },
-    { id: 4, nome: "Professor 4", disciplina: "Sistemas Inteligentes" },
-  ];
+  /**
+   * Estado para armazenar o curso selecionado.
+   * @type {[string, Function]}
+   */
+  const [curso, setCurso] = useState("")
 
-  const professoresFiltrados = professores.filter(
-    (prof) =>
-      prof.nome.toLowerCase().includes(search.toLowerCase()) ||
-      prof.disciplina.toLowerCase().includes(search.toLowerCase())
-  );
+  /**
+   * Estado para armazenar o professor selecionado.
+   * @type {[string, Function]}
+   */
+  const [professor, setProfessor] = useState("")
 
+  /**
+   * Lista de cursos disponíveis.
+   * (Substituir pelos dados reais vindos da API ou BD)
+   * @type {string[]}
+   */
+  const cursos = ["Engenharia", "Direito", "Administração"]
+
+  /**
+   * Lista de professores disponíveis.
+   * (Substituir pelos dados reais vindos da API ou BD)
+   * @type {string[]}
+   */
+  const professores = ["João Silva", "Maria Souza", "Carlos Lima"]
+
+  /**
+   * Manipula o envio do formulário de cadastro da disciplina.
+   * @param {React.FormEvent<HTMLFormElement>} e - Evento de envio do formulário
+   * @returns {void}
+   */
+  function handleSubmit(e) {
+    e.preventDefault()
+    // TODO: Implementar lógica de cadastro (ex: requisição para API)
+  }
+
+  /**
+   * Volta para a página anterior no histórico do navegador.
+   * @returns {void}
+   */
   const handleVoltar = () => {
-    window.history.back();
-  };
+    window.history.back()
+  }
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-gray-50 p-6 relative">
-      {/* Botão Voltar fixo à esquerda */}
-      <button
-        onClick={handleVoltar}
-        className="absolute top-6 left-6 flex items-center bg-gray-100 text-gray-700 px-4 py-2 rounded-xl hover:bg-gray-200 transition-all"
-      >
-        <FaArrowLeft className="mr-2" /> Voltar
-      </button>
+    <div className="flex items-start justify-center min-h-[400px] bg-gray-150 py-15">
+      <div className="w-full max-w-md bg-white rounded-xl p-8">
 
-      {/* Conteúdo central */}
-      <div className="w-full max-w-4xl mt-14">
-        {/* Campo de busca */}
-        <div className="relative mb-6">
+        {/* Botão Voltar */}
+        <button 
+          onClick={handleVoltar}
+          className="absolute top-25 left-5 w-14 h-13 bg-gray rounded-xl flex items-center justify-center text-gray-700 transition-all duration-200 text-base font cursor-pointer"
+        >
+          <span className="text-base font mr-1">←</span>
+          Voltar
+        </button>
+
+        <h2 className="text-2xl font-bold text-[#060060] text-center mb-15">
+          Cadastro de Disciplinas
+        </h2>
+
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          {/* Campo Nome da Disciplina */}
           <input
             type="text"
-            placeholder="Pesquisar por nome ou disciplina"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:ring-2 focus:ring-blue-300 outline-none"
+            placeholder="Nome da Disciplina"
+            className="w-full px-4 py-3 rounded-lg bg-[#F7F1F1] border border-gray-100 focus:outline-none focus:ring-2 focus:ring-[#060060]"
+            value={nome}
+            onChange={e => setNome(e.target.value)}
+            required
           />
-          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-        </div>
 
-        {/* Tabela */}
-        <div className="overflow-x-auto bg-white rounded-xl shadow">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="py-3 px-4 text-left font-semibold text-gray-700">Nome</th>
-                <th className="py-3 px-4 text-left font-semibold text-gray-700">Disciplina</th>
-                <th className="py-3 px-4 text-center font-semibold text-gray-700">Ações</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {professoresFiltrados.map((prof) => (
-                <tr key={prof.id} className="hover:bg-gray-50 transition">
-                  <td className="py-3 px-4">{prof.nome}</td>
-                  <td className="py-3 px-4">{prof.disciplina}</td>
-                  <td className="py-3 px-4 flex justify-center space-x-2">
-                    <button className="bg-yellow-100 text-yellow-700 p-2 rounded-full hover:bg-yellow-200 transition">
-                      🗑️ Excluir
-                    </button>
-                    <button className="bg-pink-100 text-pink-700 p-2 rounded-full hover:bg-pink-200 transition">
-                      ✏️ Editar
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {professoresFiltrados.length === 0 && (
-                <tr>
-                  <td colSpan={3} className="py-4 text-center text-gray-400 italic">
-                    Nenhum professor encontrado
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+          {/* Select Curso */}
+          <select
+            className="w-full px-4 py-3 rounded-lg bg-[#F7F1F1] border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#060060]"
+            value={curso}
+            onChange={e => setCurso(e.target.value)}
+            required
+          >
+            <option value="">Selecione o Curso</option>
+            {cursos.map((c, i) => (
+              <option key={i} value={c}>{c}</option>
+            ))}
+          </select>
+
+          {/* Select Professor */}
+          <select
+            className="w-full px-4 py-3 rounded-lg bg-[#F7F1F1] border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#060060]"
+            value={professor}
+            onChange={e => setProfessor(e.target.value)}
+            required
+          >
+            <option value="">Selecione o Professor</option>
+            {professores.map((p, i) => (
+              <option key={i} value={p}>{p}</option>
+            ))}
+          </select>
+
+          {/* Botão de envio */}
+          <div className="flex justify-center mt-8">
+            <button
+              onClick={handleSubmit}
+              className="px-16 py-2.5 bg-yellow-400 text-[#1e1e5f] font-bold rounded-xl hover:bg-yellow-500 transition-all text-lg"
+            >
+              Cadastrar
+            </button>
+          </div>
+        </form>
       </div>
     </div>
-  );
+  )
 }
 
-export default ProfessoresManagement;
+export default DisciplineManagement
