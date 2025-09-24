@@ -19,6 +19,7 @@ import ViewCourses from "./components/pages/coordinator/ViewCourses"
 import ListStrudents from "./components/pages/coordinator/ListStudents"
 import ManageTeachers from "./components/pages/coordinator/ManageTeachers"
 import ManageCourses from "./components/pages/coordinator/ManageCourses"
+import Coordinator from "./components/pages/coordinator/Coordinator"
 
 
 /**
@@ -78,12 +79,14 @@ function App() {
           {/* Rotas privadas */}
           <Route element={<PrivateRoute />}>
             <Route path="/profile" element={<Profile />} />
-            <Route path="/managementdisciplines/registerdisciplines" element={<ManagementDisciplines />} />
-            <Route path="/managementdisciplines/listdisciplines" element={<DisciplineList />} />
-            <Route path="/managementdisciplines/viewcourses" element={<ViewCourses />} />
-            <Route path="/managementdisciplines/liststudents" element={<ListStrudents />} />
-            <Route path="/managementdisciplines/manageteachers" element={<ManageTeachers />} />
-            <Route path="/managementdisciplines/managecourses" element={<ManageCourses />} />
+            <Route path="/managementcoordinator/registerdisciplines" element={<ManagementDisciplines />} />
+            <Route path="/managementcoordinator/listdisciplines" element={<DisciplineList />} />
+            <Route path="/managementcoordinator/viewcourses" element={<ViewCourses />} />
+            <Route path="/managementcoordinator/liststudents" element={<ListStrudents />} />
+            <Route path="/managementcoordinator/manageteachers" element={<ManageTeachers />} />
+            <Route path="/managementcoordinator/managecourses" element={<ManageCourses />} />
+            <Route path="/managementcoordinator/coordinator" element={<Coordinator />} />
+            
           </Route>
           
         </Routes>
