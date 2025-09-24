@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { FaArrowLeft, FaSearch } from "react-icons/fa"
 import requestData from "../../../utils/requestApi"
-import useFlashMessage from "../../../hooks/useFlashMessage";
+import useFlashMessage from "../../../hooks/useFlashMessage"
 
 
 function RequestsTeachers() {
@@ -68,7 +68,21 @@ function RequestsTeachers() {
                 <tr key={prof.id} className="hover:bg-gray-50 transition">
                   <td className="py-3 px-4">{prof.username}</td>
                   <td className="py-3 px-4">{prof.course}</td>
-                  <td className="py-3 px-4">{prof.diploma}</td>
+                  <td className="py-3 px-4">
+                    {prof.diploma ? (
+                      <a
+                        href={`${import.meta.env.VITE_BASE_URL}/diplomas/${prof.diploma}`}
+                        target="_blank" // abre em nova aba
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline hover:text-blue-800"
+                      >
+                        {prof.diploma}
+                      </a>
+                    ) : (
+                      "Sem diploma"
+                    )}
+                  </td>
+
                   <td className="py-3 px-4 flex justify-center space-x-2">
                     <button className="bg-yellow-100 text-yellow-700 p-2 rounded-full hover:bg-yellow-200 transition">
                       ✏️ 
