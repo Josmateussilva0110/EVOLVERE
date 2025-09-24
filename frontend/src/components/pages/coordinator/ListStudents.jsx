@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import { useState } from "react"
 import { FaEye, FaTrash, FaArrowLeft } from "react-icons/fa"
 
 /**

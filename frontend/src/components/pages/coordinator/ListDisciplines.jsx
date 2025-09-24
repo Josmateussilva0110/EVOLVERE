@@ -1,4 +1,5 @@
-import React, { useState } from "react"
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 /**
  * Tela de listagem de disciplinas com busca, edição e exclusão.
@@ -23,6 +24,7 @@ function DisciplineList() {
   ])
 
   const [busca, setBusca] = useState("")
+  const navigate = useNavigate()
 
   /**
    * Exclui disciplina da lista.
@@ -40,12 +42,6 @@ function DisciplineList() {
     alert(`Editar disciplina ID: ${id}`)
   }
 
-  /**
-   * Adiciona disciplina (apenas simulação).
-   */
-  const handleAdicionar = () => {
-    alert("Adicionar nova disciplina")
-  }
 
   // Filtra disciplinas conforme busca
   const disciplinasFiltradas = disciplinas.filter(d =>
@@ -100,7 +96,7 @@ function DisciplineList() {
 
       {/* Botão adicionar */}
       <button
-        onClick={handleAdicionar}
+        onClick={() => navigate("/coordinator/discipline/register")}
         className="mt-6 w-full flex items-center justify-center gap-2 bg-indigo-100 text-indigo-900 font-medium py-3 rounded-xl shadow-sm hover:bg-indigo-200 transition"
       >
         ➕ Adicionar Disciplinas
