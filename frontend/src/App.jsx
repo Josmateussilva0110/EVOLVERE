@@ -18,6 +18,7 @@ import AccountValidation from './components/pages/auth/Waiting'
 import ViewCourses from "./components/pages/coordinator/ViewCourses"
 import ListStrudents from "./components/pages/coordinator/ListStudents"
 import ManageTeachers from "./components/pages/coordinator/ManageTeachers"
+import ManageCourses from "./components/pages/coordinator/ManageCourses"
 
 
 /**
@@ -82,6 +83,7 @@ function App() {
             <Route path="/managementdisciplines/viewcourses" element={<ViewCourses />} />
             <Route path="/managementdisciplines/liststudents" element={<ListStrudents />} />
             <Route path="/managementdisciplines/manageteachers" element={<ManageTeachers />} />
+            <Route path="/managementdisciplines/managecourses" element={<ManageCourses />} />
           </Route>
           
         </Routes>
