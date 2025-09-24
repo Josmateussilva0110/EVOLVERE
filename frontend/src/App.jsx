@@ -79,14 +79,14 @@ function App() {
           {/* Rotas privadas */}
           <Route element={<PrivateRoute />}>
             <Route path="/profile" element={<Profile />} />
-            <Route path="/managementcoordinator/registerdisciplines" element={<ManagementDisciplines />} />
-            <Route path="/managementcoordinator/listdisciplines" element={<DisciplineList />} />
-            <Route path="/managementcoordinator/viewcourses" element={<ViewCourses />} />
-            <Route path="/managementcoordinator/liststudents" element={<ListStrudents />} />
-            <Route path="/managementcoordinator/manageteachers" element={<ManageTeachers />} />
-            <Route path="/managementcoordinator/managecourses" element={<ManageCourses />} />
-            <Route path="/managementcoordinator/coordinator" element={<Coordinator />} />
-            
+            <Route path="/management/coordinator/discipline/register" element={<ManagementDisciplines />} />
+            <Route path="/management/coordinator/discipline/list" element={<DisciplineList />} />
+            <Route path="/management/coordinator/course/view" element={<ViewCourses />} />
+            <Route path="/management/coordinator/student/list" element={<ListStrudents />} />
+            <Route path="/management/coordinator/teacher/manage" element={<ManageTeachers />} />
+            <Route path="/management/coordinator/course/manage" element={<ManageCourses />} />
+            <Route path="/management/coordinator" element={<Coordinator />} />
+
           </Route>
           
         </Routes>
