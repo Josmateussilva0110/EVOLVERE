@@ -1,6 +1,38 @@
 import { useNavigate } from "react-router-dom"
 import { Hourglass } from "lucide-react"
 
+
+/**
+ * Componente de validação de conta.
+ *
+ * Exibe uma tela informando ao usuário que sua conta está em processo de validação
+ * e que a equipe entrará em contato via e-mail em breve.
+ *
+ * Recursos:
+ * - Título destacando o status da conta ("Conta em validação").
+ * - Ícone de ampulheta animada com efeito visual de "aguarde".
+ * - Mensagem explicando que as credenciais institucionais estão sendo verificadas.
+ * - Link de suporte em destaque.
+ * - Botão para retornar à tela de login.
+ *
+ * Hooks utilizados:
+ * - `useNavigate` do `react-router-dom` para redirecionamento.
+ *
+ * @component
+ * @example
+ * // Uso dentro de uma rota
+ * import AccountValidation from "./pages/auth/AccountValidation";
+ *
+ * function App() {
+ *   return (
+ *     <Routes>
+ *       <Route path="/account-validation" element={<AccountValidation />} />
+ *     </Routes>
+ *   );
+ * }
+ *
+ * @returns {JSX.Element} Tela informativa de conta em processo de validação.
+ */
 export default function AccountValidation() {
   const navigate = useNavigate()
 
