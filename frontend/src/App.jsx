@@ -20,6 +20,7 @@ import ListStrudents from "./components/pages/coordinator/ListStudents"
 import ManageTeachers from "./components/pages/coordinator/ManageTeachers"
 import ManageCourses from "./components/pages/coordinator/ManageCourses"
 import Coordinator from "./components/pages/coordinator/Coordinator"
+import DashboardCoordinator from "./components/pages/coordinator/DashboardCoordinator"
 
 
 /**
@@ -86,6 +87,7 @@ function App() {
             <Route path="/management/coordinator/teacher/manage" element={<ManageTeachers />} />
             <Route path="/management/coordinator/course/manage" element={<ManageCourses />} />
             <Route path="/management/coordinator" element={<Coordinator />} />
+            <Route path="/management/coordinator/dashboard" element={<DashboardCoordinator />} />
 
           </Route>
           
