@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom"
-import { ArrowLeft, Eye, EyeOff, User, Mail, Lock, Check, Sparkles, Star, Shield } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import Input from "../../form/Input"
 import Image from "../../form/Image"
 import { useState, useContext } from "react"
 import { Context } from "../../../context/UserContext"
+import TermsModal from "./TermsModal"
 
 
 /**
@@ -44,9 +45,8 @@ import { Context } from "../../../context/UserContext"
  */
 function Register() {
   const [user, setUser] = useState({})
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [acceptedTerms, setAcceptedTerms] = useState(false)
+  const [acceptedTerms, setAcceptedTerms] = useState(false) // checkbox
+  const [isTermsOpen, setIsTermsOpen] = useState(false) // modal
   const { register } = useContext(Context)
   const navigate = useNavigate()
 
@@ -83,33 +83,25 @@ function Register() {
 
   return (
     <div className="flex min-h-screen">
-      {/* Lado Esquerdo (visível apenas em telas grandes) */}
+      {/* Lado Esquerdo */}
       <div className="hidden lg:flex relative basis-[35%] bg-white px-8 sm:px-16">
         <div className="absolute top-0 left-0">
           <Image src={"/logo_preto.png"} alt="Evolvere Logo" size={160} />
         </div>
-
         <div className="flex flex-col justify-center items-start w-full">
           <h1 className="text-5xl font-bold text-[#060060] mb-6 leading-tight mt-24">
             Seja <br /> Bem-Vindo(a)
           </h1>
-
           <p className="text-gray-700 text-lg leading-relaxed max-w-sm">
-            A Evolvere é o espaço onde aprendizado, prática e feedback se encontram. 
-            Inscreva-se e descubra como organizar seus estudos de forma clara, evoluir 
+            A Evolvere é o espaço onde aprendizado, prática e feedback se encontram.
+            Inscreva-se e descubra como organizar seus estudos de forma clara, evoluir
             com constância e alcançar seus objetivos acadêmicos.
           </p>
         </div>
       </div>
 
-      {/* Lado Direito (sempre visível) */}
+      {/* Lado Direito */}
       <div className="flex justify-center items-center w-full lg:basis-[65%] bg-[#060060] px-6 sm:px-12 relative">
-        {/* Background Elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-yellow-400/10 rounded-full blur-3xl"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl"></div>
-        </div>
-
         {/* Botão Voltar */}
         <button
           onClick={() => navigate("/")}
@@ -120,7 +112,6 @@ function Register() {
         </button>
 
         <div className="bg-white rounded-xl shadow-lg p-10 sm:p-12 md:p-16 w-full max-w-lg text-center relative z-10">
-          {/* Título */}
           <h2 className="text-2xl sm:text-3xl font-bold text-[#060060] mb-10">
             Novo por aqui ?
           </h2>
@@ -133,7 +124,6 @@ function Register() {
               handleOnChange={handleChange}
               className="text-lg py-3"
             />
-
             <Input
               type="email"
               name="email"
@@ -141,7 +131,6 @@ function Register() {
               handleOnChange={handleChange}
               className="text-lg py-3"
             />
-
             <Input
               type="password"
               name="password"
@@ -149,7 +138,6 @@ function Register() {
               handleOnChange={handleChange}
               className="text-lg py-3"
             />
-
             <Input
               type="password"
               name="confirm_password"
@@ -178,6 +166,7 @@ function Register() {
             </button>
           </p>
 
+          {/* Checkbox e link para abrir modal */}
           <div className="flex items-center mt-6 text-left">
             <input
               type="checkbox"
@@ -188,10 +177,27 @@ function Register() {
             />
             <label htmlFor="terms" className="text-base text-gray-600">
               Eu aceito os{" "}
-              <span className="font-semibold">Termos de Serviço</span> e a{" "}
-              <span className="font-semibold">Política de Privacidade</span> da Evolvere
+              <button
+                type="button"
+                onClick={() => setIsTermsOpen(true)} // <-- abre modal
+                className="font-semibold text-[#060060] hover:underline"
+              >
+                Termos de Serviço
+              </button>{" "}
+              e a{" "}
+              <button
+                type="button"
+                onClick={() => setIsTermsOpen(true)} // <-- abre modal
+                className="font-semibold text-[#060060] hover:underline"
+              >
+                Política de Privacidade
+              </button>{" "}
+              da Evolvere
             </label>
           </div>
+
+          {/* Modal de Termos */}
+          <TermsModal isOpen={isTermsOpen} onClose={() => setIsTermsOpen(false)} />
         </div>
       </div>
     </div>

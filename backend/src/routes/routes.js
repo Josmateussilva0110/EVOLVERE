@@ -3,6 +3,7 @@ const pdfUpload = require("../middleware/Archive")
 const router = express.Router()
 const userController = require("../controllers/userController")
 const courseController = require("../controllers/courseController")
+const accountController = require("../controllers/accountController")
 
 /**
  * @module routes
@@ -45,6 +46,16 @@ router.post('/user/register', userController.register)
  */
 router.post('/user/logout', userController.logout)
 
+
+/**
+ * @route GET /user/requests
+ * @summary Retorna todas as solicitações de professores pendentes de aprovação
+ * @returns {object} 200 - Lista de solicitações
+ * @returns {object} 404 - Nenhuma solicitação encontrada
+ * @returns {object} 500 - Erro interno do servidor
+ */
+router.get('/user/requests', accountController.requestsTeachers)
+
 /**
  * @route GET /user/session
  * @summary Retorna informações da sessão atual do usuário
@@ -86,8 +97,34 @@ router.post(
       next()
     })
   },
-  userController.addRole
+  accountController.addRole
 )
+
+/**
+ * ROTAS DE account
+ */
+
+/**
+ * @route DELETE /user/request/{id_user}
+ * @summary Remove uma solicitação de aprovação de professor
+ * @param {number} id_user.path.required - ID do usuário cuja solicitação será removida
+ * @returns {object} 200 - Solicitação removida com sucesso
+ * @returns {object} 422 - ID inválido
+ * @returns {object} 500 - Erro interno ao remover solicitação
+ */
+router.delete('/user/request/:id_user', accountController.removeRequest)
+
+/**
+ * @route PATCH /user/request/approved/{id_user}
+ * @summary Aprova a solicitação de um professor
+ * @param {number} id_user.path.required - ID do usuário a ser aprovado
+ * @returns {object} 200 - Conta aprovada com sucesso
+ * @returns {object} 422 - ID inválido
+ * @returns {object} 500 - Erro interno ao aprovar
+ */
+router.patch('/user/request/approved/:id_user', accountController.approve)
+
+
 
 /**
  * ROTAS DE CURSOS

@@ -1,4 +1,4 @@
-import { FaUser, FaFileAlt, FaGraduationCap, FaUserGraduate } from "react-icons/fa"
+import { FaChalkboardTeacher, FaFileAlt, FaGraduationCap, FaUserGraduate, FaTasks } from "react-icons/fa"
 import { useNavigate } from "react-router-dom"
 
 /**
@@ -41,14 +41,6 @@ function DashboardPrincipal() {
           Contém ícone, título e efeito hover.
         */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Relatórios */}
-          <div
-            onClick={() => navigate("/coordinator/dashboard")}
-            className="bg-gray-100 p-4 rounded-lg shadow flex flex-col items-center cursor-pointer hover:shadow-md transition-all border border-gray-300"
-          >
-            <FaFileAlt className="text-2xl mb-2" />
-            <span className="font-semibold">Relatórios</span>
-          </div>
 
           {/* Disciplinas */}
           <div
@@ -57,6 +49,16 @@ function DashboardPrincipal() {
           >
             <FaGraduationCap className="text-2xl mb-2" />
             <span className="font-semibold">Disciplinas</span>
+          </div>
+
+
+          {/* professores */}
+          <div
+            onClick={() => navigate("/coordinator/teacher/manage")}
+            className="bg-gray-100 p-4 rounded-lg shadow flex flex-col items-center cursor-pointer hover:shadow-md transition-all border border-gray-300"
+          >
+            <FaChalkboardTeacher className="text-2xl mb-2" />
+            <span className="font-semibold">Professores</span>
           </div>
 
           {/* Alunos */}
@@ -79,11 +81,11 @@ function DashboardPrincipal() {
         */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
           <div className="bg-gray-200 p-6 rounded-lg shadow">
-            <p className="text-gray-600">Alunos Ativos</p>
-            <p className="font-bold text-2xl">320</p>
+            <p className="text-gray-600">Disciplinas Cadastradas</p>
+            <p className="font-bold text-2xl">23</p>
           </div>
           <div className="bg-gray-200 p-6 rounded-lg shadow">
-            <p className="text-gray-600">Disciplinas Cadastradas</p>
+            <p className="text-gray-600">Professores Ativos</p>
             <p className="font-bold text-2xl">12</p>
           </div>
           <div className="bg-gray-200 p-6 rounded-lg shadow">
@@ -97,9 +99,25 @@ function DashboardPrincipal() {
           Botão principal do painel, direcionado para a tela de solicitações.
           Aumentado em tamanho para destaque visual.
         */}
-        <div className="flex justify-center mt-4">
-          <button className="bg-yellow-400 px-30.5 py-4 rounded-xl text-lg font-semibold hover:bg-yellow-500 transition-all">
+        <div className="flex justify-center gap-4 mt-4">
+          {/* Botão Solicitações */}
+          <button
+            onClick={() => navigate("/coordinator/requests")}
+            className="flex items-center gap-2 bg-yellow-400 px-8 py-4 rounded-xl text-lg font-semibold 
+               hover:bg-yellow-500 transform transition-transform hover:-translate-y-1"
+          >
+            <FaTasks className="text-xl" />
             Solicitações
+          </button>
+
+          {/* Botão Relatórios */}
+          <button
+            onClick={() => navigate("/coordinator/dashboard")}
+            className="flex items-center gap-2 bg-blue-500 px-8 py-4 rounded-xl text-lg font-semibold text-white 
+               hover:bg-blue-600 transform transition-transform hover:-translate-y-1"
+          >
+            <FaFileAlt className="text-xl" />
+            Relatórios
           </button>
         </div>
       </div>
