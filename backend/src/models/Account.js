@@ -84,6 +84,28 @@ class Account {
             return undefined
         }
     }
+
+    async deleteRequest(id) {
+        try {
+            const result = await knex('validate_professionals')
+            .where({ professional_id: id })
+            .del()
+            return result > 0
+        } catch (err) {
+            console.error('Erro ao remover request:', err)
+            return false
+        }
+    }
+
+    async approveTeacher(id) {
+        try {
+            const result = await knex('validate_professionals').where({professional_id: id }).update({approved: true})
+            return result > 0
+        } catch(err) {
+            console.error('Erro ao aprovar request:', err)
+            return false
+        }
+    }
 }
 
 module.exports = new Account()

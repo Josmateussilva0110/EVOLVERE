@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { FaArrowLeft, FaSearch } from "react-icons/fa"
+import { FaArrowLeft, FaSearch, FaCheckCircle, FaTrash} from "react-icons/fa"
 import requestData from "../../../utils/requestApi"
 import useFlashMessage from "../../../hooks/useFlashMessage"
 
@@ -14,12 +14,33 @@ function RequestsTeachers() {
       const response = await requestData('/user/requests', 'GET', {}, true)
       if(response.success) {
         setTeachers(response.data.teachers)
-      } else {
-        setFlashMessage(response.message, 'error')
-      }
+      } 
     }
     fetchRequests()
   }, [])
+
+  async function removeRequest(id) {
+    const response = await requestData(`/user/request/${id}`, "DELETE", {}, true)
+    if (response.success) {
+      setFlashMessage(response.data.message, "success")
+
+      setTeachers((prev) => prev.filter((prof) => prof.id !== id))
+    } else {
+      setFlashMessage(response.message, "error")
+    }
+  }
+
+  async function approveRequest(id) {
+    const response = await requestData(`/user/request/approved/${id}`, 'PATCH', {}, true)
+    if(response.success) {
+      setTeachers((prev) => prev.filter((prof) => prof.id !== id))
+      setFlashMessage(response.data.message, "success")
+    }
+    else {
+      setFlashMessage(response.message, "error")
+    }
+  }
+
 
 
   const professoresFiltrados = teachers.filter(
@@ -29,8 +50,8 @@ function RequestsTeachers() {
   );
 
   const handleVoltar = () => {
-    window.history.back();
-  };
+    window.history.back()
+  }
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-50 p-6 relative">
@@ -84,11 +105,17 @@ function RequestsTeachers() {
                   </td>
 
                   <td className="py-3 px-4 flex justify-center space-x-2">
-                    <button className="bg-yellow-100 text-yellow-700 p-2 rounded-full hover:bg-yellow-200 transition">
-                      ✏️ 
+                    <button 
+                      onClick={() => approveRequest(prof.id)}
+                      className="bg-green-100 text-green-700 p-2 rounded-full hover:bg-green-200 transition">
+                      
+                      <FaCheckCircle />
                     </button>
-                    <button className="bg-pink-100 text-pink-700 p-2 rounded-full hover:bg-pink-200 transition">
-                      🗑️ 
+                    <button
+                      onClick={() => removeRequest(prof.id)}
+                      className="bg-pink-100 text-pink-700 p-2 rounded-full hover:bg-pink-200 transition"
+                    >
+                      <FaTrash />
                     </button>
                   </td>
                 </tr>
@@ -96,7 +123,7 @@ function RequestsTeachers() {
               {professoresFiltrados.length === 0 && (
                 <tr>
                   <td colSpan={4} className="py-4 text-center text-gray-400 italic">
-                    Nenhum professor encontrado
+                    Nenhum solicitação encontrada
                   </td>
                 </tr>
               )}
@@ -105,7 +132,7 @@ function RequestsTeachers() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default RequestsTeachers;
+export default RequestsTeachers

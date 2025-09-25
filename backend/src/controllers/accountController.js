@@ -124,6 +124,40 @@ class AccountController {
         }
     }
 
+    async removeRequest(request, response) {
+        try {
+            const {id_user} = request.params
+            if (!validator.isInt(id_user + '', { min: 1 })) {
+                return response.status(422).json({status: false, message: "Id inválido."})
+            }
+
+            const valid = await Account.deleteRequest(id_user)
+            if(!valid) {
+                return response.status(500).json({status: false, message: 'Erro ao remover requisição'})
+            }
+            return response.status(200).json({status: true, message: "requisição recusada com sucesso."})
+        } catch(err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
+    async approve(request, response) {
+        try {
+            const {id_user} = request.params
+            if (!validator.isInt(id_user + '', { min: 1 })) {
+                return response.status(422).json({status: false, message: "Id inválido."})
+            }
+
+            const valid = await Account.approveTeacher(id_user)
+            if(!valid) {
+                return response.status(500).json({status: false, message: "Erro ao aprovar."})
+            }
+            return response.status(200).json({status: true, message: "Conta aprovada com sucesso."})
+        } catch(err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
 }
 
 module.exports = new AccountController()

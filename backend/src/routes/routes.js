@@ -92,6 +92,13 @@ router.post(
   accountController.addRole
 )
 
+/**
+ * ROTAS DE account
+ */
+
+router.delete('/user/request/:id_user', accountController.removeRequest)
+router.patch('/user/request/approved/:id_user', accountController.approve)
+
 
 
 /**
