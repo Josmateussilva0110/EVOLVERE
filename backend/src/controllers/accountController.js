@@ -115,6 +115,7 @@ class AccountController {
     async requestsTeachers(request, response) {
         try {
             const teachers = await Account.getRequests()
+            console.log(teachers)
             if(!teachers) {
                 return response.status(404).json({status: false, message: "Nenhuma solicitação encontrada."})
             }

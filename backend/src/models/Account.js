@@ -69,7 +69,8 @@ class Account {
                     split_part(diploma, '/', 2) as diploma, 
                     u.username,
                     vp.professional_id as id,
-                    cv.name as course
+                    cv.name as course,
+                    cv."acronym_IES" as flag
                 from validate_professionals vp
                 inner join users u
                     on u.id = vp.professional_id

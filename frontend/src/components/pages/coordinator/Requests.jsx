@@ -12,6 +12,7 @@ function RequestsTeachers() {
   useEffect(() => {
     async function fetchRequests() {
       const response = await requestData('/user/requests', 'GET', {}, true)
+      console.log(response)
       if(response.success) {
         setTeachers(response.data.teachers)
       } 
@@ -80,6 +81,7 @@ function RequestsTeachers() {
               <tr>
                 <th className="py-3 px-4 text-left font-semibold text-gray-700">Nome</th>
                 <th className="py-3 px-4 text-left font-semibold text-gray-700">Curso</th>
+                <th className="py-3 px-4 text-left font-semibold text-gray-700">Campus</th>
                 <th className="py-3 px-4 text-left font-semibold text-gray-700">Diploma</th>
                 <th className="py-3 px-4 text-center font-semibold text-gray-700">Ações</th>
               </tr>
@@ -89,6 +91,7 @@ function RequestsTeachers() {
                 <tr key={prof.id} className="hover:bg-gray-50 transition">
                   <td className="py-3 px-4">{prof.username}</td>
                   <td className="py-3 px-4">{prof.course}</td>
+                  <td className="py-3 px-4">{prof.flag}</td>
                   <td className="py-3 px-4">
                     {prof.diploma ? (
                       <a
@@ -122,7 +125,7 @@ function RequestsTeachers() {
               ))}
               {professoresFiltrados.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="py-4 text-center text-gray-400 italic">
+                  <td colSpan={5} className="py-4 text-center text-gray-400 italic">
                     Nenhum solicitação encontrada
                   </td>
                 </tr>
