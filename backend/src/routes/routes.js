@@ -4,6 +4,13 @@ const router = express.Router()
 const userController = require("../controllers/userController")
 const courseController = require("../controllers/courseController")
 const accountController = require("../controllers/accountController")
+const subjectController = require("../controllers/subjectController") 
+
+/**
+ * @module routes
+ * @description Define as rotas da API para usuários, cursos e disciplinas.
+ */
+
 
 /**
  * @module routes
@@ -137,5 +144,69 @@ router.patch('/user/request/approved/:id_user', accountController.approve)
  * @returns {object} 404 - Nenhum curso encontrado
  */
 router.get('/courses', courseController.getCourses)
+
+
+/**
+ * ROTAS DE DISCIPLINAS (SUBJECTS)
+ */
+
+/**
+ * @route GET /subjects
+ * @group Disciplinas - Operações com disciplinas
+ * @summary Obtém todas as disciplinas cadastradas
+ * @returns {object} 200 - Lista de disciplinas
+ * @returns {object} 404 - Nenhuma disciplina encontrada
+ */
+router.get('/subjects', subjectController.list)
+
+/**
+ * @route POST /subjects
+ * @summary Cria uma nova disciplina
+ * @param {string} name.body.required - Nome da disciplina
+ * @param {number} professional_id.body.required - ID do professor
+ * @param {number} course_valid_id.body.required - ID do curso
+ * @returns {object} 201 - Disciplina criada com sucesso
+ * @returns {object} 400 - Dados inválidos
+ */
+router.post('/subjects', subjectController.create)
+
+/**
+ * @route GET /subjects/:id
+ * @summary Obtém uma disciplina pelo ID
+ * @param {number} id.path.required - ID da disciplina
+ * @returns {object} 200 - Dados da disciplina
+ * @returns {object} 404 - Disciplina não encontrada
+ */
+router.get('/subjects/:id', subjectController.getById)
+
+/**
+ * @route PUT /subjects/:id
+ * @summary Atualiza uma disciplina
+ * @param {number} id.path.required - ID da disciplina
+ * @param {string} name.body.optional - Nome da disciplina
+ * @param {number} professional_id.body.optional - ID do professor
+ * @param {number} course_valid_id.body.optional - ID do curso
+ * @returns {object} 200 - Disciplina atualizada com sucesso
+ * @returns {object} 404 - Disciplina não encontrada
+ */
+router.put('/subjects/:id', subjectController.update)
+
+/**
+ * @route DELETE /subjects/:id
+ * @summary Exclui uma disciplina
+ * @param {number} id.path.required - ID da disciplina
+ * @returns {object} 204 - Disciplina excluída com sucesso
+ * @returns {object} 404 - Disciplina não encontrada
+ */
+router.delete('/subjects/:id', subjectController.delete)
+
+/**
+ * @route GET /users/professores
+ * @group Usuários - Operações com usuários
+ * @summary Lista professores validados
+ * @returns {object} 200 - Lista de professores validados
+ * @returns {object} 404 - Nenhum professor encontrado
+ */
+router.get('/users/professores', userController.getProfessoresValidados)
 
 module.exports = router
