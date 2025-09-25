@@ -123,6 +123,35 @@ class User {
             return undefined
         }
     }
+    
+    /**
+     * Busca professores validados (com join na tabela validate_professionals)
+     */
+    async findProfessoresValidados() {
+        try {
+            const result = await knex
+                .select(
+                    'users.id',
+                    'users.username',
+                    'users.email',
+                    'users.registration',
+                    'validate_professionals.institution',
+                    'validate_professionals.role'
+                )
+                .from('users')
+                .innerJoin('validate_professionals', 'users.id', 'validate_professionals.professional_id')
+                .where({
+                    'validate_professionals.role': 3,  // Professor
+                    'validate_professionals.approved': true  // Aprovado
+                })
+                .andWhere('users.status', 1)  // Usuário ativo
+            
+            return result.length > 0 ? result : undefined;
+        } catch(err) {
+            console.error("Erro ao buscar professores validados:", err);
+            return undefined;
+        }
+    }
 }
 
 module.exports = new User()

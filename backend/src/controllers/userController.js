@@ -255,6 +255,39 @@ class UserController {
         })
     }
 
+      /**
+     * Lista professores validados (role = 3 e approved = true)
+     * 
+     * @async
+     * @param {import("express").Request} request
+     * @param {import("express").Response} response
+     * @returns {Promise<Object>} JSON com lista de professores validados.
+     */
+    async getProfessoresValidados(request, response) {
+        try {
+            // Busca apenas professores validados (role = 3 e approved = true)
+            const professores = await User.findProfessoresValidados();
+            
+            if (!professores || professores.length === 0) {
+                return response.status(404).json({ 
+                    status: false, 
+                    message: 'Nenhum professor validado encontrado.' 
+                });
+            }
+            
+            return response.status(200).json({ 
+                status: true, 
+                professores 
+            });
+        } catch (err) {
+            console.error("Erro ao listar professores:", err);
+            return response.status(500).json({ 
+                status: false, 
+                message: "Erro interno no servidor." 
+            });
+        }
+    }
+    
 }
 
 module.exports = new UserController()
