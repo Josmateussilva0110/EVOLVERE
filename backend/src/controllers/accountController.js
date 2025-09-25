@@ -112,6 +112,21 @@ class AccountController {
         }
     }
 
+
+        
+    /**
+     * Retorna todas as solicitações de professores pendentes de aprovação.
+     *
+     * @async
+     * @param {import("express").Request} request
+     * @param {import("express").Response} response
+     * @returns {Promise<Object>} JSON contendo:
+     * - `status` - Booleano indicando sucesso ou falha.
+     * - `teachers` - Array de objetos com informações das solicitações.
+     *
+     * @throws {404} Se não houver solicitações.
+     * @throws {500} Erro interno do servidor.
+     */
     async requestsTeachers(request, response) {
         try {
             const teachers = await Account.getRequests()
@@ -125,6 +140,20 @@ class AccountController {
         }
     }
 
+
+    /**
+     * Remove uma solicitação de aprovação de professor.
+     *
+     * @async
+     * @param {import("express").Request} request
+     * @param {Object} request.params
+     * @param {number|string} request.params.id_user - ID do usuário cuja solicitação será removida.
+     * @param {import("express").Response} response
+     * @returns {Promise<Object>} JSON com status da operação.
+     *
+     * @throws {422} ID inválido.
+     * @throws {500} Erro ao remover ou erro interno do servidor.
+     */
     async removeRequest(request, response) {
         try {
             const {id_user} = request.params
@@ -142,6 +171,20 @@ class AccountController {
         }
     }
 
+
+    /**
+     * Aprova a solicitação de um professor.
+     *
+     * @async
+     * @param {import("express").Request} request
+     * @param {Object} request.params
+     * @param {number|string} request.params.id_user - ID do usuário a ser aprovado.
+     * @param {import("express").Response} response
+     * @returns {Promise<Object>} JSON com status da operação.
+     *
+     * @throws {422} ID inválido.
+     * @throws {500} Erro ao aprovar ou erro interno do servidor.
+     */
     async approve(request, response) {
         try {
             const {id_user} = request.params

@@ -4,11 +4,35 @@ import requestData from "../../../utils/requestApi"
 import useFlashMessage from "../../../hooks/useFlashMessage"
 
 
+
+/**
+ * @typedef {Object} TeacherRequest
+ * @property {number} id - ID do professor
+ * @property {string} username - Nome do professor
+ * @property {string} course - Nome do curso
+ * @property {string} flag - Sigla do campus/instituição
+ * @property {string} diploma - Nome do arquivo do diploma
+ */
+
+/**
+ * Componente RequestsTeachers
+ * 
+ * Exibe a lista de solicitações de professores pendentes de aprovação.
+ * Permite pesquisar, aprovar ou remover solicitações.
+ *
+ * @component
+ * @example
+ * <RequestsTeachers />
+ */
 function RequestsTeachers() {
   const [search, setSearch] = useState("");
-  const [teachers, setTeachers] = useState([]) // array agora
+  const [teachers, setTeachers] = useState([]) 
   const { setFlashMessage } = useFlashMessage()
 
+  /**
+   * Busca todas as solicitações de professores pendentes ao carregar o componente.
+   * Atualiza o estado `teachers` com o resultado da API.
+   */
   useEffect(() => {
     async function fetchRequests() {
       const response = await requestData('/user/requests', 'GET', {}, true)
@@ -20,6 +44,13 @@ function RequestsTeachers() {
     fetchRequests()
   }, [])
 
+
+  /**
+   * Remove uma solicitação de professor pelo ID.
+   * Atualiza o estado removendo o professor da lista.
+   *
+   * @param {number} id - ID do professor
+   */
   async function removeRequest(id) {
     const response = await requestData(`/user/request/${id}`, "DELETE", {}, true)
     if (response.success) {
@@ -31,6 +62,13 @@ function RequestsTeachers() {
     }
   }
 
+
+  /**
+   * Aprova uma solicitação de professor pelo ID.
+   * Atualiza o estado removendo o professor da lista.
+   *
+   * @param {number} id - ID do professor
+   */
   async function approveRequest(id) {
     const response = await requestData(`/user/request/approved/${id}`, 'PATCH', {}, true)
     if(response.success) {
@@ -44,12 +82,20 @@ function RequestsTeachers() {
 
 
 
+  /**
+   * Filtra a lista de professores com base no campo de busca.
+   * Procura por `username` ou `course` que contenham o termo digitado.
+   */
   const professoresFiltrados = teachers.filter(
     (prof) =>
       prof.username.toLowerCase().includes(search.toLowerCase()) ||
       prof.course.toLowerCase().includes(search.toLowerCase())
   );
 
+
+  /**
+   * Volta para a página anterior do navegador.
+   */
   const handleVoltar = () => {
     window.history.back()
   }

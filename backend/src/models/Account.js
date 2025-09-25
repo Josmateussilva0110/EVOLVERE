@@ -62,6 +62,24 @@ class Account {
         }
     }
 
+    /**
+     * Retorna todas as solicitações de aprovação de professores que ainda não foram aprovadas.
+     *
+     * @async
+     * @returns {Promise<Array<Object>|undefined>} Retorna um array de objetos contendo:
+     * - `diploma` - Nome do arquivo do diploma.
+     * - `username` - Nome do usuário.
+     * - `id` - ID do profissional.
+     * - `course` - Nome do curso.
+     * - `flag` - Sigla da instituição de ensino.
+     * Retorna `undefined` se não houver solicitações ou em caso de erro.
+     *
+     * @example
+     * const requests = await Account.getRequests()
+     * if (requests) {
+     *   console.log(requests)
+     * }
+     */
     async getRequests() {
         try {
             const result = await knex.raw(`
@@ -86,6 +104,18 @@ class Account {
         }
     }
 
+
+    /**
+     * Remove uma solicitação de aprovação de professor pelo ID do profissional.
+     *
+     * @async
+     * @param {number} id - ID do profissional cuja solicitação será removida.
+     * @returns {Promise<boolean>} Retorna `true` se a exclusão foi bem-sucedida, `false` em caso de erro.
+     *
+     * @example
+     * const deleted = await Account.deleteRequest(5)
+     * // deleted === true ou false
+     */
     async deleteRequest(id) {
         try {
             const result = await knex('validate_professionals')
@@ -98,6 +128,17 @@ class Account {
         }
     }
 
+    /**
+     * Aprova a solicitação de um professor definindo o campo `approved` como `true`.
+     *
+     * @async
+     * @param {number} id - ID do profissional a ser aprovado.
+     * @returns {Promise<boolean>} Retorna `true` se a aprovação foi bem-sucedida, `false` em caso de erro.
+     *
+     * @example
+     * const approved = await Account.approveTeacher(5)
+     * // approved === true ou false
+     */
     async approveTeacher(id) {
         try {
             const result = await knex('validate_professionals').where({professional_id: id }).update({approved: true})
