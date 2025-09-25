@@ -1,9 +1,13 @@
 const Account = require("../models/Account")
+const User = require("../models/User")
 const path = require("path")
 require('dotenv').config({ path: '../.env' })
 const fs = require("fs")
 const validator = require('validator')
 const Course = require("../models/Course")
+const sendEmail = require("../utils/sendEmail")
+const formatMessageTeacherApproved = require("../utils/messageApprovedEmail")
+const formatMessageTeacherRejected = require("../utils/messageReprovedEmail")
 
 /**
  * Controlador de Usuários.
@@ -130,7 +134,6 @@ class AccountController {
     async requestsTeachers(request, response) {
         try {
             const teachers = await Account.getRequests()
-            console.log(teachers)
             if(!teachers) {
                 return response.status(404).json({status: false, message: "Nenhuma solicitação encontrada."})
             }
@@ -165,6 +168,14 @@ class AccountController {
             if(!valid) {
                 return response.status(500).json({status: false, message: 'Erro ao remover requisição'})
             }
+
+            const user = await User.findById(id_user)
+            if(!user) {
+                return response.status(404).json({status: false, message: "Usuário não encontrado para envio de email"})
+            }
+            const subject = "Validação de conta - Evolvere"
+            const { html } = formatMessageTeacherRejected(user.username)
+            await sendEmail(user.email, subject, html)
             return response.status(200).json({status: true, message: "requisição recusada com sucesso."})
         } catch(err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
@@ -196,6 +207,14 @@ class AccountController {
             if(!valid) {
                 return response.status(500).json({status: false, message: "Erro ao aprovar."})
             }
+
+            const user = await User.findById(id_user)   
+            if(!user) {
+                return response.status(404).json({status: false, message: "Usuário não encontrado para envio de email"})
+            }
+            const subject = "Validação de conta - Evolvere"
+            const { html } = formatMessageTeacherApproved(user.username)
+            await sendEmail(user.email, subject, html)
             return response.status(200).json({status: true, message: "Conta aprovada com sucesso."})
         } catch(err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
