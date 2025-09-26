@@ -1,3 +1,22 @@
+
+/**
+ * Gera o HTML de e-mail para notificar um professor que sua conta não foi aprovada.
+ * 
+ * Essa função cria uma mensagem estilizada em HTML com:
+ * - Saudação personalizada usando o `username`.
+ * - Informação de que a conta não foi aprovada.
+ * - Orientações sobre como revisar os dados e tentar novamente.
+ * - Botão com link para o suporte da plataforma.
+ * - Rodapé com informações de copyright.
+ * 
+ * @function
+ * @param {string} username - Nome do usuário (professor) que terá a conta rejeitada.
+ * @returns {{ html: string }} Objeto contendo a string HTML formatada para envio de e-mail.
+ * 
+ * @example
+ * const { html } = formatMessageTeacherRejected("João");
+ * // html agora contém o conteúdo completo da mensagem para envio
+ */
 function formatMessageTeacherRejected(username) {
     const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; 

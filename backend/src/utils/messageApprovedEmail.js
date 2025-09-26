@@ -1,3 +1,23 @@
+
+/**
+ * Gera o HTML de e-mail para notificar um professor que sua conta foi aprovada.
+ * 
+ * A função cria uma mensagem estilizada em HTML com:
+ * - Saudação personalizada usando o `username`.
+ * - Informação de que a conta do professor foi aprovada.
+ * - Orientações sobre como acessar a plataforma e utilizar os recursos.
+ * - Botão com link direto para login na plataforma.
+ * - Aviso caso o usuário não tenha solicitado a conta.
+ * - Rodapé com informações de copyright.
+ * 
+ * @function
+ * @param {string} username - Nome do usuário (professor) cuja conta foi aprovada.
+ * @returns {{ html: string }} Objeto contendo a string HTML formatada para envio de e-mail.
+ * 
+ * @example
+ * const { html } = formatMessageTeacherApproved('Maria');
+ * // html agora contém o conteúdo completo da mensagem para envio
+ */
 function formatMessageTeacherApproved(username) {
     const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; 

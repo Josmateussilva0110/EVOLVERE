@@ -1,3 +1,23 @@
+
+/**
+ * Gera o HTML de e-mail para envio de código de recuperação de senha.
+ * 
+ * A função cria uma mensagem estilizada em HTML com:
+ * - Saudação personalizada usando o `username`.
+ * - Instruções sobre a recuperação de senha.
+ * - Código temporário (`code`) para redefinição da senha.
+ * - Aviso caso o usuário não tenha solicitado a recuperação.
+ * - Rodapé com informações de copyright.
+ * 
+ * @function
+ * @param {string} code - Código de recuperação de senha a ser enviado ao usuário.
+ * @param {string} username - Nome do usuário que solicitou a recuperação.
+ * @returns {{ html: string }} Objeto contendo a string HTML formatada para envio de e-mail.
+ * 
+ * @example
+ * const { html } = formatMessageSendPassword('123456', 'João');
+ * // html agora contém o conteúdo completo da mensagem para envio
+ */
 function formatMessageSendPassword(code, username) {
     const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; 
