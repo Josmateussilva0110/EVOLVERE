@@ -104,13 +104,6 @@ function DisciplineManagement() {
                     Cadastro de Disciplinas
                 </h2>
 
-                {/* Bloco de Debug Info (opcional, pode remover se não precisar mais) */}
-                <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-lg mb-4">
-                    <p className="text-sm text-yellow-800">
-                        <strong>Debug Info:</strong><br/>
-                        Cursos carregados: {cursos.length} | Professores carregados: {professores.length}
-                    </p>
-                </div>
 
                 <form className="space-y-4" onSubmit={handleSubmit}>
                     <input

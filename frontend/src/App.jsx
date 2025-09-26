@@ -5,20 +5,18 @@ import ForgotPassword from "./components/pages/auth/ForgotPassword"
 import HelpCenter from "./components/pages/auth/HelpCenter"
 import Home from "./components/pages/public/Home"
 import About from "./components/pages/public/About"
-import Profile from "./components/pages/Profile"
 import UserAccount from "./components/pages/auth/UserAccount"
 import FlashMessage from "./components/layout/Message"
 import Footer from "./components/layout/Footer"
 import Navbar from "./components/layout/NavBar"
 import Container from "./components/layout/Container"
 import PrivateRoute from "./context/PrivateRouter"
+import CoordinatorRoute from "./context/CoordinatorRoute"
 import ManagementDisciplines from "./components/pages/coordinator/DisciplineManagement"
 import DisciplineList from "./components/pages/coordinator/ListDisciplines"
 import AccountValidation from './components/pages/auth/Waiting'
-import ViewCourses from "./components/pages/coordinator/ViewCourses"
 import ListStrudents from "./components/pages/coordinator/ListStudents"
 import ManageTeachers from "./components/pages/coordinator/ManageTeachers"
-import ManageCourses from "./components/pages/coordinator/ManageCourses"
 import Coordinator from "./components/pages/coordinator/Coordinator"
 import DashboardCoordinator from "./components/pages/coordinator/DashboardCoordinator"
 import RequestsTeachers from "./components/pages/coordinator/Requests"
@@ -80,16 +78,15 @@ function App() {
 
           {/* Rotas privadas */}
           <Route element={<PrivateRoute />}>
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/coordinator/discipline/register" element={<ManagementDisciplines />} />
-            <Route path="/coordinator/discipline/list" element={<DisciplineList />} />
-            <Route path="/coordinator/course/view" element={<ViewCourses />} />
-            <Route path="/coordinator/student/list" element={<ListStrudents />} />
-            <Route path="/coordinator/teacher/manage" element={<ManageTeachers />} />
-            <Route path="/coordinator/course/manage" element={<ManageCourses />} />
-            <Route path="/coordinator" element={<Coordinator />} />
-            <Route path="/coordinator/dashboard" element={<DashboardCoordinator />} />
-            <Route path="/coordinator/requests" element={<RequestsTeachers />} />
+            <Route element={<CoordinatorRoute />}>
+              <Route path="/coordinator" element={<Coordinator />} />
+              <Route path="/coordinator/dashboard" element={<DashboardCoordinator />} />
+              <Route path="/coordinator/discipline/register" element={<ManagementDisciplines />} />
+              <Route path="/coordinator/discipline/list" element={<DisciplineList />} />
+              <Route path="/coordinator/student/list" element={<ListStrudents />} />
+              <Route path="/coordinator/teacher/manage" element={<ManageTeachers />} />
+              <Route path="/coordinator/requests" element={<RequestsTeachers />} />
+            </Route>
           </Route>
           
         </Routes>

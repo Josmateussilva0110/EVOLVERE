@@ -1,6 +1,9 @@
 import { FaChalkboardTeacher, FaFileAlt, FaGraduationCap, FaUserGraduate, FaTasks } from "react-icons/fa"
 import { useNavigate } from "react-router-dom"
-
+import { useState, useEffect, useContext } from "react"
+import { Context } from "../../../context/UserContext"
+import requestData from "../../../utils/requestApi"
+ 
 /**
  * Componente DashboardPrincipal
  * 
@@ -16,6 +19,37 @@ import { useNavigate } from "react-router-dom"
  */
 function DashboardPrincipal() {
   const navigate = useNavigate()
+  const [ userRequest, setUserRequest ] = useState({})
+  const { user } = useContext(Context)
+
+  useEffect(() => {
+  /**
+   * useEffect para buscar informações detalhadas do usuário coordenador.
+   * 
+   * Executa quando o objeto 'user' do contexto é definido ou atualizado.
+   * - Se o usuário estiver disponível, faz uma requisição GET para a API 
+   *   `/user/coordinator/{user.id}` para obter os dados do coordenador.
+   * - Atualiza o estado 'userRequest' com os dados retornados da API.
+   * - Caso a requisição falhe, define 'userRequest' como null.
+   * 
+   * Dependências:
+   * - [user]: garante que a busca só ocorre quando 'user' estiver disponível ou mudar.
+   */
+    if(user) {
+      async function fetchUser() {
+        const response = await requestData(`/user/coordinator/${user.id}`, 'GET', {}, true)
+        if(response.success) {
+          console.log(response.data)
+          setUserRequest(response.data.user)
+        }
+        else {
+          setUserRequest(null)
+        }
+      }
+      fetchUser()
+  }
+  }, [user])
+
   return (
     <div className="min-h-[550px] flex flex-col items-center justify-start bg-[#060060] p-4">
 
@@ -27,7 +61,11 @@ function DashboardPrincipal() {
           <div>
             <p className="text-white-100 font-bold text-xl text-gray-800">Coordenação Acadêmica</p>
             <p className="text-gray-600 mt-1">
-              Olá Lucas Emanuel - Coordenador de sistemas de informações
+              {userRequest?.course ? (
+                <>Olá {userRequest?.username} - Coordenador de {userRequest?.course}</>
+              ) : (
+                <>Olá {user?.name}</>
+              )}
             </p>
           </div>
         </div>

@@ -92,8 +92,25 @@ class User {
      */
     async findByEmail(email) {
         try {
-            const result = await knex.select("*").where({email}).table("users")
-            return result[0] || undefined
+            const result = await knex.raw(`
+                select 
+                    u.id, 
+                    u.username,
+                    u.email,
+                    u.registration,
+                    u.password,
+                    u.photo,
+                    u.status,
+                    u.created_at,
+                    u.updated_at,
+                    vp.role
+                from users u
+                left join validate_professionals vp
+                    on vp.professional_id = u.id
+                where u.email = ?
+            `, [email])
+            const rows = result.rows
+            return rows.length > 0 ? rows[0] : undefined
         } catch(err) {
             console.error('Erro ao buscar usuário por email:', err)
             return undefined
@@ -113,13 +130,79 @@ class User {
      */
     async findById(id) {
         try {
-            const result = await knex
-                .select(["id", "username", "email", "registration", "photo", "created_at", "updated_at"])
-                .where({id})
-                .table("users")
-            return result[0] || undefined
+        const result = await knex.raw(`
+            select 
+                u.id, 
+                u.username,
+                u.email,
+                u.registration,
+                u.photo,
+                u.status,
+                u.created_at,
+                u.updated_at,
+                vp.role
+            from users u
+            left join validate_professionals vp
+                on vp.professional_id = u.id
+            where u.id = ?
+        `, [id])
+            const rows = result.rows
+            return rows.length > 0 ? rows[0] : undefined
         } catch(err) {
             console.error('Erro ao buscar usuário por id:', err)
+            return undefined
+        }
+    }
+
+
+    /**
+     * Busca um coordenador acadêmico pelo seu ID.
+     * 
+     * Este método realiza uma consulta no banco de dados para obter informações detalhadas
+     * de um coordenador, incluindo dados do usuário, instituição e curso associado.
+     * 
+     * Critérios da busca:
+     * - A tabela `users` fornece dados básicos do usuário.
+     * - A tabela `validate_professionals` deve ter `role = 2` (coordenador) e `approved = true`.
+     * - A tabela `course_valid` fornece o nome do curso correspondente ao `access_code`.
+     * 
+     * @async
+     * @function findCoordinatorById
+     * @param {number} id - ID do usuário/coordenador a ser buscado.
+     * @returns {Promise<Object|undefined>} Retorna um objeto com os dados do coordenador se encontrado,
+     *                                      ou `undefined` caso não exista ou ocorra um erro.
+     * 
+     * @example
+     * const coordinator = await findCoordinatorById(10);
+     * if(coordinator) {
+     *   console.log(coordinator.username, coordinator.course);
+     * } else {
+     *   console.log('Coordenador não encontrado.');
+     * }
+     */
+    async findCoordinatorById(id) {
+        try {
+        const result = await knex.raw(`
+            select 
+                u.id, 
+                u.username,
+                u.email,
+                u.registration,
+                u.status,
+                vp.institution,
+                cv.name as course
+            from users u
+            inner join validate_professionals vp
+                on vp.professional_id = u.id
+            inner join course_valid cv
+                on cv.course_code::text = vp.access_code
+            where u.id = ? and vp.role = 2 and vp.approved = true 
+        `, [id])
+            const rows = result.rows
+
+            return rows.length > 0 ? rows[0] : undefined
+        } catch(err) {
+            console.error('Erro ao buscar coordenador por id:', err)
             return undefined
         }
     }

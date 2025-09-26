@@ -80,6 +80,8 @@ router.get('/user/session', userController.session)
  */
 router.get('/user/:id', userController.getUserById)
 
+router.get('/user/coordinator/:id', userController.getCoordinatorData)
+
 /**
  * @route POST /user/account
  * @summary Cadastro de conta de profissional com upload de diploma PDF
