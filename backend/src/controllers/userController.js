@@ -92,8 +92,14 @@ class UserController {
                 return response.status(400).json({status: false, message: "Erro ao criar token para usuário."})
             }
 
-            request.session.user = { id: user.id, name: user.username }
-            return response.status(200).json({status: true, message: "Dados salvo com sucesso.", user: { id: user.id, name: user.username }})
+            if(user.role === null) {
+                user.role = 4
+            }
+
+            console.log('user: ', user)
+
+            request.session.user = { id: user.id, name: user.username, role: user.role}
+            return response.status(200).json({status: true, message: "Dados salvo com sucesso.", user: { id: user.id, name: user.username, role: user.role}})
 
         } catch(err) {
             console.error("Erro no cadastro de usuários:", err)
@@ -147,11 +153,15 @@ class UserController {
                 return response.status(422).json({ status: false, message: "Senha incorreta" })
             }
 
-            request.session.user = { id: user.id, name: user.username }
+            if(user.registration === 'admin') {
+                user.role = 1
+            }
+
+            request.session.user = { id: user.id, name: user.username, role: user.role }
             return response.status(200).json({
                 status: true,
                 message: "Login realizado com sucesso.",
-                user: { id: user.id, name: user.username }
+                user: { id: user.id, name: user.username, role: user.role }
             })
         } catch (err) {
             console.error("Erro no login:", err)

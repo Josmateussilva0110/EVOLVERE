@@ -32,6 +32,7 @@ export default function useAuth({ setAuthenticated, setUser }) {
     const response = await requestData("/login", "POST", credentials, true)
     if (response.success) {
       setAuthenticated(true)
+      console.log(response.data)
       setUser(response.data.user)
       setFlashMessage(response.data.message, "success")
       navigate("/")
@@ -52,6 +53,7 @@ export default function useAuth({ setAuthenticated, setUser }) {
     if (response.success) {
       setAuthenticated(true)
       setUser(response.data.user)
+      console.log(response.data)
       //setFlashMessage(response.data.message, "success")
       navigate("/user/account")
     } else {

@@ -92,8 +92,25 @@ class User {
      */
     async findByEmail(email) {
         try {
-            const result = await knex.select("*").where({email}).table("users")
-            return result[0] || undefined
+            const result = await knex.raw(`
+                select 
+                    u.id, 
+                    u.username,
+                    u.email,
+                    u.registration,
+                    u.password,
+                    u.photo,
+                    u.status,
+                    u.created_at,
+                    u.updated_at,
+                    vp.role
+                from users u
+                left join validate_professionals vp
+                    on vp.professional_id = u.id
+                where u.email = ?
+            `, [email])
+            const rows = result.rows
+            return rows.length > 0 ? rows[0] : undefined
         } catch(err) {
             console.error('Erro ao buscar usuário por email:', err)
             return undefined
