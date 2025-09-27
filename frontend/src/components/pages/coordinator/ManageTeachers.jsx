@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaArrowLeft, FaSearch } from "react-icons/fa";
+import requestData from "../../../utils/requestApi";
+import useFlashMessage from "../../../hooks/useFlashMessage";
 
 /**
  * Componente de gerenciamento de professores.
@@ -15,28 +17,34 @@ function ProfessoresManagement() {
    * Estado que armazena o valor do campo de busca.
    * @type {[string, Function]}
    */
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState("")
+  const [teachers, setTeachers] = useState([])
+  const { setFlashMessage } = useFlashMessage()
 
-  /**
-   * Lista de professores com suas respectivas disciplinas.
-   * @type {Array<{id: number, nome: string, disciplina: string}>}
-   */
-  const professores = [
-    { id: 1, nome: "Professor 1", disciplina: "Estrutura de dados" },
-    { id: 2, nome: "Professor 2", disciplina: "Algoritmos 1" },
-    { id: 3, nome: "Professor 3", disciplina: "Algoritmos 2" },
-    { id: 4, nome: "Professor 4", disciplina: "Sistemas Inteligentes" },
-  ];
+  useEffect(() => {
+    async function fetchTeachers() {
+      const response = await requestData('/user/teachers', 'GET', {}, true) 
+      if(response.success) {
+        setTeachers(response.data.teachers)
+      }
+      else {
+        setFlashMessage(response.message, 'error')
+      }
+    }
+    fetchTeachers()
+  }, [])
+
 
   /**
    * Filtra a lista de professores com base no termo de busca.
    * Inclui busca pelo nome ou disciplina do professor.
    */
-  const professoresFiltrados = professores.filter(
+  const filterTeacher = teachers.filter(
     (prof) =>
-      prof.nome.toLowerCase().includes(search.toLowerCase()) ||
-      prof.disciplina.toLowerCase().includes(search.toLowerCase())
+      (prof?.username ?? "").toLowerCase().includes(search.toLowerCase()) ||
+      (prof?.disciplina ?? "").toLowerCase().includes(search.toLowerCase())
   );
+
 
   /**
    * Função para voltar à página anterior no histórico do navegador.
@@ -80,10 +88,10 @@ function ProfessoresManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {professoresFiltrados.map((prof) => (
-                <tr key={prof.id} className="hover:bg-gray-50 transition">
-                  <td className="py-3 px-4">{prof.nome}</td>
-                  <td className="py-3 px-4">{prof.disciplina}</td>
+              {filterTeacher.map((prof) => (
+                <tr key={prof.professional_id} className="hover:bg-gray-50 transition">
+                  <td className="py-3 px-4">{prof?.username}</td>
+                  <td className="py-3 px-4">{prof?.disciplina || '-'}</td>
                   <td className="py-3 px-4 flex justify-center space-x-2">
                     <button className="bg-yellow-100 text-yellow-700 p-2 rounded-full hover:bg-yellow-200 transition">
                       🗑️ Excluir
@@ -94,7 +102,7 @@ function ProfessoresManagement() {
                   </td>
                 </tr>
               ))}
-              {professoresFiltrados.length === 0 && (
+              {filterTeacher.length === 0 && (
                 <tr>
                   <td colSpan={3} className="py-4 text-center text-gray-400 italic">
                     Nenhum professor encontrado

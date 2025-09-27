@@ -221,6 +221,19 @@ class AccountController {
         }
     }
 
+    async getTeachers(request, response) {
+        try {
+            const teachers = await Account.getAllTeachers()
+            console.log(teachers)
+            if(!teachers) {
+                return response.status(404).json({status: false, message: "Nenhuma professor encontrado."})
+            }
+            return response.status(200).json({status: true, teachers})
+        } catch(err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
 }
 
 module.exports = new AccountController()

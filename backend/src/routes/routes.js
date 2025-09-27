@@ -71,6 +71,8 @@ router.get('/user/requests', accountController.requestsTeachers)
  */
 router.get('/user/session', userController.session)
 
+router.get('/user/teachers', accountController.getTeachers)
+
 /**
  * @route GET /user/:id
  * @summary Obtém dados de um usuário pelo ID
@@ -123,6 +125,8 @@ router.post(
  */
 router.delete('/user/request/:id_user', accountController.removeRequest)
 
+
+
 /**
  * @route PATCH /user/request/approved/{id_user}
  * @summary Aprova a solicitação de um professor
@@ -132,6 +136,7 @@ router.delete('/user/request/:id_user', accountController.removeRequest)
  * @returns {object} 500 - Erro interno ao aprovar
  */
 router.patch('/user/request/approved/:id_user', accountController.approve)
+
 
 
 

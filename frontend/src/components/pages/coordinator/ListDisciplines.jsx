@@ -1,5 +1,7 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import requestData from "../../../utils/requestApi";
+import useFlashMessage from "../../../hooks/useFlashMessage";
 
 /**
  * Tela de listagem de disciplinas com busca, edição e exclusão,
@@ -10,64 +12,38 @@ function DisciplineList() {
     const [busca, setBusca] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const { setFlashMessage } = useFlashMessage()
     const navigate = useNavigate();
 
-    // Efeito para buscar os dados da API quando o componente é montado
     useEffect(() => {
-        const fetchDisciplinas = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-                const response = await fetch("/api/subjects");
-
-                if (!response.ok) {
-                    throw new Error("Sem disciplinas encontradas.");
-                }
-
-                const result = await response.json();
-                
-                // Acessa 'result.data' conforme a resposta do controller
-                if (result.status && Array.isArray(result.data)) {
-                    setDisciplinas(result.data);
-                } else {
-                    setDisciplinas([]); // Garante uma lista vazia se não houver dados
-                }
-            } catch (err) {
-                setError(err.message);
-                console.error("Erro na busca de disciplinas:", err);
-            } finally {
-                setLoading(false);
+        async function fetchDisciplines() {
+            const response = await requestData('/subjects', 'GET', {}, true)
+            console.log(response)
+            if(response.success) {
+                setLoading(false)
+                setDisciplinas(response.data.subjects)
             }
-        };
-
-        fetchDisciplinas();
-    }, []);
+            else {
+                setDisciplinas([])
+            }
+        }
+        fetchDisciplines()
+    }, [])
 
     /**
      * Exclui uma disciplina via API e atualiza a lista no estado.
      */
-    const handleExcluir = async (id) => {
-        // O ideal é usar um componente de modal aqui em vez de window.confirm
-        if (window.confirm("Tem certeza que deseja excluir esta disciplina?")) {
-            try {
-                const response = await fetch(`/api/subjects/${id}`, {
-                    method: 'DELETE',
-                });
-
-                // Seu controller envia 204 (No Content), que é 'ok' mas não tem corpo JSON.
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => null); // Tenta pegar erro do corpo
-                    throw new Error(errorData?.message || "Falha ao excluir a disciplina.");
-                }
-
-                // Atualiza o estado local para remover a disciplina sem precisar recarregar a página
-                setDisciplinas(disciplinas.filter(d => d.id !== id));
-            } catch (err) {
-                console.error("Erro ao excluir:", err);
-                alert(err.message); // Usando alert aqui para simplicidade
-            }
+    async function handleDelete(id) {
+        const response = await requestData(`/subjects/${id}`, 'DELETE', {}, true)
+        if(response.success) {
+            setDisciplinas(disciplinas.filter(d => d.id !== id));
+            setFlashMessage(response.data.message, 'success')
         }
-    };
+        else {
+            setFlashMessage(response.message, 'error')
+        }
+    }
+
 
     const handleEditar = (id) => {
         navigate(`/coordinator/discipline/edit/${id}`); // Ajuste a rota se necessário
@@ -83,9 +59,6 @@ function DisciplineList() {
         [disciplinas, busca]
     );
 
-    if (loading) {
-        return <div className="p-4 text-center text-gray-600">Carregando disciplinas...</div>;
-    }
 
     if (error) {
         return <div className="p-4 text-center text-red-600"><strong>Erro:</strong> {error}</div>;
@@ -123,7 +96,7 @@ function DisciplineList() {
                                     ✏️ Editar
                                 </button>
                                 <button
-                                    onClick={() => handleExcluir(d.id)}
+                                    onClick={() => handleDelete(d.id)}
                                     className="flex items-center gap-1 text-sm bg-red-100 text-red-800 px-3 py-1 rounded-md hover:bg-red-200 transition"
                                 >
                                     🗑️ Excluir

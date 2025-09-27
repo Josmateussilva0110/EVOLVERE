@@ -97,9 +97,31 @@ class Account {
                 where vp.role = 3 and vp.approved = false
             `)
             const rows = result.rows
-             return rows.length > 0 ? rows : undefined
+            return rows.length > 0 ? rows : undefined
         } catch(err) {
             console.error('Erro ao buscar requests:', err)
+            return undefined
+        }
+    }
+
+    async getAllTeachers() {
+        try {
+            const result = await knex.raw(`
+                select 
+                    vp.professional_id,
+                    u.username,
+                    s.name as disciplina
+                from validate_professionals vp
+                inner join users u
+                    on u.id = vp.professional_id
+                left join subjects s
+                    on s.professional_id = vp.professional_id
+                where vp.role = 3 and vp.approved = true
+            `)
+            const rows = result.rows
+            return rows.length > 0 ? rows : undefined
+        } catch(err) {
+            console.error('Erro ao buscar professores:', err)
             return undefined
         }
     }
