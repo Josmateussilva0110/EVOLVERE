@@ -75,18 +75,24 @@ class Account {
      * Retorna `undefined` se não houver solicitações ou em caso de erro.
      *
      * @example
-     * const requests = await Account.getRequests()
+     * const requests = await Account.getAllRequests()
      * if (requests) {
      *   console.log(requests)
      * }
      */
-    async getRequests() {
+    async getAllRequests() {
         try {
             const result = await knex.raw(`
                 select 
                     split_part(diploma, '/', 2) as diploma, 
                     u.username,
                     vp.professional_id as id,
+                    vp.created_at,
+                    case 
+                        when vp.role = 2 then 'Coordenador'
+                        when vp.role = 3 then 'Professor'
+                        else 'Desconhecido'
+                    end as role,
                     cv.name as course,
                     cv."acronym_IES" as flag
                 from validate_professionals vp
@@ -94,13 +100,14 @@ class Account {
                     on u.id = vp.professional_id
                 inner join course_valid cv
                     on cv.course_code::text = vp.access_code
-                where vp.role = 3 and vp.approved = false
+                where vp.approved = false
+                order by vp.updated_at desc
             `)
             const rows = result.rows
-            return rows.length > 0 ? rows : undefined
+            return rows.length > 0 ? rows : []
         } catch(err) {
             console.error('Erro ao buscar requests:', err)
-            return undefined
+            return []
         }
     }
 
@@ -243,7 +250,7 @@ class Account {
      * const approved = await Account.approveTeacher(5)
      * // approved === true ou false
      */
-    async approveTeacher(id) {
+    async approveRequest(id) {
         try {
             const result = await knex('validate_professionals').where({professional_id: id }).update({approved: true})
             return result > 0

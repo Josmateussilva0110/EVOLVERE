@@ -61,7 +61,7 @@ router.post('/user/logout', userController.logout)
  * @returns {object} 404 - Nenhuma solicitação encontrada
  * @returns {object} 500 - Erro interno do servidor
  */
-router.get('/user/requests', accountController.requestsTeachers)
+router.get('/user/requests/:id', accountController.requests)
 
 /**
  * @route GET /user/session

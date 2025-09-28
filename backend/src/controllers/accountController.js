@@ -131,13 +131,21 @@ class AccountController {
      * @throws {404} Se não houver solicitações.
      * @throws {500} Erro interno do servidor.
      */
-    async requestsTeachers(request, response) {
+    async requests(request, response) {
         try {
-            const teachers = await Account.getRequests()
-            if(!teachers) {
+            const {id} = request.params
+            if (!validator.isInt(id + '', { min: 1 })) {
+                return response.status(422).json({status: false, message: "Id inválido."})
+            }
+            let users = []
+
+            if (id >= 1 && id <= 4) {
+                users = await Account.getAllRequests()
+            }
+            if(users.length === 0) {
                 return response.status(404).json({status: false, message: "Nenhuma solicitação encontrada."})
             }
-            return response.status(200).json({status: true, teachers})
+            return response.status(200).json({status: true, users})
         } catch(err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
@@ -203,7 +211,7 @@ class AccountController {
                 return response.status(422).json({status: false, message: "Id inválido."})
             }
 
-            const valid = await Account.approveTeacher(id_user)
+            const valid = await Account.approveRequest(id_user)
             if(!valid) {
                 return response.status(500).json({status: false, message: "Erro ao aprovar."})
             }
@@ -285,7 +293,6 @@ class AccountController {
                 teachers = await Account.getAllTeachersByCoordinator(coordinator.access_code)
             }
 
-            console.log(teachers)
             if(teachers.length === 0) {
                 return response.status(404).json({status: false, message: "Nenhuma professor encontrado."})
             }
