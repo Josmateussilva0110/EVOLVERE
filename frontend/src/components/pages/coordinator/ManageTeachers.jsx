@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { FaArrowLeft, FaSearch } from "react-icons/fa";
 import requestData from "../../../utils/requestApi";
 import useFlashMessage from "../../../hooks/useFlashMessage";
+import { Context } from "../../../context/UserContext"
 
 /**
  * Componente de gerenciamento de professores.
@@ -20,10 +21,11 @@ function ProfessoresManagement() {
   const [search, setSearch] = useState("")
   const [teachers, setTeachers] = useState([])
   const { setFlashMessage } = useFlashMessage()
+  const { user } = useContext(Context)
 
   useEffect(() => {
     async function fetchTeachers() {
-      const response = await requestData('/user/teachers', 'GET', {}, true) 
+      const response = await requestData(`/user/teachers/${user.id}`, 'GET', {}, true) 
       if(response.success) {
         setTeachers(response.data.teachers)
       }
@@ -32,7 +34,7 @@ function ProfessoresManagement() {
       }
     }
     fetchTeachers()
-  }, [])
+  }, [user])
 
 
   /**
@@ -45,6 +47,8 @@ function ProfessoresManagement() {
       (prof?.disciplina ?? "").toLowerCase().includes(search.toLowerCase())
   );
 
+  const showCourseColumn = user?.id >= 1 && user?.id <= 4
+
 
   /**
    * Função para voltar à página anterior no histórico do navegador.
@@ -53,17 +57,16 @@ function ProfessoresManagement() {
     window.history.back();
   };
 
-  return (
+    return (
     <div className="flex flex-col items-center min-h-screen bg-gray-50 p-6 relative">
-      {/* Botão Voltar fixo à esquerda */}
+      {/* Botão Voltar */}
       <button
-        onClick={handleVoltar}
+        onClick={() => window.history.back()}
         className="absolute top-6 left-6 flex items-center bg-white-100 text-white-700 px-4 py-2 rounded-xl hover:bg-gray-100 transition-all"
       >
         <FaArrowLeft className="mr-2" /> Voltar
       </button>
 
-      {/* Conteúdo central */}
       <div className="w-full max-w-4xl mt-14">
         {/* Campo de busca */}
         <div className="relative mb-6">
@@ -84,6 +87,9 @@ function ProfessoresManagement() {
               <tr>
                 <th className="py-3 px-4 text-left font-semibold text-gray-700">Nome</th>
                 <th className="py-3 px-4 text-left font-semibold text-gray-700">Disciplina</th>
+                {showCourseColumn && (
+                  <th className="py-3 px-4 text-left font-semibold text-gray-700">Curso</th>
+                )}
                 <th className="py-3 px-4 text-center font-semibold text-gray-700">Ações</th>
               </tr>
             </thead>
@@ -92,6 +98,9 @@ function ProfessoresManagement() {
                 <tr key={prof.professional_id} className="hover:bg-gray-50 transition">
                   <td className="py-3 px-4">{prof?.username}</td>
                   <td className="py-3 px-4">{prof?.disciplina || '-'}</td>
+                  {showCourseColumn && (
+                    <td className="py-3 px-4">{prof?.course || '-'}</td>
+                  )}
                   <td className="py-3 px-4 flex justify-center space-x-2">
                     <button className="bg-yellow-100 text-yellow-700 p-2 rounded-full hover:bg-yellow-200 transition">
                       🗑️ Excluir
@@ -104,7 +113,7 @@ function ProfessoresManagement() {
               ))}
               {filterTeacher.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="py-4 text-center text-gray-400 italic">
+                  <td colSpan={showCourseColumn ? 4 : 3} className="py-4 text-center text-gray-400 italic">
                     Nenhum professor encontrado
                   </td>
                 </tr>

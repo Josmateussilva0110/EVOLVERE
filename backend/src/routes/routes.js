@@ -71,7 +71,7 @@ router.get('/user/requests', accountController.requestsTeachers)
  */
 router.get('/user/session', userController.session)
 
-router.get('/user/teachers', accountController.getTeachers)
+router.get('/user/teachers/:id', accountController.getTeachers)
 
 /**
  * @route GET /user/:id
@@ -82,7 +82,7 @@ router.get('/user/teachers', accountController.getTeachers)
  */
 router.get('/user/:id', userController.getUserById)
 
-router.get('/user/coordinator/:id', userController.getCoordinatorData)
+router.get('/user/coordinator/:id', accountController.getCoordinatorData)
 
 /**
  * @route POST /user/account

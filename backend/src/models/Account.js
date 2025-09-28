@@ -110,12 +110,15 @@ class Account {
                 select 
                     vp.professional_id,
                     u.username,
-                    s.name as disciplina
+                    s.name as disciplina,
+                    cv.name as course
                 from validate_professionals vp
                 inner join users u
                     on u.id = vp.professional_id
                 left join subjects s
                     on s.professional_id = vp.professional_id
+                inner join course_valid cv
+                    on cv.course_code::text = vp.access_code
                 where vp.role = 3 and vp.approved = true
             `)
             const rows = result.rows
@@ -125,6 +128,7 @@ class Account {
             return undefined
         }
     }
+
 
 
     /**
@@ -147,6 +151,84 @@ class Account {
         } catch (err) {
             console.error('Erro ao remover request:', err)
             return false
+        }
+    }
+
+    /**
+     * Busca um coordenador acadêmico pelo seu ID.
+     * 
+     * Este método realiza uma consulta no banco de dados para obter informações detalhadas
+     * de um coordenador, incluindo dados do usuário, instituição e curso associado.
+     * 
+     * Critérios da busca:
+     * - A tabela `users` fornece dados básicos do usuário.
+     * - A tabela `validate_professionals` deve ter `role = 2` (coordenador) e `approved = true`.
+     * - A tabela `course_valid` fornece o nome do curso correspondente ao `access_code`.
+     * 
+     * @async
+     * @function findCoordinatorById
+     * @param {number} id - ID do usuário/coordenador a ser buscado.
+     * @returns {Promise<Object|undefined>} Retorna um objeto com os dados do coordenador se encontrado,
+     *                                      ou `undefined` caso não exista ou ocorra um erro.
+     * 
+     * @example
+     * const coordinator = await findCoordinatorById(10);
+     * if(coordinator) {
+     *   console.log(coordinator.username, coordinator.course);
+     * } else {
+     *   console.log('Coordenador não encontrado.');
+     * }
+     */
+    async findCoordinatorById(id) {
+        try {
+        const result = await knex.raw(`
+            select 
+                u.id, 
+                u.username,
+                u.email,
+                u.registration,
+                u.status,
+                vp.institution,
+                vp.access_code,
+                cv.name as course
+            from users u
+            inner join validate_professionals vp
+                on vp.professional_id = u.id
+            inner join course_valid cv
+                on cv.course_code::text = vp.access_code
+            where u.id = ? and vp.role = 2 and vp.approved = true 
+        `, [id])
+            const rows = result.rows
+
+            return rows.length > 0 ? rows[0] : undefined
+        } catch(err) {
+            console.error('Erro ao buscar coordenador por id:', err)
+            return undefined
+        }
+    }
+
+    async getAllTeachersByCoordinator(access_code) {
+        try {
+            const result = await knex.raw(`
+                select 
+                    vp.professional_id,
+                    u.username,
+                    s.name as disciplina,
+                    cv.name as course
+                from validate_professionals vp
+                inner join users u
+                    on u.id = vp.professional_id
+                left join subjects s
+                    on s.professional_id = vp.professional_id
+                inner join course_valid cv
+                    on cv.course_code::text = vp.access_code
+                where vp.role = 3 and vp.approved = true and vp.access_code = ?
+            `, [access_code])
+            const rows = result.rows
+            return rows.length > 0 ? rows : undefined
+        } catch(err) {
+            console.error('Erro ao buscar coordenador por id:', err)
+            return undefined
         }
     }
 
