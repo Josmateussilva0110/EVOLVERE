@@ -155,6 +155,7 @@ class User {
     }
 
 
+
     /**
      * Busca um coordenador acadêmico pelo seu ID.
      * 
@@ -206,6 +207,7 @@ class User {
             return undefined
         }
     }
+
     
     /**
      * Busca professores validados (com join na tabela validate_professionals)

@@ -15,9 +15,9 @@ const subjectController = {
         })
       }
       
-      res.json({ 
+      res.status(200).json({ 
         status: true, 
-        data: subjects 
+        subjects 
       })
     } catch (error) {
       console.error('Erro ao listar disciplinas:', error)
@@ -139,7 +139,7 @@ const subjectController = {
         })
       }
       
-      res.status(204).send()
+      res.status(200).json({status: true, message: "Disciplina excluída com sucesso."})
     } catch (error) {
       console.error('Erro ao excluir disciplina:', error)
       res.status(500).json({ 

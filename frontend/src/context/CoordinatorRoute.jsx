@@ -1,6 +1,7 @@
 import { useContext } from "react"
 import { Navigate, Outlet } from "react-router-dom"
 import { Context as UserContext } from "./UserContext"
+import useFlashMessage from "../hooks/useFlashMessage"
 
 
 /**
@@ -23,6 +24,7 @@ import { Context as UserContext } from "./UserContext"
  * @returns {JSX.Element} Componente <Outlet /> se autorizado, ou <Navigate /> se não autorizado
  */
 function CoordinatorRoute() {
+  const { setFlashMessage } = useFlashMessage()
   const { user } = useContext(UserContext)
 
   if (!user) {
@@ -30,6 +32,7 @@ function CoordinatorRoute() {
   }
 
   if (user.role !== 2 && user.role !== 1) {
+    setFlashMessage('Rota destinada para a coordenação', 'error')
     return <Navigate to="/" /> 
   }
 

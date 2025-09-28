@@ -96,7 +96,6 @@ class UserController {
                 user.role = 4
             }
 
-            console.log('user: ', user)
 
             request.session.user = { id: user.id, name: user.username, role: user.role}
             return response.status(200).json({status: true, message: "Dados salvo com sucesso.", user: { id: user.id, name: user.username, role: user.role}})
@@ -210,6 +209,7 @@ class UserController {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
+
 
     /**
      * Controlador para obter os dados de um coordenador acadêmico pelo ID.

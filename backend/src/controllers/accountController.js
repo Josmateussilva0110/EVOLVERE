@@ -221,6 +221,79 @@ class AccountController {
         }
     }
 
+    /**
+     * Controlador para obter os dados de um coordenador acadêmico pelo ID.
+     * 
+     * Fluxo de execução:
+     * 1. Extrai o `id` dos parâmetros da requisição (`request.params`).
+     * 2. Valida o `id` usando `UserFieldValidator`. Caso inválido, retorna status 422.
+     * 3. Chama `User.findCoordinatorById(id)` para buscar os dados do coordenador.
+     * 4. Se não encontrar o usuário, retorna status 404.
+     * 5. Se encontrado, retorna status 200 com os dados do usuário.
+     * 6. Em caso de erro interno, retorna status 500.
+     * 
+     * @async
+     * @function getCoordinatorData
+     * @param {Object} request - Objeto da requisição Express.
+     * @param {Object} request.params - Parâmetros da URL, incluindo `id`.
+     * @param {Object} response - Objeto de resposta Express.
+     * @returns {Promise<Object>} JSON contendo:
+     *   - status: boolean (true se sucesso, false se erro)
+     *   - user: objeto com os dados do coordenador (quando encontrado)
+     *   - message: string com mensagem de erro (quando aplicável)
+     * 
+     * @example
+     * // Rota Express
+     * app.get('/coordinator/:id', UserController.getCoordinatorData);
+     */
+    async getCoordinatorData(request, response) {
+        try {
+            const {id} = request.params
+            if (!validator.isInt(id + '', { min: 1 })) {
+                return response.status(422).json({status: false, message: "Id inválido."})
+            }
+
+            const user = await Account.findCoordinatorById(id)
+            console.log('coordenador: ', user)
+            if(!user) {
+                return response.status(404).json({ status: false, message: "Usuário não encontrado." })
+            }
+            return response.status(200).json({status: true, user})
+
+        } catch (err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
+    async getTeachers(request, response) {
+        try {
+            const {id} = request.params
+            if (!validator.isInt(id + '', { min: 1 })) {
+                return response.status(422).json({status: false, message: "Usuário invalido."})
+            }
+
+            let teachers = []
+
+            if (id >= 1 && id <= 4) {
+                teachers = await Account.getAllTeachers()
+            }
+            else {
+                const coordinator = await Account.findCoordinatorById(id)
+                if(!coordinator) {
+                    return response.status(404).json({status: false, message: "Coordenador não encontrado."})
+                }
+                teachers = await Account.getAllTeachersByCoordinator(coordinator.access_code)
+            }
+
+            console.log(teachers)
+            if(teachers.length === 0) {
+                return response.status(404).json({status: false, message: "Nenhuma professor encontrado."})
+            }
+            return response.status(200).json({status: true, teachers})
+        } catch(err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
 }
 
 module.exports = new AccountController()
