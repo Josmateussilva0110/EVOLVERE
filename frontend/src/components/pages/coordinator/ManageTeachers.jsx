@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { FaArrowLeft, FaSearch } from "react-icons/fa";
 import requestData from "../../../utils/requestApi";
-import useFlashMessage from "../../../hooks/useFlashMessage";
 import { Context } from "../../../context/UserContext"
 
 /**
@@ -20,7 +19,6 @@ function ProfessoresManagement() {
    */
   const [search, setSearch] = useState("")
   const [teachers, setTeachers] = useState([])
-  const { setFlashMessage } = useFlashMessage()
   const { user } = useContext(Context)
 
   useEffect(() => {
@@ -28,9 +26,6 @@ function ProfessoresManagement() {
       const response = await requestData(`/user/teachers/${user.id}`, 'GET', {}, true) 
       if(response.success) {
         setTeachers(response.data.teachers)
-      }
-      else {
-        setFlashMessage(response.message, 'error')
       }
     }
     fetchTeachers()

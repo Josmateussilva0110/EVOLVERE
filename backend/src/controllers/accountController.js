@@ -1,5 +1,6 @@
 const Account = require("../models/Account")
 const User = require("../models/User")
+const Subject = require("../models/Subject")
 const path = require("path")
 require('dotenv').config({ path: '../.env' })
 const fs = require("fs")
@@ -131,13 +132,28 @@ class AccountController {
      * @throws {404} Se não houver solicitações.
      * @throws {500} Erro interno do servidor.
      */
-    async requestsTeachers(request, response) {
+    async requests(request, response) {
         try {
-            const teachers = await Account.getRequests()
-            if(!teachers) {
+            const {id} = request.params
+            if (!validator.isInt(id + '', { min: 1 })) {
+                return response.status(422).json({status: false, message: "Id inválido."})
+            }
+            let users = []
+
+            if (id >= 1 && id <= 4) {
+                users = await Account.getAllRequests()
+            }
+            else {
+                const coordinator = await Account.findCoordinatorById(id)
+                if(!coordinator) {
+                    return response.status(404).json({status: false, message: "Coordenador não encontrado."})
+                }
+                users = await Account.getAllRequestsByCoordinator(coordinator.access_code)
+            }
+            if(users.length === 0) {
                 return response.status(404).json({status: false, message: "Nenhuma solicitação encontrada."})
             }
-            return response.status(200).json({status: true, teachers})
+            return response.status(200).json({status: true, users})
         } catch(err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
@@ -164,12 +180,12 @@ class AccountController {
                 return response.status(422).json({status: false, message: "Id inválido."})
             }
 
+            const user = await User.findById(id_user)
             const valid = await Account.deleteRequest(id_user)
             if(!valid) {
                 return response.status(500).json({status: false, message: 'Erro ao remover requisição'})
             }
 
-            const user = await User.findById(id_user)
             if(!user) {
                 return response.status(404).json({status: false, message: "Usuário não encontrado para envio de email"})
             }
@@ -203,7 +219,7 @@ class AccountController {
                 return response.status(422).json({status: false, message: "Id inválido."})
             }
 
-            const valid = await Account.approveTeacher(id_user)
+            const valid = await Account.approveRequest(id_user)
             if(!valid) {
                 return response.status(500).json({status: false, message: "Erro ao aprovar."})
             }
@@ -254,7 +270,6 @@ class AccountController {
             }
 
             const user = await Account.findCoordinatorById(id)
-            console.log('coordenador: ', user)
             if(!user) {
                 return response.status(404).json({ status: false, message: "Usuário não encontrado." })
             }
@@ -285,7 +300,6 @@ class AccountController {
                 teachers = await Account.getAllTeachersByCoordinator(coordinator.access_code)
             }
 
-            console.log(teachers)
             if(teachers.length === 0) {
                 return response.status(404).json({status: false, message: "Nenhuma professor encontrado."})
             }
@@ -294,6 +308,46 @@ class AccountController {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
+
+    async getKpis(request, response) {
+        try {
+            const { id } = request.params
+            if (!validator.isInt(id + '', { min: 1 })) {
+                return response.status(422).json({status: false, message: "Usuário invalido."})
+            }
+
+            let teachers = []
+            let subjects = []
+            let requests = []
+
+            if (id >= 1 && id <= 4) {
+                teachers = await Account.countAllTeachers()
+                subjects = await Subject.countAllSubjects()
+                requests = await Account.countAllRequests()
+            }
+            else {
+                const coordinator = await Account.findCoordinatorById(id)
+                if(!coordinator) {
+                    return response.status(404).json({status: false, message: "Coordenador não encontrado."})
+                }
+                teachers = await Account.countTeachers(coordinator.access_code)
+                subjects = await Subject.countSubjects(coordinator.access_code)
+                requests = await Account.countRequests(coordinator.access_code)
+            }
+            if(!teachers) {
+                return response.status(404).json({status: false, message: "Nenhum professor encontrado."})
+            }
+            const kpi = {
+                teachers,
+                subjects,
+                requests,
+            }
+            return response.status(200).json({status: true, kpi})
+        } catch(err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
 }
 
 module.exports = new AccountController()

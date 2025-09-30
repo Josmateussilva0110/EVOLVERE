@@ -25,7 +25,7 @@ function formatMessageTeacherRejected(username) {
         <div style="text-align: center;">
             <h2 style="color: #e53935; font-size: 24px;">❌ Conta Não Aprovada</h2>
             <p style="font-size: 16px; color: #333; margin-top: 20px;">
-                <strong>Olá ${username}</strong>, analisamos sua solicitação de cadastro como <strong>Professor</strong> na plataforma <strong>Evolvere</strong>.
+                <strong>Olá ${username}</strong>, analisamos sua solicitação de cadastro na plataforma <strong>Evolvere</strong>.
             </p>
             <p style="font-size: 16px; color: #333; margin-top: 15px;">
                 Infelizmente, sua conta não foi <span style="color: #e53935; font-weight: bold;">aprovada</span> neste momento.

@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react"
-import { FaArrowLeft, FaSearch, FaCheckCircle, FaTrash} from "react-icons/fa"
+import { useState, useEffect, useContext } from "react"
+import { FaArrowLeft, FaSearch, FaCheckCircle, FaTrash, FaFileAlt, FaUserTie, FaChalkboardTeacher, FaCalendarAlt, FaFlag } from "react-icons/fa"
 import requestData from "../../../utils/requestApi"
 import useFlashMessage from "../../../hooks/useFlashMessage"
-
+import { Context } from "../../../context/UserContext"
+import formatDate from "../../../utils/formatDate"
 
 
 /**
@@ -26,8 +27,9 @@ import useFlashMessage from "../../../hooks/useFlashMessage"
  */
 function RequestsTeachers() {
   const [search, setSearch] = useState("");
-  const [teachers, setTeachers] = useState([]) 
+  const [teachers, setTeachers] = useState([])
   const { setFlashMessage } = useFlashMessage()
+  const { user } = useContext(Context)
 
   /**
    * Busca todas as solicitações de professores pendentes ao carregar o componente.
@@ -35,14 +37,14 @@ function RequestsTeachers() {
    */
   useEffect(() => {
     async function fetchRequests() {
-      const response = await requestData('/user/requests', 'GET', {}, true)
+      const response = await requestData(`/user/requests/${user.id}`, 'GET', {}, true)
       console.log(response)
-      if(response.success) {
-        setTeachers(response.data.teachers)
-      } 
+      if (response.success) {
+        setTeachers(response.data.users)
+      }
     }
     fetchRequests()
-  }, [])
+  }, [user])
 
 
   /**
@@ -71,7 +73,7 @@ function RequestsTeachers() {
    */
   async function approveRequest(id) {
     const response = await requestData(`/user/request/approved/${id}`, 'PATCH', {}, true)
-    if(response.success) {
+    if (response.success) {
       setTeachers((prev) => prev.filter((prof) => prof.id !== id))
       setFlashMessage(response.data.message, "success")
     }
@@ -100,6 +102,8 @@ function RequestsTeachers() {
     window.history.back()
   }
 
+  const showRoleColumn = user?.id >= 1 && user?.id <= 4
+
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-50 p-6 relative">
       <button
@@ -109,7 +113,7 @@ function RequestsTeachers() {
         <FaArrowLeft className="mr-2" /> Voltar
       </button>
 
-      <div className="w-full max-w-4xl mt-14">
+      <div className="w-full max-w-7xl mt-14">
         <div className="relative mb-6">
           <input
             type="text"
@@ -125,58 +129,90 @@ function RequestsTeachers() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-100">
               <tr>
-                <th className="py-3 px-4 text-left font-semibold text-gray-700">Nome</th>
-                <th className="py-3 px-4 text-left font-semibold text-gray-700">Curso</th>
-                <th className="py-3 px-4 text-left font-semibold text-gray-700">Campus</th>
-                <th className="py-3 px-4 text-left font-semibold text-gray-700">Diploma</th>
-                <th className="py-3 px-4 text-center font-semibold text-gray-700">Ações</th>
+                <th className="py-3 px-4 text-left font-semibold text-gray-700 w-1/5">Nome</th>
+                <th className="py-3 px-4 text-left font-semibold text-gray-700 w-1/5">Curso</th>
+                <th className="py-3 px-4 text-center font-semibold text-gray-700 w-1/12">Campus</th>
+                <th className="py-3 px-4 text-left font-semibold text-gray-700 w-1/5">Diploma</th>
+                {showRoleColumn && (
+                  <th className="py-3 px-4 text-center font-semibold text-gray-700 w-1/12">Cargo</th>
+                )}
+                <th className="py-3 px-4 text-center font-semibold text-gray-700 w-1/6">Criada em</th>
+                <th className="py-3 px-4 text-center font-semibold text-gray-700 w-1/12">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {professoresFiltrados.map((prof) => (
-                <tr key={prof.id} className="hover:bg-gray-50 transition">
-                  <td className="py-3 px-4">{prof.username}</td>
-                  <td className="py-3 px-4">{prof.course}</td>
-                  <td className="py-3 px-4">{prof.flag}</td>
-                  <td className="py-3 px-4">
-                    {prof.diploma ? (
-                      <a
-                        href={`${import.meta.env.VITE_BASE_URL}/diplomas/${prof.diploma}`}
-                        target="_blank" // abre em nova aba
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline hover:text-blue-800"
-                      >
-                        {prof.diploma}
-                      </a>
-                    ) : (
-                      "Sem diploma"
+              {professoresFiltrados.length > 0 ? (
+                professoresFiltrados.map((prof) => (
+                  <tr key={prof.id} className="hover:bg-gray-50 transition">
+                    <td className="py-3 px-4 flex items-center gap-2 whitespace-nowrap">
+                      <FaUserTie className="text-gray-500" /> {prof.username}
+                    </td>
+                    <td className="py-3 px-4 whitespace-nowrap">{prof.course}</td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="flex items-center justify-center gap-1">
+                        <FaFlag className="text-red-500" /> {prof.flag}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      {prof.diploma ? (
+                        <a
+                          href={`${import.meta.env.VITE_BASE_URL}/diplomas/${prof.diploma}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 text-blue-600 hover:text-blue-800"
+                        >
+                          <FaFileAlt /> {prof.diploma}
+                        </a>
+                      ) : (
+                        <span className="text-gray-400 italic">Sem diploma</span>
+                      )}
+                    </td>
+                    {showRoleColumn && (
+                      <td className="py-3 px-4 text-center">
+                        {prof.role === "Professor" ? (
+                          <span className="flex items-center justify-center gap-1 bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">
+                            <FaChalkboardTeacher /> Professor
+                          </span>
+                        ) : (
+                          <span className="flex items-center justify-center gap-1 bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs">
+                            <FaUserTie /> Coordenador
+                          </span>
+                        )}
+                      </td>
                     )}
-                  </td>
-
-                  <td className="py-3 px-4 flex justify-center space-x-2">
-                    <button 
-                      onClick={() => approveRequest(prof.id)}
-                      className="bg-green-100 text-green-700 p-2 rounded-full hover:bg-green-200 transition">
-                      
-                      <FaCheckCircle />
-                    </button>
-                    <button
-                      onClick={() => removeRequest(prof.id)}
-                      className="bg-pink-100 text-pink-700 p-2 rounded-full hover:bg-pink-200 transition"
-                    >
-                      <FaTrash />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {professoresFiltrados.length === 0 && (
+                    <td className="py-3 px-4 text-center whitespace-nowrap">
+                      <span className="flex items-center justify-center gap-1">
+                        <FaCalendarAlt className="text-gray-500" /> {formatDate(prof.created_at)}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 flex justify-center space-x-2">
+                      <button
+                        onClick={() => approveRequest(prof.id)}
+                        className="bg-green-100 text-green-700 p-2 rounded-full hover:bg-green-200 transition"
+                      >
+                        <FaCheckCircle />
+                      </button>
+                      <button
+                        onClick={() => removeRequest(prof.id)}
+                        className="bg-pink-100 text-pink-700 p-2 rounded-full hover:bg-pink-200 transition"
+                      >
+                        <FaTrash />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
                 <tr>
-                  <td colSpan={5} className="py-4 text-center text-gray-400 italic">
-                    Nenhum solicitação encontrada
+                  <td
+                    colSpan={showRoleColumn ? 7 : 6}
+                    className="py-6 px-4 text-center text-gray-500 italic"
+                  >
+                    Nenhuma solicitação disponível
                   </td>
                 </tr>
               )}
             </tbody>
+
           </table>
         </div>
       </div>
