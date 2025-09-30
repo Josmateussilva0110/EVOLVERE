@@ -142,6 +142,13 @@ class AccountController {
             if (id >= 1 && id <= 4) {
                 users = await Account.getAllRequests()
             }
+            else {
+                const coordinator = await Account.findCoordinatorById(id)
+                if(!coordinator) {
+                    return response.status(404).json({status: false, message: "Coordenador não encontrado."})
+                }
+                users = await Account.getAllRequestsByCoordinator(coordinator.access_code)
+            }
             if(users.length === 0) {
                 return response.status(404).json({status: false, message: "Nenhuma solicitação encontrada."})
             }
@@ -172,12 +179,12 @@ class AccountController {
                 return response.status(422).json({status: false, message: "Id inválido."})
             }
 
+            const user = await User.findById(id_user)
             const valid = await Account.deleteRequest(id_user)
             if(!valid) {
                 return response.status(500).json({status: false, message: 'Erro ao remover requisição'})
             }
 
-            const user = await User.findById(id_user)
             if(!user) {
                 return response.status(404).json({status: false, message: "Usuário não encontrado para envio de email"})
             }
@@ -262,7 +269,6 @@ class AccountController {
             }
 
             const user = await Account.findCoordinatorById(id)
-            console.log('coordenador: ', user)
             if(!user) {
                 return response.status(404).json({ status: false, message: "Usuário não encontrado." })
             }
@@ -301,6 +307,38 @@ class AccountController {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
+
+    async getKpis(request, response) {
+        try {
+            const { id } = request.params
+            if (!validator.isInt(id + '', { min: 1 })) {
+                return response.status(422).json({status: false, message: "Usuário invalido."})
+            }
+
+            let teachers = []
+
+            if (id >= 1 && id <= 4) {
+                teachers = await Account.countAllTeachers()
+            }
+            else {
+                const coordinator = await Account.findCoordinatorById(id)
+                if(!coordinator) {
+                    return response.status(404).json({status: false, message: "Coordenador não encontrado."})
+                }
+                teachers = await Account.countTeachers(coordinator.access_code)
+            }
+            if(!teachers) {
+                return response.status(404).json({status: false, message: "Nenhum professor encontrado."})
+            }
+            const kpi = {
+                teachers,
+            }
+            return response.status(200).json({status: true, kpi})
+        } catch(err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
 }
 
 module.exports = new AccountController()

@@ -111,6 +111,37 @@ class Account {
         }
     }
 
+    async getAllRequestsByCoordinator(access_code) {
+        try {
+            const result = await knex.raw(`
+                select 
+                    split_part(diploma, '/', 2) as diploma, 
+                    u.username,
+                    vp.professional_id as id,
+                    vp.created_at,
+                    case 
+                        when vp.role = 2 then 'Coordenador'
+                        when vp.role = 3 then 'Professor'
+                        else 'Desconhecido'
+                    end as role,
+                    cv.name as course,
+                    cv."acronym_IES" as flag
+                from validate_professionals vp
+                inner join users u
+                    on u.id = vp.professional_id
+                inner join course_valid cv
+                    on cv.course_code::text = vp.access_code
+                where vp.approved = false and vp.access_code = ?
+                order by vp.updated_at desc
+            `, [access_code])
+            const rows = result.rows
+            return rows.length > 0 ? rows : []
+        } catch(err) {
+            console.error('Erro ao buscar requests:', err)
+            return []
+        }
+    }
+
     async getAllTeachers() {
         try {
             const result = await knex.raw(`
@@ -151,8 +182,8 @@ class Account {
      */
     async deleteRequest(id) {
         try {
-            const result = await knex('validate_professionals')
-            .where({ professional_id: id })
+            const result = await knex('users')
+            .where({ id: id })
             .del()
             return result > 0
         } catch (err) {
@@ -257,6 +288,38 @@ class Account {
         } catch(err) {
             console.error('Erro ao aprovar request:', err)
             return false
+        }
+    }
+
+    async countTeachers(access_code) {
+        try {
+            const result = await knex.raw(`
+                select 
+                    count(*)
+                from validate_professionals 
+                where approved = true and role = 3 and access_code = ?
+            `, [access_code])
+            const rows = result.rows
+            return rows.length > 0 ? rows[0] : undefined
+        } catch(err) {
+            console.error('Erro ao contar professores:', err)
+            return undefined
+        }
+    }
+
+    async countAllTeachers() {
+        try {
+            const result = await knex.raw(`
+                select 
+                    count(*)
+                from validate_professionals 
+                where approved = true and role = 3
+            `)
+            const rows = result.rows
+            return rows.length > 0 ? rows[0] : undefined
+        } catch(err) {
+            console.error('Erro ao contar todos os professores:', err)
+            return undefined
         }
     }
 }

@@ -29,7 +29,7 @@ function formatMessageTeacherApproved(username) {
                 <strong>Olá ${username}</strong>, temos uma ótima notícia!
             </p>
             <p style="font-size: 16px; color: #333;">
-                Sua conta como <strong>Professor</strong> na plataforma <strong>Evolvere</strong> foi 
+                Sua conta na plataforma <strong>Evolvere</strong> foi 
                 <span style="color: #060060; font-weight: bold;">aprovada</span>.
             </p>
             <p style="font-size: 16px; color: #333; margin-top: 15px;">
