@@ -21,6 +21,7 @@ import Coordinator from "./components/pages/coordinator/Coordinator"
 import DashboardCoordinator from "./components/pages/coordinator/DashboardCoordinator"
 import RequestsTeachers from "./components/pages/coordinator/Requests"
 import DisciplineManagement from "./components/pages/teacher/DisciplineManagement"
+import ViewDiscipline from "./components/pages/teacher/ViewDiscipline"
 
 
 /**
@@ -87,7 +88,9 @@ function App() {
               <Route path="/coordinator/student/list" element={<ListStrudents />} />
               <Route path="/coordinator/teacher/manage" element={<ManageTeachers />} />
               <Route path="/coordinator/requests" element={<RequestsTeachers />} />
-              <Route path="/teacher/discipline/list" element={<DisciplineManagement />} />
+
+              <Route path="/teacher/discipline/manage" element={<DisciplineManagement />} />
+              <Route path="/teacher/discipline/list" element={<ViewDiscipline />} />
             </Route>
           </Route>
           
