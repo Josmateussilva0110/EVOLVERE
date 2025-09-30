@@ -1,5 +1,6 @@
 const Account = require("../models/Account")
 const User = require("../models/User")
+const Subject = require("../models/Subject")
 const path = require("path")
 require('dotenv').config({ path: '../.env' })
 const fs = require("fs")
@@ -316,9 +317,11 @@ class AccountController {
             }
 
             let teachers = []
+            let subjects = []
 
             if (id >= 1 && id <= 4) {
                 teachers = await Account.countAllTeachers()
+                subjects = await Subject.countAllSubjects()
             }
             else {
                 const coordinator = await Account.findCoordinatorById(id)
@@ -326,12 +329,14 @@ class AccountController {
                     return response.status(404).json({status: false, message: "Coordenador não encontrado."})
                 }
                 teachers = await Account.countTeachers(coordinator.access_code)
+                subjects = await Subject.countSubjects(coordinator.access_code)
             }
             if(!teachers) {
                 return response.status(404).json({status: false, message: "Nenhum professor encontrado."})
             }
             const kpi = {
                 teachers,
+                subjects,
             }
             return response.status(200).json({status: true, kpi})
         } catch(err) {

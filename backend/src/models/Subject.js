@@ -192,6 +192,39 @@ class Subject {
         }
     }
 
+    async countAllSubjects() {
+        try {
+            const result = await knex.raw(`
+                select 
+                    count(*)
+                from subjects 
+            `)
+            const rows = result.rows
+            return rows.length > 0 ? rows[0] : undefined
+        } catch(err) {
+            console.error('Erro ao contar todas as disciplinas', err)
+            return undefined
+        }
+    }
+
+    async countSubjects(access_code) {
+        try {
+            const result = await knex.raw(`
+                select 
+                    count(*)
+                from subjects 
+                inner join course_valid cv
+                    on cv.id = course_valid_id
+                where cv.course_code = ?
+            `, [access_code])
+            const rows = result.rows
+            return rows.length > 0 ? rows[0] : undefined
+        } catch(err) {
+            console.error('Erro ao contar as disciplinas', err)
+            return undefined
+        }
+    }
+
     
 }
 
