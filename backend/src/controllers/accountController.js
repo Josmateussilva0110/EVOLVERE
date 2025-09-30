@@ -318,10 +318,12 @@ class AccountController {
 
             let teachers = []
             let subjects = []
+            let requests = []
 
             if (id >= 1 && id <= 4) {
                 teachers = await Account.countAllTeachers()
                 subjects = await Subject.countAllSubjects()
+                requests = await Account.countAllRequests()
             }
             else {
                 const coordinator = await Account.findCoordinatorById(id)
@@ -330,6 +332,7 @@ class AccountController {
                 }
                 teachers = await Account.countTeachers(coordinator.access_code)
                 subjects = await Subject.countSubjects(coordinator.access_code)
+                requests = await Account.countRequests(coordinator.access_code)
             }
             if(!teachers) {
                 return response.status(404).json({status: false, message: "Nenhum professor encontrado."})
@@ -337,6 +340,7 @@ class AccountController {
             const kpi = {
                 teachers,
                 subjects,
+                requests,
             }
             return response.status(200).json({status: true, kpi})
         } catch(err) {

@@ -322,6 +322,38 @@ class Account {
             return undefined
         }
     }
+
+    async countAllRequests() {
+        try {
+            const result = await knex.raw(`
+                select 
+                    count(*)
+                from validate_professionals 
+                where approved = false
+            `)
+            const rows = result.rows
+            return rows.length > 0 ? rows[0] : undefined
+        } catch(err) {
+            console.error('Erro ao contar todas as solicitações:', err)
+            return undefined
+        }
+    }
+
+    async countRequests(access_code) {
+        try {
+            const result = await knex.raw(`
+                select 
+                    count(*)
+                from validate_professionals 
+                where approved = false and role = 3 and access_code = ?
+            `, [access_code])
+            const rows = result.rows
+            return rows.length > 0 ? rows[0] : undefined
+        } catch(err) {
+            console.error('Erro ao contar requests de professores:', err)
+            return undefined
+        }
+    }
 }
 
 module.exports = new Account()

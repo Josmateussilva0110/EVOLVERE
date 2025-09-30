@@ -134,15 +134,15 @@ function DashboardPrincipal() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
           <div className="bg-gray-200 p-6 rounded-lg shadow">
             <p className="text-gray-600">Disciplinas Cadastradas</p>
-            <p className="font-bold text-2xl">{kpi.subjects?.count}</p>
+            <p className="font-bold text-2xl">{kpi.subjects?.count || '-'}</p>
           </div>
           <div className="bg-gray-200 p-6 rounded-lg shadow">
             <p className="text-gray-600">Professores Ativos</p>
-            <p className="font-bold text-2xl">{kpi.teachers?.count}</p>
+            <p className="font-bold text-2xl">{kpi.teachers?.count || '-'}</p>
           </div>
           <div className="bg-gray-200 p-6 rounded-lg shadow">
             <p className="text-gray-600">Solicitações pendentes</p>
-            <p className="font-bold text-2xl">5</p>
+            <p className="font-bold text-2xl">{kpi.requests?.count || '-'}</p>
           </div>
         </div>
 
