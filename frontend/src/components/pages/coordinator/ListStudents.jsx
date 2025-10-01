@@ -1,231 +1,196 @@
-import { useState } from "react"
-import { FaEye, FaTrash, FaArrowLeft } from "react-icons/fa"
+import React, { useState, useEffect, useMemo } from "react";
+// import { FaEye, FaTrash, FaArrowLeft } from "react-icons/fa"; // Removido para evitar erro de dependência
+import { useNavigate } from "react-router-dom";
+// ✅ CORREÇÃO: O caminho foi ajustado para a estrutura de pastas correta e o nome do ficheiro corrigido.
+import requestData from "../../../utils/requestApi.js";
 
 /**
- * Componente principal de listagem de estudantes.
- * 
- * Permite:
- * - Buscar alunos por nome, e-mail ou turma
- * - Filtrar por turma e status
- * - Paginar resultados
- * - Excluir usuários da lista
- * - Voltar para a tela anterior
+ * Calcula a turma (ex: 2025.1) com base na data de criação do utilizador.
+ * @param {string} dateString - A data de criação (ex: '2025-09-30T14:20:00.000Z')
+ * @returns {string} A turma formatada.
  */
+const getTurmaFromDate = (dateString) => {
+    if (!dateString) return "N/D";
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1; // getMonth() é 0-indexed (0-11)
+    const semester = month >= 1 && month <= 6 ? 1 : 2; // Jan-Jun = .1, Jul-Dez = .2
+    return `${year}.${semester}`;
+};
+
 function ListStudents() {
-  // Estado da barra de busca
-  const [busca, setBusca] = useState("")
+    // Estados para os dados e UI
+    const [alunos, setAlunos] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-  // Estado do filtro de turma
-  const [turma, setTurma] = useState("")
+    // Estados para os filtros
+    const [busca, setBusca] = useState("");
+    const [turmaFiltro, setTurmaFiltro] = useState("");
+    const [statusFiltro, setStatusFiltro] = useState("");
+    
+    // Estado da paginação
+    const [pagina, setPagina] = useState(1);
+    const itensPorPagina = 5;
 
-  // Estado do filtro de status (Ativo/Inativo)
-  const [status, setStatus] = useState("")
+    const navigate = useNavigate();
 
-  // Estado da página atual da paginação
-  const [pagina, setPagina] = useState(1)
+    // Busca os dados dos alunos da API quando o componente é montado
+    useEffect(() => {
+        const fetchAlunos = async () => {
+            const response = await requestData("/users/students", "GET", {}, true);
+            if (response.success) {
+              console.log(response.data);
+                // Adiciona a propriedade 'turma' a cada aluno
+                const alunosComTurma = response.data.data.map(aluno => ({
+                    ...aluno,
+                    turma: getTurmaFromDate(aluno.created_at),
+                    statusLabel: aluno.status === 1 ? "Ativo" : "Inativo" // Converte status numérico para texto
+                }));
+                setAlunos(alunosComTurma);
+            } else {
+                setError(response.message || "Falha ao buscar alunos.");
+            }
+            setLoading(false);
+        };
+        fetchAlunos();
+    }, []);
 
-  // Lista de opções de turmas
-  const turmas = ["2022.1", "2022.2", "2023.1"]
+    // Gera a lista de turmas únicas para o dropdown de filtro
+    const turmasDisponiveis = useMemo(() => {
+        const turmas = alunos.map(aluno => aluno.turma);
+        return [...new Set(turmas)].sort().reverse(); // Ordena da mais recente para a mais antiga
+    }, [alunos]);
 
-  // Lista de opções de status
-  const statusList = ["Ativo", "Inativo"]
+    // Aplica os filtros à lista de alunos
+    const alunosFiltrados = useMemo(() => {
+        return alunos.filter(aluno => {
+            const buscaLower = busca.toLowerCase();
+            const matchBusca = busca ?
+                aluno.username.toLowerCase().includes(buscaLower) ||
+                aluno.email.toLowerCase().includes(buscaLower) : true;
+            
+            const matchTurma = turmaFiltro ? aluno.turma === turmaFiltro : true;
+            const matchStatus = statusFiltro ? aluno.statusLabel === statusFiltro : true;
 
-  // Estado inicial da lista de usuários
-  const [usuarios, setUsuarios] = useState([
-    { nome: "Lucas", email: "lucasema@gmail.com", inicio: "2022.1", status: "Ativo" },
-    { nome: "Maria", email: "maria@gmail.com", inicio: "2022.2", status: "Inativo" },
-    { nome: "João", email: "joao@gmail.com", inicio: "2023.1", status: "Ativo" },
-    { nome: "Ana", email: "ana@gmail.com", inicio: "2022.1", status: "Inativo" },
-    { nome: "Pedro", email: "pedro@gmail.com", inicio: "2022.1", status: "Inativo" }
-  ])
+            return matchBusca && matchTurma && matchStatus;
+        });
+    }, [alunos, busca, turmaFiltro, statusFiltro]);
 
-  // Estado para cadastro de novo usuário (não utilizado neste código ainda)
-  const [novo, setNovo] = useState({ nome: "", email: "", inicio: "", status: "Ativo" })
+    // Lógica da paginação
+    const totalPaginas = Math.ceil(alunosFiltrados.length / itensPorPagina);
+    const inicioIndex = (pagina - 1) * itensPorPagina;
+    const alunosPagina = alunosFiltrados.slice(inicioIndex, inicioIndex + itensPorPagina);
 
-  /**
-   * Aplica filtros de busca, turma e status à lista de usuários.
-   * 
-   * @returns {Array} Lista de usuários filtrados
-   */
-  const usuariosFiltrados = usuarios.filter(u => {
-    const buscaLower = busca.toLowerCase()
+    // Funções de manipulação de eventos
+    const handleLimparFiltros = () => {
+        setBusca("");
+        setTurmaFiltro("");
+        setStatusFiltro("");
+        setPagina(1);
+    };
 
-    // Busca por nome, email ou turma
-    const matchBusca =
-      u.nome.toLowerCase().includes(buscaLower) ||
-      u.email.toLowerCase().includes(buscaLower) ||
-      u.inicio.toLowerCase().includes(buscaLower)
+    const handleExcluir = async (id) => {
+        if (window.confirm("Deseja realmente excluir este aluno? Esta ação não pode ser desfeita.")) {
+            const response = await requestData(`/users/students/${id}`, "DELETE", {}, true);
+            if (response.success) {
+                setAlunos(alunos.filter(a => a.id !== id));
+            } else {
+                alert(response.message || "Erro ao excluir aluno.");
+            }
+        }
+    };
+    
+    if (loading) return <div className="p-4 text-center">A carregar alunos...</div>;
+    if (error) return <div className="p-4 text-center text-red-600">Erro: {error}</div>;
 
-    // Verifica filtro de turma
-    const matchTurma = turma ? u.inicio === turma : true
+    return (
+        <div className="relative flex flex-col items-center min-h-full bg-gray-50 py-8 px-6">
+            <button onClick={() => navigate(-1)} className="absolute top-6 left-6 flex items-center gap-2 text-gray-600 hover:text-indigo-600 font-medium">
+                <span className="text-lg">←</span> Voltar
+            </button>
 
-    // Verifica filtro de status
-    const matchStatus = status ? u.status === status : true
+            <div className="w-full max-w-6xl mt-12">
+                <input
+                    type="text"
+                    placeholder="Buscar por nome ou e-mail"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 mb-4 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    value={busca}
+                    onChange={e => setBusca(e.target.value)}
+                />
 
-    return matchBusca && matchTurma && matchStatus
-  })
-
-  // Configuração da paginação
-  const itensPorPagina = 5
-  const totalPaginas = Math.ceil(usuariosFiltrados.length / itensPorPagina)
-  const inicioIndex = (pagina - 1) * itensPorPagina
-  const usuariosPagina = usuariosFiltrados.slice(inicioIndex, inicioIndex + itensPorPagina)
-
-  /**
-   * Reseta todos os filtros aplicados (busca, turma, status).
-   */
-  const handleLimparFiltros = () => {
-    setBusca("")
-    setTurma("")
-    setStatus("")
-  }
-
-  /**
-   * Retorna para a página anterior do navegador.
-   */
-  const handleVoltar = () => {
-    window.history.back()
-  }
-
-  /**
-   * Exclui um usuário da lista de acordo com o índice.
-   * 
-   * @param {number} index - Índice do usuário na lista
-   */
-  const handleExcluir = (index) => {
-    if (window.confirm("Deseja realmente excluir este usuário?")) {
-      setUsuarios(usuarios.filter((_, i) => i !== index))
-    }
-  }
-
-  return (
-    <div className="relative flex flex-col items-center min-h-full bg-white py-4 px-6">
-      
-      {/* Botão voltar no canto superior esquerdo */}
-      <button
-        onClick={handleVoltar}
-        className="absolute top-4 left-4 flex items-center gap-2 text-gray-600 hover:text-[#060060] font-medium"
-      >
-        <FaArrowLeft /> Voltar
-      </button>
-
-      <div className="w-full max-w-5xl mt-10">
-        {/* Barra de busca */}
-        <input
-          type="text"
-          placeholder="Buscar nome, e-mail ou turma"
-          className="w-full px-4 py-3 rounded-lg border border-gray-300 mb-4 text-gray-700"
-          value={busca}
-          onChange={e => setBusca(e.target.value)}
-        />
-
-        {/* Filtros */}
-        <div className="flex flex-wrap gap-4 mb-6">
-          <select
-            className="flex-1 min-w-[120px] px-4 py-3 rounded-lg border border-gray-300 text-gray-700 "
-            value={turma}
-            onChange={e => setTurma(e.target.value)}
-          >
-            <option value="">Turma</option>
-            {turmas.map((t, i) => (
-              <option key={i} value={t}>{t}</option>
-            ))}
-          </select>
-
-          <select
-            className="flex-1 min-w-[120px] px-4 py-3 rounded-lg border border-gray-300 text-gray-700 "
-            value={status}
-            onChange={e => setStatus(e.target.value)}
-          >
-            <option value="">Status</option>
-            {statusList.map((s, i) => (
-              <option key={i} value={s}>{s}</option>
-            ))}
-          </select>
-
-          <button
-            onClick={handleLimparFiltros}
-            className="px-6 py-3 bg-yellow-400 text-black font-medium rounded-lg hover:bg-yellow-500 transition-colors "
-          >
-            Limpar filtros
-          </button>
-        </div>
-
-        {/* Caixa da tabela + paginação */}
-        <div className="overflow-x-auto bg-white shadow rounded-lg mb-10">
-          <table className="w-full border-collapse text-gray-700">
-            <thead className="bg-gray-100 text-left">
-              <tr>
-                <th className="p-4">Nome</th>
-                <th className="p-4">E-mail</th>
-                <th className="p-4">Início</th>
-                <th className="p-4">Status</th>
-                <th className="p-4 text-center">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {usuariosPagina.map((u, i) => (
-                <tr key={i} className="border-t">
-                  <td className="p-4">{u.nome}</td>
-                  <td className="p-4">{u.email}</td>
-                  <td className="p-4">{u.inicio}</td>
-                  <td className="p-4">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        u.status === "Ativo"
-                          ? "bg-green-500 text-white"
-                          : "bg-red-500 text-white"
-                      }`}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <select
+                        className="px-4 py-3 rounded-lg border border-gray-300 text-gray-700 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        value={turmaFiltro}
+                        onChange={e => setTurmaFiltro(e.target.value)}
                     >
-                      {u.status}
-                    </span>
-                  </td>
-                  <td className="p-4 flex justify-center gap-4">
-                    <button className="text-gray-500 hover:text-blue-600 text-lg">
-                      <FaEye />
-                    </button>
+                        <option value="">Todas as Turmas</option>
+                        {turmasDisponiveis.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+
+                    <select
+                        className="px-4 py-3 rounded-lg border border-gray-300 text-gray-700 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        value={statusFiltro}
+                        onChange={e => setStatusFiltro(e.target.value)}
+                    >
+                        <option value="">Todos os Status</option>
+                        <option value="Ativo">Ativo</option>
+                        <option value="Inativo">Inativo</option>
+                    </select>
+
                     <button
-                      onClick={() => handleExcluir(i + inicioIndex)}
-                      className="text-gray-500 hover:text-red-600 text-lg"
+                        onClick={handleLimparFiltros}
+                        className="md:col-start-4 px-6 py-3 bg-yellow-400 text-black font-medium rounded-lg hover:bg-yellow-500 transition-colors shadow-sm"
                     >
-                      <FaTrash />
+                        Limpar filtros
                     </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                </div>
 
-          {/* Linha + paginação dentro da caixa */}
-          <div className="flex justify-end items-center border-t px-3 py-1 gap-2">
-            <button
-              disabled={pagina === 1}
-              onClick={() => setPagina(pagina - 1)}
-              className={`px-2 py-1 text-sm ${
-                pagina === 1 ? "text-gray-300 cursor-not-allowed" : "text-gray-500 hover:text-[#060060] "
-              }`}
-            >
-              ◀
-            </button>
-            <span className="px-3 py-1 bg-[#060060] text-white rounded-md font-semibold text-sm">
-              {pagina}
-            </span>
-            <button
-              disabled={pagina === totalPaginas || totalPaginas === 0}
-              onClick={() => setPagina(pagina + 1)}
-              className={`px-2 py-1 text-sm ${
-                pagina === totalPaginas || totalPaginas === 0
-                  ? "text-gray-300 cursor-not-allowed"
-                  : "text-gray-500 hover:text-[#060060]"
-              }`}
-            >
-              ▶
-            </button>
-          </div>
+                <div className="overflow-x-auto bg-white shadow-md rounded-lg">
+                    <table className="w-full border-collapse text-gray-700">
+                        <thead className="bg-gray-100 text-left text-sm font-medium text-gray-600 uppercase">
+                            <tr>
+                                <th className="p-4">Nome</th>
+                                <th className="p-4">E-mail</th>
+                                <th className="p-4">Início</th>
+                                <th className="p-4">Status</th>
+                                <th className="p-4 text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {alunosPagina.length > 0 ? alunosPagina.map(aluno => (
+                                <tr key={aluno.id} className="border-t hover:bg-gray-50">
+                                    <td className="p-4 font-medium text-gray-900">{aluno.username}</td>
+                                    <td className="p-4">{aluno.email}</td>
+                                    <td className="p-4">{aluno.turma}</td>
+                                    <td className="p-4">
+                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${aluno.statusLabel === "Ativo" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+                                            {aluno.statusLabel}
+                                        </span>
+                                    </td>
+                                    <td className="p-4 flex justify-center gap-4">
+                                        <button className="text-gray-500 hover:text-indigo-600 text-lg">👁️</button>
+                                        <button onClick={() => handleExcluir(aluno.id)} className="text-gray-500 hover:text-red-600 text-lg">🗑️</button>
+                                    </td>
+                                </tr>
+                            )) : (
+                                <tr>
+                                    <td colSpan="5" className="text-center p-8 text-gray-500">Nenhum aluno encontrado com os filtros aplicados.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                    <div className="flex justify-end items-center border-t px-4 py-2 gap-2 text-sm">
+                        <button disabled={pagina === 1} onClick={() => setPagina(p => p - 1)} className="px-2 py-1 disabled:text-gray-300 disabled:cursor-not-allowed">◀ Anterior</button>
+                        <span className="px-3 py-1 bg-indigo-600 text-white rounded-md font-semibold">{pagina}</span>
+                        <button disabled={pagina >= totalPaginas} onClick={() => setPagina(p => p + 1)} className="px-2 py-1 disabled:text-gray-300 disabled:cursor-not-allowed">Próximo ▶</button>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  )
+    );
 }
 
-export default ListStudents
+export default ListStudents;
+

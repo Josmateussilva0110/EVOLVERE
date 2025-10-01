@@ -112,6 +112,26 @@ router.post(
 )
 
 /**
+ * @route GET /users/students
+ * @summary Lista todos os usuários que são estudantes
+ * @returns {object} 200 - Lista de estudantes
+ * @returns {object} 404 - Nenhum estudante encontrado
+ */
+router.get('/users/students', userController.getStudents); // <<< ADICIONE ESTA LINHA
+
+
+/**
+ * @route DELETE /users/students/:id
+ * @summary Exclui um usuário (estudante) pelo ID
+ * @param {number} id.path.required - ID do usuário a ser excluído
+ * @returns {object} 200 - Aluno excluído com sucesso
+ * @returns {object} 404 - Aluno não encontrado
+ */
+router.delete('/users/students/:id', userController.deleteStudent); // <<< ADICIONE ESTA LINHA
+
+module.exports = router;
+
+/**
  * ROTAS DE account
  */
 
@@ -152,6 +172,16 @@ router.get('/user/coordinator/kpi/:id',accountController.getKpis)
  * @returns {object} 404 - Nenhum curso encontrado
  */
 router.get('/courses', courseController.getCourses)
+
+
+/**
+ * @route GET /courses/:id/professors
+ * @summary Obtém os professores validados de um curso específico
+ * @param {number} id.path.required - ID do curso
+ * @returns {object} 200 - Lista de professores
+ * @returns {object} 404 - Nenhum professor encontrado para este curso
+ */
+router.get('/courses/:id/professors', courseController.getProfessorsByCourse);
 
 
 /**

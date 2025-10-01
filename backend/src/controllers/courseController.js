@@ -50,6 +50,33 @@ class CourseController {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
+
+        
+    async getProfessorsByCourse(request, response) {
+        try {
+            const { id } = request.params;
+            const professores = await Course.findProfessors(Number(id));
+
+            if (!professores || professores.length === 0) {
+                return response.status(404).json({
+                    status: false,
+                    message: 'Nenhum professor encontrado para este curso.'
+                });
+            }
+
+            return response.status(200).json({
+                status: true,
+                professores: professores
+            });
+
+        } catch (err) {
+            console.error("Erro ao listar professores por curso:", err);
+            return response.status(500).json({
+                status: false,
+                message: "Erro interno no servidor."
+            });
+        }
+    }
 }
 
 module.exports = new CourseController()

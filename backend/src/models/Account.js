@@ -219,31 +219,34 @@ class Account {
      */
     async findCoordinatorById(id) {
         try {
-        const result = await knex.raw(`
-            select 
-                u.id, 
-                u.username,
-                u.email,
-                u.registration,
-                u.status,
-                vp.institution,
-                vp.access_code,
-                cv.name as course
-            from users u
-            inner join validate_professionals vp
-                on vp.professional_id = u.id
-            inner join course_valid cv
-                on cv.course_code::text = vp.access_code
-            where u.id = ? and vp.role = 2 and vp.approved = true 
-        `, [id])
-            const rows = result.rows
+            const result = await knex.raw(`
+                select 
+                    u.id, 
+                    u.username,
+                    u.email,
+                    u.registration,
+                    u.status,
+                    vp.institution,
+                    vp.access_code,
+                    cv.name as course,
+                    cv.id as course_id
+                from users u
+                inner join validate_professionals vp
+                    on vp.professional_id = u.id
+                inner join course_valid cv
+                    on cv.course_code::text = vp.access_code
+                where u.id = ? and vp.role = 2 and vp.approved = true 
+            `, [id]);
+            
+            const rows = result.rows;
 
-            return rows.length > 0 ? rows[0] : undefined
+            return rows.length > 0 ? rows[0] : undefined;
         } catch(err) {
-            console.error('Erro ao buscar coordenador por id:', err)
-            return undefined
+            console.error('Erro ao buscar coordenador por id:', err);
+            return undefined;
         }
     }
+
 
     async getAllTeachersByCoordinator(access_code) {
         try {
