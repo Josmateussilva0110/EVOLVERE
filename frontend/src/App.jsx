@@ -30,6 +30,7 @@ import ResponseList from "./components/pages/teacher/ResponseList"
 import CoordinatorProfile from "./components/pages/coordinator/CoordinatorProfile"
 import CoordinatorSettings from "./components/pages/coordinator/CoordinatorSettings"
 import ManagementStudents from "./components/pages/students/ManagementStudents"
+import ManagementCourses from "./components/pages/students/ManagementCourses"
 
 
 
@@ -110,6 +111,7 @@ function App() {
               <Route path="/teacher/simulated/response/list" element={<ResponseList />} />
 
               <Route path="/student/home" element={<ManagementStudents />} />
+              <Route path="/student/courses" element={<ManagementCourses />} />
 
             </Route>
           </Route>
