@@ -167,7 +167,7 @@ function DashboardPrincipal() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Disciplinas Cadastradas</p>
-                  <p className="mt-1 text-3xl font-bold text-gray-900">23</p>
+                  <p className="mt-1 text-3xl font-bold text-gray-900">{kpi.subjects?.count || '-'}</p>
                 </div>
                 <div className="h-10 w-10 rounded-lg bg-[#060060]/10 text-[#060060] flex items-center justify-center">
                   <FaGraduationCap />
@@ -180,7 +180,7 @@ function DashboardPrincipal() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Professores Ativos</p>
-                  <p className="mt-1 text-3xl font-bold text-gray-900">12</p>
+                  <p className="mt-1 text-3xl font-bold text-gray-900">{kpi.teachers?.count || '-'}</p>
                 </div>
                 <div className="h-10 w-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
                   <FaChalkboardTeacher />
@@ -193,7 +193,7 @@ function DashboardPrincipal() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Solicitações pendentes</p>
-                  <p className="mt-1 text-3xl font-bold text-gray-900">5</p>
+                  <p className="mt-1 text-3xl font-bold text-gray-900">{kpi.requests?.count || '-'}</p>
                 </div>
                 <div className="h-10 w-10 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center">
                   <FaTasks />
