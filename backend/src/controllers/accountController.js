@@ -138,6 +138,7 @@ class AccountController {
             if (!validator.isInt(id + '', { min: 1 })) {
                 return response.status(422).json({status: false, message: "Id inválido."})
             }
+
             let users = []
 
             if (id >= 1 && id <= 4) {

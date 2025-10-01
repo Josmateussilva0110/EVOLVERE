@@ -27,6 +27,9 @@ import ViewClass from "./components/pages/teacher/VíewClass"
 import RegisterSimulated from "./components/pages/teacher/RegisterSimulated"
 import ListSimulated from "./components/pages/teacher/ListSimulated"
 import ResponseList from "./components/pages/teacher/ResponseList"
+import CoordinatorProfile from "./components/pages/coordinator/CoordinatorProfile"
+import CoordinatorSettings from "./components/pages/coordinator/CoordinatorSettings"
+
 
 
 /**
@@ -63,7 +66,8 @@ import ResponseList from "./components/pages/teacher/ResponseList"
 function App() {
   const location = useLocation()
   // Rotas onde NÃO deve aparecer Navbar e Footer
-  const hideLayout = ["/login", "/register", "/forgot_password", "/help", "/", "/about", "/await/approval", "/user/account"].includes(location.pathname)
+  const isCoordinator = location.pathname.startsWith("/coordinator")
+  const hideLayout = isCoordinator || ["/login", "/register", "/forgot_password", "/help", "/", "/about", "/await/approval", "/user/account"].includes(location.pathname)
 
 
   return (
@@ -101,6 +105,8 @@ function App() {
               <Route path="/teacher/simulated/register" element={<RegisterSimulated />} />
               <Route path="/teacher/simulated/list" element={<ListSimulated />} />
               <Route path="/teacher/simulated/response/list" element={<ResponseList />} />
+              <Route path="/coordinator/profile" element={<CoordinatorProfile />} />
+              <Route path="/coordinator/settings" element={<CoordinatorSettings />} />
             </Route>
           </Route>
           
