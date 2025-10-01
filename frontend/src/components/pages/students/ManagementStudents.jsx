@@ -27,13 +27,7 @@ import { useState } from "react";
 export default function Dashboard() {
   const [activeSection, setActiveSection] = useState("dashboard");
   const usuario = "Lucas Emanuel";
-  const nivel = 12;
-  const xpAtual = 2450;
-  const xpProximoNivel = 3000;
-  const sequencia = 7;
-  const pontos = 8750;
 
-  const progressoXP = (xpAtual / xpProximoNivel) * 100;
 
   const menuItems = [
     { icon: BookOpen, label: "Meu curso", id: "curso" },
@@ -53,9 +47,6 @@ export default function Dashboard() {
           <div className="relative">
             <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-2xl flex items-center justify-center transform rotate-12 shadow-lg shadow-blue-500/50">
               <User className="text-white transform -rotate-12" size={32} strokeWidth={2.5} />
-            </div>
-            <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">
-              {nivel}
             </div>
           </div>
         </div>
@@ -114,7 +105,6 @@ export default function Dashboard() {
               </h2>
               <p className="text-gray-600">Continue sua jornada de aprendizado hoje! 🚀</p>
             </div>
-
           </div>
         </header>
 
@@ -262,7 +252,7 @@ export default function Dashboard() {
                   <Zap className="text-white" size={32} />
                 </div>
                 <h3 className="text-2xl font-bold mb-2">Simulado Disponível!</h3>
-                <p className="text-amber-50 mb-6">Teste seus conhecimentos🎯</p>
+                <p className="text-amber-50 mb-6">Teste seus conhecimentos 🎯</p>
               </div>
               <button className="relative w-full bg-white hover:bg-gray-50 text-amber-600 font-bold py-4 rounded-xl shadow-lg transition-all transform hover:scale-105 hover:-translate-y-1">
                 <span className="flex items-center justify-center gap-2">
