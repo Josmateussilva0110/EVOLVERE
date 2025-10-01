@@ -343,6 +343,7 @@ class UserController {
             });
         }
     }
+<<<<<<< HEAD
     /**
      * Lista todos os alunos.
      */
@@ -374,6 +375,8 @@ class UserController {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." });
         }
     }
+=======
+>>>>>>> fad5b1a15e362f1cd58b209d2afc62ff701d91e9
     
 }
 

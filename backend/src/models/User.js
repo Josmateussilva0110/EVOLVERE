@@ -153,6 +153,7 @@ class User {
             return undefined
         }
     }
+<<<<<<< HEAD
 
 
 
@@ -208,6 +209,8 @@ class User {
         }
     }
 
+=======
+>>>>>>> fad5b1a15e362f1cd58b209d2afc62ff701d91e9
     
     /**
      * Busca professores validados (com join na tabela validate_professionals)
@@ -237,6 +240,7 @@ class User {
             return undefined;
         }
     }
+<<<<<<< HEAD
 /**
  * Busca todos os alunos, excluindo:
  * 1. Usuários com registration 'admin'.
@@ -285,6 +289,8 @@ async findAllStudents() {
             return false;
         }
     }
+=======
+>>>>>>> fad5b1a15e362f1cd58b209d2afc62ff701d91e9
 }
 
 module.exports = new User()
