@@ -21,7 +21,6 @@ function ProfessoresManagement() {
    */
   const [search, setSearch] = useState("")
   const [teachers, setTeachers] = useState([])
-  const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [pagina, setPagina] = useState(1)
   const [itensPorPagina, setItensPorPagina] = useState(8)
@@ -98,17 +97,6 @@ function ProfessoresManagement() {
   const handleVoltar = () => {
     window.history.back();
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#060060] flex items-center justify-center">
-        <div className="inline-flex items-center gap-3 text-white/80 bg-white/10 backdrop-blur-sm px-6 py-4 rounded-2xl">
-          <div className="animate-spin w-5 h-5 border-2 border-white/30 border-t-white rounded-full"></div>
-          <span className="font-medium">Carregando professores...</span>
-        </div>
-      </div>
-    );
-  }
 
   if (error) {
     return (
