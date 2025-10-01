@@ -44,7 +44,6 @@ function DisciplineList() {
         }
     }
 
-        fetchDisciplinas();
 
     const handleEditar = (id) => {
         navigate(`/coordinator/discipline/edit/${id}`); // Ajuste a rota se necessário

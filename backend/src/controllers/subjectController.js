@@ -15,15 +15,9 @@ const subjectController = {
         })
       }
       
-<<<<<<< HEAD
       res.status(200).json({ 
         status: true, 
         subjects 
-=======
-      res.json({ 
-        status: true, 
-        data: subjects 
->>>>>>> fad5b1a15e362f1cd58b209d2afc62ff701d91e9
       })
     } catch (error) {
       console.error('Erro ao listar disciplinas:', error)
@@ -145,11 +139,7 @@ const subjectController = {
         })
       }
       
-<<<<<<< HEAD
       res.status(200).json({status: true, message: "Disciplina excluída com sucesso."})
-=======
-      res.status(204).send()
->>>>>>> fad5b1a15e362f1cd58b209d2afc62ff701d91e9
     } catch (error) {
       console.error('Erro ao excluir disciplina:', error)
       res.status(500).json({ 
@@ -160,8 +150,4 @@ const subjectController = {
   }
 }
 
-<<<<<<< HEAD
 module.exports = subjectController
-=======
-module.exports = subjectController
->>>>>>> fad5b1a15e362f1cd58b209d2afc62ff701d91e9
