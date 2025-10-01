@@ -20,6 +20,16 @@ import ManageTeachers from "./components/pages/coordinator/ManageTeachers"
 import Coordinator from "./components/pages/coordinator/Coordinator"
 import DashboardCoordinator from "./components/pages/coordinator/DashboardCoordinator"
 import RequestsTeachers from "./components/pages/coordinator/Requests"
+import DisciplineManagement from "./components/pages/teacher/DisciplineManagement"
+import ViewDiscipline from "./components/pages/teacher/ViewDiscipline"
+import RegisterMaterial from "./components/pages/teacher/RegisterMaterial"
+import ViewClass from "./components/pages/teacher/VíewClass"
+import RegisterSimulated from "./components/pages/teacher/RegisterSimulated"
+import ListSimulated from "./components/pages/teacher/ListSimulated"
+import ResponseList from "./components/pages/teacher/ResponseList"
+import CoordinatorProfile from "./components/pages/coordinator/CoordinatorProfile"
+import CoordinatorSettings from "./components/pages/coordinator/CoordinatorSettings"
+
 
 
 /**
@@ -56,7 +66,8 @@ import RequestsTeachers from "./components/pages/coordinator/Requests"
 function App() {
   const location = useLocation()
   // Rotas onde NÃO deve aparecer Navbar e Footer
-  const hideLayout = ["/login", "/register", "/forgot_password", "/help", "/", "/about", "/await/approval", "/user/account"].includes(location.pathname)
+  const isCoordinator = location.pathname.startsWith("/coordinator")
+  const hideLayout = isCoordinator || ["/login", "/register", "/forgot_password", "/help", "/", "/about", "/await/approval", "/user/account"].includes(location.pathname)
 
 
   return (
@@ -86,6 +97,16 @@ function App() {
               <Route path="/coordinator/student/list" element={<ListStrudents />} />
               <Route path="/coordinator/teacher/manage" element={<ManageTeachers />} />
               <Route path="/coordinator/requests" element={<RequestsTeachers />} />
+
+              <Route path="/teacher/discipline/manage" element={<DisciplineManagement />} />
+              <Route path="/teacher/discipline/list" element={<ViewDiscipline />} />
+              <Route path="/teacher/material/register" element={<RegisterMaterial />} />
+              <Route path="/teacher/class/view" element={<ViewClass />} />
+              <Route path="/teacher/simulated/register" element={<RegisterSimulated />} />
+              <Route path="/teacher/simulated/list" element={<ListSimulated />} />
+              <Route path="/teacher/simulated/response/list" element={<ResponseList />} />
+              <Route path="/coordinator/profile" element={<CoordinatorProfile />} />
+              <Route path="/coordinator/settings" element={<CoordinatorSettings />} />
             </Route>
           </Route>
           
