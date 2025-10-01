@@ -131,7 +131,7 @@ class Account {
                     on u.id = vp.professional_id
                 inner join course_valid cv
                     on cv.course_code::text = vp.access_code
-                where vp.approved = false and vp.access_code = ?
+                where vp.approved = false and vp.role = 3 and vp.access_code = ?
                 order by vp.updated_at desc
             `, [access_code])
             const rows = result.rows

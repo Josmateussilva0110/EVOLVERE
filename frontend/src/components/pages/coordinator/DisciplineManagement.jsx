@@ -54,7 +54,8 @@ function DisciplineManagement() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     name: nome,
-                    professional_id: parseInt(professor)
+                    professional_id: parseInt(professor),
+                    course_valid_id: 2
                 })
             });
             

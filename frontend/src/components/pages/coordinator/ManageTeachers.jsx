@@ -1,7 +1,9 @@
 import { useState, useEffect, useContext, useMemo } from "react";
-import { FiArrowLeft, FiSearch, FiEdit2, FiTrash2, FiUsers, FiUserCheck, FiPause, FiX, FiChalkboardTeacher } from "react-icons/fi";
+import { FiArrowLeft, FiSearch, FiEdit2, FiTrash2, FiUsers, FiUserCheck, FiPause, FiX } from "react-icons/fi";
+import { FaChalkboardTeacher } from "react-icons/fa";
 import requestData from "../../../utils/requestApi";
 import { Context } from "../../../context/UserContext"
+import useFlashMessage from "../../../hooks/useFlashMessage";
 
 /**
  * Componente de gerenciamento de professores.
@@ -19,7 +21,6 @@ function ProfessoresManagement() {
    */
   const [search, setSearch] = useState("")
   const [teachers, setTeachers] = useState([])
-  const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [pagina, setPagina] = useState(1)
   const [itensPorPagina, setItensPorPagina] = useState(8)
@@ -96,17 +97,6 @@ function ProfessoresManagement() {
   const handleVoltar = () => {
     window.history.back();
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#060060] flex items-center justify-center">
-        <div className="inline-flex items-center gap-3 text-white/80 bg-white/10 backdrop-blur-sm px-6 py-4 rounded-2xl">
-          <div className="animate-spin w-5 h-5 border-2 border-white/30 border-t-white rounded-full"></div>
-          <span className="font-medium">Carregando professores...</span>
-        </div>
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -192,7 +182,7 @@ function ProfessoresManagement() {
             {filterTeacher.length === 0 ? (
               <div className="p-10 text-center">
                 <div className="mx-auto mb-3 h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center ring-1 ring-slate-200 text-slate-500">
-                  <FiChalkboardTeacher />
+                  <FaChalkboardTeacher />
                 </div>
                 <p className="text-slate-900 font-semibold">Nenhum professor encontrado</p>
                 <p className="text-slate-600 text-sm mt-1">Ajuste os filtros ou tente outra busca.</p>
