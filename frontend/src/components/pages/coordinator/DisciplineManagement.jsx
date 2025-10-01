@@ -15,8 +15,6 @@ function DisciplineManagement() {
     const { user } = useContext(Context)
     const [coordinator, setCoordinator] = useState({})
     const { setFlashMessage } = useFlashMessage()
-
-
     useEffect(() => {
         async function fetchCoordinator() {
             const response = await requestData(`/user/coordinator/${user.id}`, "GET", {}, true)
