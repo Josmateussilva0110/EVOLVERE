@@ -26,6 +26,7 @@ import RegisterMaterial from "./components/pages/teacher/RegisterMaterial"
 import ViewClass from "./components/pages/teacher/VíewClass"
 import RegisterSimulated from "./components/pages/teacher/RegisterSimulated"
 import ListSimulated from "./components/pages/teacher/ListSimulated"
+import ResponseList from "./components/pages/teacher/ResponseList"
 
 
 /**
@@ -99,7 +100,7 @@ function App() {
               <Route path="/teacher/class/view" element={<ViewClass />} />
               <Route path="/teacher/simulated/register" element={<RegisterSimulated />} />
               <Route path="/teacher/simulated/list" element={<ListSimulated />} />
-
+              <Route path="/teacher/simulated/response/list" element={<ResponseList />} />
             </Route>
           </Route>
           
