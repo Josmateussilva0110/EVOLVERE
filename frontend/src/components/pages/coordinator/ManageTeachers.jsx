@@ -1,7 +1,9 @@
 import { useState, useEffect, useContext, useMemo } from "react";
-import { FiArrowLeft, FiSearch, FiEdit2, FiTrash2, FiUsers, FiUserCheck, FiPause, FiX, FiChalkboardTeacher } from "react-icons/fi";
+import { FiArrowLeft, FiSearch, FiEdit2, FiTrash2, FiUsers, FiUserCheck, FiPause, FiX } from "react-icons/fi";
+import { FaChalkboardTeacher } from "react-icons/fa";
 import requestData from "../../../utils/requestApi";
 import { Context } from "../../../context/UserContext"
+import useFlashMessage from "../../../hooks/useFlashMessage";
 
 /**
  * Componente de gerenciamento de professores.
@@ -192,7 +194,7 @@ function ProfessoresManagement() {
             {filterTeacher.length === 0 ? (
               <div className="p-10 text-center">
                 <div className="mx-auto mb-3 h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center ring-1 ring-slate-200 text-slate-500">
-                  <FiChalkboardTeacher />
+                  <FaChalkboardTeacher />
                 </div>
                 <p className="text-slate-900 font-semibold">Nenhum professor encontrado</p>
                 <p className="text-slate-600 text-sm mt-1">Ajuste os filtros ou tente outra busca.</p>
