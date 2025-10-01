@@ -24,6 +24,7 @@ import DisciplineManagement from "./components/pages/teacher/DisciplineManagemen
 import ViewDiscipline from "./components/pages/teacher/ViewDiscipline"
 import RegisterMaterial from "./components/pages/teacher/RegisterMaterial"
 import ViewClass from "./components/pages/teacher/VíewClass"
+import RegisterSimulated from "./components/pages/teacher/RegisterSimulated"
 
 
 /**
@@ -95,6 +96,8 @@ function App() {
               <Route path="/teacher/discipline/list" element={<ViewDiscipline />} />
               <Route path="/teacher/material/register" element={<RegisterMaterial />} />
               <Route path="/teacher/class/view" element={<ViewClass />} />
+              <Route path="/teacher/simulated/register" element={<RegisterSimulated />} />
+
             </Route>
           </Route>
           
