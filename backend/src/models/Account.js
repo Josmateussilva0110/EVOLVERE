@@ -111,6 +111,48 @@ class Account {
         }
     }
 
+    /**
+     * Busca todas as solicitações de validação de professores pendentes (não aprovadas)
+     * associadas a um coordenador, filtradas pelo código de acesso (`access_code`).
+     *
+     * - Retorna apenas registros onde `approved = false` e `role = 3` (professores).
+     * - Inclui informações adicionais como nome de usuário, curso e sigla da instituição.
+     *
+     * @async
+     * @function getAllRequestsByCoordinator
+     * @param {string} access_code - Código de acesso do coordenador para filtrar as solicitações.
+     * @returns {Promise<Object[]>} Lista de solicitações pendentes no formato:
+     * - `diploma` {string} - Parte do caminho do diploma (extraído por `split_part`).
+     * - `username` {string} - Nome de usuário associado ao professor.
+     * - `id` {number} - ID do professor (professional_id).
+     * - `created_at` {string} - Data de criação da solicitação.
+     * - `role` {string} - Papel do usuário (fixo em "Professor", mas pode retornar "Coordenador" ou "Desconhecido").
+     * - `course` {string} - Nome do curso associado.
+     * - `flag` {string} - Sigla da instituição (acrônimo da IES).
+     * Retorna um array vazio (`[]`) se não houver registros ou em caso de erro.
+     *
+     * @example
+     * // Consulta bem-sucedida
+     * const requests = await getAllRequestsByCoordinator("2025ABC");
+     * // Resultado:
+     * [
+     *   {
+     *     "diploma": "12345.pdf",
+     *     "username": "joao.silva",
+     *     "id": 12,
+     *     "created_at": "2025-09-21T14:35:00.000Z",
+     *     "role": "Professor",
+     *     "course": "Engenharia de Software",
+     *     "flag": "UFPI"
+     *   }
+     * ]
+     *
+     * @example
+     * // Nenhuma solicitação encontrada
+     * const requests = await getAllRequestsByCoordinator("INVALIDO");
+     * // Resultado:
+     * []
+     */
     async getAllRequestsByCoordinator(access_code) {
         try {
             const result = await knex.raw(`
@@ -142,6 +184,41 @@ class Account {
         }
     }
 
+
+    /**
+     * Retorna todos os professores aprovados no sistema, incluindo informações de usuário,
+     * disciplina e curso.
+     *
+     * - Filtra apenas registros com `role = 3` (professor) e `approved = true`.
+     * - Retorna informações adicionais do professor, como disciplina atribuída e curso associado.
+     *
+     * @async
+     * @function getAllTeachers
+     * @returns {Promise<Object[]|undefined>} Lista de professores no formato:
+     * - `professional_id` {number} - ID do professor.
+     * - `username` {string} - Nome de usuário do professor.
+     * - `disciplina` {string|null} - Nome da disciplina atribuída ao professor (pode ser null se não houver).
+     * - `course` {string} - Nome do curso associado ao professor.
+     * Retorna `undefined` se não houver registros ou em caso de erro.
+     *
+     * @example
+     * const teachers = await getAllTeachers();
+     * // Resultado:
+     * [
+     *   {
+     *     "professional_id": 12,
+     *     "username": "joao.silva",
+     *     "disciplina": "Matemática",
+     *     "course": "Engenharia de Software"
+     *   },
+     *   {
+     *     "professional_id": 13,
+     *     "username": "maria.souza",
+     *     "disciplina": null,
+     *     "course": "Ciência da Computação"
+     *   }
+     * ]
+     */
     async getAllTeachers() {
         try {
             const result = await knex.raw(`
@@ -248,6 +325,41 @@ class Account {
     }
 
 
+    /**
+     * Retorna todos os professores aprovados vinculados a um coordenador específico,
+     * filtrados pelo código de acesso (`access_code`).
+     *
+     * - Filtra apenas registros com `role = 3` (professor) e `approved = true`.
+     * - Retorna informações adicionais do professor, como disciplina atribuída e curso associado.
+     *
+     * @async
+     * @function getAllTeachersByCoordinator
+     * @param {string} access_code - Código de acesso do coordenador para filtrar os professores.
+     * @returns {Promise<Object[]|undefined>} Lista de professores no formato:
+     * - `professional_id` {number} - ID do professor.
+     * - `username` {string} - Nome de usuário do professor.
+     * - `disciplina` {string|null} - Nome da disciplina atribuída ao professor (pode ser null se não houver).
+     * - `course` {string} - Nome do curso associado ao professor.
+     * Retorna `undefined` se não houver registros ou em caso de erro.
+     *
+     * @example
+     * const teachers = await getAllTeachersByCoordinator("2025ABC");
+     * // Resultado:
+     * [
+     *   {
+     *     "professional_id": 12,
+     *     "username": "joao.silva",
+     *     "disciplina": "Matemática",
+     *     "course": "Engenharia de Software"
+     *   },
+     *   {
+     *     "professional_id": 13,
+     *     "username": "maria.souza",
+     *     "disciplina": null,
+     *     "course": "Ciência da Computação"
+     *   }
+     * ]
+     */
     async getAllTeachersByCoordinator(access_code) {
         try {
             const result = await knex.raw(`
@@ -294,6 +406,31 @@ class Account {
         }
     }
 
+
+    /**
+     * Conta o número de professores aprovados vinculados a um coordenador específico,
+     * filtrados pelo código de acesso (`access_code`).
+     *
+     * - Filtra apenas registros com `approved = true` e `role = 3` (professor).
+     *
+     * @async
+     * @function countTeachers
+     * @param {string} access_code - Código de acesso do coordenador para filtrar os professores.
+     * @returns {Promise<Object|undefined>} Retorna um objeto com a contagem, por exemplo:
+     * - `{ count: 12 }` se houver professores.
+     * Retorna `undefined` se não houver registros ou em caso de erro.
+     *
+     * @example
+     * const teacherCount = await countTeachers("2025ABC");
+     * // Resultado:
+     * { count: 12 }
+     *
+     * @example
+     * // Nenhum professor encontrado
+     * const teacherCount = await countTeachers("INVALIDO");
+     * // Resultado:
+     * undefined
+     */
     async countTeachers(access_code) {
         try {
             const result = await knex.raw(`
@@ -310,6 +447,29 @@ class Account {
         }
     }
 
+
+    /**
+     * Conta o número total de professores aprovados no sistema.
+     *
+     * - Filtra apenas registros com `approved = true` e `role = 3` (professor).
+     *
+     * @async
+     * @function countAllTeachers
+     * @returns {Promise<Object|undefined>} Retorna um objeto com a contagem total, por exemplo:
+     * - `{ count: 42 }` se houver professores.
+     * Retorna `undefined` se não houver registros ou em caso de erro.
+     *
+     * @example
+     * const totalTeachers = await countAllTeachers();
+     * // Resultado:
+     * { count: 42 }
+     *
+     * @example
+     * // Nenhum professor encontrado
+     * const totalTeachers = await countAllTeachers();
+     * // Resultado:
+     * undefined
+     */
     async countAllTeachers() {
         try {
             const result = await knex.raw(`
@@ -326,6 +486,29 @@ class Account {
         }
     }
 
+
+    /**
+     * Conta o número total de solicitações de validação de professores pendentes (não aprovadas) no sistema.
+     *
+     * - Filtra apenas registros com `approved = false`.
+     *
+     * @async
+     * @function countAllRequests
+     * @returns {Promise<Object|undefined>} Retorna um objeto com a contagem total, por exemplo:
+     * - `{ count: 7 }` se houver solicitações pendentes.
+     * Retorna `undefined` se não houver registros ou em caso de erro.
+     *
+     * @example
+     * const totalRequests = await countAllRequests();
+     * // Resultado:
+     * { count: 7 }
+     *
+     * @example
+     * // Nenhuma solicitação pendente encontrada
+     * const totalRequests = await countAllRequests();
+     * // Resultado:
+     * undefined
+     */
     async countAllRequests() {
         try {
             const result = await knex.raw(`
@@ -342,6 +525,31 @@ class Account {
         }
     }
 
+
+    /**
+     * Conta o número de solicitações de validação de professores pendentes (não aprovadas)
+     * vinculadas a um coordenador específico, filtradas pelo código de acesso (`access_code`).
+     *
+     * - Filtra apenas registros com `approved = false` e `role = 3` (professor).
+     *
+     * @async
+     * @function countRequests
+     * @param {string} access_code - Código de acesso do coordenador para filtrar as solicitações.
+     * @returns {Promise<Object|undefined>} Retorna um objeto com a contagem, por exemplo:
+     * - `{ count: 3 }` se houver solicitações pendentes.
+     * Retorna `undefined` se não houver registros ou em caso de erro.
+     *
+     * @example
+     * const requestsCount = await countRequests("2025ABC");
+     * // Resultado:
+     * { count: 3 }
+     *
+     * @example
+     * // Nenhuma solicitação pendente encontrada
+     * const requestsCount = await countRequests("INVALIDO");
+     * // Resultado:
+     * undefined
+     */
     async countRequests(access_code) {
         try {
             const result = await knex.raw(`

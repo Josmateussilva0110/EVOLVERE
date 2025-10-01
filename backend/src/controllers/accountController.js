@@ -281,6 +281,42 @@ class AccountController {
         }
     }
 
+    /**
+     * Obtém a lista de professores de acordo com o ID fornecido.
+     *
+     * - Se o `id` estiver entre 1 e 4 (inclusive), retorna todos os professores do sistema.
+     * - Caso contrário, busca o coordenador pelo `id` e retorna os professores vinculados ao seu código de acesso.
+     *
+     * @async
+     * @function getTeachers
+     * @param {Object} request - Objeto da requisição Express.
+     * @param {Object} request.params - Parâmetros da URL da requisição.
+     * @param {string|number} request.params.id - ID do usuário (pode ser coordenador ou admin).
+     * @param {Object} response - Objeto da resposta Express.
+     * @returns {Promise<Object>} Retorna uma resposta JSON com:
+     * - `200 OK` e a lista de professores (`teachers`) se encontrados.
+     * - `404 Not Found` caso não existam professores ou o coordenador não seja encontrado.
+     * - `422 Unprocessable Entity` se o `id` for inválido.
+     * - `500 Internal Server Error` em caso de erro inesperado no servidor.
+     *
+     * @example
+     * // Requisição bem-sucedida
+     * GET /teachers/2
+     * // Resposta:
+     * {
+     *   "status": true,
+     *   "teachers": [{ "id": 1, "name": "João" }, { "id": 2, "name": "Maria" }]
+     * }
+     *
+     * @example
+     * // Coordenador não encontrado
+     * GET /teachers/999
+     * // Resposta:
+     * {
+     *   "status": false,
+     *   "message": "Coordenador não encontrado."
+     * }
+     */
     async getTeachers(request, response) {
         try {
             const {id} = request.params
@@ -310,6 +346,61 @@ class AccountController {
         }
     }
 
+    /**
+     * Obtém os principais indicadores de desempenho (KPIs) relacionados a professores,
+     * disciplinas e solicitações, de acordo com o ID fornecido.
+     *
+     * - Se o `id` estiver entre 1 e 4 (inclusive), retorna os KPIs globais (todos os professores,
+     *   disciplinas e solicitações do sistema).
+     * - Caso contrário, busca o coordenador pelo `id` e retorna os KPIs vinculados ao seu código de acesso.
+     *
+     * @async
+     * @function getKpis
+     * @param {Object} request - Objeto da requisição Express.
+     * @param {Object} request.params - Parâmetros da URL da requisição.
+     * @param {string|number} request.params.id - ID do usuário (pode ser coordenador ou admin).
+     * @param {Object} response - Objeto da resposta Express.
+     * @returns {Promise<Object>} Retorna uma resposta JSON com:
+     * - `200 OK` e os KPIs (`teachers`, `subjects`, `requests`) se encontrados.
+     * - `404 Not Found` caso não existam professores ou o coordenador não seja encontrado.
+     * - `422 Unprocessable Entity` se o `id` for inválido.
+     * - `500 Internal Server Error` em caso de erro inesperado no servidor.
+     *
+     * @example
+     * // KPIs globais (usuário admin)
+     * GET /kpis/1
+     * // Resposta:
+     * {
+     *   "status": true,
+     *   "kpi": {
+     *     "teachers": 42,
+     *     "subjects": 18,
+     *     "requests": 7
+     *   }
+     * }
+     *
+     * @example
+     * // KPIs de um coordenador
+     * GET /kpis/25
+     * // Resposta:
+     * {
+     *   "status": true,
+     *   "kpi": {
+     *     "teachers": 12,
+     *     "subjects": 5,
+     *     "requests": 3
+     *   }
+     * }
+     *
+     * @example
+     * // Coordenador inexistente
+     * GET /kpis/999
+     * // Resposta:
+     * {
+     *   "status": false,
+     *   "message": "Coordenador não encontrado."
+     * }
+     */
     async getKpis(request, response) {
         try {
             const { id } = request.params
@@ -344,6 +435,72 @@ class AccountController {
                 requests,
             }
             return response.status(200).json({status: true, kpi})
+        } catch(err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
+    /**
+     * Remove um professor do sistema com base no ID fornecido.
+     *
+     * - Valida se o `id` é um número inteiro positivo.
+     * - Verifica se o professor existe no sistema antes da remoção.
+     * - Executa a exclusão através de `Account.deleteRequest(id)`.
+     *
+     * @async
+     * @function deleteTeacher
+     * @param {Object} request - Objeto da requisição Express.
+     * @param {Object} request.params - Parâmetros da URL da requisição.
+     * @param {string|number} request.params.id - ID do professor a ser removido.
+     * @param {Object} response - Objeto da resposta Express.
+     * @returns {Promise<Object>} Retorna uma resposta JSON com:
+     * - `200 OK` se o professor foi removido com sucesso.
+     * - `404 Not Found` se o professor não existir.
+     * - `422 Unprocessable Entity` se o `id` for inválido.
+     * - `500 Internal Server Error` em caso de falha na exclusão ou erro inesperado no servidor.
+     *
+     * @example
+     * // Exclusão bem-sucedida
+     * DELETE /teachers/12
+     * // Resposta:
+     * {
+     *   "status": true,
+     *   "message": "professor removido com sucesso"
+     * }
+     *
+     * @example
+     * // Professor não encontrado
+     * DELETE /teachers/999
+     * // Resposta:
+     * {
+     *   "status": false,
+     *   "message": "Professor não existe"
+     * }
+     *
+     * @example
+     * // ID inválido
+     * DELETE /teachers/abc
+     * // Resposta:
+     * {
+     *   "status": false,
+     *   "message": "Usuário invalido."
+     * }
+     */
+    async deleteTeacher(request, response) {
+        try {
+            const { id } = request.params
+            if (!validator.isInt(id + '', { min: 1 })) {
+                return response.status(422).json({status: false, message: "Usuário invalido."})
+            }
+            const teacherExist = await Account.accountExists(id)
+            if(!teacherExist) {
+                return response.status(404).json({status: false, message: "Professor não existe"})
+            } 
+            const valid = await Account.deleteRequest(id)
+            if(!valid) {
+                return response.status(500).json({status: false, message: "Erro ao remover professor"})
+            }
+            return response.status(200).json({status: true, message: "professor removido com sucesso"})
         } catch(err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }

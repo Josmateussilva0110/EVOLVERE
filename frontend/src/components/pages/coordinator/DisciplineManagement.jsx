@@ -15,8 +15,6 @@ function DisciplineManagement() {
     const { user } = useContext(Context)
     const [coordinator, setCoordinator] = useState({})
     const { setFlashMessage } = useFlashMessage()
-
-
     useEffect(() => {
         async function fetchCoordinator() {
             const response = await requestData(`/user/coordinator/${user.id}`, "GET", {}, true)
@@ -29,14 +27,16 @@ function DisciplineManagement() {
     }, [user])
 
     useEffect(() => {
-        async function fetchTeachers() {
+        if(coordinator && coordinator.course_id) {
+            async function fetchTeachers() {
             const response = await requestData(`/courses/${coordinator.course_id}/professors`, "GET", {}, true)
-            if(response.success) {
-                console.log(response)
-                setProfessores(response.data.professores)
+                if(response.success) {
+                    console.log(response)
+                    setProfessores(response.data.professores)
+                }
             }
+            fetchTeachers()
         }
-        fetchTeachers()
     }, [coordinator])
 
 
