@@ -29,6 +29,7 @@ import ListSimulated from "./components/pages/teacher/ListSimulated"
 import ResponseList from "./components/pages/teacher/ResponseList"
 import CoordinatorProfile from "./components/pages/coordinator/CoordinatorProfile"
 import CoordinatorSettings from "./components/pages/coordinator/CoordinatorSettings"
+import ManagementStudents from "./components/pages/students/ManagementStudents"
 
 
 
@@ -67,7 +68,7 @@ function App() {
   const location = useLocation()
   // Rotas onde NÃO deve aparecer Navbar e Footer
   const isCoordinator = location.pathname.startsWith("/coordinator")
-  const hideLayout = isCoordinator || ["/login", "/register", "/forgot_password", "/help", "/", "/about", "/await/approval", "/user/account"].includes(location.pathname)
+  const hideLayout = isCoordinator || ["/login", "/register", "/forgot_password", "/help", "/", "/about", "/await/approval", "/user/account", "/student/home"].includes(location.pathname)
 
 
   return (
@@ -97,6 +98,8 @@ function App() {
               <Route path="/coordinator/student/list" element={<ListStrudents />} />
               <Route path="/coordinator/teacher/manage" element={<ManageTeachers />} />
               <Route path="/coordinator/requests" element={<RequestsTeachers />} />
+              <Route path="/coordinator/profile" element={<CoordinatorProfile />} />
+              <Route path="/coordinator/settings" element={<CoordinatorSettings />} />
 
               <Route path="/teacher/discipline/manage" element={<DisciplineManagement />} />
               <Route path="/teacher/discipline/list" element={<ViewDiscipline />} />
@@ -105,8 +108,9 @@ function App() {
               <Route path="/teacher/simulated/register" element={<RegisterSimulated />} />
               <Route path="/teacher/simulated/list" element={<ListSimulated />} />
               <Route path="/teacher/simulated/response/list" element={<ResponseList />} />
-              <Route path="/coordinator/profile" element={<CoordinatorProfile />} />
-              <Route path="/coordinator/settings" element={<CoordinatorSettings />} />
+
+              <Route path="/student/home" element={<ManagementStudents />} />
+
             </Route>
           </Route>
           
