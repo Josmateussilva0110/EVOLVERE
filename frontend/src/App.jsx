@@ -22,6 +22,7 @@ import DashboardCoordinator from "./components/pages/coordinator/DashboardCoordi
 import RequestsTeachers from "./components/pages/coordinator/Requests"
 import DisciplineManagement from "./components/pages/teacher/DisciplineManagement"
 import ViewDiscipline from "./components/pages/teacher/ViewDiscipline"
+import RegisterMaterial from "./components/pages/teacher/RegisterMaterial"
 
 
 /**
@@ -91,6 +92,7 @@ function App() {
 
               <Route path="/teacher/discipline/manage" element={<DisciplineManagement />} />
               <Route path="/teacher/discipline/list" element={<ViewDiscipline />} />
+              <Route path="/teacher/material/register" element={<RegisterMaterial />} />
             </Route>
           </Route>
           
