@@ -7,11 +7,11 @@ exports.up = function(knex) {
     table.increments('id').primary();       
     table.string('name').notNullable();     
 
-    table.integer('professional_id').unsigned().notNullable();
+    table.integer('professional_id').unsigned().nullable();
     table.foreign('professional_id')
          .references('id')
          .inTable('users')
-         .onDelete('CASCADE')
+         .onDelete('SET NULL')
          .onUpdate('CASCADE');
 
     table.integer('course_valid_id').unsigned().notNullable();

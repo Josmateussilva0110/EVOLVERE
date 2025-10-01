@@ -1,4 +1,5 @@
 const Course = require("../models/Course")
+const validator = require('validator')
 
 /**
  * Controlador de Cursos.
@@ -55,6 +56,11 @@ class CourseController {
     async getProfessorsByCourse(request, response) {
         try {
             const { id } = request.params;
+
+            if (!validator.isInt(id + '', { min: 1 })) {
+                return response.status(422).json({status: false, message: "Id inválido."})
+            }
+
             const professores = await Course.findProfessors(Number(id));
 
             if (!professores || professores.length === 0) {
