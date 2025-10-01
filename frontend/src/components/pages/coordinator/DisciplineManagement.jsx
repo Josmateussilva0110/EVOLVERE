@@ -1,123 +1,63 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import requestData from "../../../utils/requestApi";
-import { FiArrowLeft, FiAlertCircle, FiLoader, FiBookOpen, FiUser, FiCheck } from "react-icons/fi";
+import { FiArrowLeft, FiBookOpen, FiCheck } from "react-icons/fi";
+import { Context } from "../../../context/UserContext";
+import useFlashMessage from "../../../hooks/useFlashMessage";
 
 
 function DisciplineManagement() {
     // ... (os estados continuam os mesmos)
     const [nome, setNome] = useState("");
-    const [professorId, setProfessorId] = useState("");
-    const [courseId, setCourseId] = useState(null);
     const [professor, setProfessor] = useState("");
     const [professores, setProfessores] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const { user } = useContext(Context)
+    const [coordinator, setCoordinator] = useState({})
+    const { setFlashMessage } = useFlashMessage()
+
 
     useEffect(() => {
-        const carregarDadosContextuais = async () => {
-            try {
-                const sessionRes = await requestData("/user/session", "GET", {}, true);
-                if (!sessionRes.success || !sessionRes.data.user?.id) {
-                    throw new Error("Sua sessão expirou. Faça login novamente.");
-                }
-                const userId = sessionRes.data.user.id;
-
-                const coordinatorRes = await requestData(`/user/coordinator/${userId}`, "GET", {}, true);
-                if (!coordinatorRes.success || !coordinatorRes.data.user?.course_id) {
-                    throw new Error("O coordenador não está associado a nenhum curso.");
-                }
-                const coordinatorCourseId = coordinatorRes.data.user.course_id;
-                setCourseId(coordinatorCourseId);
-
-                const professorsRes = await requestData(`/courses/${coordinatorCourseId}/professors`, "GET", {}, true);
-                // ✅ Acessa os dados corretamente (response.data.professores)
-                if (professorsRes.success && Array.isArray(professorsRes.data.professores)) {
-                    setProfessores(professorsRes.data.professores);
-                }
-
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
+        async function fetchCoordinator() {
+            const response = await requestData(`/user/coordinator/${user.id}`, "GET", {}, true)
+            if(response.success) {
+                //console.log(response)
+                setCoordinator(response.data.user)
             }
-        };
+        }
+        fetchCoordinator()
+    }, [user])
 
-        carregarDadosContextuais();
-    }, []);
+    useEffect(() => {
+        async function fetchTeachers() {
+            const response = await requestData(`/courses/${coordinator.course_id}/professors`, "GET", {}, true)
+            if(response.success) {
+                console.log(response)
+                setProfessores(response.data.professores)
+            }
+        }
+        fetchTeachers()
+    }, [coordinator])
+
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!nome.trim() || !courseId || !professorId) {
-            alert("Preencha todos os campos obrigatórios!");
-            return;
-        }
-
         const result = await requestData("/subjects", "POST", {
             name: nome,
-            professional_id: parseInt(professorId),
-            course_valid_id: courseId
+            professional_id: parseInt(professor),
+            course_valid_id: parseInt(coordinator.course_id)
         }, true);
         
         if (result.success) {
-            alert("Disciplina cadastrada com sucesso!");
+            setFlashMessage(result.data.message, 'success')
             navigate("/coordinator/discipline/list");
         } else {
-            // ✅ Usa a mensagem de erro padronizada da sua função
-            alert("Erro ao cadastrar: " + (result.message || "Erro desconhecido"));
+            setFlashMessage(result.message, 'error')
         }
     };
 
-    // O JSX (a parte visual) continua exatamente o mesmo
-    if (loading) return <div className="flex items-center justify-center min-h-screen">Carregando dados do coordenador...</div>;
-    if (error) return <div className="flex items-center justify-center min-h-screen text-red-500"><strong>Erro:</strong> {error}</div>;
 
-    return (
-        <div className="flex items-center justify-center min-h-[calc(100vh-200px)] bg-gray-50 p-4 relative">
-            <button onClick={() => navigate(-1)} className="absolute top-6 left-6 flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-lg shadow-sm hover:bg-gray-100 transition">
-                <span className="text-lg">←</span> Voltar
-            </button>
-            <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
-                <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">Cadastro de Disciplinas</h2>
-                <form className="space-y-4" onSubmit={handleSubmit}>
-                    <input type="text" placeholder="Nome da Disciplina" className="w-full px-4 py-3 rounded-lg bg-gray-100 border-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500" value={nome} onChange={e => setNome(e.target.value)} required />
-                    <select className="w-full px-4 py-3 rounded-lg bg-gray-100 border-transparent text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500" value={professorId} onChange={e => setProfessorId(e.target.value)} required>
-                        <option value="">Selecione o Professor</option>
-                        {professores.length === 0 && <option value="" disabled>Nenhum professor encontrado para seu curso</option>}
-                        {professores.map(prof => <option key={prof.id} value={prof.id}>{prof.username} ({prof.institution})</option>)}
-                    </select>
-                    <div className="pt-4">
-                        <button type="submit" className="w-full px-16 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition">Cadastrar</button>
-
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-[#060060] flex items-center justify-center">
-                <div className="inline-flex items-center gap-3 text-white/80 bg-white/10 backdrop-blur-sm px-6 py-4 rounded-2xl">
-                    <FiLoader className="animate-spin w-5 h-5" />
-                    <span className="font-medium">Carregando dados...</span>
-                </div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="min-h-screen bg-[#060060] flex items-center justify-center p-6">
-                <div className="max-w-lg w-full mx-auto bg-white/95 backdrop-blur-sm ring-1 ring-red-200/50 rounded-3xl p-6 text-red-700 shadow-2xl">
-                    <div className="flex items-start gap-4">
-                        <div className="h-10 w-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
-                            <FiAlertCircle className="w-5 h-5" />
-                        </div>
-                        <div>
-                            <p className="font-bold text-lg">Não foi possível carregar os dados</p>
-                            <p className="text-sm mt-1 text-red-600">{error}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen bg-[#060060] p-6">
