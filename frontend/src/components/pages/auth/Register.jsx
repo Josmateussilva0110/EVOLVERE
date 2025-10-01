@@ -105,16 +105,19 @@ function Register() {
         {/* Botão Voltar */}
         <button
           onClick={() => navigate("/")}
-          className="absolute top-6 left-6 flex items-center space-x-2 px-4 py-2 text-white hover:text-yellow-400 transition-colors duration-300 backdrop-blur-sm bg-white/10 rounded-lg z-10"
+          className="absolute top-6 left-6 flex items-center space-x-2 px-4 py-2 text-white hover:text-yellow-400 transition-colors duration-300 backdrop-blur-sm bg-white/10 rounded-lg z-10 shadow-sm ring-1 ring-white/10"
         >
           <ArrowLeft className="w-5 h-5" />
           <span>Voltar</span>
         </button>
 
-        <div className="bg-white rounded-xl shadow-lg p-10 sm:p-12 md:p-16 w-full max-w-lg text-center relative z-10">
-          <h2 className="text-2xl sm:text-3xl font-bold text-[#060060] mb-10">
+        <div className="bg-white rounded-2xl shadow-xl ring-1 ring-black/5 p-10 sm:p-12 md:p-14 w-full max-w-lg text-center relative z-10">
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#060060] tracking-tight mb-3">
             Novo por aqui ?
           </h2>
+          <p className="text-gray-600 mb-10 max-w-md mx-auto">
+            Crie sua conta para organizar seus estudos e acompanhar sua evolução.
+          </p>
 
           <form onSubmit={submitForm} className="space-y-5">
             <Input
@@ -148,8 +151,7 @@ function Register() {
 
             <button
               type="submit"
-              className="w-full py-4 bg-yellow-400 text-[#060060] text-lg font-bold rounded-lg 
-                         hover:bg-yellow-500 transition"
+              className="w-full py-4 bg-yellow-400 text-[#060060] text-lg font-bold rounded-lg shadow-sm hover:bg-yellow-500 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-white"
             >
               Inscrever-se
             </button>
@@ -160,27 +162,27 @@ function Register() {
             <button
               type="button"
               onClick={() => navigate("/login")}
-              className="text-[#060060] font-semibold hover:underline"
+              className="text-[#060060] font-semibold underline decoration-[#060060]/30 underline-offset-4 hover:decoration-[#060060]"
             >
               Entrar
             </button>
           </p>
 
           {/* Checkbox e link para abrir modal */}
-          <div className="flex items-center mt-6 text-left">
+          <div className="flex items-center mt-6 text-left bg-gray-50 rounded-lg px-4 py-3">
             <input
               type="checkbox"
               id="terms"
               checked={acceptedTerms}
               onChange={(e) => setAcceptedTerms(e.target.checked)}
-              className="mr-2 w-4 h-4"
+              className="mr-2 w-4 h-4 accent-yellow-400"
             />
             <label htmlFor="terms" className="text-base text-gray-600">
               Eu aceito os{" "}
               <button
                 type="button"
                 onClick={() => setIsTermsOpen(true)} // <-- abre modal
-                className="font-semibold text-[#060060] hover:underline"
+                className="font-semibold text-[#060060] underline decoration-[#060060]/30 underline-offset-4 hover:decoration-[#060060]"
               >
                 Termos de Serviço
               </button>{" "}
@@ -188,7 +190,7 @@ function Register() {
               <button
                 type="button"
                 onClick={() => setIsTermsOpen(true)} // <-- abre modal
-                className="font-semibold text-[#060060] hover:underline"
+                className="font-semibold text-[#060060] underline decoration-[#060060]/30 underline-offset-4 hover:decoration-[#060060]"
               >
                 Política de Privacidade
               </button>{" "}

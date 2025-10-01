@@ -20,6 +20,8 @@ import ManageTeachers from "./components/pages/coordinator/ManageTeachers"
 import Coordinator from "./components/pages/coordinator/Coordinator"
 import DashboardCoordinator from "./components/pages/coordinator/DashboardCoordinator"
 import RequestsTeachers from "./components/pages/coordinator/Requests"
+import CoordinatorProfile from "./components/pages/coordinator/CoordinatorProfile"
+import CoordinatorSettings from "./components/pages/coordinator/CoordinatorSettings"
 
 
 /**
@@ -56,7 +58,8 @@ import RequestsTeachers from "./components/pages/coordinator/Requests"
 function App() {
   const location = useLocation()
   // Rotas onde NÃO deve aparecer Navbar e Footer
-  const hideLayout = ["/login", "/register", "/forgot_password", "/help", "/", "/about", "/await/approval", "/user/account"].includes(location.pathname)
+  const isCoordinator = location.pathname.startsWith("/coordinator")
+  const hideLayout = isCoordinator || ["/login", "/register", "/forgot_password", "/help", "/", "/about", "/await/approval", "/user/account"].includes(location.pathname)
 
 
   return (
@@ -86,6 +89,8 @@ function App() {
               <Route path="/coordinator/student/list" element={<ListStrudents />} />
               <Route path="/coordinator/teacher/manage" element={<ManageTeachers />} />
               <Route path="/coordinator/requests" element={<RequestsTeachers />} />
+              <Route path="/coordinator/profile" element={<CoordinatorProfile />} />
+              <Route path="/coordinator/settings" element={<CoordinatorSettings />} />
             </Route>
           </Route>
           

@@ -1,31 +1,39 @@
 import { useState, useEffect, useMemo } from "react";
+import { FiArrowLeft, FiSearch, FiSliders, FiBook, FiUserCheck, FiAlertTriangle, FiEdit, FiTrash, FiX } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import requestData from "../../../utils/requestApi";
 import useFlashMessage from "../../../hooks/useFlashMessage";
 
 /**
  * Tela de listagem de disciplinas com busca, edição e exclusão,
- * conectada à API do backend.
+ * conectada à API do backend. UI refinada com melhor tipografia e feedback.
  */
 function DisciplineList() {
     const [disciplinas, setDisciplinas] = useState([]);
     const [busca, setBusca] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [professorFiltro, setProfessorFiltro] = useState("todos");
+    const [ordenacao, setOrdenacao] = useState("nome");
+    const [direcao, setDirecao] = useState('asc');
+    const [pagina, setPagina] = useState(1);
+    const [itensPorPagina, setItensPorPagina] = useState(8);
+    const [modoVisao, setModoVisao] = useState('tabela'); // 'tabela' | 'cartoes'
     const { setFlashMessage } = useFlashMessage()
     const navigate = useNavigate();
 
     useEffect(() => {
         async function fetchDisciplines() {
             const response = await requestData('/subjects', 'GET', {}, true)
-            console.log(response)
             if(response.success) {
-                setLoading(false)
                 setDisciplinas(response.data.subjects)
+                setError(null)
             }
             else {
                 setDisciplinas([])
+                setError(response.message || 'Falha ao carregar disciplinas')
             }
+            setLoading(false)
         }
         fetchDisciplines()
     }, [])
@@ -50,77 +58,307 @@ function DisciplineList() {
     };
 
     // Filtra disciplinas com base na busca (usando useMemo para otimização)
-    const disciplinasFiltradas = useMemo(() => 
-        disciplinas.filter(d =>
+    const disciplinasFiltradas = useMemo(() => {
+        let lista = disciplinas.filter(d =>
             (d.name && d.name.toLowerCase().includes(busca.toLowerCase())) ||
-            d.id.toString().includes(busca) ||
+            d.id?.toString().includes(busca) ||
             (d.professor_nome && d.professor_nome.toLowerCase().includes(busca.toLowerCase()))
-        ), 
-        [disciplinas, busca]
-    );
+        )
 
+        if (professorFiltro !== 'todos') {
+            lista = lista.filter(d => (d.professor_nome || 'Nao atribuido') === professorFiltro)
+        }
 
-    if (error) {
-        return <div className="p-4 text-center text-red-600"><strong>Erro:</strong> {error}</div>;
+        const factor = direcao === 'asc' ? 1 : -1
+        if (ordenacao === 'nome') {
+            lista = lista.slice().sort((a,b) => factor * (a.name || '').localeCompare(b.name || ''))
+        } else if (ordenacao === 'professor') {
+            lista = lista.slice().sort((a,b) => factor * (a.professor_nome || '').localeCompare(b.professor_nome || ''))
+        } else if (ordenacao === 'id') {
+            lista = lista.slice().sort((a,b) => factor * ((a.id || 0) - (b.id || 0)))
+        }
+
+        return lista
+    }, [disciplinas, busca, professorFiltro, ordenacao, direcao]);
+
+    const totalPaginas = Math.max(1, Math.ceil(disciplinasFiltradas.length / itensPorPagina))
+    const inicio = (pagina - 1) * itensPorPagina
+    const paginaAtual = disciplinasFiltradas.slice(inicio, inicio + itensPorPagina)
+
+    // Métricas para cards de resumo
+    const { total, atribuídas, semProfessor } = useMemo(() => {
+        const t = disciplinas.length
+        const a = disciplinas.filter(d => Boolean(d.professor_nome)).length
+        return { total: t, atribuídas: a, semProfessor: t - a }
+    }, [disciplinas])
+
+    // Utilitários visuais
+    const getInitials = (text = '') => {
+        const cleaned = String(text).trim()
+        if (!cleaned) return 'NA'
+        const parts = cleaned.split(' ')
+        if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+    }
+    const colorFromString = (str = '') => {
+        const palette = [
+            'bg-indigo-100 text-indigo-700 ring-indigo-200',
+            'bg-sky-100 text-sky-700 ring-sky-200',
+            'bg-emerald-100 text-emerald-700 ring-emerald-200',
+            'bg-amber-100 text-amber-700 ring-amber-200',
+            'bg-rose-100 text-rose-700 ring-rose-200',
+            'bg-fuchsia-100 text-fuchsia-700 ring-fuchsia-200',
+        ]
+        let hash = 0
+        for (let i = 0; i < str.length; i++) hash = (hash << 5) - hash + str.charCodeAt(i)
+        const idx = Math.abs(hash) % palette.length
+        return palette[idx]
     }
 
     return (
-        <div className="p-4 bg-white min-h-[500px] rounded-lg shadow-md">
-            <h1 className="text-2xl font-bold text-gray-800 mb-4">Gerenciar Disciplinas</h1>
-            <div className="flex items-center bg-gray-100 rounded-full px-4 py-2 mb-4">
-                <input
-                    type="text"
-                    placeholder="Pesquisar por nome, id ou professor"
-                    value={busca}
-                    onChange={e => setBusca(e.target.value)}
-                    className="flex-1 bg-transparent outline-none text-gray-700 placeholder-gray-500"
-                />
-                <span className="text-gray-500">🔍</span>
+        <div className="min-h-screen bg-[#060060] p-6">
+            <div className="max-w-7xl mx-auto">
+                <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl ring-1 ring-white/20 p-6 md:p-8">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                <div>
+                    <p className="text-[11px] uppercase tracking-widest text-[#060060]/80 font-semibold">Administração</p>
+                    <h1 className="mt-1 text-[34px] leading-8 font-black text-gray-900">Gerenciar Disciplinas</h1>
+                    <p className="text-sm text-gray-600 mt-1">Aqui você pode cadastrar, editar e visualizar disciplinas.</p>
+                    <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="rounded-2xl bg-slate-50/80 ring-1 ring-slate-200/50 p-4 flex items-center justify-between">
+                            <div>
+                                <p className="text-xs text-slate-600">Total</p>
+                                <p className="text-2xl font-extrabold text-slate-900">{total}</p>
+                            </div>
+                            <div className="text-[#060060] text-2xl"><FiBook /></div>
+                        </div>
+                        <div className="rounded-2xl bg-slate-50/80 ring-1 ring-slate-200/50 p-4 flex items-center justify-between">
+                            <div>
+                                <p className="text-xs text-slate-600">Com professor</p>
+                                <p className="text-2xl font-extrabold text-slate-900">{atribuídas}</p>
+                            </div>
+                            <div className="text-slate-600 text-2xl"><FiUserCheck /></div>
+                        </div>
+                        <div className="rounded-2xl bg-amber-50/80 ring-1 ring-amber-200/50 p-4 flex items-center justify-between">
+                            <div>
+                                <p className="text-xs text-amber-700">Sem professor</p>
+                                <p className="text-2xl font-extrabold text-amber-800">{semProfessor}</p>
+                            </div>
+                            <div className="text-amber-600 text-2xl"><FiAlertTriangle /></div>
+                        </div>
+                    </div>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2">
+                    <button onClick={() => navigate('/coordinator')} className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100/80 transition">
+                        <FiArrowLeft /> Voltar
+                    </button>
+                    <div className="inline-flex rounded-xl border border-slate-200 bg-slate-50/80 p-1">
+                        <button onClick={()=>setModoVisao('tabela')} className={`px-3 py-2 text-sm rounded-lg transition ${modoVisao==='tabela' ? 'bg-[#060060] text-white' : 'text-slate-700 hover:bg-slate-100/80'}`}>▦ Tabela</button>
+                        <button onClick={()=>setModoVisao('cartoes')} className={`px-3 py-2 text-sm rounded-lg transition ${modoVisao==='cartoes' ? 'bg-[#060060] text-white' : 'text-slate-700 hover:bg-slate-100/80'}`}>▢ Cartões</button>
+                    </div>
+                    <button onClick={() => navigate('/coordinator/discipline/register')} className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 px-4 py-2 text-sm font-semibold text-slate-900 shadow-lg hover:from-amber-500 hover:to-yellow-600 transition transform hover:scale-105">
+                        + Nova
+                    </button>
+                </div>
             </div>
 
-            <div className="space-y-3">
-                {disciplinasFiltradas.length > 0 ? (
-                    disciplinasFiltradas.map(d => (
-                        <div key={d.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 shadow-sm transition hover:shadow-md">
-                            <div>
-                                <p className="font-semibold text-gray-800">{d.name}</p>
-                                <p className="text-sm text-gray-600">
-                                    Responsável: <span className="font-medium">{d.professor_nome || 'Não atribuído'}</span>
-                                </p>
+            {/* Barra de busca e filtros */}
+            <div className="mt-6 grid grid-cols-1 xl:grid-cols-3 gap-3">
+                <div className="xl:col-span-2 flex items-center rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 shadow-sm">
+                    <span className="mr-2 text-slate-500"><FiSearch /></span>
+                    <input
+                        type="text"
+                        placeholder="Pesquisar por nome, professor ou ID..."
+                        value={busca}
+                        onChange={e => { setBusca(e.target.value); setPagina(1); }}
+                        className="flex-1 bg-transparent outline-none text-slate-700 placeholder-slate-400"
+                    />
+                    {busca && (
+                        <button onClick={()=>setBusca('')} className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-700"><FiX /> Limpar</button>
+                    )}
+                </div>
+                <div className="flex items-center gap-2">
+                    {/* Dropdown compacto de filtros */}
+                    <div className="relative">
+                        <details className="group">
+                            <summary className="cursor-pointer list-none inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-700 hover:bg-slate-100/80 shadow-sm">
+                                <FiSliders /> Filtros
+                                <span className="text-slate-400 group-open:rotate-180 transition">▾</span>
+                            </summary>
+                            <div className="absolute right-0 mt-2 w-72 rounded-2xl border border-slate-200 bg-white shadow-xl p-3 z-10">
+                                <div className="space-y-3">
+                                    <div>
+                                        <p className="text-xs text-slate-600 mb-1">Ordenar por</p>
+                                        <div className="flex items-center gap-2">
+                                            <select value={ordenacao} onChange={(e)=>{setOrdenacao(e.target.value); setPagina(1);}} className="w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm text-slate-700">
+                                                <option value="nome">Nome</option>
+                                                <option value="professor">Professor</option>
+                                                <option value="id">ID</option>
+                                            </select>
+                                            <select value={direcao} onChange={(e)=>{setDirecao(e.target.value); setPagina(1);}} className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm text-slate-700">
+                                                <option value="asc">Asc</option>
+                                                <option value="desc">Desc</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-slate-600 mb-1">Professor</p>
+                                        <select value={professorFiltro} onChange={(e)=>{setProfessorFiltro(e.target.value); setPagina(1);}} className="w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm text-slate-700">
+                                            <option value="todos">Todos</option>
+                                            {Array.from(new Set(disciplinas.map(d => d.professor_nome || 'Nao atribuido'))).map((p) => (
+                                                <option key={p} value={p}>{p === 'Nao atribuido' ? 'Não atribuído' : p}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="flex justify-between gap-2">
+                                        <button onMouseDown={()=>{ setBusca(''); setProfessorFiltro('todos'); setOrdenacao('nome'); setDirecao('asc'); setPagina(1); }} className="flex-1 rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100/80">Limpar</button>
+                                        <button onMouseDown={()=>{ /* somente fecha o dropdown */ }} className="flex-1 rounded-xl bg-[#060060] px-3 py-2 text-sm text-white hover:bg-[#0c0cb0]">Aplicar</button>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="flex gap-2 mt-2 sm:mt-0">
-                                <button
-                                    onClick={() => handleEditar(d.id)}
-                                    className="flex items-center gap-1 text-sm bg-yellow-100 text-yellow-800 px-3 py-1 rounded-md hover:bg-yellow-200 transition"
-                                >
-                                    ✏️ Editar
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(d.id)}
-                                    className="flex items-center gap-1 text-sm bg-red-100 text-red-800 px-3 py-1 rounded-md hover:bg-red-200 transition"
-                                >
-                                    🗑️ Excluir
-                                </button>
+                        </details>
+                    </div>
+                </div>
+            </div>
+
+            {/* Chips de filtros ativos */}
+            {(busca || professorFiltro !== 'todos' || ordenacao !== 'nome' || direcao !== 'asc') && (
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                    {busca && (
+                        <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 text-slate-700 text-xs px-3 py-1">
+                            Busca: "{busca}"
+                            <button onClick={() => { setBusca(''); setPagina(1); }} className="text-slate-500 hover:text-slate-800"><FiX /></button>
+                        </span>
+                    )}
+                    {professorFiltro !== 'todos' && (
+                        <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 text-slate-700 ring-1 ring-slate-200 text-xs px-3 py-1">
+                            Professor: {professorFiltro === 'Nao atribuido' ? 'Não atribuído' : professorFiltro}
+                            <button onClick={() => { setProfessorFiltro('todos'); setPagina(1); }} className="text-slate-600 hover:text-slate-800"><FiX /></button>
+                        </span>
+                    )}
+                    {(ordenacao !== 'nome' || direcao !== 'asc') && (
+                        <span className="inline-flex items-center gap-2 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200 text-xs px-3 py-1">
+                            Ordenação: {ordenacao} {direcao}
+                            <button onClick={() => { setOrdenacao('nome'); setDirecao('asc'); setPagina(1); }} className="text-amber-700 hover:text-amber-900"><FiX /></button>
+                        </span>
+                    )}
+                </div>
+            )}
+
+            {/* Conteúdo */}
+            <div className="mt-6">
+                {loading ? (
+                    <div className="space-y-3">
+                        {Array.from({length:4}).map((_,i)=> (
+                            <div key={i} className="h-16 rounded-xl bg-slate-100 animate-pulse" />
+                        ))}
+                    </div>
+                ) : error ? (
+                    <div className="text-center text-red-600 py-10">{error}</div>
+                ) : disciplinasFiltradas.length === 0 ? (
+                    <div className="text-center text-slate-700 py-16">
+                        <div className="mx-auto mb-6 h-36 w-36 rounded-full bg-slate-100 flex items-center justify-center ring-1 ring-slate-200">
+                          <img src="/book-empty.svg" alt="Livro vazio" className="h-24 w-24 opacity-80" />
+                        </div>
+                        <p className="text-lg font-semibold">Você ainda não cadastrou disciplinas.</p>
+                        <p className="text-sm mt-1 text-slate-500">Clique no botão acima para começar.</p>
+                        <button onClick={() => navigate('/coordinator/discipline/register')} className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 px-6 py-3 text-sm font-semibold text-slate-900 shadow-lg hover:from-amber-500 hover:to-yellow-600 transition transform hover:scale-105">
+                            + Nova disciplina
+                        </button>
+                    </div>
+                ) : modoVisao === 'tabela' ? (
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full border-separate border-spacing-y-3">
+                            <thead className="sticky top-0 z-10 bg-white/80 backdrop-blur">
+                                <tr>
+                                    <th className="text-left text-xs font-semibold text-slate-600 px-3 py-2">ID</th>
+                                    <th className="text-left text-xs font-semibold text-slate-600 px-3 py-2">Nome</th>
+                                    <th className="text-left text-xs font-semibold text-slate-600 px-3 py-2">Professor</th>
+                                    <th className="text-right text-xs font-semibold text-slate-600 px-3 py-2">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {paginaAtual.map((d) => (
+                                    <tr key={d.id} className="bg-white ring-1 ring-slate-200 rounded-2xl shadow-sm hover:shadow transition">
+                                        <td className="px-3 py-4 text-sm text-slate-700">{d.id}</td>
+                                        <td className="px-3 py-4 text-sm font-medium text-slate-900">{d.name}</td>
+                                        <td className="px-3 py-4 text-sm text-slate-700">
+                                            <div className="flex items-center gap-2">
+                                                <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full ring-1 ${colorFromString(d.professor_nome || 'NA')}`}>
+                                                    <span className="text-[10px] font-bold">{d.professor_nome ? getInitials(d.professor_nome) : 'NA'}</span>
+                                                </span>
+                                                <span>{d.professor_nome || 'Não atribuído'}</span>
+                                                <span className={`ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ${d.professor_nome ? 'bg-slate-50 text-slate-700 ring-slate-200' : 'bg-amber-50 text-amber-700 ring-amber-200'}`}>
+                                                    {d.professor_nome ? 'Atribuída' : 'Sem professor'}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="px-3 py-3">
+                                            <div className="flex justify-end gap-2">
+                                                <button onClick={() => handleEditar(d.id)} className="inline-flex items-center gap-2 rounded-lg bg-amber-50 text-amber-800 px-3 py-2 text-xs font-medium ring-1 ring-amber-200 hover:bg-amber-100 transition"><FiEdit /> Editar</button>
+                                                <button onClick={() => handleDelete(d.id)} className="inline-flex items-center gap-2 rounded-lg bg-red-50 text-red-700 px-3 py-2 text-xs font-medium ring-1 ring-red-200 hover:bg-red-100 transition"><FiTrash /> Excluir</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        {/* Paginação */}
+                        <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                                <p className="text-xs text-slate-500">Página {pagina} de {totalPaginas}</p>
+                                <div className="inline-flex items-center gap-2 text-xs text-slate-600">
+                                    <span>Itens por página</span>
+                                    <select value={itensPorPagina} onChange={(e)=>{ setItensPorPagina(Number(e.target.value)); setPagina(1); }} className="rounded-lg border border-slate-200 bg-slate-50/80 px-2 py-1">
+                                        <option value={8}>8</option>
+                                        <option value={12}>12</option>
+                                        <option value={24}>24</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button disabled={pagina===1} onClick={()=>setPagina(p => Math.max(1, p-1))} className={`px-3 py-2 text-sm rounded-lg ring-1 ${pagina===1? 'text-slate-400 ring-slate-200' : 'text-slate-700 ring-slate-300 hover:bg-slate-50'}`}>Anterior</button>
+                                <button disabled={pagina===totalPaginas} onClick={()=>setPagina(p => Math.min(totalPaginas, p+1))} className={`px-3 py-2 text-sm rounded-lg ring-1 ${pagina===totalPaginas? 'text-slate-400 ring-slate-200' : 'text-slate-700 ring-slate-300 hover:bg-slate-50'}`}>Próxima</button>
                             </div>
                         </div>
-                    ))
+                    </div>
                 ) : (
-                    <div className="text-center text-gray-500 py-10">
-                        <p className="font-semibold">Nenhuma disciplina encontrada.</p>
-                        <p className="text-sm mt-1">Clique no botão abaixo para adicionar a primeira disciplina.</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                        {paginaAtual.map((d) => (
+                            <div key={d.id} className="rounded-2xl ring-1 ring-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition group">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`h-10 w-10 rounded-xl flex items-center justify-center ring-1 ${colorFromString(d.name || 'Disciplina')}`}>
+                                            <span className="text-xs font-bold">{getInitials(d.name || 'Disciplina')}</span>
+                                        </div>
+                                        <div>
+                                            <p className="text-base font-semibold text-slate-900 group-hover:text-[#060060] transition">{d.name}</p>
+                                            <p className="text-xs text-slate-600">ID {d.id}</p>
+                                        </div>
+                                    </div>
+                                    <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ${d.professor_nome ? 'bg-slate-50 text-slate-700 ring-slate-200' : 'bg-amber-50 text-amber-700 ring-amber-200'}`}>
+                                        {d.professor_nome ? 'Atribuída' : 'Sem professor'}
+                                    </span>
+                                </div>
+                                <div className="mt-4 flex items-center justify-between">
+                                    <p className="text-sm text-slate-700">Professor: <span className="font-medium">{d.professor_nome || 'Não atribuído'}</span></p>
+                                    <div className="flex gap-2">
+                                        <button onClick={() => handleEditar(d.id)} className="inline-flex items-center gap-2 rounded-lg bg-amber-50 text-amber-800 px-3 py-2 text-xs font-medium ring-1 ring-amber-200 hover:bg-amber-100 transition"><FiEdit /> Editar</button>
+                                        <button onClick={() => handleDelete(d.id)} className="inline-flex items-center gap-2 rounded-lg bg-red-50 text-red-700 px-3 py-2 text-xs font-medium ring-1 ring-red-200 hover:bg-red-100 transition"><FiTrash /> Excluir</button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 )}
             </div>
-
-            <button
-                onClick={() => navigate("/coordinator/discipline/register")}
-                className="mt-6 w-full flex items-center justify-center gap-2 bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-indigo-700 transition transform hover:-translate-y-1"
-            >
-                ➕ Adicionar Disciplina
-            </button>
+                </div>
+            </div>
         </div>
     );
 }
 
 export default DisciplineList;
+
 

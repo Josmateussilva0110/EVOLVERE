@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { FaArrowLeft, FaSearch, FaCheckCircle, FaTrash} from "react-icons/fa"
+import { FiArrowLeft, FiSearch, FiCheck, FiTrash2, FiExternalLink } from "react-icons/fi"
 import requestData from "../../../utils/requestApi"
 import useFlashMessage from "../../../hooks/useFlashMessage"
 
@@ -101,78 +101,84 @@ function RequestsTeachers() {
   }
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-gray-50 p-6 relative">
-      <button
-        onClick={handleVoltar}
-        className="absolute top-6 left-6 flex items-center bg-white-100 text-white-700 px-4 py-2 rounded-xl hover:bg-gray-100 transition-all"
-      >
-        <FaArrowLeft className="mr-2" /> Voltar
-      </button>
-
-      <div className="w-full max-w-4xl mt-14">
-        <div className="relative mb-6">
-          <input
-            type="text"
-            placeholder="Pesquisar por nome ou curso"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:ring-2 focus:ring-blue-300 outline-none"
-          />
-          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+    <div className="flex flex-col items-center min-h-screen bg-[#060060] p-6">
+      <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl ring-1 ring-gray-200 p-6 mt-4">
+        <div className="flex items-center justify-between mb-4">
+          <button onClick={handleVoltar} className="inline-flex items-center gap-2 rounded-lg ring-1 ring-gray-300 px-3 py-2 text-sm text-gray-800 hover:bg-gray-50">
+            <FiArrowLeft /> Voltar
+          </button>
+          <div className="text-right">
+            <h2 className="text-lg font-bold text-gray-900">Solicitações de Professores</h2>
+            <p className="text-xs text-gray-600">Aprovar ou remover pedidos pendentes</p>
+          </div>
         </div>
 
-        <div className="overflow-x-auto bg-white rounded-xl shadow">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-100">
+        <div className="relative mb-4">
+          <div className="flex items-center rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm">
+            <FiSearch className="text-gray-500 mr-2" />
+            <input
+              type="text"
+              placeholder="Pesquisar por nome ou curso"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="flex-1 bg-transparent outline-none text-gray-700 placeholder-gray-400"
+            />
+          </div>
+        </div>
+
+        <div className="overflow-x-auto bg-white rounded-xl ring-1 ring-gray-200">
+          <table className="min-w-full border-separate border-spacing-y-2">
+            <thead className="bg-gray-50">
               <tr>
-                <th className="py-3 px-4 text-left font-semibold text-gray-700">Nome</th>
-                <th className="py-3 px-4 text-left font-semibold text-gray-700">Curso</th>
-                <th className="py-3 px-4 text-left font-semibold text-gray-700">Campus</th>
-                <th className="py-3 px-4 text-left font-semibold text-gray-700">Diploma</th>
-                <th className="py-3 px-4 text-center font-semibold text-gray-700">Ações</th>
+                <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600">Nome</th>
+                <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600">Curso</th>
+                <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600">Campus</th>
+                <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600">Diploma</th>
+                <th className="py-3 px-4 text-center text-xs font-semibold text-gray-600">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody>
               {professoresFiltrados.map((prof) => (
-                <tr key={prof.id} className="hover:bg-gray-50 transition">
-                  <td className="py-3 px-4">{prof.username}</td>
-                  <td className="py-3 px-4">{prof.course}</td>
-                  <td className="py-3 px-4">{prof.flag}</td>
-                  <td className="py-3 px-4">
+                <tr key={prof.id} className="bg-white ring-1 ring-gray-200">
+                  <td className="py-3 px-4 text-sm text-gray-900">{prof.username}</td>
+                  <td className="py-3 px-4 text-sm text-gray-700">{prof.course}</td>
+                  <td className="py-3 px-4 text-sm text-gray-700">{prof.flag}</td>
+                  <td className="py-3 px-4 text-sm">
                     {prof.diploma ? (
                       <a
                         href={`${import.meta.env.VITE_BASE_URL}/diplomas/${prof.diploma}`}
                         target="_blank" // abre em nova aba
                         rel="noopener noreferrer"
-                        className="text-blue-600 underline hover:text-blue-800"
+                        className="inline-flex items-center gap-1 text-[#060060] hover:underline"
                       >
-                        {prof.diploma}
+                        <FiExternalLink /> {prof.diploma}
                       </a>
                     ) : (
-                      "Sem diploma"
+                      <span className="text-gray-400">Sem diploma</span>
                     )}
                   </td>
 
-                  <td className="py-3 px-4 flex justify-center space-x-2">
-                    <button 
-                      onClick={() => approveRequest(prof.id)}
-                      className="bg-green-100 text-green-700 p-2 rounded-full hover:bg-green-200 transition">
-                      
-                      <FaCheckCircle />
-                    </button>
-                    <button
-                      onClick={() => removeRequest(prof.id)}
-                      className="bg-pink-100 text-pink-700 p-2 rounded-full hover:bg-pink-200 transition"
-                    >
-                      <FaTrash />
-                    </button>
+                  <td className="py-3 px-4">
+                    <div className="flex justify-center gap-2">
+                      <button 
+                        onClick={() => approveRequest(prof.id)}
+                        className="inline-flex items-center gap-2 rounded-lg bg-emerald-50 text-emerald-700 px-3 py-2 text-xs font-medium ring-1 ring-emerald-200 hover:bg-emerald-100 transition">
+                        <FiCheck /> Aprovar
+                      </button>
+                      <button
+                        onClick={() => removeRequest(prof.id)}
+                        className="inline-flex items-center gap-2 rounded-lg bg-rose-50 text-rose-700 px-3 py-2 text-xs font-medium ring-1 ring-rose-200 hover:bg-rose-100 transition"
+                      >
+                        <FiTrash2 /> Remover
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
               {professoresFiltrados.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="py-4 text-center text-gray-400 italic">
-                    Nenhum solicitação encontrada
+                  <td colSpan={5} className="py-6 text-center text-gray-500">
+                    Nenhuma solicitação encontrada
                   </td>
                 </tr>
               )}
