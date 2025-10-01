@@ -1,5 +1,5 @@
-import { useState, useEffect, useContext } from "react"
-import { FaArrowLeft, FaSearch, FaCheckCircle, FaTrash, FaFileAlt, FaUserTie, FaChalkboardTeacher, FaCalendarAlt, FaFlag } from "react-icons/fa"
+import { useState, useEffect } from "react"
+import { FiArrowLeft, FiSearch, FiCheck, FiTrash2, FiExternalLink } from "react-icons/fi"
 import requestData from "../../../utils/requestApi"
 import useFlashMessage from "../../../hooks/useFlashMessage"
 import { Context } from "../../../context/UserContext"
@@ -105,109 +105,84 @@ function RequestsTeachers() {
   const showRoleColumn = user?.id >= 1 && user?.id <= 4
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-gray-50 p-6 relative">
-      <button
-        onClick={handleVoltar}
-        className="absolute top-6 left-6 flex items-center bg-white-100 text-white-700 px-4 py-2 rounded-xl hover:bg-gray-100 transition-all"
-      >
-        <FaArrowLeft className="mr-2" /> Voltar
-      </button>
-
-      <div className="w-full max-w-7xl mt-14">
-        <div className="relative mb-6">
-          <input
-            type="text"
-            placeholder="Pesquisar por nome ou curso"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:ring-2 focus:ring-blue-300 outline-none"
-          />
-          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+    <div className="flex flex-col items-center min-h-screen bg-[#060060] p-6">
+      <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl ring-1 ring-gray-200 p-6 mt-4">
+        <div className="flex items-center justify-between mb-4">
+          <button onClick={handleVoltar} className="inline-flex items-center gap-2 rounded-lg ring-1 ring-gray-300 px-3 py-2 text-sm text-gray-800 hover:bg-gray-50">
+            <FiArrowLeft /> Voltar
+          </button>
+          <div className="text-right">
+            <h2 className="text-lg font-bold text-gray-900">Solicitações de Professores</h2>
+            <p className="text-xs text-gray-600">Aprovar ou remover pedidos pendentes</p>
+          </div>
         </div>
 
-        <div className="overflow-x-auto bg-white rounded-xl shadow">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-100">
+        <div className="relative mb-4">
+          <div className="flex items-center rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm">
+            <FiSearch className="text-gray-500 mr-2" />
+            <input
+              type="text"
+              placeholder="Pesquisar por nome ou curso"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="flex-1 bg-transparent outline-none text-gray-700 placeholder-gray-400"
+            />
+          </div>
+        </div>
+
+        <div className="overflow-x-auto bg-white rounded-xl ring-1 ring-gray-200">
+          <table className="min-w-full border-separate border-spacing-y-2">
+            <thead className="bg-gray-50">
               <tr>
-                <th className="py-3 px-4 text-left font-semibold text-gray-700 w-1/5">Nome</th>
-                <th className="py-3 px-4 text-left font-semibold text-gray-700 w-1/5">Curso</th>
-                <th className="py-3 px-4 text-center font-semibold text-gray-700 w-1/12">Campus</th>
-                <th className="py-3 px-4 text-left font-semibold text-gray-700 w-1/5">Diploma</th>
-                {showRoleColumn && (
-                  <th className="py-3 px-4 text-center font-semibold text-gray-700 w-1/12">Cargo</th>
-                )}
-                <th className="py-3 px-4 text-center font-semibold text-gray-700 w-1/6">Criada em</th>
-                <th className="py-3 px-4 text-center font-semibold text-gray-700 w-1/12">Ações</th>
+                <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600">Nome</th>
+                <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600">Curso</th>
+                <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600">Campus</th>
+                <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600">Diploma</th>
+                <th className="py-3 px-4 text-center text-xs font-semibold text-gray-600">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
-              {professoresFiltrados.length > 0 ? (
-                professoresFiltrados.map((prof) => (
-                  <tr key={prof.id} className="hover:bg-gray-50 transition">
-                    <td className="py-3 px-4 flex items-center gap-2 whitespace-nowrap">
-                      <FaUserTie className="text-gray-500" /> {prof.username}
-                    </td>
-                    <td className="py-3 px-4 whitespace-nowrap">{prof.course}</td>
-                    <td className="py-3 px-4 text-center">
-                      <span className="flex items-center justify-center gap-1">
-                        <FaFlag className="text-red-500" /> {prof.flag}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 whitespace-nowrap">
-                      {prof.diploma ? (
-                        <a
-                          href={`${import.meta.env.VITE_BASE_URL}/diplomas/${prof.diploma}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-blue-600 hover:text-blue-800"
-                        >
-                          <FaFileAlt /> {prof.diploma}
-                        </a>
-                      ) : (
-                        <span className="text-gray-400 italic">Sem diploma</span>
-                      )}
-                    </td>
-                    {showRoleColumn && (
-                      <td className="py-3 px-4 text-center">
-                        {prof.role === "Professor" ? (
-                          <span className="flex items-center justify-center gap-1 bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">
-                            <FaChalkboardTeacher /> Professor
-                          </span>
-                        ) : (
-                          <span className="flex items-center justify-center gap-1 bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs">
-                            <FaUserTie /> Coordenador
-                          </span>
-                        )}
-                      </td>
-                    )}
-                    <td className="py-3 px-4 text-center whitespace-nowrap">
-                      <span className="flex items-center justify-center gap-1">
-                        <FaCalendarAlt className="text-gray-500" /> {formatDate(prof.created_at)}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 flex justify-center space-x-2">
-                      <button
-                        onClick={() => approveRequest(prof.id)}
-                        className="bg-green-100 text-green-700 p-2 rounded-full hover:bg-green-200 transition"
+            <tbody>
+              {professoresFiltrados.map((prof) => (
+                <tr key={prof.id} className="bg-white ring-1 ring-gray-200">
+                  <td className="py-3 px-4 text-sm text-gray-900">{prof.username}</td>
+                  <td className="py-3 px-4 text-sm text-gray-700">{prof.course}</td>
+                  <td className="py-3 px-4 text-sm text-gray-700">{prof.flag}</td>
+                  <td className="py-3 px-4 text-sm">
+                    {prof.diploma ? (
+                      <a
+                        href={`${import.meta.env.VITE_BASE_URL}/diplomas/${prof.diploma}`}
+                        target="_blank" // abre em nova aba
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[#060060] hover:underline"
                       >
-                        <FaCheckCircle />
+                        <FiExternalLink /> {prof.diploma}
+                      </a>
+                    ) : (
+                      <span className="text-gray-400">Sem diploma</span>
+                    )}
+                  </td>
+
+                  <td className="py-3 px-4">
+                    <div className="flex justify-center gap-2">
+                      <button 
+                        onClick={() => approveRequest(prof.id)}
+                        className="inline-flex items-center gap-2 rounded-lg bg-emerald-50 text-emerald-700 px-3 py-2 text-xs font-medium ring-1 ring-emerald-200 hover:bg-emerald-100 transition">
+                        <FiCheck /> Aprovar
                       </button>
                       <button
                         onClick={() => removeRequest(prof.id)}
-                        className="bg-pink-100 text-pink-700 p-2 rounded-full hover:bg-pink-200 transition"
+                        className="inline-flex items-center gap-2 rounded-lg bg-rose-50 text-rose-700 px-3 py-2 text-xs font-medium ring-1 ring-rose-200 hover:bg-rose-100 transition"
                       >
-                        <FaTrash />
+                        <FiTrash2 /> Remover
                       </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {professoresFiltrados.length === 0 && (
                 <tr>
-                  <td
-                    colSpan={showRoleColumn ? 7 : 6}
-                    className="py-6 px-4 text-center text-gray-500 italic"
-                  >
-                    Nenhuma solicitação disponível
+                  <td colSpan={5} className="py-6 text-center text-gray-500">
+                    Nenhuma solicitação encontrada
                   </td>
                 </tr>
               )}
