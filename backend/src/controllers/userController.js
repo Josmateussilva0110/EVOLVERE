@@ -343,6 +343,37 @@ class UserController {
             });
         }
     }
+    /**
+     * Lista todos os alunos.
+     */
+    async getStudents(request, response) {
+        try {
+            const students = await User.findAllStudents();
+            return response.status(200).json({ status: true, data: students });
+        } catch (err) {
+            console.error("Erro ao listar alunos:", err);
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." });
+        }
+    }
+
+    /**
+         Apaga um aluno.
+     */
+    async deleteStudent(request, response) {
+        try {
+            const { id } = request.params;
+            const success = await User.deleteById(Number(id));
+
+            if (!success) {
+                return response.status(404).json({ status: false, message: 'Aluno não encontrado.' });
+            }
+
+            return response.status(200).json({ status: true, message: 'Aluno apagado com sucesso.' });
+        } catch (err) {
+            console.error("Erro ao apagar aluno:", err);
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." });
+        }
+    }
     
 }
 

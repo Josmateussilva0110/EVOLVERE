@@ -226,6 +226,17 @@ class Subject {
     }
 
     
+    async findProfessors(courseId) {
+        const professors = await knex('users')
+            .distinct('users.id', 'users.username', 'validate_professionals.institution')
+            .join('validate_professionals', 'users.id', '=', 'validate_professionals.professional_id')
+            .join('subjects', 'users.id', '=', 'subjects.professional_id')
+            .where('subjects.course_valid_id', courseId)
+            .where('validate_professionals.approved', true);
+        
+        return professors;
+    }
+    
 }
 
 module.exports = new Subject()
