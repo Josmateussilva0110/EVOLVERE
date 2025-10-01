@@ -19,11 +19,11 @@ import requestData from "../../../utils/requestApi";
 function CoordinatorProfile() {
   const navigate = useNavigate();
   /** @type {[boolean, Function]} Estado de carregamento dos dados do perfil */
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   /** @type {[string|null, Function]} Estado de erro ao carregar perfil */
   const [error, setError] = useState(null);
   /** @type {[Object, Function]} Dados do perfil do usuário */
-  const [profile, setProfile] = useState({ nome: "", email: "", telefone: "", permissao: "" });
+  const [profile, setProfile] = useState({ nome: "nome", email: "email@gmail.com", permissao: "admin" });
   /** @type {[string, Function]} URL do avatar do usuário */
   const [avatarUrl, setAvatarUrl] = useState("");
 
@@ -37,32 +37,6 @@ function CoordinatorProfile() {
    * @function fetchMe
    * @returns {Promise<void>}
    */
-  useEffect(() => {
-    async function fetchMe() {
-      try {
-        setLoading(true);
-        setError(null);
-        const resp = await requestData('/user/me', 'GET', {}, true);
-        if (resp.success && resp.data) {
-          const u = resp.data.user || resp.data;
-          setProfile({
-            nome: u.name || u.username || "—",
-            email: u.email || "—",
-            telefone: u.phone || u.telefone || "—",
-            permissao: u.role || u.permission || "Coordenador",
-          });
-          setAvatarUrl(u.avatar_url || "");
-        } else {
-          setError(resp.message || 'Não foi possível carregar seu perfil.');
-        }
-      } catch (e) {
-        setError(e.message || 'Erro ao carregar perfil.');
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchMe();
-  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#060060] py-10 px-4">
@@ -169,13 +143,6 @@ function CoordinatorProfile() {
                 <div>
                   <p className="text-xs text-gray-500">E-mail</p>
                   <p className="text-sm font-medium text-gray-900">{profile.email}</p>
-                </div>
-              </div>
-              <div className="rounded-xl ring-1 ring-gray-200 p-4 flex items-start gap-3">
-                <FiPhone className="text-gray-500 mt-0.5" />
-                <div>
-                  <p className="text-xs text-gray-500">Telefone</p>
-                  <p className="text-sm font-medium text-gray-900">{profile.telefone}</p>
                 </div>
               </div>
               <div className="rounded-xl ring-1 ring-gray-200 p-4 flex items-start gap-3">

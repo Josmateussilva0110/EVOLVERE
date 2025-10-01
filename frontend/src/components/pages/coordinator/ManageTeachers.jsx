@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useMemo } from "react";
-import { FiArrowLeft, FiSearch, FiEdit2, FiTrash2, FiUsers, FiUserCheck, FiPause, FiX } from "react-icons/fi";
+import { FiArrowLeft, FiSearch, FiTrash2, FiUsers, FiUserCheck, FiPause, FiX } from "react-icons/fi";
 import { FaChalkboardTeacher } from "react-icons/fa";
 import requestData from "../../../utils/requestApi";
 import { Context } from "../../../context/UserContext"
@@ -142,7 +142,7 @@ function ProfessoresManagement() {
             <div className="text-right">
               <p className="text-[11px] uppercase tracking-widest text-[#060060]/80 font-semibold">Administração</p>
               <h1 className="text-2xl md:text-3xl font-black text-slate-900">Gerenciar Professores</h1>
-              <p className="text-sm text-slate-600">Buscar, editar e remover docentes.</p>
+              <p className="text-sm text-slate-600">Buscar e remover docentes.</p>
               <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="rounded-2xl bg-slate-50/80 ring-1 ring-slate-200/50 p-4 flex items-center justify-between">
                   <div>
@@ -237,9 +237,6 @@ function ProfessoresManagement() {
                         )}
                         <td className="px-4 py-3">
                           <div className="flex justify-center gap-2">
-                            <button className="inline-flex items-center gap-2 rounded-lg bg-amber-50 text-amber-800 px-3 py-2 text-xs font-medium ring-1 ring-amber-200 hover:bg-amber-100 transition">
-                              <FiEdit2 /> Editar
-                            </button>
                             <button onClick={() => deleteTeacher(prof.professional_id)}  className="inline-flex items-center gap-2 rounded-lg bg-red-50 text-red-700 px-3 py-2 text-xs font-medium ring-1 ring-red-200 hover:bg-red-100 transition">
                               <FiTrash2 /> Excluir
                             </button>

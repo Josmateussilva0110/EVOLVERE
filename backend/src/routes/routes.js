@@ -82,6 +82,39 @@ router.get('/user/teachers/:id', accountController.getTeachers)
  */
 router.get('/user/:id', userController.getUserById)
 
+
+/**
+ * @route GET /user/coordinator/:id
+ * @summary Retorna os dados de um coordenador específico pelo ID.
+ * @param {string} id.path.required - ID do coordenador a ser consultado
+ * @returns {Object} 200 - Dados do coordenador encontrados
+ * @returns {Object} 404 - Coordenador não encontrado
+ * @returns {Object} 422 - ID inválido
+ * @returns {Object} 500 - Erro interno do servidor
+ *
+ * @example
+ * GET /user/coordinator/25
+ * // Resposta:
+ * {
+ *   "status": true,
+ *   "coordinator": {
+ *     "id": 25,
+ *     "username": "maria.souza",
+ *     "email": "maria.souza@email.com",
+ *     "access_code": "2025ABC",
+ *     "role": "Coordenador"
+ *   }
+ * }
+ *
+ * @example
+ * // Coordenador não encontrado
+ * GET /user/coordinator/999
+ * // Resposta:
+ * {
+ *   "status": false,
+ *   "message": "Coordenador não encontrado."
+ * }
+ */
 router.get('/user/coordinator/:id', accountController.getCoordinatorData)
 
 /**
@@ -157,7 +190,47 @@ router.delete('/user/request/:id_user', accountController.removeRequest)
  */
 router.patch('/user/request/approved/:id_user', accountController.approve)
 
+
+/**
+ * @route GET /user/coordinator/kpi/:id
+ * @summary Retorna os KPIs (indicadores) de professores, disciplinas e solicitações.
+ * @param {string} id.path.required - ID do usuário (administrador ou coordenador)
+ * @returns {Object} 200 - KPIs encontrados
+ * @returns {Object} 404 - Coordenador ou professores não encontrados
+ * @returns {Object} 422 - ID inválido
+ * @returns {Object} 500 - Erro interno do servidor
+ *
+ * @example
+ * GET /user/coordinator/kpi/1
+ * // Resposta:
+ * {
+ *   "status": true,
+ *   "kpi": {
+ *     "teachers": 42,
+ *     "subjects": 18,
+ *     "requests": 7
+ *   }
+ * }
+ */
 router.get('/user/coordinator/kpi/:id',accountController.getKpis)
+
+/**
+ * @route DELETE /user/teacher/:id
+ * @summary Remove um professor do sistema.
+ * @param {string} id.path.required - ID do professor a ser removido
+ * @returns {Object} 200 - Professor removido com sucesso
+ * @returns {Object} 404 - Professor não encontrado
+ * @returns {Object} 422 - ID inválido
+ * @returns {Object} 500 - Erro interno do servidor
+ *
+ * @example
+ * DELETE /user/teacher/12
+ * // Resposta:
+ * {
+ *   "status": true,
+ *   "message": "professor removido com sucesso"
+ * }
+ */
 router.delete('/user/teacher/:id', accountController.deleteTeacher)
 
 
