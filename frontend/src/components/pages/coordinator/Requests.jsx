@@ -1,5 +1,11 @@
 import { useState, useEffect, useContext } from "react"
-import { FiArrowLeft, FiSearch, FiCheck, FiTrash2, FiExternalLink } from "react-icons/fi"
+import {
+  FiArrowLeft, FiSearch, FiCheck, FiTrash2, FiExternalLink,
+  FiUser, FiBookOpen, FiMapPin, FiFileText, FiBriefcase, FiCalendar
+} from "react-icons/fi"
+
+import { FaChalkboardTeacher } from "react-icons/fa"
+
 import requestData from "../../../utils/requestApi"
 import useFlashMessage from "../../../hooks/useFlashMessage"
 import { Context } from "../../../context/UserContext"
@@ -134,22 +140,32 @@ function RequestsTeachers() {
           <table className="min-w-full border-separate border-spacing-y-2">
             <thead className="bg-gray-50">
               <tr>
-                <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600">Nome</th>
+                <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600">
+                  <div className="flex items-center gap-1"><FiUser /> Nome</div>
+                </th>
 
-                {/* Exibe Curso só se showRoleColumn for true */}
                 {showRoleColumn && (
-                  <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600">Curso</th>
+                  <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600">
+                    <div className="flex items-center gap-1"><FiBookOpen /> Curso</div>
+                  </th>
                 )}
 
-                <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600">Campus</th>
-                <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600">Diploma</th>
+                <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600">
+                  <div className="flex items-center gap-1"><FiMapPin /> Campus</div>
+                </th>
+                <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600">
+                  <div className="flex items-center gap-1"><FiFileText /> Diploma</div>
+                </th>
 
-                {/* Exibe Cargo só se showRoleColumn for true */}
                 {showRoleColumn && (
-                  <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600">Cargo</th>
+                  <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600">
+                    <div className="flex items-center gap-1"><FiBriefcase /> Cargo</div>
+                  </th>
                 )}
 
-                <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600">Criada em</th>
+                <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600">
+                  <div className="flex items-center gap-1"><FiCalendar /> Criada em</div>
+                </th>
                 <th className="py-3 px-4 text-center text-xs font-semibold text-gray-600">Ações</th>
               </tr>
             </thead>
@@ -157,35 +173,69 @@ function RequestsTeachers() {
             <tbody>
               {professoresFiltrados.map((prof) => (
                 <tr key={prof.id} className="bg-white ring-1 ring-gray-200">
-                  <td className="py-3 px-4 text-sm text-gray-900">{prof.username}</td>
+                  <td className="py-3 px-4 text-sm text-gray-900">
+                    {prof.username}
+                  </td>
 
-                  {/* Curso condicional */}
+                  {/* Curso */}
                   {showRoleColumn && (
-                    <td className="py-3 px-4 text-sm text-gray-700">{prof.course}</td>
+                    <td className="py-3 px-4 text-sm text-gray-700">
+                      <div className="flex items-center gap-1">
+                        <FiBookOpen className="text-gray-500" />
+                        {prof.course}
+                      </div>
+                    </td>
                   )}
 
-                  <td className="py-3 px-4 text-sm text-gray-700">{prof.flag}</td>
+
+                  {/* Campus */}
+                  <td className="py-3 px-4 text-sm text-gray-700">
+                    <div className="flex items-center gap-1">
+                      <FiMapPin className="text-gray-500" />
+                      {prof.flag}
+                    </div>
+                  </td>
+
+                  {/* Diploma */}
                   <td className="py-3 px-4 text-sm">
                     {prof.diploma ? (
                       <a
                         href={`${import.meta.env.VITE_BASE_URL}/diplomas/${prof.diploma}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[#060060] hover:underline"
+                        className="flex items-center gap-1 text-[#060060] hover:underline"
                       >
-                        <FiExternalLink /> {prof.diploma}
+                        <FiFileText className="text-gray-500" />
+                        {prof.diploma}
+                        <FiExternalLink className="ml-1" />
                       </a>
                     ) : (
-                      <span className="text-gray-400">Sem diploma</span>
+                      <div className="flex items-center gap-1 text-gray-400">
+                        <FiFileText /> Sem diploma
+                      </div>
                     )}
                   </td>
 
-                  {/* Cargo condicional */}
-                  {showRoleColumn && (
-                    <td className="py-3 px-4 text-sm text-gray-700">{prof.role}</td>
-                  )}
+                  {/* Cargo */}
+                  <td className="py-3 px-4 text-sm text-gray-700">
+                    <div className="flex items-center gap-1">
+                      {prof.role === "Professor" ? (
+                        <FaChalkboardTeacher className="text-gray-500" />
+                      ) : (
+                        <FiBriefcase className="text-gray-500" />
+                      )}
+                      {prof.role}
+                    </div>
+                  </td>
 
-                  <td className="py-3 px-4 text-sm text-gray-700">{formatDate(prof.created_at)}</td>
+
+                  {/* Criado em */}
+                  <td className="py-3 px-4 text-sm text-gray-700">
+                    <div className="flex items-center gap-1">
+                      <FiCalendar className="text-gray-500" />
+                      {formatDate(prof.created_at)}
+                    </div>
+                  </td>
 
                   <td className="py-3 px-4">
                     <div className="flex justify-center gap-2">
@@ -207,7 +257,6 @@ function RequestsTeachers() {
 
               {professoresFiltrados.length === 0 && (
                 <tr>
-                  {/* Ajusta colSpan conforme a quantidade de colunas */}
                   <td colSpan={showRoleColumn ? 7 : 5} className="py-6 text-center text-gray-500">
                     Nenhuma solicitação encontrada
                   </td>
