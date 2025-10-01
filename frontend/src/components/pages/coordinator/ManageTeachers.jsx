@@ -39,6 +39,17 @@ function ProfessoresManagement() {
     }
   }, [user])
 
+  async function deleteTeacher(id) {
+    const response = await requestData(`/user/teacher/${id}`, 'DELETE', {}, true)
+    if(response.success) {
+      setTeachers(prev => prev.filter(d => d.professional_id !== id))
+      setFlashMessage(response.data.message, 'success')
+    }
+    else {
+      setFlashMessage(response.message, 'error')
+    }
+  }
+
 
   /**
    * Filtra a lista de professores com base no termo de busca.
@@ -210,7 +221,6 @@ function ProfessoresManagement() {
                             </span>
                             <div className="flex flex-col">
                               <span className="font-medium text-slate-900">{prof?.username}</span>
-                              <span className="text-[11px] text-slate-500">ID {prof?.professional_id}</span>
                             </div>
                           </div>
                         </td>
@@ -230,7 +240,7 @@ function ProfessoresManagement() {
                             <button className="inline-flex items-center gap-2 rounded-lg bg-amber-50 text-amber-800 px-3 py-2 text-xs font-medium ring-1 ring-amber-200 hover:bg-amber-100 transition">
                               <FiEdit2 /> Editar
                             </button>
-                            <button className="inline-flex items-center gap-2 rounded-lg bg-red-50 text-red-700 px-3 py-2 text-xs font-medium ring-1 ring-red-200 hover:bg-red-100 transition">
+                            <button onClick={() => deleteTeacher(prof.professional_id)}  className="inline-flex items-center gap-2 rounded-lg bg-red-50 text-red-700 px-3 py-2 text-xs font-medium ring-1 ring-red-200 hover:bg-red-100 transition">
                               <FiTrash2 /> Excluir
                             </button>
                           </div>

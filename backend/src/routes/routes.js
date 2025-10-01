@@ -158,6 +158,7 @@ router.delete('/user/request/:id_user', accountController.removeRequest)
 router.patch('/user/request/approved/:id_user', accountController.approve)
 
 router.get('/user/coordinator/kpi/:id',accountController.getKpis)
+router.delete('/user/teacher/:id', accountController.deleteTeacher)
 
 
 

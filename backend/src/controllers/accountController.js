@@ -349,6 +349,26 @@ class AccountController {
         }
     }
 
+    async deleteTeacher(request, response) {
+        try {
+            const { id } = request.params
+            if (!validator.isInt(id + '', { min: 1 })) {
+                return response.status(422).json({status: false, message: "Usuário invalido."})
+            }
+            const teacherExist = await Account.accountExists(id)
+            if(!teacherExist) {
+                return response.status(404).json({status: false, message: "Professor não existe"})
+            } 
+            const valid = await Account.deleteRequest(id)
+            if(!valid) {
+                return response.status(500).json({status: false, message: "Erro ao remover professor"})
+            }
+            return response.status(200).json({status: true, message: "professor removido com sucesso"})
+        } catch(err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
 }
 
 module.exports = new AccountController()
