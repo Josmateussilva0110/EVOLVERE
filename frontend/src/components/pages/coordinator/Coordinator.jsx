@@ -20,6 +20,7 @@ import requestData from "../../../utils/requestApi"
 function DashboardPrincipal() {
   const navigate = useNavigate()
   const [ userRequest, setUserRequest ] = useState({})
+  const [kpi, setKpi] = useState({})
   const { user } = useContext(Context)
   const displayName = userRequest?.username || user?.name || 'Usuário'
   const initials = (displayName?.charAt(0) || 'U').toUpperCase()
@@ -51,6 +52,19 @@ function DashboardPrincipal() {
       }
       fetchUser()
   }
+  }, [user])
+
+  useEffect(() => {
+    if(user) {
+      async function fetchKpi() {
+        const response = await requestData(`/user/coordinator/kpi/${user.id}`, 'GET', {}, true)
+        if(response.success) {
+          console.log(response.data.kpi)
+          setKpi(response.data.kpi)
+        }
+      }
+      fetchKpi()
+    }
   }, [user])
 
   return (

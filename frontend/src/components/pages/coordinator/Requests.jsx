@@ -2,7 +2,8 @@ import { useState, useEffect } from "react"
 import { FiArrowLeft, FiSearch, FiCheck, FiTrash2, FiExternalLink } from "react-icons/fi"
 import requestData from "../../../utils/requestApi"
 import useFlashMessage from "../../../hooks/useFlashMessage"
-
+import { Context } from "../../../context/UserContext"
+import formatDate from "../../../utils/formatDate"
 
 
 /**
@@ -26,8 +27,9 @@ import useFlashMessage from "../../../hooks/useFlashMessage"
  */
 function RequestsTeachers() {
   const [search, setSearch] = useState("");
-  const [teachers, setTeachers] = useState([]) 
+  const [teachers, setTeachers] = useState([])
   const { setFlashMessage } = useFlashMessage()
+  const { user } = useContext(Context)
 
   /**
    * Busca todas as solicitações de professores pendentes ao carregar o componente.
@@ -35,14 +37,14 @@ function RequestsTeachers() {
    */
   useEffect(() => {
     async function fetchRequests() {
-      const response = await requestData('/user/requests', 'GET', {}, true)
+      const response = await requestData(`/user/requests/${user.id}`, 'GET', {}, true)
       console.log(response)
-      if(response.success) {
-        setTeachers(response.data.teachers)
-      } 
+      if (response.success) {
+        setTeachers(response.data.users)
+      }
     }
     fetchRequests()
-  }, [])
+  }, [user])
 
 
   /**
@@ -71,7 +73,7 @@ function RequestsTeachers() {
    */
   async function approveRequest(id) {
     const response = await requestData(`/user/request/approved/${id}`, 'PATCH', {}, true)
-    if(response.success) {
+    if (response.success) {
       setTeachers((prev) => prev.filter((prof) => prof.id !== id))
       setFlashMessage(response.data.message, "success")
     }
@@ -99,6 +101,8 @@ function RequestsTeachers() {
   const handleVoltar = () => {
     window.history.back()
   }
+
+  const showRoleColumn = user?.id >= 1 && user?.id <= 4
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-[#060060] p-6">
@@ -183,6 +187,7 @@ function RequestsTeachers() {
                 </tr>
               )}
             </tbody>
+
           </table>
         </div>
       </div>

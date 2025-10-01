@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext, useMemo } from "react";
 import { FiArrowLeft, FiSearch, FiEdit2, FiTrash2, FiUsers, FiUserCheck, FiPause, FiX, FiChalkboardTeacher } from "react-icons/fi";
 import requestData from "../../../utils/requestApi";
-import useFlashMessage from "../../../hooks/useFlashMessage";
 import { Context } from "../../../context/UserContext"
 
 /**
@@ -29,22 +28,9 @@ function ProfessoresManagement() {
 
   useEffect(() => {
     async function fetchTeachers() {
-      try {
-        setLoading(true)
-        setError(null)
-        const response = await requestData(`/user/teachers/${user.id}`, 'GET', {}, true) 
-        if(response.success) {
-          setTeachers(response.data.teachers)
-        }
-        else {
-          setError(response.message || 'Falha ao carregar professores')
-          setFlashMessage(response.message, 'error')
-        }
-      } catch (err) {
-        setError('Erro de conexão')
-        console.error(err)
-      } finally {
-        setLoading(false)
+      const response = await requestData(`/user/teachers/${user.id}`, 'GET', {}, true) 
+      if(response.success) {
+        setTeachers(response.data.teachers)
       }
     }
     if (user) {

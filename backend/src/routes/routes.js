@@ -61,7 +61,7 @@ router.post('/user/logout', userController.logout)
  * @returns {object} 404 - Nenhuma solicitação encontrada
  * @returns {object} 500 - Erro interno do servidor
  */
-router.get('/user/requests', accountController.requestsTeachers)
+router.get('/user/requests/:id', accountController.requests)
 
 /**
  * @route GET /user/session
@@ -137,6 +137,7 @@ router.delete('/user/request/:id_user', accountController.removeRequest)
  */
 router.patch('/user/request/approved/:id_user', accountController.approve)
 
+router.get('/user/coordinator/kpi/:id',accountController.getKpis)
 
 
 
