@@ -1,4 +1,4 @@
-const knex = require("../database/connection")
+const knex = require("../database/connection");
 
 /**
  * Classe para manipulação de disciplinas (subjects) na base de dados.
@@ -7,26 +7,16 @@ const knex = require("../database/connection")
 class Subject {
 
     /**
-     * Busca todas as disciplinas cadastradas com informações dos relacionamentos.
-     *
+     * Busca todas as disciplinas cadastradas com informações do professor e curso.
      * @async
-     * @returns {Promise<Object[]|undefined>} Retorna um array de disciplinas com dados do professor e curso,
-     * ou `undefined` se nenhuma disciplina for encontrada ou se ocorrer erro.
-     *
+     * @returns {Promise<Object[]|undefined>} Retorna um array de disciplinas ou `undefined` se não houver resultados.
      * @example
-     * const subjects = await Subject.getAll()
-     * // subjects = [
-     * //   { 
-     * //     id: 1, 
-     * //     name: "Matemática", 
-     * //     professional_id: 1,
-     * //     course_valid_id: 1,
-     * //     created_at: "2024-01-01...",
-     * //     updated_at: "2024-01-01...",
-     * //     professor: { id: 1, username: "João Silva", email: "joao@email.com" },
-     * //     curso: { id: 1, name: "Engenharia", acronym_IES: "UFMG" }
-     * //   }
-     * // ] ou undefined
+     * const subjects = await Subject.getAll();
+     * // Retorno:
+     * // [
+     * //   { id: 1, name: "Cálculo I", professor_nome: "Ana Silva", curso_nome: "Engenharia Civil" },
+     * //   { id: 2, name: "Algoritmos", professor_nome: "Carlos Lima", curso_nome: "Ciência da Computação" }
+     * // ]
      */
     async getAll() {
         try {
@@ -34,27 +24,36 @@ class Subject {
                 .select(
                     'subjects.id',
                     'subjects.name',
-                    'users.username as professor_nome', // Junta o nome do professor
-                    'course_valid.name as curso_nome' // Junta o nome do curso
+                    'users.username as professor_nome',
+                    'course_valid.name as curso_nome'
                 )
                 .from('subjects')
                 .leftJoin('users', 'subjects.professional_id', 'users.id')
                 .leftJoin('course_valid', 'subjects.course_valid_id', 'course_valid.id');
             
-            return result.length > 0 ? result : undefined
+            return result.length > 0 ? result : undefined;
         } catch(err) {
-            console.error('Erro ao buscar disciplinas:', err)
-            return undefined
+            console.error('Erro ao buscar todas as disciplinas:', err);
+            return undefined;
         }
     }
 
     /**
-     * Busca uma disciplina pelo ID.
-     *
+     * Busca uma disciplina específica pelo seu ID com detalhes completos.
      * @async
      * @param {number} id - ID da disciplina.
-     * @returns {Promise<Object|undefined>} Retorna a disciplina encontrada ou `undefined`
-     * caso não exista ou se ocorrer erro.
+     * @returns {Promise<Object|undefined>} Retorna o objeto da disciplina ou `undefined` se não for encontrada.
+     * @example
+     * const subject = await Subject.getById(1);
+     * // Retorno:
+     * // {
+     * //   id: 1,
+     * //   name: "Cálculo I",
+     * //   professor_nome: "Ana Silva",
+     * //   professor_email: "ana.silva@email.com",
+     * //   curso_nome: "Engenharia Civil",
+     * //   curso_sigla: "UFPI"
+     * // }
      */
     async getById(id) {
         try {
@@ -69,38 +68,42 @@ class Subject {
                 .from('subjects')
                 .leftJoin('users', 'subjects.professional_id', 'users.id')
                 .leftJoin('course_valid', 'subjects.course_valid_id', 'course_valid.id')
-                .where('subjects.id', id)
-                
-            return result[0] || undefined
+                .where('subjects.id', id);
+            
+            return result[0] || undefined;
         } catch(err) {
-            console.error('Erro ao buscar disciplina por ID:', err)
-            return undefined
+            console.error('Erro ao buscar disciplina por ID:', err);
+            return undefined;
         }
     }
 
     /**
-     * Cria uma nova disciplina.
-     *
+     * Cria uma nova disciplina na base de dados.
      * @async
-     * @param {Object} data - Dados da disciplina.
-     * @returns {Promise<Object|undefined>} Retorna a disciplina criada ou `undefined` em caso de erro.
+     * @param {Object} data - Dados da nova disciplina.
+     * @param {string} data.name - Nome da disciplina.
+     * @param {number} data.professional_id - ID do professor responsável.
+     * @param {number} data.course_valid_id - ID do curso associado.
+     * @returns {Promise<Object|undefined>} Retorna o objeto da disciplina recém-criada.
+     * @example
+     * const newSubject = await Subject.create({
+     * name: "Álgebra Linear",
+     * professional_id: 5,
+     * course_valid_id: 2
+     * });
+     * // Retorno: { id: 3, name: "Álgebra Linear", ... }
      */
     async create(data) {
         try {
-            // ✅ CORREÇÃO: Usamos .returning('*') para pegar o objeto inteiro de volta.
-            // O resultado é um array com um único item: o novo objeto da disciplina.
             const [novaDisciplina] = await knex('subjects')
                 .insert({
                     name: data.name,
                     professional_id: data.professional_id,
                     course_valid_id: data.course_valid_id,
-                    // created_at e updated_at são gerenciados pelo DB com timestamps(true, true)
                 })
-                .returning('*'); // <--- AQUI ESTÁ A MÁGICA!
+                .returning('*');
 
-            // Agora não precisamos de uma segunda busca, já temos o objeto completo.
             return novaDisciplina;
-
         } catch(err) {
             console.error('Erro ao criar disciplina:', err);
             return undefined;
@@ -108,8 +111,14 @@ class Subject {
     }
 
     /**
-     * Atualiza uma disciplina existente.
-     * (Seu código original aqui já estava bom)
+     * Atualiza os dados de uma disciplina existente.
+     * @async
+     * @param {number} id - ID da disciplina a ser atualizada.
+     * @param {Object} data - Campos a serem atualizados.
+     * @returns {Promise<Object|undefined>} Retorna o objeto da disciplina atualizada.
+     * @example
+     * const updatedSubject = await Subject.update(3, { name: "Álgebra Linear Avançada" });
+     * // Retorno: { id: 3, name: "Álgebra Linear Avançada", ... }
      */
     async update(id, data) {
         try {
@@ -120,7 +129,7 @@ class Subject {
                     updated_at: new Date()
                 });
                 
-            if (updated === 0) return undefined;
+            if (updated === 0) return undefined; // Nenhuma linha afetada
             
             return await this.getById(id);
         } catch(err) {
@@ -130,8 +139,13 @@ class Subject {
     }
 
     /**
-     * Exclui uma disciplina.
-     * (Seu código original aqui já estava bom)
+     * Apaga uma disciplina da base de dados.
+     * @async
+     * @param {number} id - ID da disciplina a ser apagada.
+     * @returns {Promise<boolean>} Retorna `true` se a exclusão for bem-sucedida, `false` caso contrário.
+     * @example
+     * const success = await Subject.delete(3);
+     * // Retorno: true
      */
     async delete(id) {
         try {
@@ -141,14 +155,19 @@ class Subject {
                 
             return deleted > 0;
         } catch(err) {
-            console.error('Erro ao excluir disciplina:', err);
+            console.error('Erro ao apagar disciplina:', err);
             return false;
         }
     }
 
     /**
-     * Busca disciplinas por professor.
-     * (Seu código original aqui já estava bom)
+     * Busca todas as disciplinas lecionadas por um professor específico.
+     * @async
+     * @param {number} professionalId - ID do professor.
+     * @returns {Promise<Object[]|undefined>} Lista de disciplinas do professor.
+     * @example
+     * const subjects = await Subject.getByProfessor(5);
+     * // Retorno: [ { id: 1, name: "Cálculo I", ... }, { id: 4, name: "Geometria", ... } ]
      */
     async getByProfessor(professionalId) {
         try {
@@ -170,8 +189,13 @@ class Subject {
     }
 
     /**
-     * Busca disciplinas por curso.
-     * (Seu código original aqui já estava bom)
+     * Busca todas as disciplinas de um curso específico.
+     * @async
+     * @param {number} courseId - ID do curso.
+     * @returns {Promise<Object[]|undefined>} Lista de disciplinas do curso.
+     * @example
+     * const subjects = await Subject.getByCourse(2);
+     * // Retorno: [ { id: 2, name: "Algoritmos", ... }, { id: 5, name: "Estrutura de Dados", ... } ]
      */
     async getByCourse(courseId) {
         try {
@@ -192,51 +216,71 @@ class Subject {
         }
     }
 
+    /**
+     * Conta o número total de disciplinas no sistema.
+     * @async
+     * @returns {Promise<number>} O número total de disciplinas.
+     * @example
+     * const count = await Subject.countAllSubjects();
+     * // Retorno: 42
+     */
     async countAllSubjects() {
         try {
-            const result = await knex.raw(`
-                select 
-                    count(*)
-                from subjects 
-            `)
-            const rows = result.rows
-            return rows.length > 0 ? rows[0] : undefined
+            const result = await knex('subjects').count('* as total');
+            return result[0] ? Number(result[0].total) : 0;
         } catch(err) {
-            console.error('Erro ao contar todas as disciplinas', err)
-            return undefined
+            console.error('Erro ao contar todas as disciplinas:', err);
+            return 0;
         }
     }
 
+    /**
+     * Conta o número de disciplinas associadas a um curso específico.
+     * @async
+     * @param {string} access_code - Código de acesso do curso.
+     * @returns {Promise<number>} O número de disciplinas do curso.
+     * @example
+     * const count = await Subject.countSubjects("CS101");
+     * // Retorno: 8
+     */
     async countSubjects(access_code) {
         try {
-            const result = await knex.raw(`
-                select 
-                    count(*)
-                from subjects 
-                inner join course_valid cv
-                    on cv.id = course_valid_id
-                where cv.course_code = ?
-            `, [access_code])
-            const rows = result.rows
-            return rows.length > 0 ? rows[0] : undefined
+            const result = await knex('subjects')
+                .join('course_valid as cv', 'subjects.course_valid_id', '=', 'cv.id')
+                .where('cv.course_code', access_code)
+                .count('* as total');
+
+            return result[0] ? Number(result[0].total) : 0;
         } catch(err) {
-            console.error('Erro ao contar as disciplinas', err)
-            return undefined
+            console.error('Erro ao contar as disciplinas por curso:', err);
+            return 0;
         }
     }
 
-    
+    /**
+     * Encontra professores disponíveis para lecionar num curso específico.
+     * A lógica encontra professores aprovados para o curso, independentemente de já lecionarem.
+     * @async
+     * @param {number} courseId - ID do curso.
+     * @returns {Promise<Object[]>} Uma lista de professores disponíveis.
+     */
     async findProfessors(courseId) {
-        const professors = await knex('users')
-            .distinct('users.id', 'users.username', 'validate_professionals.institution')
-            .join('validate_professionals', 'users.id', '=', 'validate_professionals.professional_id')
-            .join('subjects', 'users.id', '=', 'subjects.professional_id')
-            .where('subjects.course_valid_id', courseId)
-            .where('validate_professionals.approved', true);
-        
-        return professors;
+        try {
+            const professors = await knex('users')
+                .select('users.id', 'users.username', 'vp.institution')
+                .join('validate_professionals as vp', 'users.id', '=', 'vp.professional_id')
+                .join('course_valid as cv', 'vp.access_code', '=', knex.raw('cv.course_code::text'))
+                .where('cv.id', courseId)
+                .where('vp.role', 3) // Garante que são professores
+                .where('vp.approved', true);
+            
+            return professors;
+        } catch (err) {
+            console.error("Erro ao buscar professores por curso:", err);
+            return [];
+        }
     }
-    
 }
 
-module.exports = new Subject()
+module.exports = new Subject();
+
