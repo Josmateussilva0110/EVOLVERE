@@ -1,43 +1,81 @@
 import { useState, useEffect, useContext } from "react";
-// NOVO: Importamos o useParams para ler o ID da URL
 import { useNavigate, useParams } from "react-router-dom";
 import requestData from "../../../utils/requestApi";
 import { FiArrowLeft, FiBookOpen, FiCheck } from "react-icons/fi";
 import { Context } from "../../../context/UserContext";
 import useFlashMessage from "../../../hooks/useFlashMessage";
 
+/**
+ * DisciplineManagement
+ *
+ * Componente de formulário responsável por **criar e editar disciplinas**.
+ *
+ * Funcionalidades:
+ * - Adapta-se dinamicamente para "modo de criação" ou "modo de edição" com base na URL.
+ * - Em modo de edição, busca os dados da disciplina e preenche o formulário.
+ * - Busca dados contextuais, como o coordenador logado e a lista de professores do seu curso.
+ * - Valida e submete os dados para a API (POST para criar, PUT para atualizar).
+ * - Fornece feedback ao utilizador através de mensagens flash.
+ * - O título, descrição e botão de submissão são dinâmicos para refletir a ação (criar/editar).
+ *
+ * Entradas:
+ * - Não recebe props diretamente.
+ * - Utiliza `useParams` para obter o `id` da disciplina da URL (se estiver em modo de edição).
+ * - Utiliza `useContext` para obter o `user` logado.
+ *
+ * Estados locais:
+ * - `nome` → Armazena o nome da disciplina.
+ * - `professor` → Armazena o ID do professor selecionado.
+ * - `professores` → Lista de professores disponíveis para seleção.
+ * - `coordinator` → Dados do coordenador logado.
+ *
+ * Navegação:
+ * - Botão "Voltar" para a página anterior.
+ * - Após uma operação bem-sucedida, navega para a lista de disciplinas.
+ * - Em caso de erro ao carregar dados essenciais, retorna à página anterior.
+ *
+ * @component
+ * @returns {JSX.Element} Tela de formulário para gestão de disciplinas.
+ */
 function DisciplineManagement() {
-    // NOVO: Pegamos o 'id' da URL. Se não houver, será undefined.
+    /** O `id` da disciplina, obtido da URL. Se for `undefined`, o formulário está em modo de criação. */
     const { id } = useParams(); 
     const navigate = useNavigate();
     const { user } = useContext(Context);
     const { setFlashMessage } = useFlashMessage();
 
-    // Os estados continuam os mesmos
+    /** Estado para o nome da disciplina. */
     const [nome, setNome] = useState("");
-    const [professor, setProfessor] = useState(""); // Usando 'professor' como no seu código original
+    /** Estado para o ID do professor selecionado. */
+    const [professor, setProfessor] = useState("");
+    /** Estado para a lista de professores do curso. */
     const [professores, setProfessores] = useState([]);
+    /** Estado para os dados do coordenador logado. */
     const [coordinator, setCoordinator] = useState({});
     
-    // MODIFICADO: Juntamos os useEffects em um só para carregar todos os dados de forma mais eficiente
+    /**
+     * Efeito que carrega todos os dados necessários para o formulário.
+     * Roda quando o componente é montado ou quando o `id` do utilizador muda.
+     * Se um `id` de disciplina estiver presente na URL, busca também os dados dessa disciplina para edição.
+     */
     useEffect(() => {
-        // Só executa se tivermos um usuário logado
+        // Só executa se tivermos um utilizador logado.
         if (user.id) { 
             const carregarDados = async () => {
                 try {
-                    // 1. Carrega informações do coordenador (como antes)
+                    // 1. Carrega informações do coordenador.
                     const coordinatorRes = await requestData(`/user/coordinator/${user.id}`, "GET", {}, true);
                     if (!coordinatorRes.success) throw new Error("Falha ao carregar dados do coordenador.");
                     setCoordinator(coordinatorRes.data.user);
                     
-                    // 2. Carrega professores do curso do coordenador (como antes)
+                    // 2. Carrega professores do curso do coordenador.
                     const courseId = coordinatorRes.data.user.course_id;
                     const professorsRes = await requestData(`/courses/${courseId}/professors`, "GET", {}, true);
                     if (professorsRes.success) {
                         setProfessores(professorsRes.data.professores);
                     }
 
-                    // 3. busca os dados da disciplina e edita eles
+                    // 3. Se houver um ID na URL (modo de edição), busca os dados da disciplina.
                     if (id) {
                         const disciplineRes = await requestData(`/subjects/${id}`, "GET", {}, true);
                         
@@ -51,14 +89,17 @@ function DisciplineManagement() {
                     }
                 } catch (error) {
                     setFlashMessage(error.message, "error");
-                    navigate(-1); // Volta para a página anterior em caso de erro
+                    navigate(-1); // Volta para a página anterior em caso de erro.
                 }
             };
             carregarDados();
         }
-    }, [id, user.id, navigate, setFlashMessage]); // Adicionamos 'id' e outras dependências
+    }, [id, user.id, navigate, setFlashMessage]);
 
-    // MODIFICADO: O handleSubmit agora sabe se deve criar (POST) ou atualizar (PUT)
+    /**
+     * Lida com a submissão do formulário.
+     * Envia uma requisição PUT se estiver em modo de edição, ou POST se estiver em modo de criação.
+     */
     const handleSubmit = async (e) => {
         e.preventDefault();
         
@@ -78,7 +119,7 @@ function DisciplineManagement() {
         }
 
         if (result.success) {
-            const successMessage = id ? result.data.message : "Disciplina cadastrada com sucesso!";
+            const successMessage = id ? (result.data.message || "Disciplina atualizada com sucesso!") : "Disciplina cadastrada com sucesso!";
             setFlashMessage(successMessage, "success");
             navigate("/coordinator/discipline/list");
         } else {
@@ -107,7 +148,6 @@ function DisciplineManagement() {
                                     <FiBookOpen className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    {/* MODIFICADO: Título e descrição dinâmicos */}
                                     <h2 className="text-2xl font-bold text-slate-900">
                                         {id ? "Editar Disciplina" : "Cadastro de Disciplinas"}
                                     </h2>
@@ -165,7 +205,6 @@ function DisciplineManagement() {
                                     className="w-full inline-flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-900 font-bold rounded-xl hover:from-amber-500 hover:to-yellow-600 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
                                 >
                                     <FiCheck className="w-5 h-5" />
-                                    {/* MODIFICADO: Texto do botão dinâmico */}
                                     {id ? "Salvar Alterações" : "Cadastrar disciplina"}
                                 </button>
                             </div>
