@@ -83,6 +83,45 @@ class CourseController {
             });
         }
     }
+    async getSubjectsByCourse(request, response) {
+        try {
+            // 1. Pega o ID da URL, igual ao outro método
+            const { id } = request.params;
+
+            // 2. Valida se o ID é um número inteiro válido
+            if (!validator.isInt(id + '', { min: 1 })) {
+                return response.status(422).json({ success: false, message: "Id do curso é inválido." });
+            }
+
+            // 3. Chama a função do seu Model 'Course' para buscar os dados
+            //    (Esta é a função que criamos no passo anterior do Model)
+            const subjects = await Course.findSubjectsByCourseId(Number(id));
+
+            // 4. Se o model não retornar nada, envia erro 404
+            if (!subjects || subjects.length === 0) {
+                return response.status(404).json({
+                    success: false,
+                    message: 'Nenhuma disciplina encontrada para este curso.'
+                });
+            }
+
+            // 5. Se tudo der certo, envia a resposta de sucesso
+            //    no formato que o frontend espera: { data: { subjects: [...] } }
+            return response.status(200).json({
+                success: true,
+                data: {
+                    subjects: subjects
+                }
+            });
+
+        } catch (err) {
+            console.error("Erro ao listar disciplinas por curso:", err);
+            return response.status(500).json({
+                success: false,
+                message: "Erro interno no servidor."
+            });
+        }
+    }
 }
 
 module.exports = new CourseController()

@@ -102,6 +102,7 @@ function App() {
               <Route path="/coordinator/requests" element={<RequestsTeachers />} />
               <Route path="/coordinator/profile" element={<CoordinatorProfile />} />
               <Route path="/coordinator/settings" element={<CoordinatorSettings />} />
+              <Route path="/coordinator/discipline/edit/:id" element={<ManagementDisciplines />} />
 
               <Route path="/teacher/discipline/manage" element={<DisciplineManagement />} />
               <Route path="/teacher/discipline/list" element={<ViewDiscipline />} />
