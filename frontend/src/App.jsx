@@ -30,7 +30,8 @@ import ResponseList from "./components/pages/teacher/ResponseList"
 import CoordinatorProfile from "./components/pages/coordinator/CoordinatorProfile"
 import CoordinatorSettings from "./components/pages/coordinator/CoordinatorSettings"
 import ManagementStudents from "./components/pages/students/ManagementStudents"
-import ManagementCourses from "./components/pages/students/ManagementCourses"
+import ManagementCoursesStudents from "./components/pages/students/ManagementCoursesStudents"
+import ManagementDisciplinesStudents from "./components/pages/students/ManagementDisciplinesStudents"
 
 
 
@@ -69,7 +70,7 @@ function App() {
   const location = useLocation()
   // Rotas onde NÃO deve aparecer Navbar e Footer
   const isCoordinator = location.pathname.startsWith("/coordinator")
-  const hideLayout = isCoordinator || ["/login", "/register", "/forgot_password", "/help", "/", "/about", "/await/approval", "/user/account", "/student/home"].includes(location.pathname)
+  const hideLayout = isCoordinator || ["/login", "/register", "/forgot_password", "/help", "/", "/about", "/await/approval", "/user/account", "/student/home", "/student/disciplines/view"].includes(location.pathname)
 
 
   return (
@@ -111,7 +112,8 @@ function App() {
               <Route path="/teacher/simulated/response/list" element={<ResponseList />} />
 
               <Route path="/student/home" element={<ManagementStudents />} />
-              <Route path="/student/courses" element={<ManagementCourses />} />
+              <Route path="/student/courses/list" element={<ManagementCoursesStudents />} />
+              <Route path="/student/disciplines/view" element={<ManagementDisciplinesStudents />} />
 
             </Route>
           </Route>

@@ -26,7 +26,7 @@ function PerformanceReports() {
   }, [turma, periodo, busca]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start bg-[#060060] py-12 px-4">
+    <div className="min-h-screen flex flex-col items-center justify-start bg-[0600#60] py-12 px-4">
       <div className="w-full max-w-7xl bg-white rounded-2xl p-6 md:p-8 shadow-xl ring-1 ring-gray-200 flex flex-col gap-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
