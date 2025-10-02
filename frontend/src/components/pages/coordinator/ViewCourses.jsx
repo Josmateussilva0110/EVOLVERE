@@ -1,18 +1,38 @@
 
 /**
- * Componente ViewCourses
+ * ViewCourses
  * 
- * Exibe informações sobre cursos, incluindo ID, datas de criação e atualização,
- * e cartões com informações resumidas sobre disciplinas, professores e alunos ativos.
- * Também possui um botão "Voltar" que retorna à página anterior.
+ * Exibe informações detalhadas de um curso, incluindo:
+ * - ID do curso
+ * - Datas de criação e atualização
+ * - Cartões com números de disciplinas, professores e alunos ativos
+ * - Botão de voltar para a página anterior
+ * 
+ * Entrada: nenhuma
+ * Saída: interface visual do curso com informações e cartões
+ * Exemplo de saída: 
+ * {
+ *   courseName: "Sistemas de informação",
+ *   id: 6799,
+ *   created_at: "12 de fev. de 2023",
+ *   updated_at: "08 de abril de 2024",
+ *   activeDisciplines: 6,
+ *   activeTeachers: 3,
+ *   activeStudents: 42
+ * }
  */
+
+/**
+ * handleVoltar
+ * 
+ * Retorna o usuário para a página anterior do navegador.
+ * Entrada: nenhuma
+ * Saída: navegação de volta no histórico
+ * Exemplo de saída: usuário retorna à página anterior
+ */
+
 function ViewCourses() {
-  /**
-   * handleVoltar
-   * 
-   * Função chamada ao clicar no botão de voltar.
-   * Retorna o usuário para a página anterior usando a função nativa do navegador.
-   */
+
   const handleVoltar = () => {
     window.history.back()
   }

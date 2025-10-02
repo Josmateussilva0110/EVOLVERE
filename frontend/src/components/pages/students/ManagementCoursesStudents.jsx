@@ -1,3 +1,4 @@
+
 import {
   BookOpen,
   Users,
@@ -17,6 +18,44 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useState } from "react";
+
+/**
+ * SistemasInformacao
+ * 
+ * O que faz: Exibe informações do curso "Sistemas de Informação", incluindo estatísticas gerais, 
+ * lista de disciplinas, filtros de pesquisa e semestre, com cards mostrando detalhes de cada disciplina.
+ * Entrada: nenhuma
+ * Exemplo de saída: [
+ *   {
+ *     codigo: "ED1",
+ *     nome: "Professor(es): ÓSEAS",
+ *     alunos: "Qnt. alunos matriculados: 25",
+ *     semestre: "3º Semestre",
+ *     status: "Concluída",
+ *     statusColor: "text-emerald-600",
+ *     bgColor: "bg-emerald-50",
+ *     borderColor: "border-emerald-200"
+ *   },
+ *   ...
+ * ]
+ */
+
+/**
+ * filteredDisciplinas
+ * 
+ * O que faz: Filtra a lista de disciplinas com base no termo digitado na barra de pesquisa.
+ * Entrada: searchTerm (string)
+ * Exemplo de saída: [
+ *   {
+ *     codigo: "ED1",
+ *     nome: "Professor(es): ÓSEAS",
+ *     alunos: "Qnt. alunos matriculados: 25",
+ *     semestre: "3º Semestre",
+ *     status: "Concluída"
+ *   }
+ * ]
+ */
+
 
 export default function SistemasInformacao() {
   const [activeSection, setActiveSection] = useState("curso");

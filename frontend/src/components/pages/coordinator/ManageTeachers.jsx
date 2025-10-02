@@ -6,13 +6,65 @@ import { Context } from "../../../context/UserContext"
 import useFlashMessage from "../../../hooks/useFlashMessage";
 
 /**
- * Componente de gerenciamento de professores.
- * Exibe uma tabela com os professores e suas disciplinas,
- * incluindo busca, ações de editar e excluir, e botão de voltar.
+ * ProfessoresManagement
+ *
+ * Componente responsável pelo **gerenciamento de professores**.
+ *
+ * Funcionalidades:
+ * - Busca por nome do professor ou disciplina.
+ * - Listagem paginada dos professores.
+ * - Exibição de status de disciplina (Atribuída / Sem disciplina).
+ * - Botão de exclusão de professor.
+ * - Métricas resumidas no topo:
+ *    - Total de professores
+ *    - Professores com disciplina atribuída
+ *    - Professores sem disciplina atribuída
+ * - Botão de voltar para a página anterior.
+ *
+ * Entradas:
+ * - Não recebe props diretamente.
+ * - Utiliza o contexto do usuário (`Context`) para obter o ID do usuário atual.
+ *
+ * Estados locais:
+ * - `search` → valor do campo de busca.
+ * - `teachers` → lista de professores carregados da API.
+ * - `error` → mensagem de erro ao buscar dados.
+ * - `pagina` → página atual exibida.
+ * - `itensPorPagina` → quantidade de professores por página.
+ *
+ * Variáveis internas:
+ * - `filterTeacher` → professores filtrados com base no campo de busca.
+ * - `totalPaginas` → número total de páginas calculado a partir dos professores filtrados.
+ * - `professoresPagina` → professores exibidos na página atual.
+ * - `showCourseColumn` → indica se a coluna de curso deve ser exibida (para usuários específicos).
+ *
+ * Utilitários visuais:
+ * - `getInitials(text)` → retorna as iniciais do nome do professor.
+ * - `colorFromString(str)` → retorna classes de cor baseadas no nome do professor.
+ *
+ * Ações:
+ * - `deleteTeacher(id)` → exclui o professor via API e atualiza a lista.
+ * - `handleVoltar()` → volta para a página anterior no histórico do navegador.
+ *
+ * Estrutura visual:
+ * - Container branco centralizado com sombra.
+ * - Header com métricas resumidas.
+ * - Campo de busca com ícone.
+ * - Tabela com lista de professores e ações.
+ * - Paginação com seleção de itens por página.
+ *
+ * Exemplo de uso:
+ * ```jsx
+ * <ProfessoresManagement />
+ *
+ * // Interações do usuário:
+ * setSearch("Matemática"); // filtra professores pela disciplina
+ * setPagina(2);            // navega para a página 2
+ * deleteTeacher(5);        // exclui professor com id 5
+ * ```
  *
  * @component
- * @example
- * return <ProfessoresManagement />
+ * @returns {JSX.Element} Tela de gerenciamento de professores com filtros, métricas e paginação.
  */
 function ProfessoresManagement() {
   /**

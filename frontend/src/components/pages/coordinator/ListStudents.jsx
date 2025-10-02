@@ -5,9 +5,80 @@ import { FaEye, FaTrash, FaArrowLeft } from "react-icons/fa";
 import { FiSearch, FiUsers, FiUserCheck, FiPause, FiX } from "react-icons/fi";
 
 /**
- * Calcula a turma (ex: 2025.1) com base na data de criação do utilizador.
- * @param {string} dateString - A data de criação (ex: '2025-09-30T14:20:00.000Z')
- * @returns {string} A turma formatada.
+ * ListStudents
+ *
+ * Componente responsável por **listar e gerenciar estudantes cadastrados** na plataforma.
+ *
+ * Funcionalidades:
+ * - Exibe uma tabela com estudantes cadastrados.
+ * - Permite filtrar por nome, e-mail, turma e status (Ativo/Inativo).
+ * - Busca dinâmica com input e filtros combinados.
+ * - Exibe chips de filtros ativos.
+ * - Paginação configurável com visualização de número de registros por página.
+ * - Métricas de total de alunos, alunos ativos e inativos.
+ * - Permite excluir um estudante com confirmação.
+ * - Visualizar detalhes básicos do aluno (ícone de olho, ainda sem detalhe expandido).
+ *
+ * Entradas:
+ * - Não recebe props diretamente.
+ * - Usa dados da API de estudantes via `requestData`.
+ *
+ * Estados locais:
+ * - `alunos` → lista completa de alunos carregados.
+ * - `loading` → indica que os dados estão sendo carregados.
+ * - `error` → mensagem de erro caso a API falhe.
+ * - `busca` → texto digitado para busca.
+ * - `turmaFiltro` → filtro por turma.
+ * - `statusFiltro` → filtro por status.
+ * - `pagina` → página atual da tabela.
+ * - `itensPorPagina` → quantidade de itens por página.
+ *
+ * Navegação:
+ * - Botão Voltar → retorna à página anterior (`window.history.back()`).
+ *
+ * Utilitários internos:
+ * - `getTurmaFromDate(dateString)` → calcula a turma com base na data de criação do aluno.
+ * - `getInitials(fullName)` → gera iniciais do aluno para avatar.
+ * - `colorFromName(name)` → gera cor do avatar baseado no nome do aluno.
+ * - `handleLimparFiltros()` → limpa todos os filtros e reseta a página.
+ * - `handleExcluir(id)` → exclui aluno via API após confirmação.
+ *
+ * Filtros:
+ * - Nome ou e-mail → busca textual.
+ * - Turma → dropdown com turmas únicas presentes nos alunos.
+ * - Status → Ativo ou Inativo.
+ *
+ * Paginação:
+ * - Calcula início e fim dos itens com base na página atual e itens por página.
+ * - Renderiza botões de página dinamicamente.
+ *
+ * Métricas:
+ * - Total de alunos filtrados.
+ * - Total de alunos ativos.
+ * - Total de alunos inativos.
+ *
+ * Saída:
+ * - JSX completo com:
+ *   - Cabeçalho com título e botão voltar.
+ *   - Métricas.
+ *   - Barra de busca e filtros.
+ *   - Chips de filtros ativos.
+ *   - Tabela de alunos com avatar, nome, e-mail, turma, status e ações.
+ *   - Paginação.
+ *
+ * Exemplo de uso:
+ * ```jsx
+ * <ListStudents />
+ *
+ * // Interações do usuário:
+ * setBusca("João");
+ * setTurmaFiltro("2025.1");
+ * setStatusFiltro("Ativo");
+ * handleExcluir(12);
+ * ```
+ *
+ * @component
+ * @returns {JSX.Element} Tela de listagem e gerenciamento de estudantes.
  */
 const getTurmaFromDate = (dateString) => {
   if (!dateString) return "N/D";

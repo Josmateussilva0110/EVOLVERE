@@ -24,6 +24,37 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+/**
+ * Componente Dashboard
+ * 
+ * O que faz:
+ *  - Exibe o painel principal do usuário, incluindo menu lateral, cartões de estatísticas, atividades pendentes,
+ *    atualizações recentes e simulado disponível.
+ *  - Permite navegação entre seções como Meu Curso, Turmas, Materiais, Atividades/Simulados, Desempenho e Medalhas.
+ *  - Mostra informações personalizadas, como nome do usuário e notificações importantes.
+ * 
+ * Entrada:
+ *  - Estado interno controlado por useState:
+ *    - activeSection: string, controla a seção ativa do menu lateral.
+ *    - usuario: string, nome do usuário a ser exibido no header.
+ *  - Menu e dados mockados diretamente no componente.
+ * 
+ * Exemplo de entrada:
+ *  {
+ *    activeSection: "dashboard",
+ *    usuario: "Lucas Emanuel"
+ *  }
+ * 
+ * Exemplo de saída:
+ *  - Layout renderizado com:
+ *      - Sidebar com menu e botões de configurações/ajuda/logout
+ *      - Cartões de estatísticas (notas recentes, atividades pendentes)
+ *      - Lista de atividades pendentes com urgência e prazos
+ *      - Atualizações recentes do curso
+ *      - Simulado disponível com botão para iniciar
+ */
+
+
 export default function Dashboard() {
   const [activeSection, setActiveSection] = useState("dashboard");
   const usuario = "Lucas Emanuel";

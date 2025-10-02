@@ -5,9 +5,35 @@ import { FiFilter, FiBarChart2, FiTrendingUp, FiClock, FiUsers, FiBookOpen, FiRe
 /**
  * Componente PerformanceReports
  * 
- * Exibe o painel de Relatórios de Desempenho com filtros de Curso, Turma e Período,
- * além de métricas como média da turma, tempo médio de estudo, evolução do desempenho
- * e gráficos de distribuição de notas e comparação entre turmas.
+ * Painel de Relatórios de Desempenho para coordenadores.
+ * 
+ * O componente exibe:
+ * - Filtros por turma, período e busca (entrada do usuário);
+ * - KPIs (Média geral, tempo médio de estudo, alunos ativos, disciplinas);
+ * - Gráficos de evolução de desempenho e comparação entre turmas;
+ * - Tabela de atividades recentes e insights importantes.
+ * 
+ * Estados internos:
+ * - `turma`: armazena a turma selecionada no filtro (ex: "Turma A").
+ * - `periodo`: armazena o período selecionado (ex: "Jan - Jun").
+ * - `busca`: termo de busca digitado pelo usuário (ex: "João").
+ * 
+ * Uso típico:
+ * O usuário seleciona filtros ou digita uma busca, e o painel
+ * atualiza os KPIs, gráficos e lista de atividades de acordo com os filtros ativos.
+ * 
+ * Exemplo de "entrada" via interação do usuário:
+ * ```js
+ * // Selecionar uma turma
+ * setTurma("Turma A");
+ * // Selecionar um período
+ * setPeriodo("Jan - Jun");
+ * // Buscar por aluno
+ * setBusca("João");
+ * ```
+ * 
+ * Retorno:
+ * - JSX do painel completo com filtros, KPIs, gráficos, atividades recentes e insights.
  * 
  * @component
  */

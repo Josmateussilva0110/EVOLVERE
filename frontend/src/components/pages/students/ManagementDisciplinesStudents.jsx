@@ -20,6 +20,36 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+/**
+ * Componente EstruturaDados
+ * 
+ * O que faz:
+ *  - Exibe uma interface de gerenciamento de materiais, atividades, provas e turmas de um curso.
+ *  - Permite filtrar atividades por tipo, período e status.
+ *  - Mostra resultados filtrados em cards interativos.
+ *  - Possui modal para visualizar turmas disponíveis.
+ * 
+ * Entrada:
+ *  - Estado interno controlado por useState:
+ *    - filtroTipo: { atividade: boolean, prova: boolean, material: boolean }
+ *    - filtroPeriodo: { "2025.2": boolean, "2024.1": boolean, "2023.2": boolean }
+ *    - filtroStatus: { concluido: boolean, pendente: boolean, todos: boolean }
+ *  - Lista de atividades (todasAtividades) e turmas (turmas)
+ * 
+ * Exemplo de entrada:
+ *  {
+ *    filtroTipo: { atividade: true, prova: false, material: false },
+ *    filtroPeriodo: { "2025.2": true, "2024.1": false, "2023.2": false },
+ *    filtroStatus: { concluido: false, pendente: true, todos: false }
+ *  }
+ * 
+ * Exemplo de saída:
+ *  - Cards renderizados no grid apenas com atividades do tipo "Atividade", do período "2025.2" e status "Pendente".
+ *  - Quantidade de resultados filtrados exibida no topo.
+ *  - Modal de turmas acessível ao clicar no botão "Turmas".
+ */
+
+
 export default function EstruturaDados() {
   const [activeSection, setActiveSection] = useState("materiais");
   const [filtroTipo, setFiltroTipo] = useState({ atividade: false, prova: false, material: false });

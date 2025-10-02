@@ -11,6 +11,62 @@ import useFlashMessage from "../../../hooks/useFlashMessage"
 import { Context } from "../../../context/UserContext"
 import formatDate from "../../../utils/formatDate"
 
+/**
+ * RequestsTeachers
+ * 
+ * Exibe solicitações de professores pendentes, permitindo buscar, aprovar ou remover.
+ * 
+ * Entrada: nenhuma
+ * Saída: interface com a lista de professores pendentes
+ * Exemplo de saída: [
+ *   { id: 1, username: "João Silva", course: "Matemática", flag: "SP", diploma: "joao.pdf", role: "Professor", created_at: "2024-10-01" }
+ * ]
+ */
+
+/**
+ * fetchRequests
+ * 
+ * Busca todas as solicitações pendentes da API e atualiza o estado `teachers`.
+ * Entrada: nenhuma
+ * Saída: atualiza `teachers` com array de professores
+ * Exemplo de saída: [{ id: 1, username: "João Silva", course: "Matemática", ... }]
+ */
+
+/**
+ * removeRequest
+ * 
+ * Remove uma solicitação de professor pelo ID.
+ * Entrada: id (number)
+ * Saída: atualiza o estado removendo o professor da lista
+ * Exemplo de saída: array de professores sem o professor removido
+ */
+
+/**
+ * approveRequest
+ * 
+ * Aprova uma solicitação de professor pelo ID.
+ * Entrada: id (number)
+ * Saída: atualiza o estado removendo o professor aprovado
+ * Exemplo de saída: array de professores sem o professor aprovado
+ */
+
+/**
+ * professoresFiltrados
+ * 
+ * Filtra a lista de professores pelo nome ou curso com base no campo de busca.
+ * Entrada: search (string)
+ * Saída: array filtrado de professores
+ * Exemplo de saída: [{ id: 1, username: "João Silva", course: "Matemática", ... }]
+ */
+
+/**
+ * handleVoltar
+ * 
+ * Volta para a página anterior do navegador.
+ * Entrada: nenhuma
+ * Saída: navegação de volta
+ * Exemplo de saída: usuário retorna à página anterior
+ */
 
 /**
  * @typedef {Object} TeacherRequest
