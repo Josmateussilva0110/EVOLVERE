@@ -1,60 +1,14 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useContext } from "react"; // 1. Adicionar useContext
 import { FiArrowLeft, FiSearch, FiSliders, FiBook, FiUserCheck, FiAlertTriangle, FiEdit, FiTrash, FiX } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import requestData from "../../../utils/requestApi";
 import useFlashMessage from "../../../hooks/useFlashMessage";
-/**
- * DisciplineList
- *
- * Componente responsável por **listar, filtrar, ordenar e gerenciar disciplinas**.
- *
- * Funcionalidades:
- * - Exibe disciplinas em tabela ou cartões.
- * - Busca por nome, professor ou ID.
- * - Filtragem por professor.
- * - Ordenação por nome, professor ou ID (asc/desc).
- * - Paginação de resultados.
- * - Editar ou excluir disciplinas via API.
- * - Métricas de total de disciplinas, atribuídas e sem professor.
- *
- * Entradas:
- * - Não recebe props diretamente.
- *
- * Estados locais:
- * - `disciplinas` → lista completa de disciplinas carregadas da API.
- * - `busca` → texto digitado na barra de busca.
- * - `loading` → indica carregamento de dados.
- * - `error` → mensagem de erro caso a API falhe.
- * - `professorFiltro` → filtro por professor.
- * - `ordenacao` → campo usado para ordenar ('nome', 'professor', 'id').
- * - `direcao` → direção da ordenação ('asc', 'desc').
- * - `pagina` → página atual da listagem.
- * - `itensPorPagina` → quantidade de itens exibidos por página.
- * - `modoVisao` → alterna entre tabela e cartões.
- *
- * Navegação:
- * - Voltar → retorna à página anterior.
- * - Nova disciplina → navega para `/coordinator/discipline/register`.
- * - Editar → navega para `/coordinator/discipline/edit/:id`.
- *
- * Saída:
- * - JSX completo com tabela de disciplinas, filtros, busca, paginação e ações.
- *
- * Exemplo de uso:
- * ```jsx
- * <DisciplineList />
- *
- * // Interações do usuário:
- * setBusca("Cálculo");
- * setProfessorFiltro("Prof. João");
- * handleEditar(12);
- * handleDelete(15);
- * ```
- *
- * @component
- * @returns {JSX.Element} Tela de listagem e gerenciamento de disciplinas
- */
+import { Context } from "../../../context/UserContext"; // 2. Importar o Context
+
 function DisciplineList() {
+    // 3. Obter o usuário do contexto
+    const { user } = useContext(Context); 
+    
     const [disciplinas, setDisciplinas] = useState([]);
     const [busca, setBusca] = useState("");
     const [loading, setLoading] = useState(true);
@@ -68,21 +22,48 @@ function DisciplineList() {
     const { setFlashMessage } = useFlashMessage()
     const navigate = useNavigate();
 
+    // 4. Substituir o useEffect antigo por este novo
     useEffect(() => {
-        async function fetchDisciplines() {
-            const response = await requestData('/subjects', 'GET', {}, true)
-            if (response.success) {
-                setDisciplinas(response.data.subjects)
-                setError(null)
-            }
-            else {
-                setDisciplinas([])
-                setError(response.message || 'Falha ao carregar disciplinas')
-            }
-            setLoading(false)
+        // A função só executa se já tivermos um usuário do contexto
+        if (!user.id) {
+            return; // Aguarda o user.id estar disponível
         }
-        fetchDisciplines()
-    }, [])
+
+        const fetchCoordinatorDisciplines = async () => {
+            try {
+                setLoading(true);
+                // Primeiro, busca os dados do coordenador para encontrar o ID do curso
+                const coordinatorRes = await requestData(`/user/coordinator/${user.id}`, 'GET', {}, true);
+                if (!coordinatorRes.success || !coordinatorRes.data.user?.course_id) {
+                    throw new Error("Não foi possível encontrar o curso associado a este coordenador.");
+                }
+                const courseId = coordinatorRes.data.user.course_id;
+
+                // Agora, busca as disciplinas USANDO o ID do curso (a nova rota do backend)
+                const disciplinesRes = await requestData(`/courses/${courseId}/subjects`, 'GET', {}, true);
+
+                if (disciplinesRes.success) {
+                    // CORREÇÃO: A resposta da API está em `data.data.subjects`.
+                    // Adicionamos `|| []` para garantir que seja sempre um array.
+                    setDisciplinas(disciplinesRes.data.data.subjects || []);
+                    setError(null);
+                } else {
+                    setDisciplinas([]);
+                    // Se a API retornar 404 (nenhuma disciplina), não mostramos como erro, apenas uma lista vazia.
+                    if (disciplinesRes.status !== 404) {
+                       setError(disciplinesRes.message || 'Falha ao carregar disciplinas do curso.');
+                    }
+                }
+            } catch (err) {
+                setError(err.message);
+                setDisciplinas([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCoordinatorDisciplines();
+    }, [user.id]); // A dependência agora é user.id para refazer a busca se o usuário mudar
 
     /**
      * Exclui uma disciplina via API e atualiza a lista no estado.
@@ -98,14 +79,16 @@ function DisciplineList() {
         }
     }
 
-
     const handleEditar = (id) => {
-        navigate(`/coordinator/discipline/edit/${id}`); // Ajuste a rota se necessário
+        navigate(`/coordinator/discipline/edit/${id}`); 
     };
 
     // Filtra disciplinas com base na busca (usando useMemo para otimização)
     const disciplinasFiltradas = useMemo(() => {
-        let lista = disciplinas.filter(d =>
+        // Adicionado um fallback para o caso de disciplinas ser undefined momentaneamente
+        const listaInicial = Array.isArray(disciplinas) ? disciplinas : [];
+        
+        let lista = listaInicial.filter(d =>
             (d.name && d.name.toLowerCase().includes(busca.toLowerCase())) ||
             d.id?.toString().includes(busca) ||
             (d.professor_nome && d.professor_nome.toLowerCase().includes(busca.toLowerCase()))
@@ -133,12 +116,12 @@ function DisciplineList() {
 
     // Métricas para cards de resumo
     const { total, atribuídas, semProfessor } = useMemo(() => {
-        const t = disciplinas.length
-        const a = disciplinas.filter(d => Boolean(d.professor_nome)).length
+        const t = Array.isArray(disciplinas) ? disciplinas.length : 0;
+        const a = Array.isArray(disciplinas) ? disciplinas.filter(d => Boolean(d.professor_nome)).length : 0;
         return { total: t, atribuídas: a, semProfessor: t - a }
     }, [disciplinas])
 
-    // Utilitários visuais
+    // Utilitários visuais (sem alterações)
     const getInitials = (text = '') => {
         const cleaned = String(text).trim()
         if (!cleaned) return 'NA'
@@ -161,6 +144,7 @@ function DisciplineList() {
         return palette[idx]
     }
 
+    // O JSX (parte visual) continua exatamente o mesmo
     return (
         <div className="min-h-screen bg-[#060060] p-6">
             <div className="max-w-7xl mx-auto">
@@ -170,7 +154,7 @@ function DisciplineList() {
                         <div>
                             <p className="text-[11px] uppercase tracking-widest text-[#060060]/80 font-semibold">Administração</p>
                             <h1 className="mt-1 text-[34px] leading-8 font-black text-gray-900">Gerenciar Disciplinas</h1>
-                            <p className="text-sm text-gray-600 mt-1">Aqui você pode cadastrar, editar e visualizar disciplinas.</p>
+                            <p className="text-sm text-gray-600 mt-1">Aqui você pode cadastrar, editar e visualizar as disciplinas do seu curso.</p>
                             <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <div className="rounded-2xl bg-slate-50/80 ring-1 ring-slate-200/50 p-4 flex items-center justify-between">
                                     <div>
@@ -300,6 +284,10 @@ function DisciplineList() {
                                     <div key={i} className="h-16 rounded-xl bg-slate-100 animate-pulse" />
                                 ))}
                             </div>
+                        ) : error ? (
+                            <div className="text-center py-10 text-red-600 text-sm">
+                                <p><strong>Erro:</strong> {error}</p>
+                            </div>
                         ) : (
                             <div className="overflow-x-auto">
                                 <table className="min-w-full border-separate border-spacing-y-3">
@@ -339,7 +327,7 @@ function DisciplineList() {
                                         ) : (
                                             <tr>
                                                 <td colSpan={4} className="text-center py-10 text-slate-500 text-sm">
-                                                    Nenhuma disciplina cadastrada.
+                                                    Nenhuma disciplina encontrada para este curso.
                                                 </td>
                                             </tr>
                                         )}
@@ -367,7 +355,6 @@ function DisciplineList() {
                             </div>
                         )}
                     </div>
-
                 </div>
             </div>
         </div>
@@ -375,5 +362,4 @@ function DisciplineList() {
 }
 
 export default DisciplineList;
-
 
