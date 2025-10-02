@@ -3,19 +3,31 @@ import { useNavigate } from "react-router-dom"
 import { useState, useEffect, useContext } from "react"
 import { Context } from "../../../context/UserContext"
 import requestData from "../../../utils/requestApi"
- 
+
 /**
- * Componente DashboardPrincipal
- * 
- * Exibe o painel principal da Coordenação Acadêmica, contendo:
- * - Cabeçalho com saudação e função do usuário
- * - Cards de navegação (Relatórios, Cursos, Alunos)
- * - KPIs (Alunos Ativos, Cursos Cadastrados, Solicitações Pendentes)
- * - Botão de ação para Solicitações
- * 
- * @component
- * @example
- * return <DashboardPrincipal />
+ * DashboardPrincipal
+ *
+ * Componente responsável por exibir o painel principal da **Coordenação Acadêmica**.
+ *
+ * O que faz:
+ * - Renderiza cabeçalho com saudação e informações do coordenador.
+ * - Mostra cards de navegação para Disciplinas, Professores e Alunos.
+ * - Apresenta indicadores (KPIs) como número de disciplinas cadastradas,
+ *   professores ativos e solicitações pendentes.
+ * - Possui botões de ação rápidos para Solicitações e Relatórios.
+ * - Exibe menu de perfil com acesso a configurações e dados do usuário.
+ *
+ * Entradas:
+ * - Não recebe props diretamente.
+ * - Consome dados do usuário pelo contexto `Context`.
+ *
+ * Saída:
+ * - Retorna um elemento JSX com a interface do painel administrativo.
+ *
+ * Exemplo de uso:
+ * ```jsx
+ * <DashboardPrincipal />
+ * ```
  */
 function DashboardPrincipal() {
   const navigate = useNavigate()
@@ -26,34 +38,54 @@ function DashboardPrincipal() {
   const initials = (displayName?.charAt(0) || 'U').toUpperCase()
   const [ menuOpen, setMenuOpen ] = useState(false)
 
-  useEffect(() => {
   /**
-   * useEffect para buscar informações detalhadas do usuário coordenador.
-   * 
-   * Executa quando o objeto 'user' do contexto é definido ou atualizado.
-   * - Se o usuário estiver disponível, faz uma requisição GET para a API 
-   *   `/user/coordinator/{user.id}` para obter os dados do coordenador.
-   * - Atualiza o estado 'userRequest' com os dados retornados da API.
-   * - Caso a requisição falhe, define 'userRequest' como null.
-   * 
+   * Efeito: Buscar informações detalhadas do coordenador.
+   *
+   * O que faz:
+   * - Executa chamada GET para `/user/coordinator/{user.id}`.
+   * - Armazena no estado `userRequest` os dados retornados.
+   * - Define `userRequest` como `null` caso a requisição falhe.
+   *
+   * Entradas:
+   * - `user` (do contexto) → utilizado para compor a URL da requisição.
+   *
+   * Saída:
+   * - Atualiza o estado local `userRequest`.
+   *
    * Dependências:
-   * - [user]: garante que a busca só ocorre quando 'user' estiver disponível ou mudar.
+   * - Executa novamente sempre que `user` mudar.
    */
+  useEffect(() => {
     if(user) {
       async function fetchUser() {
         const response = await requestData(`/user/coordinator/${user.id}`, 'GET', {}, true)
         if(response.success) {
           console.log(response.data)
           setUserRequest(response.data.user)
-        }
-        else {
+        } else {
           setUserRequest(null)
         }
       }
       fetchUser()
-  }
+    }
   }, [user])
 
+  /**
+   * Efeito: Buscar indicadores (KPIs) do coordenador.
+   *
+   * O que faz:
+   * - Executa chamada GET para `/user/coordinator/kpi/{user.id}`.
+   * - Armazena no estado `kpi` os valores retornados pela API.
+   *
+   * Entradas:
+   * - `user` (do contexto) → utilizado para compor a URL da requisição.
+   *
+   * Saída:
+   * - Atualiza o estado local `kpi` com os indicadores.
+   *
+   * Dependências:
+   * - Executa novamente sempre que `user` mudar.
+   */
   useEffect(() => {
     if(user) {
       async function fetchKpi() {
@@ -74,6 +106,7 @@ function DashboardPrincipal() {
         <div className="w-full max-w-6xl bg-white rounded-3xl p-6 md:p-10 shadow-xl flex flex-col gap-8">
 
           {/* Cabeçalho */}
+          {/* Exibe título da área administrativa, saudação ao coordenador e menu de perfil */}
           <div className="flex items-start md:items-center justify-between gap-6 flex-col md:flex-row">
             <div>
               <p className="text-xs uppercase tracking-wider text-[#060060] font-semibold">Área administrativa</p>
@@ -87,7 +120,7 @@ function DashboardPrincipal() {
               </p>
             </div>
 
-            {/* Perfil e ações dentro do card branco */}
+            {/* Perfil e menu suspenso */}
             <div className="flex items-center gap-3 md:gap-4">
               <span className="hidden sm:inline-flex items-center gap-2 rounded-full bg-[#060060]/10 text-[#060060] px-3 py-1 text-sm font-medium ring-1 ring-[#060060]/20">
                 <FaChalkboardTeacher />
@@ -108,8 +141,10 @@ function DashboardPrincipal() {
           </div>
 
           {/* Cards de navegação */}
+          {/* Cada card redireciona para uma seção administrativa */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             {/* Disciplinas */}
+            {/* Card para gerenciar disciplinas */}
             <div
               onClick={() => navigate("/coordinator/discipline/list")}
               className="group relative overflow-hidden rounded-2xl cursor-pointer bg-indigo-50 p-5 shadow-sm ring-1 ring-indigo-100 hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
@@ -127,6 +162,7 @@ function DashboardPrincipal() {
             </div>
 
             {/* Professores */}
+            {/* Card para gerenciamento de professores */}
             <div
               onClick={() => navigate("/coordinator/teacher/manage")}
               className="group relative overflow-hidden rounded-2xl cursor-pointer bg-emerald-50 p-5 shadow-sm ring-1 ring-emerald-100 hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
@@ -144,6 +180,7 @@ function DashboardPrincipal() {
             </div>
 
             {/* Alunos */}
+            {/* Card para consulta e acompanhamento de alunos */}
             <div
               onClick={() => navigate("/coordinator/student/list")}
               className="group relative overflow-hidden rounded-2xl cursor-pointer bg-amber-50 p-5 shadow-sm ring-1 ring-amber-100 hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
@@ -162,7 +199,9 @@ function DashboardPrincipal() {
           </div>
 
           {/* KPIs */}
+          {/* Exibição dos indicadores principais da coordenação */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+            {/* KPI Disciplinas */}
             <div className="rounded-2xl bg-gray-50 p-6 shadow-sm ring-1 ring-gray-200">
               <div className="flex items-center justify-between">
                 <div>
@@ -176,6 +215,7 @@ function DashboardPrincipal() {
               <p className="mt-3 text-xs text-gray-500">Atualizado diariamente</p>
             </div>
 
+            {/* KPI Professores */}
             <div className="rounded-2xl bg-gray-50 p-6 shadow-sm ring-1 ring-gray-200">
               <div className="flex items-center justify-between">
                 <div>
@@ -189,6 +229,7 @@ function DashboardPrincipal() {
               <p className="mt-3 text-xs text-gray-500">Últimos 30 dias</p>
             </div>
 
+            {/* KPI Solicitações */}
             <div className="rounded-2xl bg-gray-50 p-6 shadow-sm ring-1 ring-gray-200">
               <div className="flex items-center justify-between">
                 <div>
@@ -204,6 +245,7 @@ function DashboardPrincipal() {
           </div>
 
           {/* Ações principais */}
+          {/* Botões de navegação para Solicitações e Relatórios */}
           <div className="flex flex-col sm:flex-row justify-center gap-3 md:gap-4 mt-2">
             <button
               onClick={() => navigate("/coordinator/requests")}

@@ -3,10 +3,56 @@ import { FiArrowLeft, FiSearch, FiSliders, FiBook, FiUserCheck, FiAlertTriangle,
 import { useNavigate } from "react-router-dom";
 import requestData from "../../../utils/requestApi";
 import useFlashMessage from "../../../hooks/useFlashMessage";
-
 /**
- * Tela de listagem de disciplinas com busca, edição e exclusão,
- * conectada à API do backend. UI refinada com melhor tipografia e feedback.
+ * DisciplineList
+ *
+ * Componente responsável por **listar, filtrar, ordenar e gerenciar disciplinas**.
+ *
+ * Funcionalidades:
+ * - Exibe disciplinas em tabela ou cartões.
+ * - Busca por nome, professor ou ID.
+ * - Filtragem por professor.
+ * - Ordenação por nome, professor ou ID (asc/desc).
+ * - Paginação de resultados.
+ * - Editar ou excluir disciplinas via API.
+ * - Métricas de total de disciplinas, atribuídas e sem professor.
+ *
+ * Entradas:
+ * - Não recebe props diretamente.
+ *
+ * Estados locais:
+ * - `disciplinas` → lista completa de disciplinas carregadas da API.
+ * - `busca` → texto digitado na barra de busca.
+ * - `loading` → indica carregamento de dados.
+ * - `error` → mensagem de erro caso a API falhe.
+ * - `professorFiltro` → filtro por professor.
+ * - `ordenacao` → campo usado para ordenar ('nome', 'professor', 'id').
+ * - `direcao` → direção da ordenação ('asc', 'desc').
+ * - `pagina` → página atual da listagem.
+ * - `itensPorPagina` → quantidade de itens exibidos por página.
+ * - `modoVisao` → alterna entre tabela e cartões.
+ *
+ * Navegação:
+ * - Voltar → retorna à página anterior.
+ * - Nova disciplina → navega para `/coordinator/discipline/register`.
+ * - Editar → navega para `/coordinator/discipline/edit/:id`.
+ *
+ * Saída:
+ * - JSX completo com tabela de disciplinas, filtros, busca, paginação e ações.
+ *
+ * Exemplo de uso:
+ * ```jsx
+ * <DisciplineList />
+ *
+ * // Interações do usuário:
+ * setBusca("Cálculo");
+ * setProfessorFiltro("Prof. João");
+ * handleEditar(12);
+ * handleDelete(15);
+ * ```
+ *
+ * @component
+ * @returns {JSX.Element} Tela de listagem e gerenciamento de disciplinas
  */
 function DisciplineList() {
     const [disciplinas, setDisciplinas] = useState([]);

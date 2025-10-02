@@ -1,21 +1,55 @@
 import { useState } from "react"
 
 /**
- * Componente CoursesList
- * 
- * Exibe uma lista de cursos com funcionalidades de:
- * - Pesquisa por nome ou ID
- * - Paginação
- * - Indicação de status do curso
- * - Adição de novo curso (botão fictício)
- * 
+ * CoursesList
+ *
+ * Componente responsável por **exibir e gerenciar a lista de cursos**.
+ *
+ * Funcionalidades:
+ * - Pesquisa por nome ou ID do curso.
+ * - Paginação com botões "Anterior" e "Próximo".
+ * - Exibição de status de cada curso (Ativo/Inativo).
+ * - Exibição de informações do curso:
+ *    - Nome
+ *    - Data de criação
+ *    - Data de atualização ou observação (quando inativo)
+ *    - ID
+ * - Botão fictício de adicionar curso (visual apenas, sem funcionalidade).
+ *
+ * Entradas:
+ * - Não recebe props diretamente.
+ * - Dados de cursos estão definidos internamente como lista fictícia.
+ *
+ * Estados locais:
+ * - `search` → texto digitado no campo de busca.
+ * - `pagina` → página atual exibida na lista.
+ *
+ * Variáveis internas:
+ * - `cursosPorPagina` → quantidade de cursos exibidos por página.
+ * - `cursosFiltrados` → cursos que atendem ao critério de busca.
+ * - `totalPaginas` → número total de páginas calculado a partir dos cursos filtrados.
+ * - `cursosPaginaAtual` → cursos que serão exibidos na página atual.
+ *
  * Estrutura visual:
- * - Container central branco com sombra
- * - Campo de pesquisa com ícone de lupa
- * - Botão de adicionar curso
- * - Lista de cursos em grid 2x2
- * - Paginação com botões "Anterior" e "Próximo"
+ * - Container branco centralizado com sombra.
+ * - Botão voltar para página anterior.
+ * - Campo de busca com ícone de lupa.
+ * - Grid 2x2 exibindo os cursos da página atual.
+ * - Paginação com navegação entre páginas e exibição do número da página.
+ *
+ * Exemplo de uso:
+ * ```jsx
+ * <CoursesList />
+ *
+ * // Interações do usuário:
+ * setSearch("Medicina"); // filtra por nome ou ID
+ * setPagina(2);          // navega para a página 2
+ * ```
+ *
+ * @component
+ * @returns {JSX.Element} Tela de listagem de cursos com filtros e paginação.
  */
+
 function CoursesList() {
   /** Estado para armazenar o texto de busca */
   const [search, setSearch] = useState("")

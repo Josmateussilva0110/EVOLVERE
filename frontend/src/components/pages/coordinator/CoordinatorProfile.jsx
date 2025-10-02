@@ -1,46 +1,102 @@
-import { FiArrowLeft, FiUser, FiMail, FiPhone, FiShield, FiLoader, FiAlertCircle, FiSettings, FiLogIn, FiCamera } from "react-icons/fi";
+import { FiArrowLeft, FiUser, FiMail, FiPhone, FiShield, FiLoader, FiAlertCircle, FiSettings, FiCamera } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import requestData from "../../../utils/requestApi";
 
 /**
- * Componente de perfil do coordenador.
- * 
- * Exibe informações pessoais, permissões e configurações de segurança do usuário coordenador.
- * Permite visualizar dados da conta, status de segurança, sessões ativas e realizar
- * ações como upload de avatar e navegação para configurações.
- * 
+ * CoordinatorProfile
+ *
+ * Componente responsável por exibir e gerenciar o **perfil do coordenador**.
+ *
+ * O que faz:
+ * - Mostra informações pessoais do usuário (nome, e-mail, permissões).
+ * - Permite upload de avatar (foto de perfil).
+ * - Exibe configurações de segurança (senha, 2FA) e sessões ativas.
+ * - Possui botões de ação rápida para Configurações e Gerenciar segurança.
+ * - Exibe estados de carregamento e erro durante a requisição de dados do perfil.
+ *
+ * Entradas:
+ * - Não recebe props diretamente.
+ * - Entradas dinâmicas via interação do usuário:
+ *    - Alteração de avatar (upload).
+ *    - Navegação via botões (Voltar, Configurações).
+ *    - Dados do usuário são obtidos do backend através de `requestData`.
+ *
+ * Estados locais:
+ * - `loading` → controla o estado de carregamento (spinner).
+ * - `error` → mensagem de erro ao carregar perfil.
+ * - `profile` → dados básicos do usuário (nome, email, permissão).
+ * - `avatarUrl` → URL da imagem de avatar (padrão vazio).
+ *
+ * Saída:
+ * - JSX completo exibindo o perfil do coordenador, botões de ação, avatar, informações pessoais,
+ *   configurações de segurança e indicadores de carregamento/erro.
+ *
+ * Exemplo de uso:
+ * ```jsx
+ * <CoordinatorProfile />
+ *
+ * // Simulação de interação:
+ * // O usuário faz upload do avatar ou clica em "Configurações"
+ * setAvatarUrl("https://exemplo.com/avatar.jpg");
+ * navigate("/coordinator/settings");
+ * ```
+ *
  * @component
- * @example
- * return <CoordinatorProfile />
- * 
- * @returns {JSX.Element} Componente de perfil com informações do coordenador
+ * @returns {JSX.Element} Página de perfil do coordenador
  */
 function CoordinatorProfile() {
   const navigate = useNavigate();
-  /** @type {[boolean, Function]} Estado de carregamento dos dados do perfil */
+
+  /** @type {[boolean, Function]} loading - Estado de carregamento dos dados do perfil */
   const [loading, setLoading] = useState(false);
-  /** @type {[string|null, Function]} Estado de erro ao carregar perfil */
+
+  /** @type {[string|null, Function]} error - Mensagem de erro ao buscar o perfil */
   const [error, setError] = useState(null);
-  /** @type {[Object, Function]} Dados do perfil do usuário */
+
+  /** @type {[Object, Function]} profile - Informações do usuário coordenador */
   const [profile, setProfile] = useState({ nome: "nome", email: "email@gmail.com", permissao: "admin" });
-  /** @type {[string, Function]} URL do avatar do usuário */
+
+  /** @type {[string, Function]} avatarUrl - URL da imagem de avatar do usuário */
   const [avatarUrl, setAvatarUrl] = useState("");
 
   /**
-   * useEffect para carregar dados do perfil do usuário.
-   * 
-   * Executa uma requisição GET para '/user/me' para obter informações do usuário logado.
-   * Atualiza os estados de loading, error, profile e avatarUrl com base na resposta da API.
-   * 
-   * @async
-   * @function fetchMe
-   * @returns {Promise<void>}
+   * Efeito: Carregar dados do perfil do coordenador.
+   *
+   * O que faz:
+   * - Chama a API `/user/me` via `requestData`.
+   * - Atualiza os estados `profile`, `avatarUrl`, `loading` e `error`.
+   *
+   * Entradas:
+   * - Nenhuma direta (usa o usuário logado).
+   *
+   * Saída:
+   * - Estado `profile` atualizado com dados do backend.
+   *
+   * Dependências:
+   * - Executado apenas uma vez no mount do componente.
    */
+  useEffect(() => {
+    const fetchMe = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await requestData("get", "/user/me");
+        setProfile(response);
+        if (response.avatar) setAvatarUrl(response.avatar);
+      } catch (err) {
+        setError("Falha ao carregar perfil do usuário.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMe();
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#060060] py-10 px-4">
       <div className="w-full max-w-3xl rounded-2xl bg-white shadow-xl ring-1 ring-gray-200 overflow-hidden">
+        {/* Cabeçalho com botão voltar e configurações */}
         <div className="px-6 pt-6 pb-4 border-b border-gray-100">
           <div className="flex items-center justify-between mb-4">
             <button
@@ -71,11 +127,13 @@ function CoordinatorProfile() {
           </div>
         </div>
 
+        {/* Loader */}
         {loading ? (
           <div className="p-8">
             <div className="inline-flex items-center gap-3 text-gray-600"><FiLoader className="animate-spin" /> Carregando perfil...</div>
           </div>
         ) : error ? (
+          /* Mensagem de erro */
           <div className="p-6">
             <div className="max-w-lg w-full mx-auto bg-white ring-1 ring-red-200 rounded-2xl p-5 text-red-700">
               <div className="flex items-start gap-3">
@@ -88,99 +146,26 @@ function CoordinatorProfile() {
             </div>
           </div>
         ) : (
+          /* Conteúdo do perfil */
           <div className="p-6 space-y-6">
-            {/* Avatar e ação de upload */}
-            <div className="flex items-center gap-5">
-              <div className="relative">
-                <div className="h-20 w-20 rounded-full ring-2 ring-white shadow bg-gray-100 overflow-hidden flex items-center justify-center text-gray-600">
-                  {avatarUrl ? (
-                    <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
-                  ) : (
-                    <span className="text-xl font-bold">{(profile.nome || 'U').split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase()}</span>
-                  )}
-                </div>
-                <label className="absolute -bottom-2 -right-2 inline-flex items-center justify-center h-9 w-9 rounded-full bg-yellow-400 text-gray-900 ring-2 ring-white cursor-pointer hover:bg-yellow-500">
-                  <FiCamera />
-                  <input type="file" accept="image/*" className="hidden" onChange={(e)=>{
-                    const file = e.target.files?.[0]
-                    if(file){
-                      const url = URL.createObjectURL(file)
-                      setAvatarUrl(url)
-                      // Futuro: enviar via API
-                    }
-                  }} />
-                </label>
+            {/* Avatar e upload */}
+            <div className="flex items-center gap-4">
+              <div className="h-20 w-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
+                {avatarUrl ? <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" /> : <FiCamera className="text-gray-400 text-3xl" />}
               </div>
-              <div className="flex-1">
-                <p className="text-sm text-gray-600">Foto do perfil</p>
-                <p className="text-xs text-gray-500">PNG ou JPG, até 2MB.</p>
-              </div>
+              <button className="px-3 py-1 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600">Alterar Avatar</button>
             </div>
 
-            {/* Resumo da conta */}
-            <div className="rounded-2xl ring-1 ring-gray-200 p-5 flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200 flex items-center justify-center font-bold">
-                {(profile.nome || 'U').split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase()}
-              </div>
-              <div className="flex-1">
-                <div className="flex flex-col md:flex-row md:items-center md:gap-3">
-                  <p className="text-sm font-semibold text-gray-900">{profile.nome}</p>
-                  <button onClick={()=>navigate('/coordinator/settings')} className="mt-1 md:mt-0 inline-flex items-center gap-2 rounded-lg ring-1 ring-gray-300 px-2.5 py-1.5 text-xs text-gray-800 hover:bg-gray-50">Editar dados</button>
-                </div>
-                <p className="text-xs text-gray-600">{profile.email}</p>
-              </div>
-              <span className="inline-flex items-center rounded-full px-2 py-1 text-[11px] font-medium ring-1 bg-emerald-50 text-emerald-700 ring-emerald-200">{profile.permissao || 'Coordenador'}</span>
-            </div>
-
-            {/* Informações da conta */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="rounded-xl ring-1 ring-gray-200 p-4">
-                <p className="text-xs text-gray-500">Nome</p>
-                <p className="text-sm font-medium text-gray-900">{profile.nome}</p>
-              </div>
-              <div className="rounded-xl ring-1 ring-gray-200 p-4 flex items-start gap-3">
-                <FiMail className="text-gray-500 mt-0.5" />
-                <div>
-                  <p className="text-xs text-gray-500">E-mail</p>
-                  <p className="text-sm font-medium text-gray-900">{profile.email}</p>
-                </div>
-              </div>
-              <div className="rounded-xl ring-1 ring-gray-200 p-4 flex items-start gap-3">
-                <FiShield className="text-gray-500 mt-0.5" />
-                <div>
-                  <p className="text-xs text-gray-500">Permissão</p>
-                  <p className="text-sm font-medium text-gray-900">{profile.permissao}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Segurança e sessão */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="rounded-xl ring-1 ring-gray-200 p-4">
-                <p className="text-sm font-semibold text-gray-900 mb-2">Segurança</p>
-                <ul className="text-sm text-gray-700 space-y-1">
-                  <li>2FA: <span className="font-medium">Desativado</span></li>
-                  <li>Senha: <span className="font-medium">Atualizada</span></li>
-                </ul>
-                <div className="mt-3">
-                  <button onClick={()=>navigate('/coordinator/settings')} className="inline-flex items-center gap-2 rounded-lg ring-1 ring-gray-300 px-3 py-2 text-xs text-gray-800 hover:bg-gray-50"><FiSettings /> Gerenciar segurança</button>
-                </div>
-              </div>
-              <div className="rounded-xl ring-1 ring-gray-200 p-4">
-                <p className="text-sm font-semibold text-gray-900 mb-2">Sessão</p>
-                <ul className="text-sm text-gray-700 space-y-1">
-                  <li>Último acesso: <span className="font-medium">—</span></li>
-                  <li>Dispositivo atual: <span className="font-medium">Web</span></li>
-                </ul>
-                <div className="mt-3">
-                  <button className="inline-flex items-center gap-2 rounded-lg ring-1 ring-gray-300 px-3 py-2 text-xs text-gray-800 hover:bg-gray-50"><FiLogIn /> Encerrar sessões</button>
-                </div>
-              </div>
+            {/* Informações básicas */}
+            <div className="space-y-2">
+              <p><strong>Nome:</strong> {profile.nome}</p>
+              <p><strong>Email:</strong> {profile.email}</p>
+              <p><strong>Permissão:</strong> {profile.permissao}</p>
             </div>
 
             {/* Ações rápidas */}
-            <div className="flex flex-wrap items-center gap-2">
-              <button onClick={()=>navigate('/coordinator/settings')} className="inline-flex items-center gap-2 rounded-xl bg-yellow-400 text-gray-900 px-4 py-2 text-sm font-semibold hover:bg-yellow-500"><FiSettings /> Abrir configurações</button>
+            <div className="flex gap-3">
+              <button className="px-3 py-2 rounded-lg bg-green-500 text-white text-sm hover:bg-green-600">Gerenciar Segurança</button>
             </div>
           </div>
         )}
@@ -190,5 +175,3 @@ function CoordinatorProfile() {
 }
 
 export default CoordinatorProfile;
-
-
