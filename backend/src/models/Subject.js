@@ -226,11 +226,16 @@ class Subject {
      */
     async countAllSubjects() {
         try {
-            const result = await knex('subjects').count('* as total');
-            return result[0] ? Number(result[0].total) : 0;
+            const result = await knex.raw(`
+                select 
+                    count(*)
+                from subjects 
+            `)
+            const rows = result.rows
+            return rows.length > 0 ? rows[0] : undefined
         } catch(err) {
-            console.error('Erro ao contar todas as disciplinas:', err);
-            return 0;
+            console.error('Erro ao contar todas as disciplinas:', err)
+            return undefined
         }
     }
 
@@ -245,15 +250,19 @@ class Subject {
      */
     async countSubjects(access_code) {
         try {
-            const result = await knex('subjects')
-                .join('course_valid as cv', 'subjects.course_valid_id', '=', 'cv.id')
-                .where('cv.course_code', access_code)
-                .count('* as total');
-
-            return result[0] ? Number(result[0].total) : 0;
+            const result = await knex.raw(`
+                select 
+                    count(*)
+                from subjects 
+                inner join course_valid cv
+                    on cv.id = course_valid_id
+                where cv.course_code = ?
+            `, [access_code])
+            const rows = result.rows
+            return rows.length > 0 ? rows[0] : undefined
         } catch(err) {
-            console.error('Erro ao contar as disciplinas por curso:', err);
-            return 0;
+            console.error('Erro ao contar as disciplinas', err)
+            return undefined
         }
     }
 
