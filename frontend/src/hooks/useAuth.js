@@ -37,7 +37,7 @@ export default function useAuth({ setAuthenticated, setUser }) {
       setFlashMessage(response.data.message, "success")
       navigate("/")
     } else {
-      setFlashMessage(response.message, "error")
+      setFlashMessage('Usuário ou senha incorreto', "error")
     }
     return response
   }

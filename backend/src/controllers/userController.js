@@ -272,11 +272,18 @@ class UserController {
      */
     async getStudents(request, response) {
         try {
-            const students = await User.findAllStudents();
-            return response.status(200).json({ status: true, data: students });
+            const {id} = request.params
+            const error = UserFieldValidator.validate({id})
+            if (error) return response.status(422).json({ status: false, message: error })
+            const admin = await User.isAdmin(id)
+            if(!admin) {
+                return response.status(422).json({status: false, message: "Usuários indisponíveis"})
+            }
+            const students = await User.findAllStudents()
+            return response.status(200).json({ status: true, data: students })
         } catch (err) {
             console.error("Erro ao listar alunos:", err);
-            return response.status(500).json({ status: false, message: "Erro interno no servidor." });
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
 

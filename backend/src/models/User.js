@@ -155,40 +155,41 @@ class User {
     }
 
 
-/**
- * Busca todos os alunos, excluindo:
- * 1. Usuários com registration 'admin'.
- * 2. TODOS os usuários que estão na tabela 'validate_professionals'.
- * @returns {Promise<Object[]>} - Uma lista de usuários que são apenas alunos.
- */
-async findAllStudents() {
-    try {
-        const students = await knex('users')
-            .select(
-                'users.id', 
-                'users.username', 
-                'users.email', 
-                'users.status', 
-                'users.created_at'
-            )
-            
-            // FILTRO 1: Aqui está o "negócio dos admins".
-            // A consulta primeiro remove qualquer usuário que seja 'admin'.
-            .whereNot('registration', 'admin')
-            
-            // FILTRO 2: E aqui entra a linha que você mencionou.
-            // Dos usuários que sobraram, a consulta remove todos que estão na
-            // lista de profissionais.
-            .whereNotIn('id', function() {
-                this.select('professional_id').from('validate_professionals');
-            });
-            
-        return students;
-    } catch (err) {
-        console.error("Erro ao buscar alunos:", err);
-        return [];
+    /**
+     * Busca todos os alunos, excluindo:
+     * 1. Usuários com registration 'admin'.
+     * 2. TODOS os usuários que estão na tabela 'validate_professionals'.
+     * @returns {Promise<Object[]>} - Uma lista de usuários que são apenas alunos.
+     */
+    async findAllStudents() {
+        try {
+            const students = await knex('users')
+                .select(
+                    'users.id', 
+                    'users.username', 
+                    'users.registration',
+                    'users.email', 
+                    'users.status', 
+                    'users.created_at'
+                )
+                
+                // FILTRO 1: Aqui está o "negócio dos admins".
+                // A consulta primeiro remove qualquer usuário que seja 'admin'.
+                .whereNot('registration', 'admin')
+                
+                // FILTRO 2: E aqui entra a linha que você mencionou.
+                // Dos usuários que sobraram, a consulta remove todos que estão na
+                // lista de profissionais.
+                .whereNotIn('id', function() {
+                    this.select('professional_id').from('validate_professionals');
+                });
+                
+            return students;
+        } catch (err) {
+            console.error("Erro ao buscar alunos:", err);
+            return [];
+        }
     }
-}
 
     /**
      * @param {number} id - O ID do utilizador a ser apagado.
@@ -201,6 +202,22 @@ async findAllStudents() {
         } catch (err) {
             console.error("Erro ao apagar utilizador:", err);
             return false;
+        }
+    }
+
+    async isAdmin(id) {
+        try {
+            const result = await knex.raw(`
+                select 
+                    *
+                from users
+                where registration = 'admin' and id = ?
+            `, [id])
+            const rows = result.rows
+            return rows.length > 0 ? rows[0] : false
+        } catch (err) {
+            console.error("Erro ao buscar admin:", err)
+            return false
         }
     }
 }
