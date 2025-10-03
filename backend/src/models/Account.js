@@ -225,6 +225,7 @@ class Account {
                 select 
                     vp.professional_id,
                     u.username,
+                    u.registration,
                     s.name as disciplina,
                     cv.name as course
                 from validate_professionals vp
@@ -395,6 +396,7 @@ class Account {
                 select 
                     vp.professional_id,
                     u.username,
+                    u.registration,
                     s.name as disciplina,
                     cv.name as course
                 from validate_professionals vp

@@ -435,7 +435,7 @@ function ListStudents() {
                   <thead className="bg-slate-50 text-left">
                     <tr>
                       <th className="px-4 py-3 text-xs font-semibold text-slate-600">
-                        Matricula
+                        Matrícula
                       </th>
                       <th className="px-4 py-3 text-xs font-semibold text-slate-600">
                         Aluno
