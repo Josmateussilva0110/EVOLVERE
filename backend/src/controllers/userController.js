@@ -212,52 +212,6 @@ class UserController {
 
 
     /**
-     * Controlador para obter os dados de um coordenador acadêmico pelo ID.
-     * 
-     * Fluxo de execução:
-     * 1. Extrai o `id` dos parâmetros da requisição (`request.params`).
-     * 2. Valida o `id` usando `UserFieldValidator`. Caso inválido, retorna status 422.
-     * 3. Chama `User.findCoordinatorById(id)` para buscar os dados do coordenador.
-     * 4. Se não encontrar o usuário, retorna status 404.
-     * 5. Se encontrado, retorna status 200 com os dados do usuário.
-     * 6. Em caso de erro interno, retorna status 500.
-     * 
-     * @async
-     * @function getCoordinatorData
-     * @param {Object} request - Objeto da requisição Express.
-     * @param {Object} request.params - Parâmetros da URL, incluindo `id`.
-     * @param {Object} response - Objeto de resposta Express.
-     * @returns {Promise<Object>} JSON contendo:
-     *   - status: boolean (true se sucesso, false se erro)
-     *   - user: objeto com os dados do coordenador (quando encontrado)
-     *   - message: string com mensagem de erro (quando aplicável)
-     * 
-     * @example
-     * // Rota Express
-     * app.get('/coordinator/:id', UserController.getCoordinatorData);
-     */
-    async getCoordinatorData(request, response) {
-        try {
-            const {id} = request.params
-            const error = UserFieldValidator.validate({id})
-
-            if (error) {
-                return response.status(422).json({ status: false, message: error })
-            }
-
-            const user = await User.findCoordinatorById(id)
-            console.log(user)
-            if(!user) {
-                return response.status(404).json({ status: false, message: "Usuário não encontrado." })
-            }
-            return response.status(200).json({status: true, user})
-
-        } catch (err) {
-            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
-        }
-    }
-
-    /**
      * Retorna informações da sessão ativa.
      *
      * @async
@@ -311,38 +265,8 @@ class UserController {
         })
     }
 
-      /**
-     * Lista professores validados (role = 3 e approved = true)
-     * 
-     * @async
-     * @param {import("express").Request} request
-     * @param {import("express").Response} response
-     * @returns {Promise<Object>} JSON com lista de professores validados.
-     */
-    async getProfessoresValidados(request, response) {
-        try {
-            // Busca apenas professores validados (role = 3 e approved = true)
-            const professores = await User.findProfessoresValidados();
-            
-            if (!professores || professores.length === 0) {
-                return response.status(404).json({ 
-                    status: false, 
-                    message: 'Nenhum professor validado encontrado.' 
-                });
-            }
-            
-            return response.status(200).json({ 
-                status: true, 
-                professores 
-            });
-        } catch (err) {
-            console.error("Erro ao listar professores:", err);
-            return response.status(500).json({ 
-                status: false, 
-                message: "Erro interno no servidor." 
-            });
-        }
-    }
+
+    
     /**
      * Lista todos os alunos.
      */

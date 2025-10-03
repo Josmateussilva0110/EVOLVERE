@@ -1,125 +1,24 @@
-import { Routes, Route, useLocation } from "react-router-dom"
-import Register from "./components/pages/auth/Register"
-import Login from "./components/pages/auth/Login"
-import ForgotPassword from "./components/pages/auth/ForgotPassword"
-import HelpCenter from "./components/pages/auth/HelpCenter"
-import Home from "./components/pages/public/Home"
-import About from "./components/pages/public/About"
-import UserAccount from "./components/pages/auth/UserAccount"
+import { useLocation } from "react-router-dom"
 import FlashMessage from "./components/layout/Message"
 import Footer from "./components/layout/Footer"
 import Navbar from "./components/layout/NavBar"
 import Container from "./components/layout/Container"
-import PrivateRoute from "./context/PrivateRouter"
-import CoordinatorRoute from "./context/CoordinatorRoute"
-import ManagementDisciplines from "./components/pages/coordinator/DisciplineManagement"
-import DisciplineList from "./components/pages/coordinator/ListDisciplines"
-import AccountValidation from './components/pages/auth/Waiting'
-import ListStrudents from "./components/pages/coordinator/ListStudents"
-import ManageTeachers from "./components/pages/coordinator/ManageTeachers"
-import Coordinator from "./components/pages/coordinator/Coordinator"
-import DashboardCoordinator from "./components/pages/coordinator/DashboardCoordinator"
-import RequestsTeachers from "./components/pages/coordinator/Requests"
-import DisciplineManagement from "./components/pages/teacher/DisciplineManagement"
-import ViewDiscipline from "./components/pages/teacher/ViewDiscipline"
-import RegisterMaterial from "./components/pages/teacher/RegisterMaterial"
-import ViewClass from "./components/pages/teacher/VíewClass"
-import RegisterSimulated from "./components/pages/teacher/RegisterSimulated"
-import ListSimulated from "./components/pages/teacher/ListSimulated"
-import ResponseList from "./components/pages/teacher/ResponseList"
-import CoordinatorProfile from "./components/pages/coordinator/CoordinatorProfile"
-import CoordinatorSettings from "./components/pages/coordinator/CoordinatorSettings"
-import ManagementStudents from "./components/pages/students/ManagementStudents"
-import ManagementCoursesStudents from "./components/pages/students/ManagementCoursesStudents"
-import ManagementDisciplinesStudents from "./components/pages/students/ManagementDisciplinesStudents"
+import AppRoutes from "./routes/Index"
 
-
-
-/**
- * Componente raiz da aplicação Evolvere.
- *
- * Responsável por:
- * - Configurar todas as rotas públicas e privadas usando `react-router-dom`.
- * - Exibir Navbar e Footer apenas em páginas públicas específicas.
- * - Renderizar mensagens flash em todas as páginas.
- *
- * Rotas públicas:
- * - "/" → Home
- * - "/about" → About
- * - "/login" → Login
- * - "/register" → Register
- * - "/forgot_password" → ForgotPassword
- * - "/help" → HelpCenter
- * - "/user/account" → UserAccount
- * - "/await/approval" → AccountValidation
- *
- * Rotas privadas (protegidas pelo `PrivateRoute`):
- * - "/profile" → Profile
- * - "/management/disciplines/register" → ManagementDisciplines
- * - "/management/disciplines/list" → DisciplineList
- *
- * @component
- * @example
- * return (
- *   <App />
- * )
- *
- * @returns {JSX.Element} Estrutura de roteamento da aplicação com layout condicional.
- */
 function App() {
   const location = useLocation()
-  // Rotas onde NÃO deve aparecer Navbar e Footer
   const isCoordinator = location.pathname.startsWith("/coordinator")
-  const hideLayout = isCoordinator || ["/login", "/register", "/forgot_password", "/help", "/", "/about", "/await/approval", "/user/account", "/student/home", "/student/disciplines/view"].includes(location.pathname)
-
+  const hideLayout = isCoordinator || [
+    "/login", "/register", "/forgot_password", "/help", "/", "/about",
+    "/await/approval", "/user/account", "/student/home", "/student/disciplines/view"
+  ].includes(location.pathname)
 
   return (
     <>
       {!hideLayout && <Navbar />}
       <Container>
         <FlashMessage />
-        <Routes>
-          {/* Rotas públicas */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot_password" element={<ForgotPassword />} />
-          <Route path="/help" element={<HelpCenter />} />
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/user/account" element={<UserAccount/>} />
-          <Route path="/await/approval" element={<AccountValidation/>} />
-
-
-          {/* Rotas privadas */}
-          <Route element={<PrivateRoute />}>
-            <Route element={<CoordinatorRoute />}>
-              <Route path="/coordinator" element={<Coordinator />} />
-              <Route path="/coordinator/dashboard" element={<DashboardCoordinator />} />
-              <Route path="/coordinator/discipline/register" element={<ManagementDisciplines />} />
-              <Route path="/coordinator/discipline/list" element={<DisciplineList />} />
-              <Route path="/coordinator/student/list" element={<ListStrudents />} />
-              <Route path="/coordinator/teacher/manage" element={<ManageTeachers />} />
-              <Route path="/coordinator/requests" element={<RequestsTeachers />} />
-              <Route path="/coordinator/profile" element={<CoordinatorProfile />} />
-              <Route path="/coordinator/settings" element={<CoordinatorSettings />} />
-              <Route path="/coordinator/discipline/edit/:id" element={<ManagementDisciplines />} />
-
-              <Route path="/teacher/discipline/manage" element={<DisciplineManagement />} />
-              <Route path="/teacher/discipline/list" element={<ViewDiscipline />} />
-              <Route path="/teacher/material/register" element={<RegisterMaterial />} />
-              <Route path="/teacher/class/view" element={<ViewClass />} />
-              <Route path="/teacher/simulated/register" element={<RegisterSimulated />} />
-              <Route path="/teacher/simulated/list" element={<ListSimulated />} />
-              <Route path="/teacher/simulated/response/list" element={<ResponseList />} />
-
-              <Route path="/student/home" element={<ManagementStudents />} />
-              <Route path="/student/courses/list" element={<ManagementCoursesStudents />} />
-              <Route path="/student/disciplines/view" element={<ManagementDisciplinesStudents />} />
-
-            </Route>
-          </Route>
-          
-        </Routes>
+        <AppRoutes />
       </Container>
       {!hideLayout && <Footer />}
     </>

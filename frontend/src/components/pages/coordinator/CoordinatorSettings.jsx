@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiArrowLeft, FiShield } from "react-icons/fi";
+import { FiArrowLeft, FiBell, FiShield, FiCheck, FiMail, FiLock, FiPhone } from "react-icons/fi";
 
 /**
  * CoordinatorSettings
@@ -56,56 +56,48 @@ import { FiArrowLeft, FiShield } from "react-icons/fi";
  */
 function CoordinatorSettings() {
   const navigate = useNavigate();
-
-  /** @type {[boolean, Function]} notifEmail - Estado de notificações por e-mail */
+  /** @type {[boolean, Function]} Estado para notificações por e-mail */
   const [notifEmail, setNotifEmail] = useState(true);
-
-  /** @type {[boolean, Function]} notifWhats - Estado de notificações por WhatsApp */
+  /** @type {[boolean, Function]} Estado para notificações por WhatsApp */
   const [notifWhats, setNotifWhats] = useState(false);
-
-  /** @type {[string, Function]} novoEmail - Novo e-mail informado pelo usuário */
+  /** @type {[string, Function]} Novo e-mail a ser definido */
   const [novoEmail, setNovoEmail] = useState("");
-
-  /** @type {[string, Function]} emailAtual - E-mail atual do usuário */
+  /** @type {[string, Function]} E-mail atual do usuário */
   const [emailAtual, setEmailAtual] = useState("");
-
-  /** @type {[string, Function]} senhaAtual - Senha atual (para autenticação da troca) */
+  /** @type {[string, Function]} Senha atual para validação */
   const [senhaAtual, setSenhaAtual] = useState("");
-
-  /** @type {[string, Function]} novaSenha - Nova senha que será definida */
+  /** @type {[string, Function]} Nova senha a ser definida */
   const [novaSenha, setNovaSenha] = useState("");
-
-  /** @type {[string, Function]} confirmarSenha - Confirmação da nova senha */
+  /** @type {[string, Function]} Confirmação da nova senha */
   const [confirmarSenha, setConfirmarSenha] = useState("");
 
   /**
-   * Verifica se a senha é forte o suficiente.
-   *
-   * Critérios:
+   * Valida se a senha atende aos critérios de segurança.
+   * 
+   * Verifica se a senha possui:
    * - Mínimo de 8 caracteres
    * - Pelo menos uma letra minúscula
    * - Pelo menos uma letra maiúscula
    * - Pelo menos um número
    * - Pelo menos um caractere especial
-   *
+   * 
    * @param {string} pwd - Senha a ser validada
-   * @returns {boolean} true se for considerada forte, false caso contrário
+   * @returns {boolean} true se a senha é forte, false caso contrário
    */
   const isStrongPassword = (pwd) => {
+    // mínimo 8, com letra minúscula, maiúscula, número e caractere especial
     return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/.test(pwd);
   };
 
   /**
    * Manipula o envio do formulário de configurações.
-   *
-   * Validações aplicadas:
-   * - Verifica e-mail válido e diferente do atual.
-   * - Confere se a senha atual foi informada.
-   * - Garante que a nova senha seja diferente da atual e forte.
-   * - Valida se nova senha e confirmação coincidem.
-   *
-   * Emite `alert()` de sucesso ou erro conforme o resultado.
-   *
+   * 
+   * Realiza validações para:
+   * - E-mail: formato válido e diferente do atual
+   * - Senha: senha atual obrigatória, nova senha forte e confirmação
+   * 
+   * Exibe alertas para erros de validação e sucesso ao salvar.
+   * 
    * @param {Event} e - Evento de submit do formulário
    * @returns {void}
    */
@@ -139,9 +131,7 @@ function CoordinatorSettings() {
         return;
       }
       if (!isStrongPassword(novaSenha)) {
-        alert(
-          "A nova senha deve ter no mínimo 8 caracteres, com maiúscula, minúscula, número e caractere especial."
-        );
+        alert("A nova senha deve ter no mínimo 8 caracteres, com maiúscula, minúscula, número e caractere especial.");
         return;
       }
       if (novaSenha !== confirmarSenha) {
@@ -150,14 +140,13 @@ function CoordinatorSettings() {
       }
     }
 
-    // Futuro: persistir alterações em API
+    // Futuro: persistir em API (e-mail, senha, notificações)
     alert("Configurações salvas com sucesso.");
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#060060] py-10 px-4">
       <div className="w-full max-w-3xl rounded-2xl bg-white shadow-xl ring-1 ring-gray-200 overflow-hidden">
-        {/* Cabeçalho */}
         <div className="px-6 pt-6 pb-4 border-b border-gray-100">
           <div className="flex items-center justify-between mb-4">
             <button
@@ -179,74 +168,62 @@ function CoordinatorSettings() {
           </div>
         </div>
 
-        {/* Formulário de configurações */}
         <form className="p-6 space-y-6" onSubmit={handleSalvar}>
-          {/* E-mail */}
-          <div className="flex flex-col">
-            <label className="text-sm font-medium text-gray-700 mb-1">E-mail</label>
-            <input
-              type="email"
-              value={novoEmail}
-              placeholder={emailAtual || "Digite um e-mail"}
-              onChange={(e) => setNovoEmail(e.target.value)}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-          </div>
+          {/* Conta */}
+          <section className="space-y-3">
+            <h3 className="text-sm font-semibold text-gray-800">Conta</h3>
+            <div className="rounded-xl ring-1 ring-gray-200 p-4 space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <label className="text-sm text-gray-700 inline-flex items-center gap-2"><FiMail className="text-gray-500" /> E-mail atual</label>
+                <input type="email" value={emailAtual} onChange={(e)=>setEmailAtual(e.target.value)} placeholder="seu_email@instituicao" className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-gray-50" disabled />
+                <label className="text-sm text-gray-700 inline-flex items-center gap-2"><FiMail className="text-gray-500" /> Novo e-mail</label>
+                <input type="email" value={novoEmail} onChange={(e)=>setNovoEmail(e.target.value)} placeholder="nome@exemplo.com" className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm" />
+              </div>
+            </div>
+          </section>
 
-          {/* Notificações */}
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-700">Notificações</label>
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                checked={notifEmail}
-                onChange={() => setNotifEmail(!notifEmail)}
-              />
-              <span>E-mail</span>
+          {/* Segurança */}
+          <section className="space-y-3">
+            <h3 className="text-sm font-semibold text-gray-800">Notificações</h3>
+            <div className="rounded-xl ring-1 ring-gray-200 p-4 space-y-3">
+              <label className="flex items-center justify-between cursor-pointer">
+                <div className="flex items-center gap-2 text-gray-800">
+                  <FiBell className="text-gray-500" />
+                  <span className="text-sm">Receber por e-mail</span>
+                </div>
+                <input type="checkbox" checked={notifEmail} onChange={(e)=>setNotifEmail(e.target.checked)} className="h-4 w-4" />
+              </label>
+              <label className="flex items-center justify-between cursor-pointer">
+                <div className="flex items-center gap-2 text-gray-800">
+                  <FiPhone className="text-gray-500" />
+                  <span className="text-sm">Receber por WhatsApp</span>
+                </div>
+                <input type="checkbox" checked={notifWhats} onChange={(e)=>setNotifWhats(e.target.checked)} className="h-4 w-4" />
+              </label>
             </div>
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                checked={notifWhats}
-                onChange={() => setNotifWhats(!notifWhats)}
-              />
-              <span>WhatsApp</span>
-            </div>
-          </div>
+          </section>
 
           {/* Alterar senha */}
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-700">Alterar senha</label>
-            <input
-              type="password"
-              placeholder="Senha atual"
-              value={senhaAtual}
-              onChange={(e) => setSenhaAtual(e.target.value)}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-            <input
-              type="password"
-              placeholder="Nova senha"
-              value={novaSenha}
-              onChange={(e) => setNovaSenha(e.target.value)}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-            <input
-              type="password"
-              placeholder="Confirmar nova senha"
-              value={confirmarSenha}
-              onChange={(e) => setConfirmarSenha(e.target.value)}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-          </div>
+          <section className="space-y-3">
+            <h3 className="text-sm font-semibold text-gray-800">Alterar senha</h3>
+            <div className="rounded-xl ring-1 ring-gray-200 p-4 space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <label className="text-sm text-gray-700 inline-flex items-center gap-2"><FiLock className="text-gray-500" /> Senha atual</label>
+                <input type="password" value={senhaAtual} onChange={(e)=>setSenhaAtual(e.target.value)} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm" />
+                <label className="text-sm text-gray-700 inline-flex items-center gap-2"><FiLock className="text-gray-500" /> Nova senha</label>
+                <input type="password" value={novaSenha} onChange={(e)=>setNovaSenha(e.target.value)} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm" />
+                <label className="text-sm text-gray-700 inline-flex items-center gap-2"><FiLock className="text-gray-500" /> Confirmar senha</label>
+                <input type="password" value={confirmarSenha} onChange={(e)=>setConfirmarSenha(e.target.value)} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm" />
+              </div>
+              <p className="text-xs text-gray-500">Use ao menos 8 caracteres, com letras e números.</p>
+            </div>
+          </section>
 
-          {/* Botão salvar */}
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 font-semibold"
-          >
-            Salvar alterações
-          </button>
+          <div className="pt-2">
+            <button type="submit" className="inline-flex items-center gap-2 rounded-xl bg-yellow-400 text-gray-900 px-6 py-3 text-sm font-semibold hover:bg-yellow-500">
+              <FiCheck /> Salvar alterações
+            </button>
+          </div>
         </form>
       </div>
     </div>
