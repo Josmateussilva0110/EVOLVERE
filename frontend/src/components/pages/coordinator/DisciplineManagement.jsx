@@ -80,7 +80,7 @@ function DisciplineManagement() {
                         const disciplineRes = await requestData(`/subjects/${id}`, "GET", {}, true);
                         
                         if (disciplineRes.success) {
-                            const disciplina = disciplineRes.data.data;
+                            const disciplina = disciplineRes.data.subject;
                             setNome(disciplina.name);
                             setProfessor(String(disciplina.professional_id)); 
                         } else {

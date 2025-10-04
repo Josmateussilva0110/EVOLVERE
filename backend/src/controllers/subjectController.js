@@ -141,9 +141,9 @@ const subjectController = {
                 });
             }
             
-            res.json({ 
-                success: true, 
-                data: { subject }
+            res.status(200).json({ 
+                status: true, 
+                subject
             });
         } catch (error) {
             console.error('Erro ao buscar disciplina:', error);
