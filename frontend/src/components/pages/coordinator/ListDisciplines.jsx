@@ -1,18 +1,16 @@
-import { useState, useEffect, useMemo, useContext } from "react"; // 1. Adicionar useContext
+import { useState, useEffect, useMemo, useContext } from "react";
 import { FiArrowLeft, FiSearch, FiSliders, FiBook, FiUserCheck, FiAlertTriangle, FiEdit, FiTrash, FiX } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import requestData from "../../../utils/requestApi";
 import useFlashMessage from "../../../hooks/useFlashMessage";
-import { Context } from "../../../context/UserContext"; // 2. Importar o Context
+import { Context } from "../../../context/UserContext";
 
 function DisciplineList() {
     // 3. Obter o usuário do contexto
-    const { user } = useContext(Context); 
-    
+    const { user } = useContext(Context);
+
     const [disciplinas, setDisciplinas] = useState([]);
     const [busca, setBusca] = useState("");
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [professorFiltro, setProfessorFiltro] = useState("todos");
     const [ordenacao, setOrdenacao] = useState("nome");
     const [direcao, setDirecao] = useState('asc');
@@ -22,48 +20,17 @@ function DisciplineList() {
     const { setFlashMessage } = useFlashMessage()
     const navigate = useNavigate();
 
-    // 4. Substituir o useEffect antigo por este novo
     useEffect(() => {
-        // A função só executa se já tivermos um usuário do contexto
-        if (!user.id) {
-            return; // Aguarda o user.id estar disponível
-        }
-
-        const fetchCoordinatorDisciplines = async () => {
-            try {
-                setLoading(true);
-                // Primeiro, busca os dados do coordenador para encontrar o ID do curso
-                const coordinatorRes = await requestData(`/user/coordinator/${user.id}`, 'GET', {}, true);
-                if (!coordinatorRes.success || !coordinatorRes.data.user?.course_id) {
-                    throw new Error("Não foi possível encontrar o curso associado a este coordenador.");
-                }
-                const courseId = coordinatorRes.data.user.course_id;
-
-                // Agora, busca as disciplinas USANDO o ID do curso (a nova rota do backend)
-                const disciplinesRes = await requestData(`/courses/${courseId}/subjects`, 'GET', {}, true);
-
-                if (disciplinesRes.success) {
-                    // CORREÇÃO: A resposta da API está em `data.data.subjects`.
-                    // Adicionamos `|| []` para garantir que seja sempre um array.
-                    setDisciplinas(disciplinesRes.data.data.subjects || []);
-                    setError(null);
-                } else {
-                    setDisciplinas([]);
-                    // Se a API retornar 404 (nenhuma disciplina), não mostramos como erro, apenas uma lista vazia.
-                    if (disciplinesRes.status !== 404) {
-                       setError(disciplinesRes.message || 'Falha ao carregar disciplinas do curso.');
-                    }
-                }
-            } catch (err) {
-                setError(err.message);
-                setDisciplinas([]);
-            } finally {
-                setLoading(false);
+        async function fetchSubjects() {
+            const response = await requestData(`/courses/${user.id}/subjects`, 'GET', {}, true)
+            console.log(response)
+            if (response.success) {
+                setDisciplinas(response.data.subjects)
             }
-        };
+        }
+        fetchSubjects()
+    }, [user])
 
-        fetchCoordinatorDisciplines();
-    }, [user.id]); // A dependência agora é user.id para refazer a busca se o usuário mudar
 
     /**
      * Exclui uma disciplina via API e atualiza a lista no estado.
@@ -80,14 +47,14 @@ function DisciplineList() {
     }
 
     const handleEditar = (id) => {
-        navigate(`/coordinator/discipline/edit/${id}`); 
+        navigate(`/coordinator/discipline/edit/${id}`);
     };
 
     // Filtra disciplinas com base na busca (usando useMemo para otimização)
     const disciplinasFiltradas = useMemo(() => {
         // Adicionado um fallback para o caso de disciplinas ser undefined momentaneamente
         const listaInicial = Array.isArray(disciplinas) ? disciplinas : [];
-        
+
         let lista = listaInicial.filter(d =>
             (d.name && d.name.toLowerCase().includes(busca.toLowerCase())) ||
             d.id?.toString().includes(busca) ||
@@ -143,6 +110,8 @@ function DisciplineList() {
         const idx = Math.abs(hash) % palette.length
         return palette[idx]
     }
+
+    const showRoleColumn = user?.id >= 1 && user?.id <= 4
 
     // O JSX (parte visual) continua exatamente o mesmo
     return (
@@ -278,82 +247,91 @@ function DisciplineList() {
 
                     {/* Conteúdo */}
                     <div className="mt-6">
-                        {loading ? (
-                            <div className="space-y-3">
-                                {Array.from({ length: 4 }).map((_, i) => (
-                                    <div key={i} className="h-16 rounded-xl bg-slate-100 animate-pulse" />
-                                ))}
-                            </div>
-                        ) : error ? (
-                            <div className="text-center py-10 text-red-600 text-sm">
-                                <p><strong>Erro:</strong> {error}</p>
-                            </div>
-                        ) : (
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full border-separate border-spacing-y-3">
-                                    <thead className="sticky top-0 z-10 bg-white/80 backdrop-blur">
-                                        <tr>
-                                            <th className="text-left text-xs font-semibold text-slate-600 px-3 py-2">ID</th>
-                                            <th className="text-left text-xs font-semibold text-slate-600 px-3 py-2">Nome</th>
-                                            <th className="text-left text-xs font-semibold text-slate-600 px-3 py-2">Professor</th>
-                                            <th className="text-right text-xs font-semibold text-slate-600 px-3 py-2">Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {paginaAtual.length > 0 ? (
-                                            paginaAtual.map((d) => (
-                                                <tr key={d.id} className="bg-white ring-1 ring-slate-200 rounded-2xl shadow-sm hover:shadow transition">
-                                                    <td className="px-3 py-4 text-sm text-slate-700">{d.id}</td>
-                                                    <td className="px-3 py-4 text-sm font-medium text-slate-900">{d.name}</td>
+                        {/* Tabela de disciplinas */}
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full border-separate border-spacing-y-3">
+                                <thead className="sticky top-0 z-10 bg-white/80 backdrop-blur">
+                                    <tr>
+                                        <th className="text-left text-xs font-semibold text-slate-600 px-3 py-2">ID</th>
+                                        <th className="text-left text-xs font-semibold text-slate-600 px-3 py-2">Nome</th>
+                                        <th className="text-left text-xs font-semibold text-slate-600 px-3 py-2">Professor</th>
+                                        {/* Coluna condicional */}
+                                        {showRoleColumn && (
+                                            <th className="text-left text-xs font-semibold text-slate-600 px-3 py-2">Curso</th>
+                                        )}
+                                        <th className="text-right text-xs font-semibold text-slate-600 px-3 py-2">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {paginaAtual.length > 0 ? (
+                                        paginaAtual.map((d) => (
+                                            <tr
+                                                key={d.id}
+                                                className="bg-white ring-1 ring-slate-200 rounded-2xl shadow-sm hover:shadow transition"
+                                            >
+                                                <td className="px-3 py-4 text-sm text-slate-700">{d.id}</td>
+                                                <td className="px-3 py-4 text-sm font-medium text-slate-900">{d.name}</td>
+
+                                                <td className="px-3 py-4 text-sm text-slate-700">
+                                                    <div className="flex items-center gap-2">
+                                                        <span
+                                                            className={`inline-flex h-8 w-8 items-center justify-center rounded-full ring-1 ${colorFromString(
+                                                                d.professor_nome || "NA"
+                                                            )}`}
+                                                        >
+                                                            <span className="text-[10px] font-bold">
+                                                                {d.professor_nome ? getInitials(d.professor_nome) : "NA"}
+                                                            </span>
+                                                        </span>
+                                                        <span>{d.professor_nome || "Não atribuído"}</span>
+                                                        <span
+                                                            className={`ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ${d.professor_nome
+                                                                    ? "bg-slate-50 text-slate-700 ring-slate-200"
+                                                                    : "bg-amber-50 text-amber-700 ring-amber-200"
+                                                                }`}
+                                                        >
+                                                            {d.professor_nome ? "Atribuída" : "Sem professor"}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                {/* Coluna Curso condicional */}
+                                                {showRoleColumn && (
                                                     <td className="px-3 py-4 text-sm text-slate-700">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full ring-1 ${colorFromString(d.professor_nome || 'NA')}`}>
-                                                                <span className="text-[10px] font-bold">{d.professor_nome ? getInitials(d.professor_nome) : 'NA'}</span>
-                                                            </span>
-                                                            <span>{d.professor_nome || 'Não atribuído'}</span>
-                                                            <span className={`ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ${d.professor_nome ? 'bg-slate-50 text-slate-700 ring-slate-200' : 'bg-amber-50 text-amber-700 ring-amber-200'}`}>
-                                                                {d.professor_nome ? 'Atribuída' : 'Sem professor'}
-                                                            </span>
-                                                        </div>
+                                                        {d.course_name || "Não informado"}
                                                     </td>
-                                                    <td className="px-3 py-3">
-                                                        <div className="flex justify-end gap-2">
-                                                            <button onClick={() => handleEditar(d.id)} className="inline-flex items-center gap-2 rounded-lg bg-amber-50 text-amber-800 px-3 py-2 text-xs font-medium ring-1 ring-amber-200 hover:bg-amber-100 transition"><FiEdit /> Editar</button>
-                                                            <button onClick={() => handleDelete(d.id)} className="inline-flex items-center gap-2 rounded-lg bg-red-50 text-red-700 px-3 py-2 text-xs font-medium ring-1 ring-red-200 hover:bg-red-100 transition"><FiTrash /> Excluir</button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        ) : (
-                                            <tr>
-                                                <td colSpan={4} className="text-center py-10 text-slate-500 text-sm">
-                                                    Nenhuma disciplina encontrada para este curso.
+                                                )}
+                                                <td className="px-3 py-3">
+                                                    <div className="flex justify-end gap-2">
+                                                        <button
+                                                            onClick={() => handleEditar(d.id)}
+                                                            className="inline-flex items-center gap-2 rounded-lg bg-amber-50 text-amber-800 px-3 py-2 text-xs font-medium ring-1 ring-amber-200 hover:bg-amber-100 transition"
+                                                        >
+                                                            <FiEdit /> Editar
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(d.id)}
+                                                            className="inline-flex items-center gap-2 rounded-lg bg-red-50 text-red-700 px-3 py-2 text-xs font-medium ring-1 ring-red-200 hover:bg-red-100 transition"
+                                                        >
+                                                            <FiTrash /> Excluir
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
-                                        )}
-                                    </tbody>
-                                </table>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td
+                                                colSpan={showRoleColumn ? 5 : 4} // ajustar colSpan dinamicamente
+                                                className="text-center py-10 text-slate-500 text-sm"
+                                            >
+                                                Nenhuma disciplina encontrada para este curso.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
 
-                                {/* Paginação */}
-                                <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                                    <div className="flex items-center gap-3">
-                                        <p className="text-xs text-slate-500">Página {pagina} de {totalPaginas}</p>
-                                        <div className="inline-flex items-center gap-2 text-xs text-slate-600">
-                                            <span>Itens por página</span>
-                                            <select value={itensPorPagina} onChange={(e) => { setItensPorPagina(Number(e.target.value)); setPagina(1); }} className="rounded-lg border border-slate-200 bg-slate-50/80 px-2 py-1">
-                                                <option value={8}>8</option>
-                                                <option value={12}>12</option>
-                                                <option value={24}>24</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <button disabled={pagina === 1} onClick={() => setPagina(p => Math.max(1, p - 1))} className={`px-3 py-2 text-sm rounded-lg ring-1 ${pagina === 1 ? 'text-slate-400 ring-slate-200' : 'text-slate-700 ring-slate-300 hover:bg-slate-50'}`}>Anterior</button>
-                                        <button disabled={pagina === totalPaginas} onClick={() => setPagina(p => Math.min(totalPaginas, p + 1))} className={`px-3 py-2 text-sm rounded-lg ring-1 ${pagina === totalPaginas ? 'text-slate-400 ring-slate-200' : 'text-slate-700 ring-slate-300 hover:bg-slate-50'}`}>Próxima</button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </div>
             </div>

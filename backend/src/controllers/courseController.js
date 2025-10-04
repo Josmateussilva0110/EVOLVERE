@@ -1,5 +1,7 @@
-const Course = require("../models/Course");
-const validator = require('validator');
+const Course = require("../models/Course")
+const validator = require('validator')
+const User = require("../models/User")
+const Account = require("../models/Account")
 
 /**
  * Controlador para gerir operações relacionadas a Cursos.
@@ -100,34 +102,47 @@ class CourseController {
      */
     async getSubjectsByCourse(request, response) {
         try {
-            const { id } = request.params;
+            const { id } = request.params
 
             if (!validator.isInt(id + '', { min: 1 })) {
-                return response.status(422).json({ success: false, message: "Id do curso é inválido." });
+                return response.status(422).json({ success: false, message: "Id do curso é inválido." })
             }
 
-            const subjects = await Course.findSubjectsByCourseId(Number(id));
+            let subjects = []
+
+            const isAdmin = await User.isAdmin(id) 
+            if(isAdmin) {
+                subjects = await Course.getAllSubjects()
+                console.log(subjects)
+            }
+            else {
+                const coordinator = await Account.findCoordinatorById(id)
+                if(!coordinator) {
+                    return response.status(404).json({status: false, message: "Coordenador não encontrado"})
+                }
+                subjects = await Course.findSubjectsByCourseId(coordinator.course_id)
+            }
+
+
 
             if (!subjects || subjects.length === 0) {
                 return response.status(404).json({
-                    success: false,
+                    status: false,
                     message: 'Nenhuma disciplina encontrada para este curso.'
-                });
+                })
             }
 
             return response.status(200).json({
-                success: true,
-                data: {
-                    subjects: subjects
-                }
-            });
+                status: true,
+                subjects
+            })
 
         } catch (err) {
-            console.error("Erro ao listar disciplinas por curso:", err);
+            console.error("Erro ao listar disciplinas por curso:", err)
             return response.status(500).json({
-                success: false,
+                status: false,
                 message: "Erro interno no servidor."
-            });
+            })
         }
     }
 }
