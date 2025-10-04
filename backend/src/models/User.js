@@ -191,6 +191,7 @@ class User {
         }
     }
 
+
     /**
      * @param {number} id - O ID do utilizador a ser apagado.
      * @returns {Promise<boolean>} - Retorna true se foi bem-sucedido.
