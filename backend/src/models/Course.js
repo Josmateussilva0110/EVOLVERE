@@ -98,6 +98,27 @@ class Course {
             return undefined;
         }
     }
+
+    async getAllSubjects() {
+        try {
+            const result = await knex.raw(`
+                select 
+                    s.*,
+                    u.username as professor_nome,
+                    cv.name as course_name
+                from subjects s
+                inner join users u
+                    on u.id = s.professional_id
+                inner join course_valid cv
+                    on cv.id = s.course_valid_id 
+            `)
+            const rows = result.rows
+            return rows.length > 0 ? rows : undefined
+        } catch(err) {
+            console.error("Erro no model ao buscar disciplinas:", err)
+            return undefined
+        }
+    }
 }
 
 module.exports = new Course()

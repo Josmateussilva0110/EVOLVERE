@@ -75,7 +75,7 @@ router.get('/user/:id', userController.getUserById)
  * @returns {object} 200 - Lista de alunos.
  * @returns {object} 404 - Nenhum aluno encontrado.
  */
-router.get('/users/students', userController.getStudents)
+router.get('/users/students/:id', userController.getStudents)
 
 /**
  * @route DELETE /users/students/:id

@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import requestData from "../../../utils/requestApi.js";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useContext} from "react";
 import { FaEye, FaTrash, FaArrowLeft } from "react-icons/fa";
 import { FiSearch, FiUsers, FiUserCheck, FiPause, FiX } from "react-icons/fi";
+import { Context } from "../../../context/UserContext"
 
 /**
  * ListStudents
@@ -94,6 +95,7 @@ function ListStudents() {
   const [alunos, setAlunos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user } = useContext(Context)
 
   // Filtros
   const [busca, setBusca] = useState("");
@@ -109,21 +111,20 @@ function ListStudents() {
   // Busca os dados da API
   useEffect(() => {
     const fetchAlunos = async () => {
-      const response = await requestData("/users/students", "GET", {}, true);
+      const response = await requestData(`/users/students/${user.id}`, "GET", {}, true);
       if (response.success) {
+        console.log(response)
         const alunosComTurma = response.data.data.map((aluno) => ({
           ...aluno,
           turma: getTurmaFromDate(aluno.created_at),
           statusLabel: aluno.status === 1 ? "Ativo" : "Inativo",
         }));
         setAlunos(alunosComTurma);
-      } else {
-        setError(response.message || "Falha ao buscar alunos.");
       }
       setLoading(false);
     };
     fetchAlunos();
-  }, []);
+  }, [user]);
 
   // Turmas únicas para dropdown
   const turmasDisponiveis = useMemo(() => {
@@ -434,6 +435,9 @@ function ListStudents() {
                   <thead className="bg-slate-50 text-left">
                     <tr>
                       <th className="px-4 py-3 text-xs font-semibold text-slate-600">
+                        Matrícula
+                      </th>
+                      <th className="px-4 py-3 text-xs font-semibold text-slate-600">
                         Aluno
                       </th>
                       <th className="px-4 py-3 text-xs font-semibold text-slate-600">
@@ -456,6 +460,9 @@ function ListStudents() {
                         key={u.id}
                         className="bg-white hover:bg-slate-50 transition"
                       >
+                        <td className="px-4 py-3 text-sm text-slate-600">
+                          {u.registration}
+                        </td>
                         <td className="px-4 py-3 text-sm text-slate-900">
                           <div className="flex items-center gap-3">
                             <span
@@ -471,9 +478,6 @@ function ListStudents() {
                               <span className="font-medium text-slate-900">
                                 {u.username}
                               </span>
-                              <span className="text-[11px] text-slate-500">
-                                Turma {u.turma}
-                              </span>
                             </div>
                           </div>
                         </td>
@@ -485,14 +489,14 @@ function ListStudents() {
                           <span
                             className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ring-1 ${
                               u.statusLabel === "Ativo"
-                                ? "bg-slate-50 text-slate-700 ring-slate-200"
+                                ? "bg-slate-50 text-green-700 ring-slate-200"
                                 : "bg-amber-50 text-amber-700 ring-amber-200"
                             }`}
                           >
                             <span
                               className={`h-2 w-2 rounded-full ${
                                 u.statusLabel === "Ativo"
-                                  ? "bg-slate-500"
+                                  ? "bg-green-500"
                                   : "bg-amber-500"
                               }`}
                             ></span>

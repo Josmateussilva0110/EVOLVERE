@@ -81,8 +81,8 @@ function ProfessoresManagement() {
 
   useEffect(() => {
     async function fetchTeachers() {
-      const response = await requestData(`/user/teachers/${user.id}`, 'GET', {}, true) 
-      if(response.success) {
+      const response = await requestData(`/user/teachers/${user.id}`, 'GET', {}, true)
+      if (response.success) {
         setTeachers(response.data.teachers)
       }
     }
@@ -93,7 +93,7 @@ function ProfessoresManagement() {
 
   async function deleteTeacher(id) {
     const response = await requestData(`/user/teacher/${id}`, 'DELETE', {}, true)
-    if(response.success) {
+    if (response.success) {
       setTeachers(prev => prev.filter(d => d.professional_id !== id))
       setFlashMessage(response.data.message, 'success')
     }
@@ -137,7 +137,7 @@ function ProfessoresManagement() {
     if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
   }
-  
+
   const colorFromString = (str = '') => {
     const palette = [
       'bg-indigo-100 text-indigo-700 ring-indigo-200',
@@ -255,6 +255,7 @@ function ProfessoresManagement() {
                 <table className="w-full border-separate border-spacing-y-1 text-slate-700">
                   <thead className="bg-slate-50 text-left">
                     <tr>
+                      <th className="px-4 py-3 text-xs font-semibold text-slate-600">Matrícula</th>
                       <th className="px-4 py-3 text-xs font-semibold text-slate-600">Professor</th>
                       <th className="px-4 py-3 text-xs font-semibold text-slate-600">Disciplina</th>
                       {showCourseColumn && (
@@ -266,6 +267,13 @@ function ProfessoresManagement() {
                   <tbody>
                     {professoresPagina.map((prof) => (
                       <tr key={prof.professional_id} className="bg-white hover:bg-slate-50 transition">
+
+                        {/* Matrícula */}
+                        <td className="px-4 py-3 text-sm text-slate-900 font-medium">
+                          {prof?.registration || '-'}
+                        </td>
+
+                        {/* Nome e avatar */}
                         <td className="px-4 py-3 text-sm text-slate-900">
                           <div className="flex items-center gap-3">
                             <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full ring-1 ${colorFromString(prof?.username || 'Professor')}`}>
@@ -276,6 +284,8 @@ function ProfessoresManagement() {
                             </div>
                           </div>
                         </td>
+
+                        {/* Disciplina */}
                         <td className="px-4 py-3 text-sm text-slate-700">
                           <div className="flex items-center gap-2">
                             <span>{prof?.disciplina || 'Não atribuída'}</span>
@@ -284,19 +294,22 @@ function ProfessoresManagement() {
                             </span>
                           </div>
                         </td>
+
                         {showCourseColumn && (
                           <td className="px-4 py-3 text-sm text-slate-700">{prof?.course || '-'}</td>
                         )}
-                        <td className="px-4 py-3">
-                          <div className="flex justify-center gap-2">
-                            <button onClick={() => deleteTeacher(prof.professional_id)}  className="inline-flex items-center gap-2 rounded-lg bg-red-50 text-red-700 px-3 py-2 text-xs font-medium ring-1 ring-red-200 hover:bg-red-100 transition">
-                              <FiTrash2 /> Excluir
-                            </button>
-                          </div>
+
+                        {/* Ações */}
+                        <td className="px-4 py-3 text-center">
+                          <button onClick={() => deleteTeacher(prof.professional_id)} className="inline-flex items-center gap-2 rounded-lg bg-red-50 text-red-700 px-3 py-2 text-xs font-medium ring-1 ring-red-200 hover:bg-red-100 transition">
+                            <FiTrash2 /> Excluir
+                          </button>
                         </td>
+
                       </tr>
                     ))}
                   </tbody>
+
                 </table>
 
                 {/* Paginação */}
@@ -305,7 +318,7 @@ function ProfessoresManagement() {
                     <p className="text-xs text-slate-500">Página {pagina} de {totalPaginas || 1}</p>
                     <div className="inline-flex items-center gap-2 text-xs text-slate-600">
                       <span>Itens por página</span>
-                      <select value={itensPorPagina} onChange={(e)=>{ setItensPorPagina(Number(e.target.value)); setPagina(1) }} className="rounded-lg border border-slate-200 bg-slate-50/80 px-2 py-1">
+                      <select value={itensPorPagina} onChange={(e) => { setItensPorPagina(Number(e.target.value)); setPagina(1) }} className="rounded-lg border border-slate-200 bg-slate-50/80 px-2 py-1">
                         <option value={8}>8</option>
                         <option value={12}>12</option>
                         <option value={24}>24</option>
@@ -316,9 +329,8 @@ function ProfessoresManagement() {
                     <button
                       disabled={pagina === 1}
                       onClick={() => setPagina(pagina - 1)}
-                      className={`px-3 py-2 text-sm rounded-lg ring-1 ${
-                        pagina === 1 ? "text-slate-300 ring-slate-200 cursor-not-allowed" : "text-slate-700 ring-slate-300 hover:bg-slate-50"
-                      }`}
+                      className={`px-3 py-2 text-sm rounded-lg ring-1 ${pagina === 1 ? "text-slate-300 ring-slate-200 cursor-not-allowed" : "text-slate-700 ring-slate-300 hover:bg-slate-50"
+                        }`}
                     >
                       Anterior
                     </button>
@@ -328,11 +340,10 @@ function ProfessoresManagement() {
                     <button
                       disabled={pagina === totalPaginas || totalPaginas === 0}
                       onClick={() => setPagina(pagina + 1)}
-                      className={`px-3 py-2 text-sm rounded-lg ring-1 ${
-                        pagina === totalPaginas || totalPaginas === 0
-                          ? "text-slate-300 ring-slate-200 cursor-not-allowed"
-                          : "text-slate-700 ring-slate-300 hover:bg-slate-50"
-                      }`}
+                      className={`px-3 py-2 text-sm rounded-lg ring-1 ${pagina === totalPaginas || totalPaginas === 0
+                        ? "text-slate-300 ring-slate-200 cursor-not-allowed"
+                        : "text-slate-700 ring-slate-300 hover:bg-slate-50"
+                        }`}
                     >
                       Próxima
                     </button>
