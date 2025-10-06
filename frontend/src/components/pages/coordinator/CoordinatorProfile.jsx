@@ -6,6 +6,7 @@ import useFlashMessage from "../../../hooks/useFlashMessage"
 import { Context } from "../../../context/UserContext"
 import Image from "../../form/Image"
 import RoleBadge from "../../form/RoleBadge"
+import formatDate from "../../../utils/formatDate"
 
 /**
  * CoordinatorProfile
@@ -58,7 +59,8 @@ function CoordinatorProfile() {
   /** @type {[string, Function]} URL do avatar do usuário */
   const [avatarUrl, setAvatarUrl] = useState("");
   const { setFlashMessage } = useFlashMessage()
-  const { user } = useContext(Context)
+  const { user, logout } = useContext(Context)
+  const [session, setSession] = useState(null)
 
   useEffect(() => {
     if (user) {
@@ -70,6 +72,19 @@ function CoordinatorProfile() {
         }
       }
       fetchUser()
+    }
+  }, [user])
+
+  useEffect(() => {
+    if (user) {
+      async function fetchSession() {
+        const response = await requestData(`user/expire/session/${user.id}`)
+        if (response.success) {
+          console.log('session: ', response)
+          setSession(response.data.session.expire)
+        }
+      }
+      fetchSession()
     }
   }, [user])
 
@@ -281,11 +296,11 @@ function CoordinatorProfile() {
               <div className="rounded-xl ring-1 ring-gray-200 p-4">
                 <p className="text-sm font-semibold text-gray-900 mb-2">Sessão</p>
                 <ul className="text-sm text-gray-700 space-y-1">
-                  <li>Último acesso: <span className="font-medium">—</span></li>
+                  <li>Valida até: <span className="font-medium">{formatDate(session)}</span></li>
                   <li>Dispositivo atual: <span className="font-medium">Web</span></li>
                 </ul>
                 <div className="mt-3">
-                  <button className="inline-flex items-center gap-2 rounded-lg ring-1 ring-gray-300 px-3 py-2 text-xs text-gray-800 hover:bg-gray-50"><FiLogIn /> Encerrar sessões</button>
+                  <button onClick={logout} className="inline-flex items-center gap-2 rounded-lg ring-1 ring-gray-300 px-3 py-2 text-xs text-gray-800 hover:bg-gray-50"><FiLogIn /> Encerrar sessões</button>
                 </div>
               </div>
             </div>

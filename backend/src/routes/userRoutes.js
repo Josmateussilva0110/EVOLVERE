@@ -101,5 +101,6 @@ router.put("/user/photo/:id", (request, response, next) => {
 
 router.get("/user/photo/:id", userController.findPhoto)
 router.put("/user/photo/delete/:id", userController.removePhoto)
+router.get("/user/expire/session/:id", userController.findSessionById)
 
 module.exports = router

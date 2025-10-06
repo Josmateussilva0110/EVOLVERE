@@ -270,7 +270,17 @@ class AccountController {
                 return response.status(422).json({status: false, message: "Id inválido."})
             }
 
-            const user = await Account.findCoordinatorById(id)
+            let user = {}
+
+            if(id >= 1 && id <= 4) {
+                user = await Account.findAdmin(id)
+                console.log(user)
+            }
+
+            else {
+                user = await Account.findCoordinatorById(id)
+            }
+
             if(!user) {
                 return response.status(404).json({ status: false, message: "Usuário não encontrado." })
             }

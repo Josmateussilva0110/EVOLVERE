@@ -60,8 +60,8 @@ function DashboardPrincipal() {
     if(user) {
       async function fetchUser() {
         const response = await requestData(`/user/coordinator/${user.id}`, 'GET', {}, true)
+        console.log(response)
         if(response.success) {
-          console.log(response.data)
           setUserRequest(response.data.user)
         } else {
           setUserRequest(null)
@@ -75,7 +75,7 @@ function DashboardPrincipal() {
     if(user) {
         async function fetchPhoto() {
         const response = await requestData(`/user/photo/${user.id}`, 'GET', {}, true)
-        console.log('response da foto: ', response)
+        //console.log('response da foto: ', response)
         if(response.success) {
           setPhoto(response.data.photo.photo)
         }
@@ -105,7 +105,7 @@ function DashboardPrincipal() {
       async function fetchKpi() {
         const response = await requestData(`/user/coordinator/kpi/${user.id}`, 'GET', {}, true)
         if(response.success) {
-          console.log(response.data.kpi)
+          //console.log(response.data.kpi)
           setKpi(response.data.kpi)
         }
       }

@@ -268,6 +268,24 @@ class User {
         }
     }
 
+    async findSessionById(id) {
+        try {
+            const result = await knex('session')
+            .select('expire')
+            .whereRaw(`sess->'user'->>'id' = ?`, [String(id)])
+            .andWhere('expire', '>', knex.fn.now())
+            .orderBy('expire', 'desc')
+            .first()
+            return result
+        } catch (err) {
+            console.error("Erro ao buscar sessão:", err)
+            return undefined
+        }
+    }
+
+    
+
+
 }
 
 module.exports = new User()

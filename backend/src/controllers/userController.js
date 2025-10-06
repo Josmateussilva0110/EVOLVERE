@@ -388,6 +388,22 @@ class UserController {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
+
+    async findSessionById(request, response) {
+        try {
+            const { id } = request.params 
+            const error = UserFieldValidator.validate({ id })
+            if (error) return response.status(422).json({ status: false, message: error })
+            const session = await User.findSessionById(id)
+            if(!session) {
+                return response.status(404).json({status: false, message: "Sessão não encontrada"})
+            }
+            return response.status(200).json({status: true, session})
+        } catch(err) {
+            console.error("Erro ao sessão:", err)
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
     
 }
 
