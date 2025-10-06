@@ -140,7 +140,13 @@ class User {
                 u.status,
                 u.created_at,
                 u.updated_at,
-                vp.role
+            CASE 
+                when vp.role = '1' then 'Admin'
+                when vp.role = '2' then 'Coordenador'
+                when vp.role = '3' then 'Professor'
+                when vp.role = '4' then 'Aluno'
+                ELSE 'Desconhecido'
+            END AS role
             from users u
             left join validate_professionals vp
                 on vp.professional_id = u.id
@@ -221,6 +227,65 @@ class User {
             return false
         }
     }
+
+
+    async updatePhoto(id, photoPath) {
+        try {
+            const updated_at = knex.fn.now()
+            const result = await knex("users")
+                .where({ id })
+                .update({ photo: photoPath, updated_at})
+            return result > 0
+        } catch (err) {
+            console.error("Erro ao atualizar foto:", err)
+            return false
+        }
+    }
+
+    async findPhoto(id) {
+        try {
+            const result = await knex.select(["photo"]).where({id}).table("users")
+            if(result.length > 0) {
+                return result[0]
+            }
+            else {
+                return undefined
+            }
+        } catch (err) {
+            console.error("Erro ao atualizar foto:", err)
+            return undefined
+        }
+    }
+
+    async deletePhoto(id) {
+        try {
+            const updated_at = knex.fn.now()
+            const result = await knex("users")
+                .where({ id })
+                .update({ photo: null, updated_at})
+            return result > 0
+        } catch (err) {
+            console.error("Erro ao atualizar foto:", err)
+            return false
+        }
+    }
+
+    async findSessionById(id) {
+        try {
+            const result = await knex('session')
+            .select('expire')
+            .whereRaw(`sess->'user'->>'id' = ?`, [String(id)])
+            .andWhere('expire', '>', knex.fn.now())
+            .orderBy('expire', 'desc')
+            .first()
+            return result
+        } catch (err) {
+            console.error("Erro ao buscar sessão:", err)
+            return undefined
+        }
+    }
+
+    
 }
 
 module.exports = new User()

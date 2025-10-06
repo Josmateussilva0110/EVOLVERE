@@ -1,6 +1,8 @@
 const User = require("../models/User")
 const bcrypt = require("bcrypt")
 const UserFieldValidator = require("../utils/userValidator")
+const path = require("path")
+const fs = require("fs")
 require('dotenv').config({ path: '../.env' })
 const { customAlphabet } = require('nanoid')
 
@@ -293,6 +295,8 @@ class UserController {
     async deleteStudent(request, response) {
         try {
             const { id } = request.params;
+            const error = UserFieldValidator.validate({id})
+            if (error) return response.status(422).json({ status: false, message: error })
             const success = await User.deleteById(Number(id));
 
             if (!success) {
@@ -303,6 +307,101 @@ class UserController {
         } catch (err) {
             console.error("Erro ao apagar aluno:", err);
             return response.status(500).json({ status: false, message: "Erro interno no servidor." });
+        }
+    }
+
+    async editPhoto(request, response) {
+        try {
+            const { id } = request.params
+            const error = UserFieldValidator.validate({ id })
+            if (error) return response.status(422).json({ status: false, message: error })
+
+            const user = await User.findById(id)
+            if (!user) {
+                return response.status(404).json({ status: false, message: "Usuário não encontrado." })
+            }
+
+            if (!request.file) {
+                return response.status(400).json({ status: false, message: "O upload de uma imagem PNG é obrigatório." })
+            }
+
+            const rootDir = path.join(__dirname, "..", "..")
+            const uploadDir = path.join(rootDir, "public", "images", "users")
+            fs.mkdirSync(uploadDir, { recursive: true })
+
+            // Apaga a foto anterior (se existir)
+            if (user.photo) {
+                const oldPath = path.join(rootDir, "public", user.photo)
+                if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath)
+            }
+
+            const uniqueName = Date.now() + "_" + Math.floor(Math.random() * 100) + path.extname(request.file.originalname)
+            const finalPath = path.join(uploadDir, uniqueName)
+            const photoPath = path.join("images", "users", uniqueName)
+
+            fs.writeFileSync(finalPath, request.file.buffer)
+
+            const updated = await User.updatePhoto(id, photoPath)
+            if (!updated) {
+                return response.status(500).json({ status: false, message: "Erro ao atualizar a foto do usuário." })
+            }
+
+            return response.status(200).json({ status: true, message: "Foto atualizada com sucesso." })
+        } catch (err) {
+            console.error("Erro ao adicionar imagem:", err)
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
+    async findPhoto(request, response) {
+        try {
+            const { id } = request.params 
+            const error = UserFieldValidator.validate({ id })
+            if (error) return response.status(422).json({ status: false, message: error })
+            const photo = await User.findPhoto(id)
+            if(photo === undefined) {
+                return response.status(404).json({status: false, message: "Foto não encontrada"})
+            }
+            return response.status(200).json({status: true, photo})
+        } catch(err) {
+            console.error("Erro ao buscar foto:", err)
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
+    async removePhoto(request, response) {
+        try {
+            const { id } = request.params 
+            const error = UserFieldValidator.validate({ id })
+            if (error) return response.status(422).json({ status: false, message: error })
+            const photo = await User.findPhoto(id)
+            if(photo === undefined) {
+                return response.status(404).json({status: false, message: "Foto não encontrada"})
+            }
+            const valid = await User.deletePhoto(id)
+            if(!valid) {
+                return response.status(500).json({ status: false, message: "Erro ao remover foto." })
+            }
+            return response.status(200).json({ status: true, message: "Foto removida com sucesso" })
+        } catch(err) {
+            console.error("Erro ao buscar foto:", err)
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
+    async findSessionById(request, response) {
+        try {
+            const { id } = request.params 
+            const error = UserFieldValidator.validate({ id })
+            if (error) return response.status(422).json({ status: false, message: error })
+            const session = await User.findSessionById(id)
+            if(!session) {
+                return response.status(404).json({status: false, message: "Sessão não encontrada"})
+            }
+            return response.status(200).json({status: true, session})
+        } catch(err) {
+            console.error("Erro ao sessão:", err)
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
     

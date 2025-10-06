@@ -1,6 +1,8 @@
 const express = require("express")
 const router = express.Router()
 const userController = require("../controllers/userController")
+const uploadImage = require("../middleware/uploadImage")
+
 
 /**
  * @module userRoutes
@@ -85,5 +87,23 @@ router.get('/users/students/:id', userController.getStudents)
  * @returns {object} 404 - Aluno não encontrado.
  */
 router.delete('/users/students/:id', userController.deleteStudent)
+
+
+router.put("/user/photo/:id", (request, response, next) => {
+    uploadImage.single("photo")(request, response, (err) => {
+        if (err) {
+            if (err.code === "LIMIT_FILE_SIZE") {
+                return response.status(400).json({ status: false, message: "A imagem excede o limite de 5 MB." })
+            }
+            return response.status(400).json({ status: false, message: err.message })
+        }
+        next()
+    })
+}, userController.editPhoto)
+
+router.get("/user/photo/:id", userController.findPhoto)
+router.put("/user/photo/delete/:id", userController.removePhoto)
+router.get("/user/expire/session/:id", userController.findSessionById)
+
 
 module.exports = router

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { useState, useEffect, useContext } from "react"
 import { Context } from "../../../context/UserContext"
 import requestData from "../../../utils/requestApi"
+import Image from "../../form/Image"
 
 /**
  * DashboardPrincipal
@@ -35,8 +36,8 @@ function DashboardPrincipal() {
   const [kpi, setKpi] = useState({})
   const { user } = useContext(Context)
   const displayName = userRequest?.username || user?.name || 'Usuário'
-  const initials = (displayName?.charAt(0) || 'U').toUpperCase()
   const [ menuOpen, setMenuOpen ] = useState(false)
+  const [ photo, setPhoto] = useState(null)
 
   /**
    * Efeito: Buscar informações detalhadas do coordenador.
@@ -59,8 +60,8 @@ function DashboardPrincipal() {
     if(user) {
       async function fetchUser() {
         const response = await requestData(`/user/coordinator/${user.id}`, 'GET', {}, true)
+        console.log(response)
         if(response.success) {
-          console.log(response.data)
           setUserRequest(response.data.user)
         } else {
           setUserRequest(null)
@@ -68,6 +69,19 @@ function DashboardPrincipal() {
       }
       fetchUser()
     }
+  }, [user])
+
+  useEffect(() => {
+    if(user) {
+        async function fetchPhoto() {
+        const response = await requestData(`/user/photo/${user.id}`, 'GET', {}, true)
+        //console.log('response da foto: ', response)
+        if(response.success) {
+          setPhoto(response.data.photo.photo)
+        }
+      }
+      fetchPhoto()
+    } 
   }, [user])
 
   /**
@@ -91,13 +105,19 @@ function DashboardPrincipal() {
       async function fetchKpi() {
         const response = await requestData(`/user/coordinator/kpi/${user.id}`, 'GET', {}, true)
         if(response.success) {
-          console.log(response.data.kpi)
+          //console.log(response.data.kpi)
           setKpi(response.data.kpi)
         }
       }
       fetchKpi()
     }
   }, [user])
+
+  const getAvatarColor = (name) => {
+    const colors = ["bg-yellow-400", "bg-indigo-400", "bg-pink-400", "bg-green-400", "bg-blue-400"]
+    const index = name ? name.charCodeAt(0) % colors.length : 0
+    return colors[index]
+  }
 
   return (
     <div className="min-h-screen w-full bg-[#060060] flex items-center">
@@ -127,8 +147,19 @@ function DashboardPrincipal() {
                 Coordenação
               </span>
               <div className="relative" tabIndex={0} onBlur={() => setMenuOpen(false)}>
-                <button onClick={() => setMenuOpen((v) => !v)} className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-[#060060] text-white flex items-center justify-center font-bold shadow-md focus:outline-none focus:ring-2 focus:ring-[#060060]/40">
-                  {initials}
+                <button onClick={() => setMenuOpen((v) => !v)}>
+                  {photo ? (
+                    <Image
+                      src={`${import.meta.env.VITE_BASE_URL}/${photo}`}
+                      alt={userRequest.username || "Foto do usuário"}
+                      size={70}
+                    />
+                  ) : (
+                    <div className={`h-[70px] w-[70px] rounded-full ${getAvatarColor(userRequest?.username)} flex items-center justify-center text-white text-3xl font-bold`}>
+                      {userRequest.username ? userRequest.username.charAt(0).toUpperCase() : "?"}
+                    </div>
+                  )}
+
                 </button>
                 {menuOpen && (
                   <div className="absolute right-0 mt-2 w-44 rounded-xl bg-white shadow-lg ring-1 ring-black/5 p-1 z-10">

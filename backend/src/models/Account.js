@@ -596,6 +596,28 @@ class Account {
             return undefined
         }
     }
+
+    async findAdmin(id) {
+        try {
+            const result = await knex.raw(`
+                select 
+                    u.id, 
+                    u.username,
+                    u.email,
+                    u.registration,
+                    u.status
+                from users u
+                where u.id = ?
+            `, [id]);
+            
+            const rows = result.rows;
+
+            return rows.length > 0 ? rows[0] : undefined;
+        } catch(err) {
+            console.error('Erro ao buscar admin por id:', err);
+            return undefined;
+        }
+    }
 }
 
 module.exports = new Account()
