@@ -404,6 +404,36 @@ class UserController {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
+
+    async edit(request, response) {
+        try {
+            const { id } = request.params 
+            const {email, password, confirm_password} = request.body
+            const update = {}
+            const error = UserFieldValidator.validate({ id, email, password, confirm_password })
+            if (error) return response.status(422).json({ status: false, message: error })
+            const user = await User.findById(id)
+            if(!user) {
+                return response.status(404).json({status: false, message: "Usuário não encontrado"})
+            }
+            if(email && email !== user.email) {
+                const emailExist = await User.emailExists(email)
+                if(emailExist) {
+                    return response.status(422).json({status: false, message: "Email já existe"})
+                }
+                update.email = email
+            }
+            update.password = password
+            const valid = await User.updateUser(id, update)
+            if(!valid) {
+                return response.status(500).json({ status: false, message: "Erro ao atualizar usuário" })
+            }
+            return response.status(200).json({ status: true, message: "Usuário atualizado com sucesso" })
+        } catch(err) {
+            console.error("Erro ao sessão:", err)
+            return response.status(500).json({ status: false, message: "Erro interno no servidor" })
+        }
+    }
     
 }
 

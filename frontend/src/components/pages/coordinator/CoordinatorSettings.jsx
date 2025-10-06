@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiBell, FiShield, FiCheck, FiMail, FiLock, FiPhone } from "react-icons/fi";
+import { Context } from "../../../context/UserContext"
+import requestData from "../../../utils/requestApi"
+import useFlashMessage from "../../../hooks/useFlashMessage";
 
 /**
  * CoordinatorSettings
@@ -70,79 +73,52 @@ function CoordinatorSettings() {
   const [novaSenha, setNovaSenha] = useState("");
   /** @type {[string, Function]} Confirmação da nova senha */
   const [confirmarSenha, setConfirmarSenha] = useState("");
+  const [userData, setUserData] = useState({})
+  const { setFlashMessage } = useFlashMessage()
 
-  /**
-   * Valida se a senha atende aos critérios de segurança.
-   * 
-   * Verifica se a senha possui:
-   * - Mínimo de 8 caracteres
-   * - Pelo menos uma letra minúscula
-   * - Pelo menos uma letra maiúscula
-   * - Pelo menos um número
-   * - Pelo menos um caractere especial
-   * 
-   * @param {string} pwd - Senha a ser validada
-   * @returns {boolean} true se a senha é forte, false caso contrário
-   */
-  const isStrongPassword = (pwd) => {
-    // mínimo 8, com letra minúscula, maiúscula, número e caractere especial
-    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/.test(pwd);
-  };
+  const { user } = useContext(Context)
+
+  useEffect(() => {
+    if(user) {
+      async function fetchUser() {
+        const response = await requestData(`/user/${user.id}`, 'GET', {}, true)
+        if(response.success) {
+          setUserData(response.data.user, 'success')
+        }
+      }
+      fetchUser()
+    }
+  }, [user])
+
+
 
   /**
    * Manipula o envio do formulário de configurações.
-   * 
+   *
    * Realiza validações para:
    * - E-mail: formato válido e diferente do atual
    * - Senha: senha atual obrigatória, nova senha forte e confirmação
-   * 
-   * Exibe alertas para erros de validação e sucesso ao salvar.
-   * 
+   *
    * @param {Event} e - Evento de submit do formulário
-   * @returns {void}
    */
-  const handleSalvar = (e) => {
-    e.preventDefault();
-    // Validação e-mail
-    if (novoEmail) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(novoEmail)) {
-        alert("Informe um e-mail válido.");
-        return;
-      }
-      if (emailAtual && novoEmail === emailAtual) {
-        alert("O novo e-mail deve ser diferente do e-mail atual.");
-        return;
-      }
-    }
+  async function handleEdit(e) {
+    e.preventDefault()
 
-    // Validação senha
-    if (novaSenha || confirmarSenha || senhaAtual) {
-      if (!senhaAtual) {
-        alert("Informe a senha atual.");
-        return;
-      }
-      if (!novaSenha) {
-        alert("Informe a nova senha.");
-        return;
-      }
-      if (novaSenha === senhaAtual) {
-        alert("A nova senha deve ser diferente da atual.");
-        return;
-      }
-      if (!isStrongPassword(novaSenha)) {
-        alert("A nova senha deve ter no mínimo 8 caracteres, com maiúscula, minúscula, número e caractere especial.");
-        return;
-      }
-      if (novaSenha !== confirmarSenha) {
-        alert("A confirmação de senha não confere.");
-        return;
-      }
-    }
+    // cria formData e adiciona os campos
+    const formData = new FormData()
+    formData.append("email", novoEmail)
+    formData.append("password", novaSenha)
+    formData.append("confirm_password", confirmarSenha)
 
-    // Futuro: persistir em API (e-mail, senha, notificações)
-    alert("Configurações salvas com sucesso.");
-  };
+    const response = await requestData(`/user/${user.id}`, "PATCH", formData, true)
+
+    if (response.success) {
+      setFlashMessage(response.data.message, "success")
+    } else {
+      setFlashMessage(response.message, "error")
+    }
+  }
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#060060] py-10 px-4">
@@ -168,14 +144,14 @@ function CoordinatorSettings() {
           </div>
         </div>
 
-        <form className="p-6 space-y-6" onSubmit={handleSalvar}>
+        <form className="p-6 space-y-6" onSubmit={handleEdit}>
           {/* Conta */}
           <section className="space-y-3">
             <h3 className="text-sm font-semibold text-gray-800">Conta</h3>
             <div className="rounded-xl ring-1 ring-gray-200 p-4 space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <label className="text-sm text-gray-700 inline-flex items-center gap-2"><FiMail className="text-gray-500" /> E-mail atual</label>
-                <input type="email" value={emailAtual} onChange={(e)=>setEmailAtual(e.target.value)} placeholder="seu_email@instituicao" className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-gray-50" disabled />
+                <input type="email" value={userData.email} onChange={(e)=>setEmailAtual(e.target.value)} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-gray-50" disabled />
                 <label className="text-sm text-gray-700 inline-flex items-center gap-2"><FiMail className="text-gray-500" /> Novo e-mail</label>
                 <input type="email" value={novoEmail} onChange={(e)=>setNovoEmail(e.target.value)} placeholder="nome@exemplo.com" className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm" />
               </div>

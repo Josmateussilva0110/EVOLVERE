@@ -274,7 +274,6 @@ class AccountController {
 
             if(id >= 1 && id <= 4) {
                 user = await Account.findAdmin(id)
-                console.log(user)
             }
 
             else {
