@@ -11,7 +11,7 @@ const multer = require("multer")
 const storage = multer.memoryStorage()
 
 const fileFilter = (request, file, callback) => {
-    if (file.mimetype === "image/png" || file.mimetype === "image/jpeg") {
+    if (file.originalname.match(/\.(png|jpg|jpeg)$/)) {
     callback(null, true)
   } else {
     callback(new Error("Apenas arquivos PNG são permitidos!"), false)

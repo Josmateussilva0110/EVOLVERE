@@ -353,6 +353,21 @@ class UserController {
         }
     }
 
+    async findPhoto(request, response) {
+        try {
+            const { id } = request.params 
+            const error = UserFieldValidator.validate({ id })
+            if (error) return response.status(422).json({ status: false, message: error })
+            const photo = await User.findPhoto(id)
+            if(photo === undefined) {
+                return response.status(404).json({status: false, message: "Foto não encontrada"})
+            }
+            return response.status(200).json({status: true, photo})
+        } catch(err) {
+            console.error("Erro ao buscar foto:", err)
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
     
 }
 

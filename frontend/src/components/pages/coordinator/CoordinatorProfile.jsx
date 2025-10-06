@@ -4,6 +4,8 @@ import { useEffect, useState, useContext } from "react";
 import requestData from "../../../utils/requestApi";
 import useFlashMessage from "../../../hooks/useFlashMessage"
 import { Context } from "../../../context/UserContext"
+import Image from "../../form/Image"
+import RoleBadge from "../../form/RoleBadge"
 
 /**
  * CoordinatorProfile
@@ -49,8 +51,6 @@ import { Context } from "../../../context/UserContext"
  */
 function CoordinatorProfile() {
   const navigate = useNavigate();
-  /** @type {[boolean, Function]} Estado de carregamento dos dados do perfil */
-  const [loading, setLoading] = useState(false);
   /** @type {[string|null, Function]} Estado de erro ao carregar perfil */
   const [error, setError] = useState(null);
   /** @type {[Object, Function]} Dados do perfil do usuário */
@@ -61,10 +61,11 @@ function CoordinatorProfile() {
   const { user } = useContext(Context)
 
   useEffect(() => {
-    if(user) {
+    if (user) {
       async function fetchUser() {
         const response = await requestData(`user/${user.id}`)
-        if(response.success) {
+        if (response.success) {
+          console.log(response)
           setProfile(response.data.user)
         }
       }
@@ -76,7 +77,7 @@ function CoordinatorProfile() {
     const formData = new FormData()
     formData.append("photo", file)
 
-    const response = await requestData(`user/photo/${id}`, "PUT", formData, true)
+    const response = await requestData(`user/photo/${user.id}`, "PUT", formData, true)
 
     if (response.success) {
       setFlashMessage(response.data.message, "success")
@@ -84,6 +85,13 @@ function CoordinatorProfile() {
       setFlashMessage(response.message, "error")
     }
   }
+
+  const getAvatarColor = (name) => {
+    const colors = ["bg-yellow-400", "bg-indigo-400", "bg-pink-400", "bg-green-400", "bg-blue-400"]
+    const index = name ? name.charCodeAt(0) % colors.length : 0
+    return colors[index]
+  }
+
 
 
   /**
@@ -130,11 +138,7 @@ function CoordinatorProfile() {
           </div>
         </div>
 
-        {loading ? (
-          <div className="p-8">
-            <div className="inline-flex items-center gap-3 text-gray-600"><FiLoader className="animate-spin" /> Carregando perfil...</div>
-          </div>
-        ) : error ? (
+        {error ? (
           <div className="p-6">
             <div className="max-w-lg w-full mx-auto bg-white ring-1 ring-red-200 rounded-2xl p-5 text-red-700">
               <div className="flex items-start gap-3">
@@ -151,18 +155,30 @@ function CoordinatorProfile() {
             {/* Avatar e ação de upload */}
             <div className="flex items-center gap-5">
               <div className="relative">
-                <div className="h-20 w-20 rounded-full ring-2 ring-white shadow bg-gray-100 overflow-hidden flex items-center justify-center text-gray-600">
-                  {avatarUrl ? (
-                    <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
-                  ) : (
-                    <span className="text-xl font-bold">{(profile.username || 'U').split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase()}</span>
-                  )}
-                </div>
+
+                {avatarUrl ? (
+                  <Image
+                    src={avatarUrl}
+                    alt={profile.username || "Foto do usuário"}
+                    size={100}
+                  />
+                ) : profile.photo ? (
+                  <Image
+                    src={`${import.meta.env.VITE_BASE_URL}/${profile.photo}`}
+                    alt={profile.username || "Foto do usuário"}
+                    size={100}
+                  />
+                ) : (
+                  <div className={`h-[100px] w-[100px] rounded-full ${getAvatarColor(profile.username)} flex items-center justify-center text-white text-3xl font-bold`}>
+                    {profile.username ? profile.username.charAt(0).toUpperCase() : "?"}
+                  </div>
+                )}
+
                 <label className="absolute -bottom-2 -right-2 inline-flex items-center justify-center h-9 w-9 rounded-full bg-yellow-400 text-gray-900 ring-2 ring-white cursor-pointer hover:bg-yellow-500">
                   <FiCamera />
-                  <input type="file" accept="image/*" className="hidden" onChange={(e)=>{
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => {
                     const file = e.target.files?.[0]
-                    if(file){
+                    if (file) {
                       const url = URL.createObjectURL(file)
                       setAvatarUrl(url)
                       updateImage(profile.id, file)
@@ -172,23 +188,28 @@ function CoordinatorProfile() {
               </div>
               <div className="flex-1">
                 <p className="text-sm text-gray-600">Foto do perfil</p>
-                <p className="text-xs text-gray-500">PNG ou JPG, até 2MB.</p>
+                <p className="text-xs text-gray-500">PNG ou JPG, até 5MB.</p>
               </div>
             </div>
 
             {/* Resumo da conta */}
             <div className="rounded-2xl ring-1 ring-gray-200 p-5 flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200 flex items-center justify-center font-bold">
-                {(profile.username || 'U').split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase()}
-              </div>
+
               <div className="flex-1">
                 <div className="flex flex-col md:flex-row md:items-center md:gap-3">
                   <p className="text-sm font-semibold text-gray-900">{profile.username}</p>
-                  <button onClick={()=>navigate('/coordinator/settings')} className="mt-1 md:mt-0 inline-flex items-center gap-2 rounded-lg ring-1 ring-gray-300 px-2.5 py-1.5 text-xs text-gray-800 hover:bg-gray-50">Editar dados</button>
+                  <button
+                    onClick={() => navigate('/coordinator/settings')}
+                    className="mt-1 md:mt-0 inline-flex items-center gap-2 rounded-lg ring-1 ring-gray-300 px-2.5 py-1.5 text-xs text-gray-800 hover:bg-gray-50"
+                  >
+                    Editar dados
+                  </button>
                 </div>
                 <p className="text-xs text-gray-600">{profile.email}</p>
               </div>
-              <span className="inline-flex items-center rounded-full px-2 py-1 text-[11px] font-medium ring-1 bg-emerald-50 text-emerald-700 ring-emerald-200">{profile.role || 'Admin'}</span>
+
+              {/* Badge de papel/permissão */}
+              <RoleBadge profile={profile} />
             </div>
 
             {/* Informações da conta */}
@@ -204,13 +225,6 @@ function CoordinatorProfile() {
                   <p className="text-sm font-medium text-gray-900">{profile.email}</p>
                 </div>
               </div>
-              <div className="rounded-xl ring-1 ring-gray-200 p-4 flex items-start gap-3">
-                <FiShield className="text-gray-500 mt-0.5" />
-                <div>
-                  <p className="text-xs text-gray-500">Permissão</p>
-                  <p className="text-sm font-medium text-gray-900">{profile.role || "Admin"}</p>
-                </div>
-              </div>
             </div>
 
             {/* Segurança e sessão */}
@@ -222,7 +236,7 @@ function CoordinatorProfile() {
                   <li>Senha: <span className="font-medium">Atualizada</span></li>
                 </ul>
                 <div className="mt-3">
-                  <button onClick={()=>navigate('/coordinator/settings')} className="inline-flex items-center gap-2 rounded-lg ring-1 ring-gray-300 px-3 py-2 text-xs text-gray-800 hover:bg-gray-50"><FiSettings /> Gerenciar segurança</button>
+                  <button onClick={() => navigate('/coordinator/settings')} className="inline-flex items-center gap-2 rounded-lg ring-1 ring-gray-300 px-3 py-2 text-xs text-gray-800 hover:bg-gray-50"><FiSettings /> Gerenciar segurança</button>
                 </div>
               </div>
               <div className="rounded-xl ring-1 ring-gray-200 p-4">
@@ -239,7 +253,7 @@ function CoordinatorProfile() {
 
             {/* Ações rápidas */}
             <div className="flex flex-wrap items-center gap-2">
-              <button onClick={()=>navigate('/coordinator/settings')} className="inline-flex items-center gap-2 rounded-xl bg-yellow-400 text-gray-900 px-4 py-2 text-sm font-semibold hover:bg-yellow-500"><FiSettings /> Abrir configurações</button>
+              <button onClick={() => navigate('/coordinator/settings')} className="inline-flex items-center gap-2 rounded-xl bg-yellow-400 text-gray-900 px-4 py-2 text-sm font-semibold hover:bg-yellow-500"><FiSettings /> Abrir configurações</button>
             </div>
           </div>
         )}
