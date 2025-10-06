@@ -1,7 +1,9 @@
-import { FiArrowLeft, FiUser, FiMail, FiPhone, FiShield, FiLoader, FiAlertCircle, FiSettings, FiLogIn, FiCamera } from "react-icons/fi";
+import { FiArrowLeft, FiUser, FiMail, FiShield, FiLoader, FiAlertCircle, FiSettings, FiLogIn, FiCamera } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import requestData from "../../../utils/requestApi";
+import useFlashMessage from "../../../hooks/useFlashMessage"
+import { Context } from "../../../context/UserContext"
 
 /**
  * CoordinatorProfile
@@ -52,9 +54,37 @@ function CoordinatorProfile() {
   /** @type {[string|null, Function]} Estado de erro ao carregar perfil */
   const [error, setError] = useState(null);
   /** @type {[Object, Function]} Dados do perfil do usuário */
-  const [profile, setProfile] = useState({ nome: "nome", email: "email@gmail.com", permissao: "admin" });
+  const [profile, setProfile] = useState({});
   /** @type {[string, Function]} URL do avatar do usuário */
   const [avatarUrl, setAvatarUrl] = useState("");
+  const { setFlashMessage } = useFlashMessage()
+  const { user } = useContext(Context)
+
+  useEffect(() => {
+    if(user) {
+      async function fetchUser() {
+        const response = await requestData(`user/${user.id}`)
+        if(response.success) {
+          setProfile(response.data.user)
+        }
+      }
+      fetchUser()
+    }
+  }, [user])
+
+  async function updateImage(id, file) {
+    const formData = new FormData()
+    formData.append("photo", file)
+
+    const response = await requestData(`user/photo/${id}`, "PUT", formData, true)
+
+    if (response.success) {
+      setFlashMessage(response.data.message, "success")
+    } else {
+      setFlashMessage(response.message, "error")
+    }
+  }
+
 
   /**
    * useEffect para carregar dados do perfil do usuário.
@@ -125,7 +155,7 @@ function CoordinatorProfile() {
                   {avatarUrl ? (
                     <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
                   ) : (
-                    <span className="text-xl font-bold">{(profile.nome || 'U').split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase()}</span>
+                    <span className="text-xl font-bold">{(profile.username || 'U').split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase()}</span>
                   )}
                 </div>
                 <label className="absolute -bottom-2 -right-2 inline-flex items-center justify-center h-9 w-9 rounded-full bg-yellow-400 text-gray-900 ring-2 ring-white cursor-pointer hover:bg-yellow-500">
@@ -135,7 +165,7 @@ function CoordinatorProfile() {
                     if(file){
                       const url = URL.createObjectURL(file)
                       setAvatarUrl(url)
-                      // Futuro: enviar via API
+                      updateImage(profile.id, file)
                     }
                   }} />
                 </label>
@@ -149,23 +179,23 @@ function CoordinatorProfile() {
             {/* Resumo da conta */}
             <div className="rounded-2xl ring-1 ring-gray-200 p-5 flex items-center gap-4">
               <div className="h-12 w-12 rounded-full bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200 flex items-center justify-center font-bold">
-                {(profile.nome || 'U').split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase()}
+                {(profile.username || 'U').split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase()}
               </div>
               <div className="flex-1">
                 <div className="flex flex-col md:flex-row md:items-center md:gap-3">
-                  <p className="text-sm font-semibold text-gray-900">{profile.nome}</p>
+                  <p className="text-sm font-semibold text-gray-900">{profile.username}</p>
                   <button onClick={()=>navigate('/coordinator/settings')} className="mt-1 md:mt-0 inline-flex items-center gap-2 rounded-lg ring-1 ring-gray-300 px-2.5 py-1.5 text-xs text-gray-800 hover:bg-gray-50">Editar dados</button>
                 </div>
                 <p className="text-xs text-gray-600">{profile.email}</p>
               </div>
-              <span className="inline-flex items-center rounded-full px-2 py-1 text-[11px] font-medium ring-1 bg-emerald-50 text-emerald-700 ring-emerald-200">{profile.permissao || 'Coordenador'}</span>
+              <span className="inline-flex items-center rounded-full px-2 py-1 text-[11px] font-medium ring-1 bg-emerald-50 text-emerald-700 ring-emerald-200">{profile.role || 'Admin'}</span>
             </div>
 
             {/* Informações da conta */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="rounded-xl ring-1 ring-gray-200 p-4">
                 <p className="text-xs text-gray-500">Nome</p>
-                <p className="text-sm font-medium text-gray-900">{profile.nome}</p>
+                <p className="text-sm font-medium text-gray-900">{profile.username}</p>
               </div>
               <div className="rounded-xl ring-1 ring-gray-200 p-4 flex items-start gap-3">
                 <FiMail className="text-gray-500 mt-0.5" />
@@ -178,7 +208,7 @@ function CoordinatorProfile() {
                 <FiShield className="text-gray-500 mt-0.5" />
                 <div>
                   <p className="text-xs text-gray-500">Permissão</p>
-                  <p className="text-sm font-medium text-gray-900">{profile.permissao}</p>
+                  <p className="text-sm font-medium text-gray-900">{profile.role || "Admin"}</p>
                 </div>
               </div>
             </div>
