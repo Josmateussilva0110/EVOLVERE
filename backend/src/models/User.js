@@ -255,6 +255,19 @@ class User {
         }
     }
 
+    async deletePhoto(id) {
+        try {
+            const updated_at = knex.fn.now()
+            const result = await knex("users")
+                .where({ id })
+                .update({ photo: null, updated_at})
+            return result > 0
+        } catch (err) {
+            console.error("Erro ao atualizar foto:", err)
+            return false
+        }
+    }
+
 }
 
 module.exports = new User()

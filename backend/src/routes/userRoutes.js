@@ -100,5 +100,6 @@ router.put("/user/photo/:id", (request, response, next) => {
 }, userController.editPhoto)
 
 router.get("/user/photo/:id", userController.findPhoto)
+router.put("/user/photo/delete/:id", userController.removePhoto)
 
 module.exports = router

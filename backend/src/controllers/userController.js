@@ -368,6 +368,26 @@ class UserController {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
+
+    async removePhoto(request, response) {
+        try {
+            const { id } = request.params 
+            const error = UserFieldValidator.validate({ id })
+            if (error) return response.status(422).json({ status: false, message: error })
+            const photo = await User.findPhoto(id)
+            if(photo === undefined) {
+                return response.status(404).json({status: false, message: "Foto não encontrada"})
+            }
+            const valid = await User.deletePhoto(id)
+            if(!valid) {
+                return response.status(500).json({ status: false, message: "Erro ao remover foto." })
+            }
+            return response.status(200).json({ status: true, message: "Foto removida com sucesso" })
+        } catch(err) {
+            console.error("Erro ao buscar foto:", err)
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
     
 }
 

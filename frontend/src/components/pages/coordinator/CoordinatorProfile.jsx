@@ -86,6 +86,22 @@ function CoordinatorProfile() {
     }
   }
 
+  async function deleteImage(id) {
+    const response = await requestData(`user/photo/delete/${user.id}`, "PUT", {}, true)
+
+    if (response.success) {
+      setAvatarUrl("")
+      setProfile(prev => ({ 
+        ...prev,
+        photo: null
+      }));
+      setFlashMessage(response.data.message, "success")
+
+    } else {
+      setFlashMessage(response.message, "error")
+    }
+  }
+
   const getAvatarColor = (name) => {
     const colors = ["bg-yellow-400", "bg-indigo-400", "bg-pink-400", "bg-green-400", "bg-blue-400"]
     const index = name ? name.charCodeAt(0) % colors.length : 0
@@ -154,8 +170,7 @@ function CoordinatorProfile() {
           <div className="p-6 space-y-6">
             {/* Avatar e ação de upload */}
             <div className="flex items-center gap-5">
-              <div className="relative">
-
+              <div className="relative flex items-center gap-2">
                 {avatarUrl ? (
                   <Image
                     src={avatarUrl}
@@ -169,28 +184,52 @@ function CoordinatorProfile() {
                     size={100}
                   />
                 ) : (
-                  <div className={`h-[100px] w-[100px] rounded-full ${getAvatarColor(profile.username)} flex items-center justify-center text-white text-3xl font-bold`}>
+                  <div className={`h-[80px] w-[80px] rounded-full ${getAvatarColor(profile.username)} flex items-center justify-center text-white text-3xl font-bold`}>
                     {profile.username ? profile.username.charAt(0).toUpperCase() : "?"}
                   </div>
                 )}
 
-                <label className="absolute -bottom-2 -right-2 inline-flex items-center justify-center h-9 w-9 rounded-full bg-yellow-400 text-gray-900 ring-2 ring-white cursor-pointer hover:bg-yellow-500">
-                  <FiCamera />
-                  <input type="file" accept="image/*" className="hidden" onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) {
-                      const url = URL.createObjectURL(file)
-                      setAvatarUrl(url)
-                      updateImage(profile.id, file)
-                    }
-                  }} />
-                </label>
+                  {/* Botão de upload (ícone da câmera) */}
+                  <label className="absolute -bottom-2 -right-2 inline-flex items-center justify-center h-9 w-9 rounded-full bg-yellow-400 text-gray-900 ring-2 ring-white cursor-pointer hover:bg-yellow-500">
+                    <FiCamera />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          const url = URL.createObjectURL(file)
+                          setAvatarUrl(url)
+                          updateImage(profile.id, file)
+                        }
+                      }}
+                    />
+                  </label>
               </div>
-              <div className="flex-1">
-                <p className="text-sm text-gray-600">Foto do perfil</p>
-                <p className="text-xs text-gray-500">PNG ou JPG, até 5MB.</p>
-              </div>
+
+                {/* Botão remover foto */}
+                {(avatarUrl || profile.photo) && (
+                  <button
+                    className=" mt-20 inline-flex items-center gap-1 rounded-lg px-2 py-1 bg-gray-400 text-white text-sm font-medium hover:bg-gray-500"
+                    onClick={() => {
+                      setAvatarUrl("")
+                      deleteImage(profile.id) 
+                    }}
+                  >
+                    Remover Foto
+                  </button>
+                )}
+
+              {!avatarUrl && !profile.photo && (
+                <div className="flex-1">
+                  <p className="text-sm text-gray-600">Foto do perfil</p>
+                  <p className="text-xs text-gray-500">PNG ou JPG, até 5MB.</p>
+                </div>
+              )}
+
             </div>
+
 
             {/* Resumo da conta */}
             <div className="rounded-2xl ring-1 ring-gray-200 p-5 flex items-center gap-4">
