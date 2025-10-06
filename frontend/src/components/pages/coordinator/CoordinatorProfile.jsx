@@ -124,7 +124,6 @@ function CoordinatorProfile() {
   }
 
 
-
   /**
    * useEffect para carregar dados do perfil do usuário.
    * 
@@ -271,6 +270,7 @@ function CoordinatorProfile() {
               <div className="rounded-xl ring-1 ring-gray-200 p-4">
                 <p className="text-xs text-gray-500">Nome</p>
                 <p className="text-sm font-medium text-gray-900">{profile.username}</p>
+
               </div>
               <div className="rounded-xl ring-1 ring-gray-200 p-4 flex items-start gap-3">
                 <FiMail className="text-gray-500 mt-0.5" />
@@ -308,6 +308,7 @@ function CoordinatorProfile() {
             {/* Ações rápidas */}
             <div className="flex flex-wrap items-center gap-2">
               <button onClick={() => navigate('/coordinator/settings')} className="inline-flex items-center gap-2 rounded-xl bg-yellow-400 text-gray-900 px-4 py-2 text-sm font-semibold hover:bg-yellow-500"><FiSettings /> Abrir configurações</button>
+
             </div>
           </div>
         )}

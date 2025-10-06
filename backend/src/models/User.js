@@ -197,6 +197,7 @@ class User {
         }
     }
 
+
     /**
      * @param {number} id - O ID do utilizador a ser apagado.
      * @returns {Promise<boolean>} - Retorna true se foi bem-sucedido.
@@ -226,6 +227,7 @@ class User {
             return false
         }
     }
+
 
     async updatePhoto(id, photoPath) {
         try {
@@ -284,8 +286,6 @@ class User {
     }
 
     
-
-
 }
 
 module.exports = new User()

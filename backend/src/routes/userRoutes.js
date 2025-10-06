@@ -3,6 +3,7 @@ const router = express.Router()
 const userController = require("../controllers/userController")
 const uploadImage = require("../middleware/uploadImage")
 
+
 /**
  * @module userRoutes
  * @description Rotas relacionadas a utilizadores (autenticação, registo, contas, alunos e professores).
@@ -87,6 +88,7 @@ router.get('/users/students/:id', userController.getStudents)
  */
 router.delete('/users/students/:id', userController.deleteStudent)
 
+
 router.put("/user/photo/:id", (request, response, next) => {
     uploadImage.single("photo")(request, response, (err) => {
         if (err) {
@@ -102,5 +104,6 @@ router.put("/user/photo/:id", (request, response, next) => {
 router.get("/user/photo/:id", userController.findPhoto)
 router.put("/user/photo/delete/:id", userController.removePhoto)
 router.get("/user/expire/session/:id", userController.findSessionById)
+
 
 module.exports = router
