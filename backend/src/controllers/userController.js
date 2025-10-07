@@ -61,7 +61,7 @@ class UserController {
                 return response.status(422).json({status: false, message: "Email já existe."})
             }
 
-            const code = customAlphabet('0123456789', 8);
+            const code = customAlphabet('0123456789', 8)
 
             let registration
             let isUnique = false
@@ -284,7 +284,7 @@ class UserController {
             const students = await User.findAllStudents()
             return response.status(200).json({ status: true, data: students })
         } catch (err) {
-            console.error("Erro ao listar alunos:", err);
+            console.error("Erro ao listar alunos:", err)
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
@@ -294,19 +294,19 @@ class UserController {
      */
     async deleteStudent(request, response) {
         try {
-            const { id } = request.params;
+            const { id } = request.params
             const error = UserFieldValidator.validate({id})
             if (error) return response.status(422).json({ status: false, message: error })
-            const success = await User.deleteById(Number(id));
+            const success = await User.deleteById(Number(id))
 
             if (!success) {
-                return response.status(404).json({ status: false, message: 'Aluno não encontrado.' });
+                return response.status(404).json({ status: false, message: 'Aluno não encontrado.' })
             }
 
-            return response.status(200).json({ status: true, message: 'Aluno apagado com sucesso.' });
+            return response.status(200).json({ status: true, message: 'Aluno apagado com sucesso.' })
         } catch (err) {
-            console.error("Erro ao apagar aluno:", err);
-            return response.status(500).json({ status: false, message: "Erro interno no servidor." });
+            console.error("Erro ao apagar aluno:", err)
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
 
@@ -407,34 +407,66 @@ class UserController {
 
     async edit(request, response) {
         try {
-            const { id } = request.params 
-            const {email, password, confirm_password} = request.body
+            const { id } = request.params
+            const { username, email, current_password, password, confirm_password } = request.body
             const update = {}
-            const error = UserFieldValidator.validate({ id, email, password, confirm_password })
-            if (error) return response.status(422).json({ status: false, message: error })
+
             const user = await User.findById(id)
-            if(!user) {
-                return response.status(404).json({status: false, message: "Usuário não encontrado"})
+            if (!user) {
+                return response.status(404).json({ status: false, message: "Usuário não encontrado" })
             }
-            if(email && email !== user.email) {
+
+            if (username && username !== user.username) {
+                update.username = username
+            }
+
+
+            if (email && email !== user.email) {
                 const emailExist = await User.emailExists(email)
-                if(emailExist) {
-                    return response.status(422).json({status: false, message: "Email já existe"})
+                if (emailExist) {
+                    return response.status(422).json({ status: false, message: "Email já existe" })
                 }
                 update.email = email
             }
-            update.password = password
-            const valid = await User.updateUser(id, update)
-            if(!valid) {
-                return response.status(500).json({ status: false, message: "Erro ao atualizar usuário" })
+
+            if (current_password || password || confirm_password) {
+                if (!current_password || !password || !confirm_password) {
+                    return response.status(422).json({
+                    status: false,
+                    message: "Para alterar a senha, preencha todos os campos de senha.",
+                    })
+                }
+
+                const checkPassword = await bcrypt.compare(current_password, user.password)
+                if (!checkPassword) {
+                    return response.status(422).json({ status: false, message: "Senha atual incorreta." })
+                }
+
+                if (password !== confirm_password) {
+                    return response.status(422).json({ status: false, message: "As senhas não coincidem." })
+                }
+
+                const salt = await bcrypt.genSalt(10)
+                const passwordHash = await bcrypt.hash(password, salt)
+                update.password = passwordHash
             }
-            return response.status(200).json({ status: true, message: "Usuário atualizado com sucesso" })
-        } catch(err) {
-            console.error("Erro ao sessão:", err)
-            return response.status(500).json({ status: false, message: "Erro interno no servidor" })
+
+            if (Object.keys(update).length === 0) {
+            return response.status(400).json({ status: false, message: "Nenhuma alteração foi feita." })
+            }
+
+            const valid = await User.updateUser(id, update)
+            if (!valid) {
+            return response.status(500).json({ status: false, message: "Erro ao atualizar usuário." })
+            }
+
+            return response.status(200).json({ status: true, message: "Usuário atualizado com sucesso." })
+        } catch (err) {
+            console.error("Erro ao editar usuário:", err)
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
-    
+
 }
 
 module.exports = new UserController()

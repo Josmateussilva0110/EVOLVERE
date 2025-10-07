@@ -1,9 +1,9 @@
-import { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import { FiArrowLeft, FiBell, FiShield, FiCheck, FiMail, FiLock, FiPhone } from "react-icons/fi";
+import { useState, useEffect, useContext } from "react"
+import { useNavigate } from "react-router-dom"
+import { FiArrowLeft, FiBell, FiShield, FiCheck, FiMail, FiLock, FiPhone, FiUser } from "react-icons/fi"
 import { Context } from "../../../context/UserContext"
 import requestData from "../../../utils/requestApi"
-import useFlashMessage from "../../../hooks/useFlashMessage";
+import useFlashMessage from "../../../hooks/useFlashMessage"
 
 /**
  * CoordinatorSettings
@@ -58,7 +58,7 @@ import useFlashMessage from "../../../hooks/useFlashMessage";
  * @returns {JSX.Element} Página de configurações do coordenador
  */
 function CoordinatorSettings() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   /** @type {[boolean, Function]} Estado para notificações por e-mail */
   const [notifEmail, setNotifEmail] = useState(true);
   /** @type {[boolean, Function]} Estado para notificações por WhatsApp */
@@ -67,6 +67,7 @@ function CoordinatorSettings() {
   const [novoEmail, setNovoEmail] = useState("");
   /** @type {[string, Function]} E-mail atual do usuário */
   const [emailAtual, setEmailAtual] = useState("");
+  const [username, setUsername] = useState("");
   /** @type {[string, Function]} Senha atual para validação */
   const [senhaAtual, setSenhaAtual] = useState("");
   /** @type {[string, Function]} Nova senha a ser definida */
@@ -83,7 +84,9 @@ function CoordinatorSettings() {
       async function fetchUser() {
         const response = await requestData(`/user/${user.id}`, 'GET', {}, true)
         if(response.success) {
-          setUserData(response.data.user, 'success')
+          const fetchedUser = response.data.user
+          setUserData(fetchedUser, 'success')
+          setUsername(fetchedUser.username)
         }
       }
       fetchUser()
@@ -104,16 +107,20 @@ function CoordinatorSettings() {
   async function handleEdit(e) {
     e.preventDefault()
 
-    // cria formData e adiciona os campos
-    const formData = new FormData()
-    formData.append("email", novoEmail)
-    formData.append("password", novaSenha)
-    formData.append("confirm_password", confirmarSenha)
+    const data = {
+      username: username,
+      email: novoEmail,
+      current_password: senhaAtual,
+      password: novaSenha,
+      confirm_password: confirmarSenha
+    }
 
-    const response = await requestData(`/user/${user.id}`, "PATCH", formData, true)
+    const response = await requestData(`/user/edit/${user.id}`, "PATCH", data, true)
 
     if (response.success) {
       setFlashMessage(response.data.message, "success")
+      navigate('/coordinator/profile')
+
     } else {
       setFlashMessage(response.message, "error")
     }
@@ -150,8 +157,10 @@ function CoordinatorSettings() {
             <h3 className="text-sm font-semibold text-gray-800">Conta</h3>
             <div className="rounded-xl ring-1 ring-gray-200 p-4 space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <label className="text-sm text-gray-700 inline-flex items-center gap-2"><FiUser className="text-gray-500" /> Nome</label>
+                <input type="text" value={username} onChange={(e)=>setUsername(e.target.value)} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-gray-50"/>
                 <label className="text-sm text-gray-700 inline-flex items-center gap-2"><FiMail className="text-gray-500" /> E-mail atual</label>
-                <input type="email" value={userData.email} onChange={(e)=>setEmailAtual(e.target.value)} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-gray-50" disabled />
+                <input type="email" value={userData.email} onChange={(e)=>setEmailAtual(e.target.value)} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-gray-50 opacity-60 cursor-not-allowed" disabled />
                 <label className="text-sm text-gray-700 inline-flex items-center gap-2"><FiMail className="text-gray-500" /> Novo e-mail</label>
                 <input type="email" value={novoEmail} onChange={(e)=>setNovoEmail(e.target.value)} placeholder="nome@exemplo.com" className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm" />
               </div>

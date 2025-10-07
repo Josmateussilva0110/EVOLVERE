@@ -137,6 +137,7 @@ class User {
                 u.email,
                 u.registration,
                 u.photo,
+                u.password,
                 u.status,
                 u.created_at,
                 u.updated_at,
@@ -290,7 +291,7 @@ class User {
             data.updated_at = knex.fn.now()
             const result = await knex("users")
                 .where({ id })
-                .update({data})
+                .update({ ...data })
             return result > 0
         } catch (err) {
             console.error("Erro ao atualizar usuário:", err)
