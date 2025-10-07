@@ -9,7 +9,7 @@ import { FaChalkboardTeacher } from "react-icons/fa"
 import requestData from "../../../utils/requestApi"
 import useFlashMessage from "../../../hooks/useFlashMessage"
 import { Context } from "../../../context/UserContext"
-import formatDate from "../../../utils/formatDate"
+import formatDateRequests from "../../../utils/formatDateRequests"
 
 /**
  * RequestsTeachers
@@ -289,7 +289,7 @@ function RequestsTeachers() {
                   <td className="py-3 px-4 text-sm text-gray-700">
                     <div className="flex items-center gap-1">
                       <FiCalendar className="text-gray-500" />
-                      {formatDate(prof.created_at)}
+                      {formatDateRequests(prof.created_at)}
                     </div>
                   </td>
 

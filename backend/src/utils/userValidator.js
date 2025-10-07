@@ -83,6 +83,21 @@ class UserFieldValidator {
     }
 
     /**
+     * Valida a senha do usuário.
+     * @param {string} password - Senha do usuário.
+     * @returns {string|null} Mensagem de erro ou `null` se válido.
+     */
+    static current_password(password) {
+        if (validator.isEmpty(password || '')) {
+            return 'Senha obrigatória.'
+        }
+        if (!validator.isLength(password, { min: 6 })) {
+            return 'Senha deve ter no mínimo 6 caracteres.'
+        }
+        return null
+    }
+
+    /**
      * Valida a confirmação de senha.
      * @param {string} password - Senha original.
      * @param {string} confirm_password - Confirmação da senha.
@@ -145,6 +160,9 @@ class UserFieldValidator {
                     break
                 case 'confirm_password':
                     error = UserFieldValidator.confirmPassword(fields.password, value)
+                    break
+                case 'current_password':
+                    error = UserFieldValidator.current_password(value)
                     break
                 case 'id':
                     error = UserFieldValidator.id(value)
