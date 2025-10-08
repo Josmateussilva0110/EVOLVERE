@@ -1,77 +1,20 @@
-
 import {
   BookOpen,
   Users,
-  Folder,
-  FileText,
-  BarChart3,
-  Award,
-  Settings,
-  HelpCircle,
-  LogOut,
-  ClipboardList,
   ChevronLeft,
   Search,
   ChevronDown,
   User,
   Calendar,
   TrendingUp,
+  Award,
 } from "lucide-react";
 import { useState } from "react";
 
-/**
- * SistemasInformacao
- * 
- * O que faz: Exibe informações do curso "Sistemas de Informação", incluindo estatísticas gerais, 
- * lista de disciplinas, filtros de pesquisa e semestre, com cards mostrando detalhes de cada disciplina.
- * Entrada: nenhuma
- * Exemplo de saída: [
- *   {
- *     codigo: "ED1",
- *     nome: "Professor(es): ÓSEAS",
- *     alunos: "Qnt. alunos matriculados: 25",
- *     semestre: "3º Semestre",
- *     status: "Concluída",
- *     statusColor: "text-emerald-600",
- *     bgColor: "bg-emerald-50",
- *     borderColor: "border-emerald-200"
- *   },
- *   ...
- * ]
- */
-
-/**
- * filteredDisciplinas
- * 
- * O que faz: Filtra a lista de disciplinas com base no termo digitado na barra de pesquisa.
- * Entrada: searchTerm (string)
- * Exemplo de saída: [
- *   {
- *     codigo: "ED1",
- *     nome: "Professor(es): ÓSEAS",
- *     alunos: "Qnt. alunos matriculados: 25",
- *     semestre: "3º Semestre",
- *     status: "Concluída"
- *   }
- * ]
- */
-
-
 export default function SistemasInformacao() {
-  const [activeSection, setActiveSection] = useState("curso");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSemester, setSelectedSemester] = useState("Semestre");
-  const usuario = "Lucas Emanuel";
-
-  const menuItems = [
-    { icon: BookOpen, label: "Meu curso", id: "curso" },
-    { icon: Users, label: "Turmas", id: "turmas" },
-    { icon: Folder, label: "Materiais", id: "materiais" },
-    { icon: ClipboardList, label: "Atividades/Simulados", id: "atividades" },
-    { icon: BarChart3, label: "Desempenho", id: "desempenho" },
-    { icon: Award, label: "Medalhas", id: "medalhas" },
-  ];
-
+  
   const disciplinas = [
     {
       codigo: "ED1",
@@ -134,35 +77,49 @@ export default function SistemasInformacao() {
       borderColor: "border-emerald-200",
     },
   ];
+  
+  const filteredDisciplinas = disciplinas.filter((disc) => {
+    const matchesSearch = disc.codigo.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSemester = selectedSemester === "Semestre" || selectedSemester === "Todos" || disc.semestre === selectedSemester;
+    return matchesSearch && matchesSemester;
+  });
 
-  const filteredDisciplinas = disciplinas.filter((disc) =>
-    disc.codigo.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleVoltar = () => {
+    window.history.back();
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      {/* Main Content */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pb-20">
       <main className="w-full min-h-screen">
-        {/* Header com breadcrumb - Responsivo */}
+        {/* Header com botão voltar */}
         <header className="bg-white/90 backdrop-blur-md border-b border-gray-200/50 px-4 sm:px-6 lg:px-8 py-4 sm:py-5 shadow-sm sticky top-0 z-10">
           <div className="max-w-7xl mx-auto">
-            <button className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors group">
-              <ChevronLeft size={22} strokeWidth={2.5} className="group-hover:-translate-x-1 transition-transform" />
+            <button
+              onClick={handleVoltar}
+              className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors group"
+            >
+              <ChevronLeft
+                size={22}
+                strokeWidth={2.5}
+                className="group-hover:-translate-x-1 transition-transform"
+              />
               <span className="font-bold text-lg sm:text-xl">Sistemas de Informação</span>
             </button>
           </div>
         </header>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 pb-16 sm:pb-20 lg:pb-24">
-          {/* Stats Cards - Responsivo */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+          {/* Stats Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <div className="group bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-lg hover:shadow-xl border border-blue-100 hover:border-blue-300 transition-all duration-300 hover:-translate-y-1">
               <div className="text-center">
                 <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl mb-3 sm:mb-4 shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform">
                   <BookOpen className="text-white" size={24} />
                 </div>
-                <p className="text-gray-600 text-xs sm:text-sm font-medium mb-2">Total disciplina</p>
-                <p className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-br from-blue-600 to-indigo-600 bg-clip-text text-transparent">6</p>
+                <p className="text-gray-600 text-xs sm:text-sm font-medium mb-2">Total disciplinas</p>
+                <p className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-br from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  {disciplinas.length}
+                </p>
               </div>
             </div>
 
@@ -182,12 +139,12 @@ export default function SistemasInformacao() {
                   <Award className="text-white" size={24} />
                 </div>
                 <p className="text-gray-600 text-xs sm:text-sm font-medium mb-2">Média</p>
-                <p className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-br from-amber-600 to-orange-600 bg-clip-text text-transparent">8.0157</p>
+                <p className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-br from-amber-600 to-orange-600 bg-clip-text text-transparent">8.0</p>
               </div>
             </div>
           </div>
 
-          {/* Filtros - Responsivo */}
+          {/* Filtros */}
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
             <div className="flex-1 relative group">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
@@ -199,6 +156,7 @@ export default function SistemasInformacao() {
                 className="w-full pl-12 pr-4 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl border-2 border-gray-200 bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm sm:text-base text-gray-700 placeholder-gray-400 shadow-sm"
               />
             </div>
+
             <div className="relative group sm:min-w-[180px]">
               <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
               <select
@@ -207,16 +165,17 @@ export default function SistemasInformacao() {
                 className="appearance-none w-full pl-11 pr-10 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl border-2 border-gray-200 bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer text-sm sm:text-base text-gray-700 shadow-sm font-medium"
               >
                 <option>Semestre</option>
-                <option>1º Semestre</option>
                 <option>2º Semestre</option>
                 <option>3º Semestre</option>
+                <option>4º Semestre</option>
+                <option>5º Semestre</option>
                 <option>Todos</option>
               </select>
               <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
             </div>
           </div>
 
-          {/* Grid de Disciplinas - Responsivo */}
+          {/* Grid de Disciplinas */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {filteredDisciplinas.map((disciplina, index) => (
               <div
@@ -227,7 +186,9 @@ export default function SistemasInformacao() {
                 
                 <div className="relative">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{disciplina.codigo}</h3>
+                    <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                      {disciplina.codigo}
+                    </h3>
                   </div>
                   
                   <div className="space-y-2 mb-4">
@@ -263,7 +224,7 @@ export default function SistemasInformacao() {
                 <Search className="text-gray-400" size={32} />
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Nenhuma disciplina encontrada</h3>
-              <p className="text-sm sm:text-base text-gray-600">Tente buscar por outro termo</p>
+              <p className="text-sm sm:text-base text-gray-600">Tente buscar por outro termo ou ajustar os filtros</p>
             </div>
           )}
         </div>
