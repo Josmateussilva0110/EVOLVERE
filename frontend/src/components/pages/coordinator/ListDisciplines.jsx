@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import requestData from "../../../utils/requestApi";
 import useFlashMessage from "../../../hooks/useFlashMessage";
 import { Context } from "../../../context/UserContext";
+import Image from "../../form/Image";
 
 function DisciplineList() {
     // 3. Obter o usuário do contexto
@@ -273,27 +274,33 @@ function DisciplineList() {
                                                 <td className="px-3 py-4 text-sm font-medium text-slate-900">{d.name}</td>
 
                                                 <td className="px-3 py-4 text-sm text-slate-700">
-                                                    <div className="flex items-center gap-2">
-                                                        <span
-                                                            className={`inline-flex h-8 w-8 items-center justify-center rounded-full ring-1 ${colorFromString(
-                                                                d.professor_nome || "NA"
-                                                            )}`}
-                                                        >
-                                                            <span className="text-[10px] font-bold">
-                                                                {d.professor_nome ? getInitials(d.professor_nome) : "NA"}
-                                                            </span>
+                                                <div className="flex items-center gap-2">
+                                                    {d.photo ? (
+                                                        <Image
+                                                        src={`${import.meta.env.VITE_BASE_URL}/${d.photo}`}
+                                                        alt={d.professor_nome || "Foto do usuário"}
+                                                        size={60}
+                                                        />
+                                                    ) : (
+                                                        <span className={`inline-flex h-15 w-15 items-center justify-center rounded-full ring-1 ${colorFromString(d?.professor_nome || 'Professor')}`}>
+                                                        <span className="text-xs font-bold">{getInitials(d?.professor_nome || 'Professor')}</span>
                                                         </span>
-                                                        <span>{d.professor_nome || "Não atribuído"}</span>
-                                                        <span
-                                                            className={`ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ${d.professor_nome
-                                                                    ? "bg-slate-50 text-slate-700 ring-slate-200"
-                                                                    : "bg-amber-50 text-amber-700 ring-amber-200"
-                                                                }`}
-                                                        >
-                                                            {d.professor_nome ? "Atribuída" : "Sem professor"}
-                                                        </span>
-                                                    </div>
+                                                    )}
+
+                                                    <span>{d.professor_nome || "Não atribuído"}</span>
+
+                                                    <span
+                                                    className={`ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ${
+                                                        d.professor_nome
+                                                        ? "bg-slate-50 text-slate-700 ring-slate-200"
+                                                        : "bg-amber-50 text-amber-700 ring-amber-200"
+                                                    }`}
+                                                    >
+                                                    {d.professor_nome ? "Atribuída" : "Sem professor"}
+                                                    </span>
+                                                </div>
                                                 </td>
+
                                                 {/* Coluna Curso condicional */}
                                                 {showRoleColumn && (
                                                     <td className="px-3 py-4 text-sm text-slate-700">

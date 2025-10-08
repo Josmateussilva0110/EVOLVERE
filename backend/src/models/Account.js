@@ -222,21 +222,24 @@ class Account {
     async getAllTeachers() {
         try {
             const result = await knex.raw(`
-                select 
+                SELECT 
                     vp.professional_id,
                     u.username,
                     u.registration,
-                    s.name as disciplina,
-                    cv.name as course
-                from validate_professionals vp
-                inner join users u
-                    on u.id = vp.professional_id
-                left join subjects s
-                    on s.professional_id = vp.professional_id
-                inner join course_valid cv
-                    on cv.course_code::text = vp.access_code
-                where vp.role = 3 and vp.approved = true
+                    u.photo,
+                    cv.name AS course,
+                    COALESCE(array_agg(s.name) FILTER (WHERE s.name IS NOT NULL), '{}') AS subjects
+                FROM validate_professionals vp
+                INNER JOIN users u
+                    ON u.id = vp.professional_id
+                LEFT JOIN subjects s
+                    ON s.professional_id = vp.professional_id
+                INNER JOIN course_valid cv
+                    ON cv.course_code::text = vp.access_code
+                WHERE vp.role = 3 AND vp.approved = true
+                GROUP BY vp.professional_id, u.username, u.registration, u.photo, cv.name
             `)
+
             const rows = result.rows
             return rows.length > 0 ? rows : undefined
         } catch(err) {
@@ -244,6 +247,7 @@ class Account {
             return undefined
         }
     }
+
 
 
 
@@ -397,7 +401,8 @@ class Account {
                     vp.professional_id,
                     u.username,
                     u.registration,
-                    s.name as disciplina,
+                    u.photo,
+                    COALESCE(array_agg(s.name) FILTER (WHERE s.name IS NOT NULL), '{}') AS subjects,
                     cv.name as course
                 from validate_professionals vp
                 inner join users u
@@ -407,6 +412,7 @@ class Account {
                 inner join course_valid cv
                     on cv.course_code::text = vp.access_code
                 where vp.role = 3 and vp.approved = true and vp.access_code = ?
+                GROUP BY vp.professional_id, u.username, u.registration, u.photo, cv.name
             `, [access_code])
             const rows = result.rows
             return rows.length > 0 ? rows : undefined

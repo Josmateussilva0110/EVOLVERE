@@ -142,7 +142,7 @@ function CoordinatorProfile() {
           <div className="flex items-center justify-between mb-4">
             <button
               type="button"
-              onClick={() => navigate('/coordinator')}
+              onClick={() => navigate('/')}
               className="inline-flex items-center gap-2 rounded-lg ring-1 ring-gray-300 px-3 py-2 text-sm text-gray-800 hover:bg-gray-50"
             >
               <FiArrowLeft /> Voltar
@@ -150,7 +150,7 @@ function CoordinatorProfile() {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => navigate('/coordinator/settings')}
+                onClick={() => navigate('/settings')}
                 className="inline-flex items-center gap-2 rounded-xl bg-yellow-400 text-gray-900 px-3 py-2 text-sm font-semibold hover:bg-yellow-500"
               >
                 <FiSettings /> Configurações
@@ -252,7 +252,7 @@ function CoordinatorProfile() {
                 <div className="flex flex-col md:flex-row md:items-center md:gap-3">
                   <p className="text-sm font-semibold text-gray-900">{profile.username}</p>
                   <button
-                    onClick={() => navigate('/coordinator/settings')}
+                    onClick={() => navigate('/settings')}
                     className="mt-1 md:mt-0 inline-flex items-center gap-2 rounded-lg ring-1 ring-gray-300 px-2.5 py-1.5 text-xs text-gray-800 hover:bg-gray-50"
                   >
                     Editar dados
@@ -290,7 +290,7 @@ function CoordinatorProfile() {
                   <li>Senha: <span className="font-medium">Atualizada</span></li>
                 </ul>
                 <div className="mt-3">
-                  <button onClick={() => navigate('/coordinator/settings')} className="inline-flex items-center gap-2 rounded-lg ring-1 ring-gray-300 px-3 py-2 text-xs text-gray-800 hover:bg-gray-50"><FiSettings /> Gerenciar segurança</button>
+                  <button onClick={() => navigate('/settings')} className="inline-flex items-center gap-2 rounded-lg ring-1 ring-gray-300 px-3 py-2 text-xs text-gray-800 hover:bg-gray-50"><FiSettings /> Gerenciar segurança</button>
                 </div>
               </div>
               <div className="rounded-xl ring-1 ring-gray-200 p-4">
@@ -307,7 +307,7 @@ function CoordinatorProfile() {
 
             {/* Ações rápidas */}
             <div className="flex flex-wrap items-center gap-2">
-              <button onClick={() => navigate('/coordinator/settings')} className="inline-flex items-center gap-2 rounded-xl bg-yellow-400 text-gray-900 px-4 py-2 text-sm font-semibold hover:bg-yellow-500"><FiSettings /> Abrir configurações</button>
+              <button onClick={() => navigate('/settings')} className="inline-flex items-center gap-2 rounded-xl bg-yellow-400 text-gray-900 px-4 py-2 text-sm font-semibold hover:bg-yellow-500"><FiSettings /> Abrir configurações</button>
 
             </div>
           </div>
