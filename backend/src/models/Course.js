@@ -85,7 +85,8 @@ class Course {
                 // Seleciona todas as colunas de 'subjects' E o nome do professor da tabela 'users'
                 .select(
                     'subjects.*', 
-                    'users.username as professor_nome' 
+                    'users.username as professor_nome',
+                    'users.photo',
                 )
                 // Usa LEFT JOIN para garantir que disciplinas sem professor também apareçam
                 .leftJoin('users', 'subjects.professional_id', 'users.id')
@@ -105,6 +106,7 @@ class Course {
                 select 
                     s.*,
                     u.username as professor_nome,
+                    u.photo,
                     cv.name as course_name
                 from subjects s
                 inner join users u

@@ -277,7 +277,7 @@ class User {
             .select('expire')
             .whereRaw(`sess->'user'->>'id' = ?`, [String(id)])
             .andWhere('expire', '>', knex.fn.now())
-            .orderBy('expire', 'desc')
+            .orderBy('expire', 'asc')
             .first()
             return result
         } catch (err) {
