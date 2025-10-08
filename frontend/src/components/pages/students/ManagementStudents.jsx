@@ -23,6 +23,7 @@ import {
   Briefcase,
 } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom"; // 🔹 Import necessário para mudar de rota
 
 /**
  * Componente Dashboard
@@ -58,7 +59,35 @@ import { useState } from "react";
 export default function Dashboard() {
   const [activeSection, setActiveSection] = useState("dashboard");
   const usuario = "Lucas Emanuel";
+  const navigate = useNavigate(); // 🔹 Hook para navegar entre rotas
 
+  // 🔹 Função que define rota de cada item
+  const handleNavigation = (id) => {
+    setActiveSection(id);
+
+    switch (id) {
+      case "curso":
+        navigate("/student/courses/list");
+        break;
+      case "turmas":
+        navigate("/student/classes/view");
+        break;
+      case "materiais":
+        navigate("/student/materials/view");
+        break;
+      case "atividades":
+        navigate("/student/activities/view");
+        break;
+      case "desempenho":
+        navigate("/student/performance/view");
+        break;
+      case "medalhas":
+        navigate("/student/medals/view");
+        break;
+      default:
+        break;
+    }
+  };
 
   const menuItems = [
     { icon: BookOpen, label: "Meu curso", id: "curso" },
@@ -82,8 +111,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-
-
         {/* Menu */}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {menuItems.map((item) => {
@@ -91,7 +118,7 @@ export default function Dashboard() {
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveSection(item.id)}
+                onClick={() => handleNavigation(item.id)} // 🔹 Chama a navegação
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${
                   activeSection === item.id
                     ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 scale-105"
@@ -103,7 +130,7 @@ export default function Dashboard() {
               </button>
             );
           })}
-          
+
           <div className="pt-3 space-y-1 border-t border-blue-800 mt-3">
             <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-blue-200 hover:bg-blue-900/50 hover:text-white transition-all text-sm font-medium hover:translate-x-1">
               <Settings size={20} />
