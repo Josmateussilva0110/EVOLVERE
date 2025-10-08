@@ -1,6 +1,8 @@
 const express = require("express")
 const router = express.Router()
 const subjectController = require("../controllers/subjectController")
+const TeacherController = require("../controllers/teacherController")
+const teacherController = require("../controllers/teacherController")
 
 /**
  * @module subjectRoutes
@@ -61,5 +63,8 @@ router.put('/subjects/:id', subjectController.update)
  * @returns {Error} 404 - Disciplina não encontrada
  */
 router.delete('/subjects/:id', subjectController.delete)
+
+
+router.get("/subjects/teacher/:id", teacherController.getAllSubjects)
 
 module.exports = router
