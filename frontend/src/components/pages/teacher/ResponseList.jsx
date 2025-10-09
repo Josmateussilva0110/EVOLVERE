@@ -2,6 +2,52 @@ import { useState } from "react";
 import { Check, X, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+/**
+ * CorrigirSimulado
+ *
+ * Componente React para corrigir respostas de alunos em um simulado de forma interativa.
+ *
+ * Funcionalidades principais:
+ * - Exibe uma lista de respostas dos alunos
+ * - Permite marcar cada resposta como "correto" ou "incorreto"
+ * - Permite adicionar comentários a cada resposta
+ * - Mostra barra de progresso da correção
+ * - Modal de resultado final com todas as correções e comentários
+ *
+ * Estados internos:
+ * - correcao: objeto, chave = id da resposta, valor = "correto" | "incorreto"
+ * - comentarios: objeto, chave = id da resposta, valor = texto do comentário
+ * - comentando: id da resposta atualmente sendo comentada
+ * - mostrarResultado: boolean, controla a exibição do modal de resultado final
+ *
+ * Funções internas:
+ * - marcarCorrecao(id, valor): marca ou desmarca a correção de uma resposta
+ * - salvarComentario(id, texto): salva o comentário de uma resposta
+ *
+ * Estatísticas:
+ * - total: número total de respostas
+ * - corrigidas: número de respostas corrigidas
+ * - progresso: porcentagem de respostas corrigidas (para barra de progresso)
+ *
+ * Entrada:
+ * - Nenhuma entrada externa; respostas são mockadas internamente
+ *
+ * Saída:
+ * - JSX que renderiza:
+ *   - Cabeçalho do componente
+ *   - Barra de progresso com número de respostas corrigidas e percentual
+ *   - Lista de respostas, com botões para marcar correto/incorreto e adicionar comentário
+ *   - Feedback visual do status de cada resposta
+ *   - Modal com resultado final contendo aluno, resposta, status e comentário
+ *
+ * Observações:
+ * - Utiliza `framer-motion` para animações suaves na lista de respostas e modal
+ * - Permite adicionar/remover comentários dinamicamente
+ * - Botões possuem feedback visual de hover, tap e mudança de status
+ * - Modal exibe scroll para grandes listas de respostas
+ * - Feedback de status usa cores: verde para correto, vermelho para incorreto
+ */
+
 export default function CorrigirSimulado() {
   const [correcao, setCorrecao] = useState({});
   const [comentarios, setComentarios] = useState({});

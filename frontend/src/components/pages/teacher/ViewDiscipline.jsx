@@ -1,6 +1,71 @@
 import { useState } from "react"
 import { ArrowLeft, MoreVertical, FileText, Users, X, Plus, Download, Calendar, BookOpen } from "lucide-react"
 
+/**
+ * ViewSubjectDetails
+ *
+ * Componente React que exibe os detalhes de uma disciplina específica, incluindo:
+ * - Informações gerais da disciplina (nome, período, curso)
+ * - Turmas vinculadas à disciplina
+ * - Materiais globais disponíveis para download
+ * - Pop-up para adicionar nova turma
+ * - Menu de ações rápidas
+ *
+ * Funcionalidades principais:
+ * - Botão de voltar para a página anterior
+ * - Menu flutuante com opções (corrigir simulados, adicionar turma)
+ * - Exibição de cartões para turmas e materiais
+ * - Download de materiais
+ * - Adição de nova turma via pop-up interativo
+ * - Animações de hover, escala e transições
+ * - Background moderno com círculos animados e blur
+ *
+ * Estados internos:
+ * - isMenuOpen: controla a abertura/fechamento do menu de ações
+ * - showAddTurmaPopup: controla a exibição do pop-up de adição de turma
+ * - nomeTurma: armazena o nome digitado para a nova turma
+ * - capacidade: armazena a capacidade de alunos da nova turma
+ *
+ * Constantes internas:
+ * - turmas: array de objetos com informações das turmas (nome, cor, quantidade de alunos)
+ * - materiais: array de objetos com informações dos materiais (título, data, tipo, tamanho)
+ *
+ * Funções internas:
+ * - handleVoltar(): volta para a página anterior usando window.history
+ * - toggleMenu(): alterna a abertura do menu flutuante
+ * - handleAddTurma(): abre o pop-up para adicionar uma nova turma
+ * - handleConfirmar(): confirma a criação da nova turma (aqui apenas log no console)
+ * - handleCancelar(): fecha o pop-up e limpa os campos de entrada
+ *
+ * Entrada:
+ * - Nenhuma entrada externa; dados das turmas e materiais são mockados internamente
+ *
+ * Saída:
+ * - JSX que renderiza:
+ *   - Cabeçalho com botão de voltar, título da disciplina e menu de ações
+ *   - Banner de informações gerais da disciplina
+ *   - Grid com dois cartões:
+ *     1. Materiais Globais
+ *        - Lista de materiais com data, tipo, título e tamanho
+ *        - Botão de download
+ *        - Botão para adicionar novo material
+ *     2. Turmas
+ *        - Lista de turmas com nome, número de alunos e destaque visual com cor
+ *        - Botão para adicionar nova turma
+ *   - Pop-up para criação de nova turma:
+ *        - Campos de nome e capacidade
+ *        - Botões de confirmar ou cancelar
+ *   - Efeitos visuais:
+ *        - Background com círculos animados e blur
+ *        - Hover, transições, escala e sombras nos cards e botões
+ *
+ * Observações:
+ * - Pop-up de adicionar turma é moderno e centralizado
+ * - Botões possuem feedback visual consistente (hover, scale, sombra)
+ * - Cards de materiais e turmas usam gradientes e efeitos de group-hover
+ * - Integração futura pode substituir console.log por chamadas de API para criar turmas
+ */
+
 function ViewSubjectDetails() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [showAddTurmaPopup, setShowAddTurmaPopup] = useState(false)

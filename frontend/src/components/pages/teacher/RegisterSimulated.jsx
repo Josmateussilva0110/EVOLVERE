@@ -1,6 +1,58 @@
 import { useState } from "react"
 import { Plus, X } from "lucide-react"
 
+/**
+ * CreateQuiz
+ *
+ * Componente React para criação de simulados/quiz com perguntas e opções.
+ *
+ * Funcionalidades principais:
+ * - Formulário para criar um simulado com título e descrição
+ * - Adição e remoção dinâmica de perguntas
+ * - Seleção do tipo de pergunta: Alternativa, Verdadeiro/Falso ou Discursiva
+ * - Para perguntas do tipo Alternativa ou Verdadeiro/Falso:
+ *   - Adição e remoção de opções
+ *   - Marcação de opção correta (radio para alternativa, checkbox para VF)
+ * - Botão para adicionar novas perguntas
+ * - Botão de cadastro do simulado
+ *
+ * Estados internos:
+ * - titulo: string, armazena o título do simulado
+ * - descricao: string, armazena a descrição do simulado
+ * - perguntas: array de objetos, cada objeto contém:
+ *     - texto: string, texto da pergunta
+ *     - tipo: string, tipo da pergunta ("alternativa", "vf", "discursiva")
+ *     - opcoes: array de objetos com:
+ *         - texto: string, texto da opção
+ *         - correta: boolean, indica se a opção é correta
+ *
+ * Funções internas:
+ * - adicionarPergunta(): adiciona uma nova pergunta com campo de texto vazio
+ * - removerPergunta(idx): remove a pergunta de índice `idx`
+ * - atualizarPergunta(idx, campo, valor): atualiza o campo de uma pergunta
+ *      - Se o campo for `tipo`, reinicia as opções conforme tipo
+ * - adicionarOpcao(idxPergunta): adiciona uma opção para a pergunta `idxPergunta`
+ * - removerOpcao(idxPergunta, idxOpcao): remove a opção `idxOpcao` da pergunta `idxPergunta`
+ * - atualizarOpcao(idxPergunta, idxOpcao, campo, valor): atualiza campo da opção
+ *      - Para tipo "alternativa", garante apenas uma opção correta
+ *
+ * Entrada:
+ * - Nenhuma entrada externa, todos os dados são inseridos pelo usuário
+ *
+ * Saída:
+ * - JSX que renderiza:
+ *   - Título e descrição do simulado
+ *   - Lista dinâmica de perguntas e opções
+ *   - Botões de adicionar/remover perguntas e opções
+ *   - Botão de cadastro do simulado com estilo gradient
+ *
+ * Observações:
+ * - Layout responsivo e centrado na tela
+ * - Inputs e selects possuem efeitos de foco e hover
+ * - Tipos VF possuem opções fixas ("Verdadeiro" e "Falso") e inputs desabilitados
+ * - Alternativa permite adicionar/remover múltiplas opções
+ */
+
 const tiposPergunta = [
   { value: "alternativa", label: "Alternativa" },
   { value: "vf", label: "Verdadeiro/Falso" },

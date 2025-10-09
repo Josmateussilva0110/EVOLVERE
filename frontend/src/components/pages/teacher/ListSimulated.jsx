@@ -1,6 +1,62 @@
 import { Eye, ChevronLeft, ChevronRight, BookOpen } from "lucide-react"
 import { useState } from "react"
 
+/**
+ * SimuladosList
+ *
+ * Componente React que exibe uma lista de simulados acadêmicos,
+ * permitindo filtrar por disciplina e status, paginar os resultados e visualizar detalhes.
+ *
+ * Funcionalidades principais:
+ * - Header com título e ícone
+ * - Filtros:
+ *   - Input para disciplina
+ *   - Select para status (Corrigido, Pendente)
+ *   - Botão para limpar filtros
+ * - Cards de simulados:
+ *   - Nome do simulado
+ *   - Disciplina
+ *   - Status com badge visual (Corrigido/Pendente)
+ *   - Botão de visualização
+ * - Paginação:
+ *   - Navegação entre páginas com botões de anterior/próximo
+ *   - Exibição do número da página atual
+ * - Layout responsivo com animações nos cards e interações
+ *
+ * Estados internos:
+ * - simulados: lista de simulados (mock inicial)
+ * - filtroDisciplina: string para filtrar disciplina
+ * - filtroStatus: string para filtrar status
+ * - page: número da página atual
+ *
+ * Constantes:
+ * - ITEMS_PER_PAGE: quantidade de simulados exibidos por página
+ *
+ * Funcionalidades derivadas:
+ * - simuladosFiltrados: lista de simulados após aplicação de filtros
+ * - totalPages: número total de páginas
+ * - pageSimulados: simulados exibidos na página atual
+ *
+ * Entrada:
+ * - Dados simulados (simuladosMock) com campos:
+ *   - nome: string (nome do simulado)
+ *   - disciplina: string (nome da disciplina)
+ *   - status: string ("Corrigido" ou "Pendente")
+ *
+ * Saída:
+ * - JSX que renderiza:
+ *   - Header com título
+ *   - Filtros e botão limpar
+ *   - Lista de cards de simulados paginados
+ *   - Paginação interativa
+ *   - Mensagem quando nenhum simulado é encontrado
+ *
+ * Observações:
+ * - Layout inclui elementos decorativos e gradientes
+ * - Badge de status muda de cor e ícone conforme o estado
+ * - Paginação desativa botões quando não há mais páginas
+ */
+
 const simuladosMock = [
   {
     nome: "Prova Ed1",

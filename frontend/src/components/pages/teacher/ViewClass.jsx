@@ -2,6 +2,64 @@ import { useState } from "react"
 import { Trash2, Eye, ArrowDownToLine, Users, BookOpen, FileText, ChevronLeft, ChevronRight } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
+/**
+ * ViewClass
+ *
+ * Componente React para exibir a visão geral de uma turma, incluindo:
+ * - Lista de alunos
+ * - Simulados disponíveis
+ * - Materiais cadastrados
+ *
+ * Funcionalidades principais:
+ * - Exibe tabelas paginadas de alunos, simulados e materiais
+ * - Botões de ação para gerar convites, cadastrar material e cadastrar simulado
+ * - Ações individuais de cada item (deletar, visualizar ou baixar)
+ * - Paginação com limite de itens por página
+ * - Efeitos visuais com background glass circles e animações fade-in
+ *
+ * Estados internos:
+ * - pageAlunos: página atual da tabela de alunos
+ * - pageSimulados: página atual da tabela de simulados
+ * - pageMateriais: página atual da tabela de materiais
+ *
+ * Constantes internas:
+ * - ITEMS_PER_PAGE: quantidade de itens por página (4)
+ * - alunos: array de nomes de exemplo
+ * - simulados: array de objetos com nome do simulado e quantidade de respondidos
+ * - materiais: array de objetos com nome do material
+ *
+ * Funções internas:
+ * - getPage(arr, page): retorna apenas os itens da página atual de uma lista
+ * - totalPages(arr): calcula o total de páginas de acordo com a quantidade de itens
+ *
+ * Entrada:
+ * - Nenhuma entrada externa; dados são mockados internamente
+ *
+ * Saída:
+ * - JSX que renderiza:
+ *   - Cabeçalho com nome da turma
+ *   - Botões de ação no topo
+ *   - Três seções principais:
+ *     1. Alunos
+ *     2. Simulados
+ *     3. Materiais
+ *   - Cada seção contém:
+ *     - Título com ícone
+ *     - Tabela com colunas apropriadas
+ *     - Paginação com navegação entre páginas
+ *     - Botões de ação em cada linha
+ *   - Efeitos visuais:
+ *     - Background com círculos animados (glass effect)
+ *     - Animação fade-in para seções e botões
+ *
+ * Observações:
+ * - Utiliza `useNavigate` do react-router-dom para navegação em botões de cadastro
+ * - Botões de ação possuem feedback visual de hover, escala e cores
+ * - A tabela de simulados permite visualizar ou deletar cada simulado
+ * - A tabela de materiais permite baixar ou deletar cada material
+ * - Paginação é dinâmica e calcula número de páginas automaticamente
+ */
+
 export default function ViewClass() {
   const navigate = useNavigate()
 

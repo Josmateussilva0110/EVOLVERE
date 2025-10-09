@@ -1,6 +1,52 @@
 import { useState } from "react"
 import { ArrowLeft, Upload, FileText } from "lucide-react"
 
+/**
+ * CadastrarMaterial
+ *
+ * Componente React que permite o cadastro de materiais acadêmicos,
+ * incluindo título, descrição, tipo e upload de arquivo.
+ *
+ * Funcionalidades principais:
+ * - Header com título centralizado e botão de voltar
+ * - Formulário para cadastro:
+ *   - Título (obrigatório)
+ *   - Descrição
+ *   - Tipo de material (PDF, DOC, PPT, Vídeo, Outro) (obrigatório)
+ *   - Upload de arquivo (obrigatório)
+ * - Preview do arquivo selecionado
+ * - Botão para cadastrar o material
+ * - Card informativo destacando campos obrigatórios
+ *
+ * Estados internos:
+ * - titulo: string, armazenando o título do material
+ * - descricao: string, armazenando a descrição do material
+ * - tipo: string, armazenando o tipo selecionado
+ * - arquivo: File | null, armazenando o arquivo selecionado
+ *
+ * Funções internas:
+ * - handleVoltar: retorna à página anterior
+ * - handleFileChange: atualiza o estado `arquivo` com o arquivo selecionado
+ * - handleCadastrar: realiza a ação de cadastro (aqui apenas loga os dados no console)
+ *
+ * Entrada:
+ * - Nenhuma entrada externa (todos os dados são inseridos pelo usuário)
+ *
+ * Saída:
+ * - JSX que renderiza:
+ *   - Header com botão de voltar e título
+ *   - Formulário completo com campos obrigatórios e opcionais
+ *   - Upload de arquivo com preview do arquivo selecionado
+ *   - Botão de cadastro estilizado com gradiente e efeitos hover
+ *   - Card informativo sobre preenchimento obrigatório
+ *
+ * Observações:
+ * - Layout inclui elementos decorativos animados em background
+ * - Todos os campos obrigatórios são indicados com *
+ * - Foco e hover nos inputs possuem efeitos visuais (gradientes, sombras)
+ * - Upload utiliza input hidden + label estilizada para melhor UX
+ */
+
 function CadastrarMaterial() {
   const [titulo, setTitulo] = useState("")
   const [descricao, setDescricao] = useState("")
