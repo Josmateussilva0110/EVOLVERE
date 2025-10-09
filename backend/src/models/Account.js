@@ -603,6 +603,26 @@ class Account {
         }
     }
 
+
+    /**
+     * Busca um usuário administrador pelo ID.
+     * 
+     * @async
+     * @function findAdmin
+     * @param {string|number} id - ID do usuário a ser buscado.
+     * 
+     * @returns {Promise<Object|undefined>} Retorna um objeto com os dados do usuário
+     *  ({ id, username, email, registration, status }) se encontrado, ou `undefined` caso não exista
+     *  ou ocorra algum erro.
+     * 
+     * @example
+     * const admin = await findAdmin(123);
+     * if (admin) {
+     *   console.log(admin.username);
+     * } else {
+     *   console.log("Admin não encontrado");
+     * }
+     */
     async findAdmin(id) {
         try {
             const result = await knex.raw(`

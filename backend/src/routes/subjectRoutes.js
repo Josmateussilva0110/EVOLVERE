@@ -65,6 +65,28 @@ router.put('/subjects/:id', subjectController.update)
 router.delete('/subjects/:id', subjectController.delete)
 
 
+/**
+ * @route GET /subjects/teacher/:id
+ * @description Retorna todas as disciplinas associadas a um professor específico.
+ * 
+ * @param {string} id - ID do professor (passado como parâmetro de rota).
+ * 
+ * @returns {Object[]} Lista de disciplinas do professor, cada uma contendo informações
+ *  sobre a disciplina, o professor e o curso associado.
+ * 
+ * @example
+ * // GET /subjects/teacher/123
+ * [
+ *   {
+ *     "id": 1,
+ *     "name": "Matemática",
+ *     "professor_nome": "João Silva",
+ *     "course_name": "Engenharia",
+ *     "photo": "/uploads/professor1.jpg",
+ *     ...
+ *   }
+ * ]
+ */
 router.get("/subjects/teacher/:id", teacherController.getAllSubjects)
 
 module.exports = router

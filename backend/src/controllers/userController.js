@@ -310,6 +310,65 @@ class UserController {
         }
     }
 
+
+    /**
+     * Atualiza a foto de perfil de um usuário específico.
+     * 
+     * @async
+     * @function editPhoto
+     * @memberof UserController
+     * 
+     * @param {import('express').Request} request - Objeto de requisição do Express.  
+     *   Deve conter:
+     *   - `params.id`: ID do usuário (numérico e válido).  
+     *   - `file`: Arquivo de imagem PNG enviado via `multipart/form-data`.
+     * @param {import('express').Response} response - Objeto de resposta do Express.
+     * 
+     * @returns {Promise<import('express').Response>} Retorna uma resposta JSON com:
+     *  - `status`: booleano indicando sucesso ou falha.  
+     *  - `message`: mensagem de status da operação.
+     * 
+     * @throws {Error} Retorna erro 500 caso ocorra falha interna no servidor.
+     * 
+     * @example
+     * // Exemplo de rota usando o método editPhoto
+     * const express = require("express")
+     * const multer = require("multer")
+     * const router = express.Router()
+     * const UserController = require("../controllers/UserController")
+     * 
+     * // Configuração do multer (armazenamento em memória)
+     * const storage = multer.memoryStorage()
+     * const upload = multer({
+     *   storage,
+     *   fileFilter: (req, file, cb) => {
+     *     if (file.mimetype !== "image/png") {
+     *       return cb(new Error("Apenas imagens PNG são permitidas."))
+     *     }
+     *     cb(null, true)
+     *   }
+     * })
+     * 
+     * // Rota: PATCH /users/:id/photo
+     * router.patch("/users/:id/photo", upload.single("photo"), UserController.editPhoto)
+     * 
+     * // Requisição de exemplo (multipart/form-data):
+     * // PATCH /users/3/photo
+     * // Form-data:
+     * //  - photo: (arquivo.png)
+     * //
+     * // Resposta de sucesso (HTTP 200):
+     * // {
+     * //   "status": true,
+     * //   "message": "Foto atualizada com sucesso."
+     * // }
+     * //
+     * // Resposta de erro (HTTP 400):
+     * // {
+     * //   "status": false,
+     * //   "message": "O upload de uma imagem PNG é obrigatório."
+     * // }
+     */
     async editPhoto(request, response) {
         try {
             const { id } = request.params
@@ -353,6 +412,49 @@ class UserController {
         }
     }
 
+
+    /**
+     * Busca a foto de perfil de um usuário pelo seu ID.
+     * 
+     * @async
+     * @function findPhoto
+     * @memberof UserController
+     * 
+     * @param {import('express').Request} request - Objeto de requisição do Express.  
+     * Deve conter o parâmetro `id` em `request.params`.
+     * @param {import('express').Response} response - Objeto de resposta do Express.
+     * 
+     * @returns {Promise<import('express').Response>} Retorna uma resposta JSON com:
+     *  - `status`: booleano indicando sucesso ou falha.  
+     *  - `photo`: caminho relativo da imagem do usuário, se encontrada.  
+     *  - `message`: mensagem de erro, se aplicável.
+     * 
+     * @throws {Error} Retorna erro 500 em caso de falha interna no servidor.
+     * 
+     * @example
+     * // Exemplo de rota usando o método findPhoto
+     * const express = require("express")
+     * const router = express.Router()
+     * const UserController = require("../controllers/UserController")
+     * 
+     * // Rota: GET /users/:id/photo
+     * router.get("/users/:id/photo", UserController.findPhoto)
+     * 
+     * // Requisição de exemplo:
+     * // GET /users/3/photo
+     * //
+     * // Resposta de sucesso (HTTP 200):
+     * // {
+     * //   "status": true,
+     * //   "photo": "images/users/1728403200000_12.png"
+     * // }
+     * //
+     * // Resposta de erro (HTTP 404):
+     * // {
+     * //   "status": false,
+     * //   "message": "Foto não encontrada"
+     * // }
+     */
     async findPhoto(request, response) {
         try {
             const { id } = request.params 
@@ -369,6 +471,48 @@ class UserController {
         }
     }
 
+
+    /**
+     * Remove a foto de perfil de um usuário pelo seu ID.
+     * 
+     * @async
+     * @function removePhoto
+     * @memberof UserController
+     * 
+     * @param {import('express').Request} request - Objeto de requisição do Express.  
+     * Deve conter o parâmetro `id` em `request.params`.
+     * @param {import('express').Response} response - Objeto de resposta do Express.
+     * 
+     * @returns {Promise<import('express').Response>} Retorna uma resposta JSON com:
+     *  - `status`: booleano indicando sucesso ou falha.  
+     *  - `message`: mensagem de status da operação.
+     * 
+     * @throws {Error} Retorna erro 500 em caso de falha interna no servidor.
+     * 
+     * @example
+     * // Exemplo de rota usando o método removePhoto
+     * const express = require("express")
+     * const router = express.Router()
+     * const UserController = require("../controllers/UserController")
+     * 
+     * // Rota: DELETE /users/:id/photo
+     * router.delete("/users/:id/photo", UserController.removePhoto)
+     * 
+     * // Requisição de exemplo:
+     * // DELETE /users/3/photo
+     * //
+     * // Resposta de sucesso (HTTP 200):
+     * // {
+     * //   "status": true,
+     * //   "message": "Foto removida com sucesso"
+     * // }
+     * //
+     * // Resposta de erro (HTTP 404):
+     * // {
+     * //   "status": false,
+     * //   "message": "Foto não encontrada"
+     * // }
+     */
     async removePhoto(request, response) {
         try {
             const { id } = request.params 
@@ -389,6 +533,53 @@ class UserController {
         }
     }
 
+
+    /**
+     * Busca os dados da sessão de um usuário com base no seu ID.
+     * 
+     * @async
+     * @function findSessionById
+     * @memberof UserController
+     * 
+     * @param {import('express').Request} request - Objeto de requisição do Express.  
+     * Deve conter o parâmetro `id` em `request.params`.
+     * @param {import('express').Response} response - Objeto de resposta do Express.
+     * 
+     * @returns {Promise<import('express').Response>} Retorna uma resposta JSON com:
+     *  - `status`: booleano indicando sucesso ou falha.  
+     *  - `session`: objeto contendo os dados da sessão do usuário, se encontrada.  
+     *  - `message`: mensagem de erro, se aplicável.
+     * 
+     * @throws {Error} Retorna erro 500 em caso de falha interna no servidor.
+     * 
+     * @example
+     * // Exemplo de rota usando o método findSessionById
+     * const express = require("express")
+     * const router = express.Router()
+     * const UserController = require("../controllers/UserController")
+     * 
+     * // Rota: GET /users/:id/session
+     * router.get("/users/:id/session", UserController.findSessionById)
+     * 
+     * // Requisição de exemplo:
+     * // GET /users/3/session
+     * //
+     * // Resposta de sucesso (HTTP 200):
+     * // {
+     * //   "status": true,
+     * //   "session": {
+     * //     "session_id": "abc123xyz",
+     * //     "user_id": 3,
+     * //     "expires_at": "2025-10-08T20:30:00.000Z"
+     * //   }
+     * // }
+     * //
+     * // Resposta de erro (HTTP 404):
+     * // {
+     * //   "status": false,
+     * //   "message": "Sessão não encontrada"
+     * // }
+     */
     async findSessionById(request, response) {
         try {
             const { id } = request.params 
@@ -405,6 +596,36 @@ class UserController {
         }
     }
 
+    /**
+     * Atualiza as informações de um usuário.
+     * 
+     * @async
+     * @function edit
+     * @param {Object} request - Objeto de requisição do Express.
+     * @param {Object} request.params - Parâmetros da URL.
+     * @param {string} request.params.id - ID do usuário a ser atualizado.
+     * @param {Object} request.body - Dados enviados no corpo da requisição.
+     * @param {string} [request.body.username] - Novo nome de usuário.
+     * @param {string} [request.body.email] - Novo email.
+     * @param {string} [request.body.current_password] - Senha atual (necessária para alterar a senha).
+     * @param {string} [request.body.password] - Nova senha.
+     * @param {string} [request.body.confirm_password] - Confirmação da nova senha.
+     * @param {Object} response - Objeto de resposta do Express.
+     * 
+     * @returns {Promise<Object>} Retorna um JSON com o status e a mensagem da operação.
+     * 
+     * @throws {Error} Lança erro em caso de falha interna no servidor.
+     * 
+     * @example
+     * // PATCH /users/123
+     * {
+     *   "username": "novoUsuario",
+     *   "email": "novo@email.com",
+     *   "current_password": "senhaAtual",
+     *   "password": "novaSenha",
+     *   "confirm_password": "novaSenha"
+     * }
+     */
     async edit(request, response) {
         try {
             const { id } = request.params

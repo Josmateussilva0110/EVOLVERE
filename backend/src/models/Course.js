@@ -100,6 +100,28 @@ class Course {
         }
     }
 
+    /**
+     * Busca todas as disciplinas cadastradas, incluindo informações do professor e do curso.
+     * 
+     * @async
+     * @function getAllSubjects
+     * 
+     * @returns {Promise<Object[]|undefined>} Retorna um array de objetos com os dados das disciplinas,
+     *  incluindo:
+     *   - s.*: todos os campos da tabela `subjects`
+     *   - professor_nome: nome do professor (usuário)
+     *   - photo: foto do professor
+     *   - course_name: nome do curso associado
+     *  Retorna `undefined` caso não haja disciplinas ou ocorra algum erro.
+     * 
+     * @example
+     * const subjects = await getAllSubjects();
+     * if (subjects) {
+     *   subjects.forEach(s => console.log(s.professor_nome, s.course_name));
+     * } else {
+     *   console.log("Nenhuma disciplina encontrada");
+     * }
+     */
     async getAllSubjects() {
         try {
             const result = await knex.raw(`
