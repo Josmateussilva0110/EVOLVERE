@@ -62,6 +62,7 @@ app.use(
     secret: process.env.SECRET,
     resave: false,
     saveUninitialized: false,
+    rolling: false,
     cookie: {
       maxAge: 1000 * 60 * 60 * 2, // 2 horas em ms
       secure: false, // true se usar https

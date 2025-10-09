@@ -1,5 +1,6 @@
 import { Award, Star, Trophy, Zap, Target, Crown, ArrowLeft, Sparkles } from "lucide-react";
 
+
 /**
  * Medalhas
  *

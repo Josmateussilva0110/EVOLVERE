@@ -1,5 +1,6 @@
 import { BarChart3, TrendingUp, Award, Target, ArrowLeft } from "lucide-react";
 
+
 /**
  * Desempenho
  *
@@ -37,7 +38,6 @@ import { BarChart3, TrendingUp, Award, Target, ArrowLeft } from "lucide-react";
  * - Notas ≥ 9 recebem badge "Excelente", notas ≥ 8.5 badge "Ótimo", demais badge "Bom"
  * - Layout responsivo, ajustando grid e tamanho dos elementos conforme a tela
  */
-
 export default function Desempenho() {
   const dados = [
     { disciplina: "Estruturas de Dados", nota: 9.2, cor: "from-blue-500 to-blue-600" },

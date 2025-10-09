@@ -1,5 +1,6 @@
-import { Eye, ChevronLeft, ChevronRight, BookOpen } from "lucide-react"
-import { useState } from "react"
+import { Eye, ChevronLeft, ChevronRight, BookOpen, Search, XCircle, FilePlus } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom"
 
 /**
  * SimuladosList
@@ -59,158 +60,247 @@ import { useState } from "react"
 
 const simuladosMock = [
   {
-    nome: "Prova Ed1",
+    nome: "Prova Final de Estrutura de Dados",
     disciplina: "Estrutura de dados",
     status: "Corrigido"
   },
   {
-    nome: "Laços de repetições",
+    nome: "Introdução a Laços de Repetição",
     disciplina: "Algoritmos 1",
     status: "Pendente"
   },
   {
-    nome: "Funções",
+    nome: "Conceitos Avançados de Funções",
     disciplina: "Algoritmos 1",
     status: "Corrigido"
   },
   {
-    nome: "Vetores",
+    nome: "Manipulação de Vetores e Matrizes",
     disciplina: "Estrutura de dados",
     status: "Pendente"
   },
   {
-    nome: "Recursividade",
+    nome: "Análise de Complexidade e Recursividade",
+    disciplina: "Algoritmos 2",
+    status: "Corrigido"
+  },
+  {
+    nome: "Listas Encadeadas e Pilhas",
+    disciplina: "Estrutura de dados",
+    status: "Pendente"
+  },
+  {
+    nome: "Ordenação: Quicksort e Mergesort",
     disciplina: "Algoritmos 2",
     status: "Corrigido"
   }
-]
+];
 
+
+/**
+ * @component StatusBadge
+ * @description
+ * Um componente de UI reutilizável que renderiza um selo (badge) visualmente distinto
+ * para representar o status de um item, como "Corrigido" ou "Pendente".
+ * A cor e o estilo do selo mudam de acordo com o status fornecido.
+ *
+ * @param {object} props - As propriedades do componente.
+ * @param {'Corrigido' | 'Pendente'} props.status - O status a ser exibido. Determina a estilização do badge.
+ * @returns {JSX.Element} Um elemento <span> estilizado que representa o status.
+ *
+ * @example
+ * <StatusBadge status="Corrigido" />
+ * <StatusBadge status="Pendente" />
+ */
+const StatusBadge = ({ status }) => {
+  const baseClasses = "px-3 py-1 text-xs font-bold rounded-full inline-flex items-center gap-1.5";
+  if (status === "Corrigido") {
+    return (
+      <span className={`${baseClasses} bg-green-500/10 text-green-400`}>
+        <span className="w-2 h-2 rounded-full bg-green-400"></span>
+        Corrigido
+      </span>
+    );
+  }
+  return (
+    <span className={`${baseClasses} bg-amber-500/10 text-amber-400`}>
+      <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+      Pendente
+    </span>
+  );
+};
+
+/**
+ * @component SimuladosList
+ * @description
+ * Componente de página principal que exibe uma lista de simulados.
+ * Inclui funcionalidades como busca por disciplina, filtro por status e paginação.
+ * O componente gerencia seu próprio estado para filtros e dados da página atual.
+ *
+ * @returns {JSX.Element} A página completa de listagem de simulados.
+ *
+ * @feature Cabeçalho com título e botão para criar novo simulado.
+ * @feature Barra de filtros interativa para refinar os resultados.
+ * @feature Tabela de dados que exibe os simulados de forma organizada.
+ * @feature Paginação para navegar por grandes conjuntos de dados.
+ * @feature Mensagem de "nenhum resultado" quando os filtros não retornam dados.
+ */
 export default function SimuladosList() {
-  const [simulados] = useState(simuladosMock)
-  const [filtroDisciplina, setFiltroDisciplina] = useState("")
-  const [filtroStatus, setFiltroStatus] = useState("")
-  const [page, setPage] = useState(1)
-  const ITEMS_PER_PAGE = 4
+  const [simulados] = useState(simuladosMock);
+  const [filtroDisciplina, setFiltroDisciplina] = useState("");
+  const [filtroStatus, setFiltroStatus] = useState("");
+  const [page, setPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
+  const navigate = useNavigate()
 
-  // Filtro simples (mock)
+  // Lógica de filtro e paginação
   const simuladosFiltrados = simulados.filter(s =>
     (!filtroDisciplina || s.disciplina.toLowerCase().includes(filtroDisciplina.toLowerCase())) &&
-    (!filtroStatus || s.status.toLowerCase().includes(filtroStatus.toLowerCase()))
-  )
+    (!filtroStatus || s.status === filtroStatus)
+  );
 
-  const totalPages = Math.ceil(simuladosFiltrados.length / ITEMS_PER_PAGE)
-  const pageSimulados = simuladosFiltrados.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
+  const totalPages = Math.max(1, Math.ceil(simuladosFiltrados.length / ITEMS_PER_PAGE));
+  const pageSimulados = simuladosFiltrados.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
+  /**
+   * @function limparFiltros
+   * @description Reseta os estados de filtro para seus valores iniciais e
+   * retorna para a primeira página da lista.
+   */
   const limparFiltros = () => {
-    setFiltroDisciplina("")
-    setFiltroStatus("")
-  }
+    setFiltroDisciplina("");
+    setFiltroStatus("");
+    setPage(1);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#060060] via-[#060060] to-[#121282] flex items-center justify-center py-6 px-2 relative">
-      {/* Fundo decorativo */}
-      <div className="absolute -z-10 top-0 left-0 w-full h-full pointer-events-none">
-        <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[38rem] h-[38rem] bg-yellow-200/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-0 w-[28rem] h-[28rem] bg-blue-300/20 rounded-full blur-3xl"></div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-slate-200 font-sans p-4 sm:p-6 lg:p-8">
+      <div className="max-w-6xl mx-auto">
 
-      <div className="w-full max-w-5xl bg-white/95 rounded-[2.5rem] shadow-2xl border border-gray-100 p-10 sm:p-16 relative flex flex-col items-center mb-16">
-        <h1 className="text-4xl font-extrabold text-[#060060] text-center mb-10 tracking-tight drop-shadow-lg">
-          <span className="inline-flex items-center gap-2 px-6 py-5 rounded-3xl bg-gradient-to-r ext-[#060060]">
-            <span className="text-3xl">🏆</span> Simulados
-          </span>
-        </h1>
-
-        {/* Filtros */}
-        <div className="flex flex-wrap gap-6 items-center justify-center mb-12 w-full">
-          <input
-            type="text"
-            placeholder="Disciplinas"
-            className="border border-gray-200 bg-gray-50 rounded-xl px-5 py-3 focus:ring-2 focus:ring-blue-300 outline-none w-56 shadow transition text-base"
-            value={filtroDisciplina}
-            onChange={e => setFiltroDisciplina(e.target.value)}
-          />
-          <select
-            className="border border-gray-200 bg-gray-50 rounded-xl px-5 py-3 focus:ring-2 focus:ring-blue-300 outline-none w-56 shadow transition text-base"
-            value={filtroStatus}
-            onChange={e => setFiltroStatus(e.target.value)}
-          >
-            <option value="">Status</option>
-            <option value="Corrigido">Corrigido</option>
-            <option value="Pendente">Pendente</option>
-          </select>
-          <button
-            className="bg-gradient-to-r from-yellow-300 to-yellow-400 hover:from-yellow-400 hover:to-yellow-500 text-[#060060] font-bold px-8 py-3 rounded-xl shadow transition-all border border-yellow-200 text-base"
-            onClick={limparFiltros}
-          >
-            Limpar filtros
-          </button>
-        </div>
-
-        {/* Cards de Simulados */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 w-full">
-          {pageSimulados.length === 0 && (
-            <div className="col-span-2 text-center text-gray-300 py-16 text-xl">
-              Nenhum simulado encontrado.
-            </div>
-          )}
-          {pageSimulados.map((sim, idx) => (
-            <div
-              key={sim.nome}
-              className="relative bg-gradient-to-br from-blue-50 via-white to-blue-100 border border-blue-100 rounded-2xl shadow-lg p-7 flex flex-col gap-4 hover:scale-[1.015] hover:shadow-2xl transition group"
+        {/* Cabeçalho */}
+        <header className="flex flex-col sm:flex-row justify-between sm:items-center mb-8 gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-white">Meus Simulados</h1>
+            <p className="text-slate-400 mt-1">Visualize, filtre e gerencie suas avaliações.</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 shadow-lg shadow-yellow-400/20 transition-colors"
+              onClick={() => navigate('/teacher/simulated/register')}
             >
-              <div className="flex items-center gap-4 mb-2">
-                <div className="bg-blue-200 rounded-full p-4 shadow">
-                  <BookOpen className="w-10 h-10 text-blue-700" />
-                </div>
-                <div>
-                  <div className="text-xl font-bold text-[#060060]">{sim.nome}</div>
-                  <div className="text-sm text-blue-900/80">{sim.disciplina}</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 mt-2">
-                {sim.status === "Corrigido" ? (
-                  <span className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full bg-green-500/90 text-white text-sm font-bold shadow">
-                    <span className="text-lg">✔️</span> Corrigido
-                  </span>
+              <FilePlus className="w-4 h-4 text-blue-700" />
+              Criar Novo Simulado
+            </button>
+          </div>
+        </header>
+
+        {/* Container da Tabela e Filtros */}
+        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-lg overflow-hidden">
+
+          {/* Barra de Filtros */}
+          <div className="p-5 flex flex-col sm:flex-row gap-4 items-center border-b border-slate-700/50">
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-400 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Filtrar por disciplina..."
+                className="w-full bg-slate-900/60 border border-slate-700 rounded-lg pl-10 pr-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none transition placeholder:text-slate-400 text-slate-100"
+                value={filtroDisciplina}
+                onChange={e => { setFiltroDisciplina(e.target.value); setPage(1); }}
+              />
+            </div>
+
+            <select
+              className="w-full sm:w-56 bg-slate-900/60 border border-slate-700 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none transition text-slate-100"
+              value={filtroStatus}
+              onChange={e => { setFiltroStatus(e.target.value); setPage(1); }}
+            >
+              <option value="" className="bg-slate-800 text-slate-300">Todos os Status</option>
+              <option value="Corrigido" className="bg-slate-800 text-slate-300">Corrigido</option>
+              <option value="Pendente" className="bg-slate-800 text-slate-300">Pendente</option>
+            </select>
+
+            <button
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-300 hover:bg-slate-700 transition"
+              onClick={limparFiltros}
+            >
+              <XCircle className="w-4 h-4 text-blue-400" />
+              Limpar Filtros
+            </button>
+          </div>
+
+          {/* Tabela de Dados */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="border-b border-slate-700/50">
+                <tr>
+                  <th className="px-5 py-4 text-sm font-semibold text-slate-300">Nome do Simulado</th>
+                  <th className="px-5 py-4 text-sm font-semibold text-slate-300">Disciplina</th>
+                  <th className="px-5 py-4 text-sm font-semibold text-slate-300">Status</th>
+                  <th className="px-5 py-4 text-sm font-semibold text-slate-300 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pageSimulados.length > 0 ? (
+                  pageSimulados.map((sim, idx) => (
+                    <tr key={idx} className="hover:bg-slate-700/50 transition-colors border-b border-slate-800 last:border-b-0">
+                      <td className="px-5 py-4">
+                        <div onClick={() => navigate('/teacher/simulated/response/list')} className="font-medium text-white">{sim.nome}</div>
+                      </td>
+                      <td className="px-5 py-4 text-slate-400">{sim.disciplina}</td>
+                      <td className="px-5 py-4">
+                        <StatusBadge status={sim.status} />
+                      </td>
+                      <td className="px-5 py-4 text-right">
+                        <button
+                          className="p-2 rounded-md hover:bg-slate-700 text-slate-400 hover:text-blue-400 transition-colors"
+                          title="Visualizar detalhes"
+                        >
+                          <Eye className="w-5 h-5 text-blue-400" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
                 ) : (
-                  <span className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full bg-yellow-300/90 text-[#060060] text-sm font-bold shadow">
-                    <span className="text-lg">⏳</span> Pendente
-                  </span>
+                  <tr>
+                    <td colSpan="4" className="text-center py-16 px-5 text-slate-400">
+                      <BookOpen className="w-10 h-10 mx-auto mb-4 text-blue-400 opacity-40" />
+                      Nenhum simulado encontrado com os filtros aplicados.
+                    </td>
+                  </tr>
                 )}
-                <button className="ml-auto p-2 hover:bg-blue-200 rounded-full transition group" title="Visualizar">
-                  <Eye className="w-7 h-7 text-[#060060] group-hover:scale-110 transition" />
+              </tbody>
+            </table>
+          </div>
+
+          {/* Rodapé com Paginação */}
+          {totalPages > 1 && (
+            <div className="p-5 flex flex-col sm:flex-row justify-between items-center border-t border-slate-700/50">
+              <span className="text-sm text-slate-400 mb-4 sm:mb-0">
+                Página {page} de {totalPages}
+              </span>
+              <div className="flex gap-2 items-center">
+                <button
+                  className="p-2 rounded-md hover:bg-slate-700 transition disabled:opacity-40 disabled:hover:bg-transparent"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  aria-label="Página anterior"
+                >
+                  <ChevronLeft className="w-5 h-5 text-blue-400" />
+                </button>
+                <button
+                  className="p-2 rounded-md hover:bg-slate-700 transition disabled:opacity-40 disabled:hover:bg-transparent"
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  aria-label="Próxima página"
+                >
+                  <ChevronRight className="w-5 h-5 text-blue-400" />
                 </button>
               </div>
             </div>
-          ))}
+          )}
         </div>
-
-        {/* Paginação */}
-        {totalPages > 1 && (
-          <div className="flex justify-end w-full mt-2 gap-2 items-center">
-            <button
-              className="p-2 rounded-full hover:bg-[#060060]/10 transition disabled:opacity-40"
-              onClick={() => setPage(page => Math.max(1, page - 1))}
-              disabled={page === 1}
-              aria-label="Página anterior"
-            >
-              <ChevronLeft className="w-7 h-7 text-[#060060]" />
-            </button>
-            <span className="inline-flex items-center gap-1 px-5 py-2 rounded-full bg-[#060060] text-white text-lg font-bold select-none shadow border-2 border-white">
-              {page}
-            </span>
-            <button
-              className="p-2 rounded-full hover:bg-[#060060]/10 transition disabled:opacity-40"
-              onClick={() => setPage(page => Math.min(totalPages, page + 1))}
-              disabled={page === totalPages || totalPages === 0}
-              aria-label="Próxima página"
-            >
-              <ChevronRight className="w-7 h-7 text-[#060060]" />
-            </button>
-          </div>
-        )}
       </div>
     </div>
-  )
+  );
 }

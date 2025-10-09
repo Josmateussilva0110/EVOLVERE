@@ -34,7 +34,7 @@ function DashboardPrincipal() {
   const navigate = useNavigate()
   const [ userRequest, setUserRequest ] = useState({})
   const [kpi, setKpi] = useState({})
-  const { user } = useContext(Context)
+  const { user, logout } = useContext(Context)
   const displayName = userRequest?.username || user?.name || 'Usuário'
   const [ menuOpen, setMenuOpen ] = useState(false)
   const [ photo, setPhoto] = useState(null)
@@ -163,8 +163,9 @@ function DashboardPrincipal() {
                 </button>
                 {menuOpen && (
                   <div className="absolute right-0 mt-2 w-44 rounded-xl bg-white shadow-lg ring-1 ring-black/5 p-1 z-10">
-                    <button onMouseDown={() => navigate('/coordinator/profile')} className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Perfil</button>
-                    <button onMouseDown={() => navigate('/coordinator/settings')} className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Configurações</button>
+                    <button onMouseDown={() => navigate('/profile')} className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Perfil</button>
+                    <button onMouseDown={() => navigate('/settings')} className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Configurações</button>
+                    <button onMouseDown={ logout } className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50"> Encerrar sessões</button>
                   </div>
                 )}
               </div>
