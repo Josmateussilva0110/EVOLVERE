@@ -1,5 +1,43 @@
 import { BarChart3, TrendingUp, Award, Target, ArrowLeft } from "lucide-react";
 
+/**
+ * Desempenho
+ *
+ * Componente React que exibe o desempenho acadêmico de um aluno,
+ * incluindo médias por disciplina, média geral, melhor nota e indicadores de progresso.
+ *
+ * Funcionalidades principais:
+ * - Header com botão de voltar, título do módulo e ícone representativo
+ * - Cards de estatísticas:
+ *   - Média geral das disciplinas
+ *   - Melhor nota e disciplina correspondente
+ * - Lista de disciplinas com:
+ *   - Nome da disciplina
+ *   - Nota média
+ *   - Badge de avaliação qualitativa (Excelente, Ótimo, Bom)
+ *   - Gradientes de cores diferenciando disciplinas
+ * - Layout responsivo e animações visuais nos cards e badges
+ *
+ * Entrada:
+ * - Dados internos simulados:
+ *   @var {Array} dados - Lista de disciplinas com campos:
+ *     - disciplina: string (nome da disciplina)
+ *     - nota: number (média do aluno na disciplina)
+ *     - cor: string (gradiente usado para destacar visualmente a nota)
+ *
+ * Saída:
+ * - JSX que renderiza:
+ *   - Header com botão voltar e título
+ *   - Cards de estatísticas (média geral e melhor nota)
+ *   - Lista de disciplinas com notas e badges de desempenho
+ *   - Rodapé com data da última atualização
+ *
+ * Observações:
+ * - Todas as cores e gradientes são configuráveis por disciplina
+ * - Notas ≥ 9 recebem badge "Excelente", notas ≥ 8.5 badge "Ótimo", demais badge "Bom"
+ * - Layout responsivo, ajustando grid e tamanho dos elementos conforme a tela
+ */
+
 export default function Desempenho() {
   const dados = [
     { disciplina: "Estruturas de Dados", nota: 9.2, cor: "from-blue-500 to-blue-600" },
