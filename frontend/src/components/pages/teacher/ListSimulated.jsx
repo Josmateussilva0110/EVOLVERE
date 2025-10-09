@@ -1,5 +1,6 @@
 import { Eye, ChevronLeft, ChevronRight, BookOpen, Search, XCircle, FilePlus } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom"
 
 /**
  * @const simuladosMock
@@ -106,6 +107,7 @@ export default function SimuladosList() {
   const [filtroStatus, setFiltroStatus] = useState("");
   const [page, setPage] = useState(1);
   const ITEMS_PER_PAGE = 5;
+  const navigate = useNavigate()
 
   // Lógica de filtro e paginação
   const simuladosFiltrados = simulados.filter(s =>
@@ -140,7 +142,7 @@ export default function SimuladosList() {
           <div className="flex items-center gap-3">
             <button
               className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 shadow-lg shadow-yellow-400/20 transition-colors"
-              onClick={() => {/* Lógica para navegar para a página de criação */}}
+              onClick={() => navigate('/teacher/simulated/register')}
             >
               <FilePlus className="w-4 h-4 text-blue-700" />
               Criar Novo Simulado
@@ -199,7 +201,7 @@ export default function SimuladosList() {
                   pageSimulados.map((sim, idx) => (
                     <tr key={idx} className="hover:bg-slate-700/50 transition-colors border-b border-slate-800 last:border-b-0">
                       <td className="px-5 py-4">
-                        <div className="font-medium text-white">{sim.nome}</div>
+                        <div onClick={() => navigate('/teacher/simulated/response/list')} className="font-medium text-white">{sim.nome}</div>
                       </td>
                       <td className="px-5 py-4 text-slate-400">{sim.disciplina}</td>
                       <td className="px-5 py-4">

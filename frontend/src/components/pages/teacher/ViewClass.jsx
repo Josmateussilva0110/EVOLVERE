@@ -189,7 +189,7 @@ export default function ViewClass() {
                             <PlusCircle className="w-4 h-4 text-blue-700" />
                             Cadastrar Material
                         </button>
-                        <button className="px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 transition-colors shadow-lg shadow-yellow-400/20">
+                        <button onClick={() => navigate('/teacher/simulated/register')} className="px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 transition-colors shadow-lg shadow-yellow-400/20">
                             <PlusCircle className="w-4 h-4 text-blue-700" />
                             Cadastrar Simulado
                         </button>
