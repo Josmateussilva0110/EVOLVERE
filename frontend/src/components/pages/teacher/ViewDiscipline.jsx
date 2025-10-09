@@ -1,20 +1,70 @@
 import { useState } from "react"
 import { ArrowLeft, MoreVertical, FileText, Users, X, Plus, Download, Calendar, BookOpen } from "lucide-react"
 
+/**
+ * ViewSubjectDetails
+ *
+ * Tela de detalhes da disciplina que reúne:
+ * - Cabeçalho com título da disciplina e menu de ações.
+ * - Banner informativo.
+ * - Cards com Materiais Globais e Turmas vinculadas.
+ * - Popup para criação rápida de uma nova turma.
+ *
+ * Comportamento:
+ * - Gerencia estados locais para abertura de menu, exibição do pop-up de adicionar turma,
+ *   campos do formulário (nome da turma, capacidade) e ações de confirmar/cancelar.
+ * - Dados de `turmas` e `materiais` são exemplos estáticos; em produção, devem vir de uma API/props.
+ *
+ * Observações de integração:
+ * - `handleConfirmar` atualmente apenas loga no console e reseta os campos; substitua pela lógica
+ *   de persistência (fetch/axios) para enviar ao backend.
+ * - O componente usa estilos utilitários (Tailwind) e ícones do lucide-react.
+ *
+ * Retorno:
+ * @returns {JSX.Element} Layout completo da página de detalhes da disciplina.
+ */
 function ViewSubjectDetails() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [showAddTurmaPopup, setShowAddTurmaPopup] = useState(false)
   const [nomeTurma, setNomeTurma] = useState("")
   const [capacidade, setCapacidade] = useState("")
 
+  /**
+   * handleVoltar
+   *
+   * Volta à página anterior usando o histórico do browser.
+   * Uso: chamado pelo botão de voltar no cabeçalho.
+   */
   const handleVoltar = () => window.history.back()
+
+  /**
+   * toggleMenu
+   *
+   * Alterna a visibilidade do menu de ações (mais opções) no cabeçalho.
+   */
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
   
+  /**
+   * handleAddTurma
+   *
+   * Abre o pop-up de adicionar turma e fecha o menu (caso esteja aberto).
+   * Uso: item do menu "Adicionar turma".
+   */
   const handleAddTurma = () => {
     setShowAddTurmaPopup(true)
     setIsMenuOpen(false)
   }
   
+  /**
+   * handleConfirmar
+   *
+   * Confirmar criação de turma.
+   * Atualmente:
+   * - Loga o objeto { nome, capacidade } no console.
+   * - Fecha o pop-up e limpa os campos.
+   *
+   * Em produção: substitua por chamada à API que cria a turma e trate erros.
+   */
   const handleConfirmar = () => {
     console.log("Nova turma:", { nome: nomeTurma, capacidade })
     setShowAddTurmaPopup(false)
@@ -22,81 +72,106 @@ function ViewSubjectDetails() {
     setCapacidade("")
   }
   
+  /**
+   * handleCancelar
+   *
+   * Fecha o pop-up de adicionar turma e reseta os campos do formulário.
+   */
   const handleCancelar = () => {
     setShowAddTurmaPopup(false)
     setNomeTurma("")
     setCapacidade("")
   }
 
+  /**
+   * Dados de exemplo: turmas
+   *
+   * Estrutura de cada item:
+   * - nome: string — identificador curto da turma (ex.: "A")
+   * - cor: string — classes utilitárias para gradiente de fundo (Tailwind)
+   * - alunos: number — quantidade de alunos matriculados
+   *
+   * Em produção: substituir por dados carregados do backend.
+   */
   const turmas = [
-    { nome: "A", cor: "from-blue-500 to-indigo-600", alunos: 42 },
-    { nome: "B", cor: "from-green-500 to-emerald-600", alunos: 38 },
-    { nome: "C", cor: "from-yellow-500 to-amber-600", alunos: 45 },
+    { nome: "A", cor: "from-gray-700 to-gray-600", alunos: 42 },
+    { nome: "B", cor: "from-gray-700 to-gray-600", alunos: 38 },
+    { nome: "C", cor: "from-gray-700 to-gray-600", alunos: 45 },
   ]
 
+  /**
+   * Dados de exemplo: materiais globais
+   *
+   * Estrutura de cada item:
+   * - titulo: string — título do material
+   * - data: string — data de publicação/formato amigável (ex.: "06/09/2025")
+   * - tipo: string — tipo/etiqueta (ex.: "PDF")
+   * - tamanho: string — string legível com o tamanho do arquivo
+   *
+   * Em produção: carregar metadados reais do backend (incluindo URL para download).
+   */
   const materiais = [
     { titulo: "Prova ED", data: "06/09/2025", tipo: "PDF", tamanho: "2.4 MB" },
     { titulo: "Simulado PAA", data: "06/09/2025", tipo: "PDF", tamanho: "1.8 MB" },
   ]
 
   return (
-    <div className="bg-gradient-to-b from-[#060060] via-[#0a0a7a] to-[#121282] px-4 py-6 pb-24 relative min-h-screen">
-      {/* Background Elements */}
-      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute -top-32 -right-32 w-64 h-64 sm:w-80 sm:h-80 bg-blue-400/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-32 -left-32 w-64 h-64 sm:w-80 sm:h-80 bg-indigo-400/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 sm:w-96 sm:h-96 bg-purple-400/5 rounded-full blur-3xl"></div>
-      </div>
-
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 pt-4 pb-10 px-4">
       {/* Container Principal */}
-      <div className="w-full max-w-6xl mx-auto relative space-y-5">
+      <div className="max-w-7xl mx-auto py-8 space-y-8">
         
         {/* Header Card */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-white/50">
-          <div className="flex justify-between items-center px-6 py-4 bg-gradient-to-r from-white/40 to-white/20 backdrop-blur-sm border-b border-gray-200">
+        <div className="bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700/50 overflow-hidden">
+          <div className="flex justify-between items-center px-6 py-6 bg-gray-800/90 border-b border-gray-700/50">
             <button
               onClick={handleVoltar}
-              className="w-10 h-10 bg-white/80 backdrop-blur-sm border border-gray-300 rounded-xl flex items-center justify-center text-gray-700 hover:bg-white hover:scale-105 transition-all shadow-sm"
+              className="p-3 rounded-xl text-gray-300 hover:text-white hover:bg-gray-700/50 transition-all duration-200 border border-gray-600/30 hover:border-gray-500/50"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-6 h-6" />
             </button>
             
             <div className="text-center flex-1">
-              <h1 className="text-xl md:text-2xl font-bold text-[#060060]">
+              <h1 className="text-2xl md:text-3xl font-bold text-white drop-shadow-sm">
                 Estrutura de Dados
               </h1>
-              <p className="text-sm text-gray-600 mt-0.5">Período 2025.1 • SI</p>
+              <p className="text-sm text-gray-400 mt-1">Período 2025.1 • Sistemas de Informação</p>
             </div>
 
             <div className="relative">
               <button
                 onClick={toggleMenu}
-                className="w-10 h-10 bg-white/80 backdrop-blur-sm border border-gray-300 rounded-xl flex items-center justify-center text-gray-700 hover:bg-white hover:scale-105 transition-all shadow-sm"
+                className="p-3 rounded-xl text-gray-300 hover:text-white hover:bg-gray-700/50 transition-all duration-200 border border-gray-600/30 hover:border-gray-500/50"
               >
-                <MoreVertical className="w-5 h-5" />
+                <MoreVertical className="w-6 h-6" />
               </button>
               {isMenuOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-20">
+                <div className="absolute right-0 mt-3 w-72 bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-700/50 overflow-hidden z-20">
                   <ul className="py-2">
                     <li>
-                      <button className="w-full text-left px-5 py-3 hover:bg-blue-50 flex items-center gap-3 text-gray-700 transition-colors">
-                        <span className="text-xl">📝</span>
+                      <button className="w-full text-left px-5 py-3 hover:bg-gray-700/50 flex items-center gap-3 text-gray-300 hover:text-white transition-all duration-200">
+                        <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                          <span className="text-sm">📝</span>
+                        </div>
                         <span className="font-medium">Corrigir simulados</span>
                       </button>
                     </li>
                     <li>
                       <button 
                         onClick={handleAddTurma}
-                        className="w-full text-left px-5 py-3 hover:bg-blue-50 flex items-center gap-3 text-gray-700 transition-colors"
+                        className="w-full text-left px-5 py-3 hover:bg-gray-700/50 flex items-center gap-3 text-gray-300 hover:text-white transition-all duration-200"
                       >
-                        <span className="text-xl">👩‍🏫</span>
+                        <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                          <span className="text-sm">👩‍🏫</span>
+                        </div>
                         <span className="font-medium">Adicionar turma</span>
                       </button>
                     </li>
                     <li>
-                      <button className="w-full text-left px-5 py-3 hover:bg-blue-50 flex items-center gap-3 text-gray-700 transition-colors">
-                        <span className="text-xl">📝</span>
-                        <span className="font-medium">Corrigir simulado</span>
+                      <button className="w-full text-left px-5 py-3 hover:bg-gray-700/50 flex items-center gap-3 text-gray-300 hover:text-white transition-all duration-200">
+                        <div className="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center">
+                          <span className="text-sm">📊</span>
+                        </div>
+                        <span className="font-medium">Relatórios</span>
                       </button>
                     </li>
                   </ul>
@@ -106,9 +181,9 @@ function ViewSubjectDetails() {
           </div>
 
           {/* Info Banner */}
-          <div className="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50">
-            <p className="text-center text-gray-700 text-sm leading-relaxed flex items-center justify-center gap-2">
-              <BookOpen className="w-4 h-4 text-indigo-600" />
+          <div className="px-6 py-4 bg-gray-700/30 border-b border-gray-700/50">
+            <p className="text-center text-gray-300 text-sm leading-relaxed flex items-center justify-center gap-2">
+              <BookOpen className="w-4 h-4 text-blue-400" />
               Aqui você encontra os conteúdos globais desta disciplina: materiais para download, datas importantes e turmas vinculadas.
             </p>
           </div>
@@ -118,46 +193,47 @@ function ViewSubjectDetails() {
         <div className="grid lg:grid-cols-2 gap-5">
           
           {/* Card Materiais Globais */}
-          <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-white/50">
-            <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                  <FileText className="w-4 h-4 text-white" />
+          <div className="bg-gray-800/60 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700/50 overflow-hidden">
+            <div className="bg-gradient-to-r from-gray-700 to-gray-600 px-6 py-5 border-b border-gray-700/50">
+              <h2 className="text-lg font-bold text-white flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-blue-400" />
                 </div>
                 Materiais Globais
               </h2>
             </div>
             
-            <div className="p-5 space-y-3">
+            <div className="p-6 space-y-4">
               {materiais.map((material, idx) => (
                 <div 
                   key={idx}
-                  className="group bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 rounded-xl p-4 border border-blue-200 transition-all hover:shadow-md cursor-pointer"
+                  className="group bg-gray-700/40 hover:bg-gray-700/60 rounded-xl p-4 border border-gray-600/30 hover:border-gray-500/50 transition-all duration-200 cursor-pointer"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs text-gray-500 flex items-center gap-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-xs text-gray-400 flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
                           {material.data}
                         </span>
-                        <span className="text-xs px-2 py-0.5 bg-blue-200 text-blue-700 rounded-full font-medium">
+                        <span className="text-xs px-2 py-1 bg-blue-500/20 text-blue-400 rounded-lg font-medium border border-blue-500/30">
                           {material.tipo}
                         </span>
                       </div>
-                      <h3 className="font-semibold text-[#060060] group-hover:text-blue-600 transition-colors flex items-center gap-2">
-                        📄 {material.titulo}
+                      <h3 className="font-semibold text-white group-hover:text-blue-400 transition-colors flex items-center gap-2 mb-1">
+                        <FileText className="w-4 h-4 text-gray-400" />
+                        {material.titulo}
                       </h3>
-                      <p className="text-xs text-gray-500 mt-1">{material.tamanho}</p>
+                      <p className="text-xs text-gray-400">{material.tamanho}</p>
                     </div>
-                    <button className="w-10 h-10 bg-blue-500 hover:bg-blue-600 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 shadow-md">
+                    <button className="w-10 h-10 bg-blue-600/80 hover:bg-blue-500 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-110 shadow-lg border border-blue-500/30">
                       <Download className="w-4 h-4 text-white" />
                     </button>
                   </div>
                 </div>
               ))}
               
-              <button className="w-full py-3 border-2 border-dashed border-blue-300 rounded-xl text-blue-600 hover:bg-blue-50 transition-all font-medium flex items-center justify-center gap-2">
+              <button className="w-full py-4 border-2 border-dashed border-gray-600/50 rounded-xl text-gray-300 hover:text-white hover:border-gray-500/50 hover:bg-gray-700/30 transition-all duration-200 font-medium flex items-center justify-center gap-2">
                 <Plus className="w-4 h-4" />
                 Adicionar Material
               </button>
@@ -165,34 +241,34 @@ function ViewSubjectDetails() {
           </div>
 
           {/* Card Turmas */}
-          <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-white/50">
-            <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                  <Users className="w-4 h-4 text-white" />
+          <div className="bg-gray-800/60 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700/50 overflow-hidden">
+            <div className="bg-gradient-to-r from-gray-700 to-gray-600 px-6 py-5 border-b border-gray-700/50">
+              <h2 className="text-lg font-bold text-white flex items-center gap-3">
+                <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center">
+                  <Users className="w-5 h-5 text-emerald-400" />
                 </div>
                 Turmas 2025.1
               </h2>
             </div>
             
-            <div className="p-5 space-y-3">
+            <div className="p-6 space-y-4">
               {turmas.map((turma) => (
                 <a
                   key={turma.nome}
                   href="#"
-                  className={`group relative bg-gradient-to-br ${turma.cor} rounded-xl p-5 shadow-md hover:shadow-xl transition-all hover:scale-[1.02] overflow-hidden block`}
+                  className={`group relative bg-gradient-to-br ${turma.cor} rounded-xl p-5 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] overflow-hidden block border border-gray-600/30 hover:border-gray-500/50`}
                 >
-                  <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   <div className="relative z-10 flex items-center justify-between">
                     <div>
                       <h3 className="text-xl font-bold text-white mb-1">Turma {turma.nome}</h3>
-                      <p className="text-white/90 text-sm font-medium flex items-center gap-1">
+                      <p className="text-gray-300 text-sm font-medium flex items-center gap-2">
                         <Users className="w-4 h-4" />
-                        {turma.alunos} alunos
+                        {turma.alunos} alunos matriculados
                       </p>
                     </div>
-                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                      <span className="text-2xl font-bold text-white">{turma.nome}</span>
+                    <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center border border-white/20">
+                      <span className="text-xl font-bold text-white">{turma.nome}</span>
                     </div>
                   </div>
                 </a>
@@ -200,7 +276,7 @@ function ViewSubjectDetails() {
               
               <button 
                 onClick={handleAddTurma}
-                className="w-full py-3 border-2 border-dashed border-green-300 rounded-xl text-green-600 hover:bg-green-50 transition-all font-medium flex items-center justify-center gap-2"
+                className="w-full py-4 border-2 border-dashed border-gray-600/50 rounded-xl text-gray-300 hover:text-white hover:border-gray-500/50 hover:bg-gray-700/30 transition-all duration-200 font-medium flex items-center justify-center gap-2"
               >
                 <Plus className="w-4 h-4" />
                 Adicionar Turma
@@ -213,31 +289,31 @@ function ViewSubjectDetails() {
 
       {/* Pop-up Modernizado */}
       {showAddTurmaPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md px-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border-2 border-blue-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md px-4">
+          <div className="bg-gray-800/95 backdrop-blur-sm rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-700/50">
             {/* Header do Pop-up */}
-            <div className="bg-gradient-to-r from-[#060060] to-[#0a0a7a] px-6 py-5 flex items-center justify-between">
+            <div className="bg-gradient-to-r from-gray-700 to-gray-600 px-6 py-5 flex items-center justify-between border-b border-gray-700/50">
               <div>
                 <h3 className="text-white font-bold text-xl">Adicionar Turma</h3>
-                <p className="text-blue-200 text-sm mt-0.5">Crie uma nova turma para a disciplina</p>
+                <p className="text-gray-300 text-sm mt-0.5">Crie uma nova turma para a disciplina</p>
               </div>
               <button
                 onClick={handleCancelar}
-                className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center transition-all hover:scale-110"
+                className="w-10 h-10 bg-gray-600/50 hover:bg-gray-500/50 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110 border border-gray-600/30"
               >
-                <X className="w-5 h-5 text-white" />
+                <X className="w-5 h-5 text-gray-300" />
               </button>
             </div>
 
             {/* Conteúdo do Pop-up */}
             <div className="px-6 py-6 space-y-5">
-              <p className="text-center text-gray-600 text-sm">
+              <p className="text-center text-gray-400 text-sm">
                 Preencha as informações abaixo
               </p>
 
               {/* Campo Nome da turma */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Nome da turma
                 </label>
                 <input
@@ -245,13 +321,13 @@ function ViewSubjectDetails() {
                   placeholder="Ex: Turma D"
                   value={nomeTurma}
                   onChange={(e) => setNomeTurma(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 transition-all"
+                  className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600/50 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 placeholder-gray-400 transition-all duration-200"
                 />
               </div>
 
               {/* Campo Capacidade */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Capacidade
                 </label>
                 <div className="relative">
@@ -260,11 +336,11 @@ function ViewSubjectDetails() {
                     placeholder="Número de alunos"
                     value={capacidade}
                     onChange={(e) => setCapacidade(e.target.value)}
-                    className="w-full px-4 py-3 pr-14 bg-gray-50 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 transition-all"
+                    className="w-full px-4 py-3 pr-14 bg-gray-700/50 border border-gray-600/50 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 placeholder-gray-400 transition-all duration-200"
                   />
                   <button
                     onClick={() => setCapacidade((prev) => String(Number(prev || 0) + 1))}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-lg flex items-center justify-center transition-all hover:scale-105 shadow-md"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-blue-600/80 hover:bg-blue-500 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105 shadow-lg border border-blue-500/30"
                   >
                     <Plus className="w-4 h-4 text-white" />
                   </button>
@@ -275,15 +351,15 @@ function ViewSubjectDetails() {
               <div className="flex items-center gap-3 pt-2">
                 <button
                   onClick={handleConfirmar}
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold py-3 rounded-xl transition-all hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+                  className="flex-1 bg-blue-600/80 hover:bg-blue-500 text-white font-semibold py-3 rounded-xl transition-all duration-200 hover:scale-105 shadow-lg flex items-center justify-center gap-2 border border-blue-500/30"
                 >
-                  <span className="text-xl">✓</span> Confirmar
+                  <span className="text-lg">✓</span> Confirmar
                 </button>
                 <button
                   onClick={handleCancelar}
-                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 rounded-xl transition-all hover:scale-105 flex items-center justify-center gap-2"
+                  className="flex-1 bg-gray-700/50 hover:bg-gray-600/50 text-gray-300 hover:text-white font-semibold py-3 rounded-xl transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2 border border-gray-600/30"
                 >
-                  <span className="text-xl">✗</span> Cancelar
+                  <span className="text-lg">✗</span> Cancelar
                 </button>
               </div>
             </div>
