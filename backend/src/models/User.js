@@ -213,6 +213,24 @@ class User {
         }
     }
 
+    /**
+     * Verifica se um usuário é administrador pelo ID.
+     * 
+     * @async
+     * @function isAdmin
+     * @param {string|number} id - ID do usuário a ser verificado.
+     * 
+     * @returns {Promise<Object|boolean>} Retorna o objeto do usuário se for admin,
+     *  ou `false` caso o usuário não seja admin ou ocorra algum erro.
+     * 
+     * @example
+     * const admin = await isAdmin(123);
+     * if (admin) {
+     *   console.log("Usuário é admin:", admin.username);
+     * } else {
+     *   console.log("Usuário não é admin");
+     * }
+     */
     async isAdmin(id) {
         try {
             const result = await knex.raw(`
@@ -230,6 +248,25 @@ class User {
     }
 
 
+    /**
+     * Atualiza a foto de um usuário.
+     * 
+     * @async
+     * @function updatePhoto
+     * @param {string|number} id - ID do usuário que terá a foto atualizada.
+     * @param {string} photoPath - Caminho ou URL da nova foto do usuário.
+     * 
+     * @returns {Promise<boolean>} Retorna `true` se a atualização foi bem-sucedida,
+     *  ou `false` caso não tenha conseguido atualizar ou ocorra algum erro.
+     * 
+     * @example
+     * const success = await updatePhoto(123, "/uploads/profile123.jpg");
+     * if (success) {
+     *   console.log("Foto atualizada com sucesso!");
+     * } else {
+     *   console.log("Falha ao atualizar foto.");
+     * }
+     */
     async updatePhoto(id, photoPath) {
         try {
             const updated_at = knex.fn.now()
@@ -243,6 +280,25 @@ class User {
         }
     }
 
+
+    /**
+     * Busca a foto de um usuário pelo ID.
+     * 
+     * @async
+     * @function findPhoto
+     * @param {string|number} id - ID do usuário cuja foto será buscada.
+     * 
+     * @returns {Promise<Object|undefined>} Retorna um objeto com a propriedade `photo`
+     *  caso o usuário seja encontrado, ou `undefined` caso não exista ou ocorra algum erro.
+     * 
+     * @example
+     * const userPhoto = await findPhoto(123);
+     * if (userPhoto) {
+     *   console.log("Caminho da foto:", userPhoto.photo);
+     * } else {
+     *   console.log("Usuário não encontrado ou sem foto.");
+     * }
+     */
     async findPhoto(id) {
         try {
             const result = await knex.select(["photo"]).where({id}).table("users")
@@ -258,6 +314,25 @@ class User {
         }
     }
 
+
+    /**
+     * Remove a foto de um usuário, definindo o campo `photo` como `null`.
+     * 
+     * @async
+     * @function deletePhoto
+     * @param {string|number} id - ID do usuário cuja foto será removida.
+     * 
+     * @returns {Promise<boolean>} Retorna `true` se a remoção foi bem-sucedida,
+     *  ou `false` caso não tenha conseguido atualizar ou ocorra algum erro.
+     * 
+     * @example
+     * const success = await deletePhoto(123);
+     * if (success) {
+     *   console.log("Foto removida com sucesso!");
+     * } else {
+     *   console.log("Falha ao remover foto.");
+     * }
+     */
     async deletePhoto(id) {
         try {
             const updated_at = knex.fn.now()
@@ -271,13 +346,33 @@ class User {
         }
     }
 
+
+    /**
+     * Busca a sessão ativa de um usuário pelo ID.
+     * 
+     * @async
+     * @function findSessionById
+     * @param {string|number} id - ID do usuário cuja sessão será buscada.
+     * 
+     * @returns {Promise<Object|undefined>} Retorna um objeto com a propriedade `expire`
+     *  representando a data de expiração da sessão, ou `undefined` caso não haja sessão ativa
+     *  ou ocorra algum erro.
+     * 
+     * @example
+     * const session = await findSessionById(123);
+     * if (session) {
+     *   console.log("Sessão expira em:", session.expire);
+     * } else {
+     *   console.log("Nenhuma sessão ativa encontrada.");
+     * }
+     */
     async findSessionById(id) {
         try {
             const result = await knex('session')
             .select('expire')
             .whereRaw(`sess->'user'->>'id' = ?`, [String(id)])
             .andWhere('expire', '>', knex.fn.now())
-            .orderBy('expire', 'desc')
+            .orderBy('expire', 'asc')
             .first()
             return result
         } catch (err) {
@@ -286,6 +381,26 @@ class User {
         }
     }
 
+
+    /**
+     * Atualiza os dados de um usuário.
+     * 
+     * @async
+     * @function updateUser
+     * @param {string|number} id - ID do usuário que será atualizado.
+     * @param {Object} data - Objeto contendo os campos a serem atualizados.
+     * 
+     * @returns {Promise<boolean>} Retorna `true` se a atualização foi bem-sucedida,
+     *  ou `false` caso não tenha conseguido atualizar ou ocorra algum erro.
+     * 
+     * @example
+     * const success = await updateUser(123, { username: "novoNome", email: "novo@email.com" });
+     * if (success) {
+     *   console.log("Usuário atualizado com sucesso!");
+     * } else {
+     *   console.log("Falha ao atualizar usuário.");
+     * }
+     */
     async updateUser(id, data) {
         try {
             data.updated_at = knex.fn.now()

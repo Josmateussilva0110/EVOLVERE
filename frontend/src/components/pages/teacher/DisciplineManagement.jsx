@@ -1,12 +1,10 @@
-/**
- * @fileoverview Componente de página principal para o Gerenciamento de Disciplinas.
- *
- * Este componente orquestra a interface completa para visualizar, buscar, filtrar
- * e interagir com a lista de disciplinas. Ele é projetado com foco em
- * responsividade e usabilidade, utilizando Tailwind CSS para o estilo.
- *
- * @author Gemini Assistant
- */
+import { useNavigate } from "react-router-dom"
+import { useState, useEffect, useContext } from "react"
+import { Context } from "../../../context/UserContext"
+import requestData from "../../../utils/requestApi"
+import useFlashMessage from "../../../hooks/useFlashMessage"
+import { FaEye } from "react-icons/fa"
+
 
 /**
  * Componente principal (Página) para a interface de Gerenciamento de Disciplinas.

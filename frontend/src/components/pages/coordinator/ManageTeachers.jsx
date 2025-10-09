@@ -4,6 +4,7 @@ import { FaChalkboardTeacher } from "react-icons/fa";
 import requestData from "../../../utils/requestApi";
 import { Context } from "../../../context/UserContext"
 import useFlashMessage from "../../../hooks/useFlashMessage";
+import Image from "../../form/Image";
 
 /**
  * ProfessoresManagement
@@ -82,6 +83,7 @@ function ProfessoresManagement() {
   useEffect(() => {
     async function fetchTeachers() {
       const response = await requestData(`/user/teachers/${user.id}`, 'GET', {}, true)
+      console.log(response)
       if (response.success) {
         setTeachers(response.data.teachers)
       }
@@ -276,9 +278,17 @@ function ProfessoresManagement() {
                         {/* Nome e avatar */}
                         <td className="px-4 py-3 text-sm text-slate-900">
                           <div className="flex items-center gap-3">
+                            {prof?.photo ? (
+                              <Image
+                                src={`${import.meta.env.VITE_BASE_URL}/${prof.photo}`}
+                                alt={prof.username || "Foto do usuário"}
+                                size={50}
+                              />
+                            ): (
                             <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full ring-1 ${colorFromString(prof?.username || 'Professor')}`}>
                               <span className="text-xs font-bold">{getInitials(prof?.username || 'Professor')}</span>
                             </span>
+                            )}
                             <div className="flex flex-col">
                               <span className="font-medium text-slate-900">{prof?.username}</span>
                             </div>
@@ -286,14 +296,25 @@ function ProfessoresManagement() {
                         </td>
 
                         {/* Disciplina */}
-                        <td className="px-4 py-3 text-sm text-slate-700">
+                      <td className="px-4 py-3 text-sm text-slate-700">
+                        <div className="flex flex-col gap-1">
                           <div className="flex items-center gap-2">
-                            <span>{prof?.disciplina || 'Não atribuída'}</span>
-                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ${prof?.disciplina ? 'bg-slate-50 text-slate-700 ring-slate-200' : 'bg-amber-50 text-amber-700 ring-amber-200'}`}>
-                              {prof?.disciplina ? 'Atribuída' : 'Sem disciplina'}
+                            <span>
+                              {prof?.subjects?.length > 0 
+                                ? prof.subjects.join(', ') 
+                                : 'Não atribuída'}
+                            </span>
+                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ${
+                              prof?.subjects?.length > 0 
+                                ? 'bg-slate-50 text-slate-700 ring-slate-200' 
+                                : 'bg-amber-50 text-amber-700 ring-amber-200'
+                            }`}>
+                              {prof?.subjects?.length > 0 ? 'Atribuída' : 'Sem disciplina'}
                             </span>
                           </div>
-                        </td>
+                        </div>
+                      </td>
+
 
                         {showCourseColumn && (
                           <td className="px-4 py-3 text-sm text-slate-700">{prof?.course || '-'}</td>

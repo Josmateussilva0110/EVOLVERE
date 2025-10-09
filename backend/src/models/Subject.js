@@ -167,26 +167,41 @@ class Subject {
      * @returns {Promise<Object[]|undefined>} Lista de disciplinas do professor.
      * @example
      * const subjects = await Subject.getByProfessor(5);
-     * // Retorno: [ { id: 1, name: "Cálculo I", ... }, { id: 4, name: "Geometria", ... } ]
+     * // Retorno: [ { id: 1, name: "Cálculo I", ano_periodo: "2025.2", ... } ]
      */
     async getByProfessor(professionalId) {
         try {
-            const result = await knex
-                .select(
-                    'subjects.*',
-                    'course_valid.name as curso_nome',
-                    'course_valid.acronym_IES as curso_sigla'
-                )
-                .from('subjects')
-                .leftJoin('course_valid', 'subjects.course_valid_id', 'course_valid.id')
-                .where('subjects.professional_id', professionalId);
-                
-            return result.length > 0 ? result : undefined;
-        } catch(err) {
+            const result = await knex.raw(`
+                SELECT 
+                    s.*, 
+                    c.name AS course_name,
+                    c."acronym_IES" AS course_sigla,
+                    (
+                        EXTRACT(YEAR FROM s.updated_at)::TEXT || '.' ||
+                        CASE 
+                            WHEN EXTRACT(MONTH FROM s.updated_at) <= 6 THEN '1'
+                            ELSE '2'
+                        END
+                    ) AS period,
+                    CASE 
+                        WHEN s.professional_id IS NOT NULL THEN 1 
+                        ELSE 0 
+                    END AS status
+                FROM subjects s
+                LEFT JOIN course_valid c ON s.course_valid_id = c.id
+                WHERE s.professional_id = ?;
+            `, [professionalId]);
+
+            const rows = result.rows;
+            return rows.length > 0 ? rows : undefined;
+        } catch (err) {
             console.error('Erro ao buscar disciplinas por professor:', err);
             return undefined;
         }
     }
+
+
+
 
     /**
      * Busca todas as disciplinas de um curso específico.

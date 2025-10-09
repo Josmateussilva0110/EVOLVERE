@@ -6,8 +6,6 @@ import DisciplineList from "../components/pages/coordinator/ListDisciplines"
 import ListStudents from "../components/pages/coordinator/ListStudents"
 import ManageTeachers from "../components/pages/coordinator/ManageTeachers"
 import RequestsTeachers from "../components/pages/coordinator/Requests"
-import CoordinatorProfile from "../components/pages/coordinator/CoordinatorProfile"
-import CoordinatorSettings from "../components/pages/coordinator/CoordinatorSettings"
 
 export default function CoordinatorRoutes() {
   return (
@@ -20,8 +18,6 @@ export default function CoordinatorRoutes() {
       <Route path="student/list" element={<ListStudents />} />
       <Route path="teacher/manage" element={<ManageTeachers />} />
       <Route path="requests" element={<RequestsTeachers />} />
-      <Route path="profile" element={<CoordinatorProfile />} />
-      <Route path="settings" element={<CoordinatorSettings />} />
     </Routes>
   )
 }

@@ -10,8 +10,9 @@ function App() {
   const isCoordinator = location.pathname.startsWith("/coordinator")
   const hideLayout = isCoordinator || [
     "/login", "/register", "/forgot_password", "/help", "/", "/about",
-    "/await/approval", "/user/account", "/student/home", "/student/disciplines/view"
-  ].includes(location.pathname) || location.pathname.startsWith("/teacher")
+    "/await/approval", "/user/account", "/student/home", "/student/disciplines/view", "/teacher/discipline/manage", "/profile", "/settings"
+
+  ].includes(location.pathname)
 
   return (
     <>
