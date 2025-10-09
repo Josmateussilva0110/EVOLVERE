@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { ArrowLeft, MoreVertical, FileText, Users, X, Plus, Download, Calendar, BookOpen } from "lucide-react"
 
 /**
@@ -28,6 +29,7 @@ function ViewSubjectDetails() {
   const [showAddTurmaPopup, setShowAddTurmaPopup] = useState(false)
   const [nomeTurma, setNomeTurma] = useState("")
   const [capacidade, setCapacidade] = useState("")
+  const navigate = useNavigate()
 
   /**
    * handleVoltar
@@ -94,7 +96,7 @@ function ViewSubjectDetails() {
    * Em produção: substituir por dados carregados do backend.
    */
   const turmas = [
-    { nome: "A", cor: "from-gray-700 to-gray-600", alunos: 42 },
+    { nome: "Turma de Algoritmos Avançados", cor: "from-gray-700 to-gray-600", alunos: 42 },
     { nome: "B", cor: "from-gray-700 to-gray-600", alunos: 38 },
     { nome: "C", cor: "from-gray-700 to-gray-600", alunos: 45 },
   ]
@@ -132,7 +134,7 @@ function ViewSubjectDetails() {
             
             <div className="text-center flex-1">
               <h1 className="text-2xl md:text-3xl font-bold text-white drop-shadow-sm">
-                Estrutura de Dados
+                Calculo
               </h1>
               <p className="text-sm text-gray-400 mt-1">Período 2025.1 • Sistemas de Informação</p>
             </div>
@@ -152,7 +154,7 @@ function ViewSubjectDetails() {
                         <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
                           <span className="text-sm">📝</span>
                         </div>
-                        <span className="font-medium">Corrigir simulados</span>
+                        <span onClick={() => navigate('/teacher/simulated/list')} className="font-medium">Corrigir simulados</span>
                       </button>
                     </li>
                     <li>
@@ -233,7 +235,7 @@ function ViewSubjectDetails() {
                 </div>
               ))}
               
-              <button className="w-full py-4 border-2 border-dashed border-gray-600/50 rounded-xl text-gray-300 hover:text-white hover:border-gray-500/50 hover:bg-gray-700/30 transition-all duration-200 font-medium flex items-center justify-center gap-2">
+              <button onClick={() => navigate('/teacher/material/register')} className="w-full py-4 border-2 border-dashed border-gray-600/50 rounded-xl text-gray-300 hover:text-white hover:border-gray-500/50 hover:bg-gray-700/30 transition-all duration-200 font-medium flex items-center justify-center gap-2">
                 <Plus className="w-4 h-4" />
                 Adicionar Material
               </button>
@@ -261,14 +263,11 @@ function ViewSubjectDetails() {
                   <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   <div className="relative z-10 flex items-center justify-between">
                     <div>
-                      <h3 className="text-xl font-bold text-white mb-1">Turma {turma.nome}</h3>
+                      <h3 onClick={() => navigate('/teacher/class/view')} className="text-xl font-bold text-white mb-1">Turma {turma.nome}</h3>
                       <p className="text-gray-300 text-sm font-medium flex items-center gap-2">
                         <Users className="w-4 h-4" />
                         {turma.alunos} alunos matriculados
                       </p>
-                    </div>
-                    <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center border border-white/20">
-                      <span className="text-xl font-bold text-white">{turma.nome}</span>
                     </div>
                   </div>
                 </a>

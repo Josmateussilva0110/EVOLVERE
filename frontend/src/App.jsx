@@ -9,8 +9,8 @@ function App() {
   const location = useLocation()
   const isCoordinator = location.pathname.startsWith("/coordinator")
   const hideLayout = isCoordinator || [
-    "/login", "/register", "/forgot_password", "/help", "/", "/about",
-    "/await/approval", "/user/account", "/student/home", "/student/disciplines/view", "/teacher/discipline/manage", "/profile", "/settings"
+    "/login", "/register", "/forgot_password", "/help", "/", "/about", "/teacher/discipline/list", "/teacher/material/register", "/teacher/class/view",
+    "/await/approval", "/user/account", "/student/home", "/student/disciplines/view", "/teacher/discipline/manage", "/profile", "/settings", "/teacher/simulated/register", "/teacher/simulated/list", "/teacher/simulated/response/list"
 
   ].includes(location.pathname)
 
