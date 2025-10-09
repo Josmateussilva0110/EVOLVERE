@@ -304,6 +304,111 @@ class Subject {
             return [];
         }
     }
+
+    async findByIdWithCourse(id) {
+        try {
+            const subject = await knex('subjects')
+                .join('course_valid', 'subjects.course_valid_id', '=', 'course_valid.id')
+                .select(
+                    'subjects.*', // Todos os campos de subjects
+                    'course_valid.code as course_code', // O código do curso
+                    'course_valid.name as course_name'  // O nome do curso
+                )
+                .where('subjects.id', id)
+                .first(); // .first() para pegar apenas um objeto
+            return subject;
+        } catch (error) {
+            console.error("Erro ao buscar disciplina com curso:", error);
+            return undefined;
+        }
+    }
+
+
+    /**
+     * @summary Verifica se um usuário (coordenador) tem permissão sobre uma disciplina.
+     * @description A permissão é validada checando se o ID do coordenador corresponde ao coordenador do curso ao qual a disciplina pertence.
+     * @param {number} subjectId - O ID da disciplina.
+     * @param {number} coordinatorId - O ID do usuário coordenador.
+     * @returns {Promise<boolean>} Retorna `true` se o usuário for o coordenador do curso.
+     */
+    async isCoordinatorOfSubject(subjectId, coordinatorId) {
+        try {
+            // Esta consulta assume que sua tabela 'course_valid' tem uma coluna 'coordinator_id'
+            const subject = await knex('subjects')
+                .join('course_valid', 'subjects.course_valid_id', 'course_valid.id')
+                .where('subjects.id', subjectId)
+                .andWhere('course_valid.coordinator_id', coordinatorId)
+                .first('subjects.id');
+                
+            return !!subject; // Retorna true se encontrou, false se não
+        } catch (error) {
+            console.error('Erro ao verificar permissão do coordenador:', error);
+            return false;
+        }
+    }
+
+    /**
+     * @summary Busca os detalhes completos de uma disciplina para a tela de gerenciamento.
+     * @description Reúne dados da disciplina, seus materiais e suas turmas com contagem de alunos.
+     * @param {number} id - O ID da disciplina.
+     * @returns {Promise<Object|null>} Um objeto com todos os dados formatados ou null se não for encontrado.
+     */
+    async findScreenDetailsById(id) {
+        try {
+            // Usamos Promise.all para executar as buscas em paralelo, o que é mais eficiente
+            const [subject, materials, classes] = await Promise.all([
+                // Query 1: Busca dados da disciplina e do curso associado
+                knex('subjects')
+                    .join('course_valid', 'subjects.course_valid_id', 'course_valid.id')
+                    .where('subjects.id', id)
+                    .first(
+                        'subjects.*', 
+                        'course_valid.name as course_name',
+                        'course_valid.acronym_IES as course_acronym'
+                    ),
+
+                // Query 2: Busca os materiais da disciplina (assumindo que a tabela 'materials' existe)
+                knex('materials').where({ subject_id: id }).select('*'),
+
+                // Query 3: Busca as turmas e conta os alunos de cada uma
+                knex('Class as c')
+                    .leftJoin('Class_alunos as cs', 'c.id', 'cs.Class_id')
+                    .where('c.subject_id', id)
+                    .groupBy('c.id', 'c.name', 'c.period')
+                    .select('c.id', 'c.name', 'c.period')
+                    .count('cs.aluno_id as studentCount')
+            ]);
+
+            if (!subject) {
+                return null; // Disciplina não encontrada
+            }
+
+            // Formata o resultado final no mesmo formato que a API espera
+            return {
+                id: subject.id,
+                name: subject.name,
+                period: `Período ${subject.period || '2025.1'} • ${subject.course_acronym || 'SI'}`,
+                description: subject.description || 'Aqui você encontra os conteúdos globais desta disciplina: materiais para download, datas importantes e turmas vinculadas.',
+                courseId: subject.course_valid_id, // <-- IMPORTANTE: Incluído para a função 'Adicionar Turma' no frontend
+                materials: materials.map(m => ({
+                    id: m.id,
+                    name: m.name,
+                    fileType: m.file_type || 'PDF',
+                    size: m.size || '0 MB',
+                    uploadDate: new Date(m.created_at).toLocaleDateString('pt-BR'),
+                })),
+                classes: classes.map(c => ({
+                    id: c.id,
+                    name: c.name,
+                    period: c.period,
+                    studentCount: parseInt(c.studentCount, 10)
+                }))
+            };
+        } catch (error) {
+            console.error("Erro ao buscar detalhes completos da disciplina:", error);
+            return undefined;
+        }
+    }
 }
 
 module.exports = new Subject();

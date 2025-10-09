@@ -89,4 +89,13 @@ router.delete('/subjects/:id', subjectController.delete)
  */
 router.get("/subjects/teacher/:id", teacherController.getAllSubjects)
 
+
+
+/**
+ * @route GET /:id/details
+ * @summary Busca todos os detalhes de uma disciplina para a tela de gerenciamento.
+ * @param {number} id.path.required - ID da disciplina.
+ */
+router.get('/:id/details', subjectController.getScreenDetails)
+
 module.exports = router
