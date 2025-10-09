@@ -1,5 +1,56 @@
 import { Award, Star, Trophy, Zap, Target, Crown, ArrowLeft, Sparkles } from "lucide-react";
 
+
+/**
+ * Medalhas
+ *
+ * Componente React que exibe a coleção de medalhas e conquistas de um aluno,
+ * incluindo estatísticas de pontos, raridade e próximas metas a serem alcançadas.
+ *
+ * Funcionalidades principais:
+ * - Header com botão de voltar, título do módulo e ícone animado.
+ * - Cards de estatísticas:
+ *   - Total de pontos acumulados
+ *   - Quantidade de medalhas lendárias
+ *   - Quantidade de medalhas épicas
+ * - Grid de medalhas conquistadas com:
+ *   - Ícone, título e descrição da medalha
+ *   - Badge indicando raridade (Lendária, Épica, Rara, etc.)
+ *   - Data da conquista
+ *   - Pontos associados
+ *   - Efeitos visuais e hover (brilho, escala, gradientes)
+ * - Grid de próximas conquistas, mostrando progresso em porcentagem
+ *   com barra de progresso animada
+ * - Feedback visual e gradientes para destacar conquistas importantes
+ *
+ * Entrada:
+ * - Dados internos simulados:
+ *   @var {Array} medalhas - Lista de medalhas com campos:
+ *     - titulo: string (nome da medalha)
+ *     - descricao: string (descrição do objetivo ou conquista)
+ *     - cor: string (gradiente principal para destaque visual)
+ *     - corBg: string (gradiente de fundo para detalhes)
+ *     - icone: componente React do lucide-react (Crown, Trophy, Zap, etc.)
+ *     - data: string (data em que a medalha foi conquistada)
+ *     - pontos: number (pontos acumulados pela conquista)
+ *     - raridade: string (Lendária, Épica, Rara)
+ *
+ * Saída:
+ * - JSX que renderiza:
+ *   - Header com botão voltar, título e ícone
+ *   - Cards de estatísticas (total de pontos, lendárias e épicas)
+ *   - Grid de medalhas conquistadas
+ *   - Próximas conquistas com barra de progresso
+ *   - Rodapé com mensagem motivacional
+ *
+ * Observações:
+ * - Todos os cards e elementos visuais possuem animações ao hover
+ *   (escala, brilho, gradientes)
+ * - Progress bar de próximas conquistas é animada dinamicamente
+ * - Layout responsivo, ajustando grid e tamanho dos elementos conforme a tela
+ * - Gradientes e cores são utilizados para diferenciar raridade e importância das medalhas
+ */
+
 export default function Medalhas() {
   const medalhas = [
     { 

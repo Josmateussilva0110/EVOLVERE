@@ -17,6 +17,37 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+
+/**
+ * ManagementActivity
+ *
+ * Componente React que exibe uma interface de gerenciamento de atividades e simulados
+ * de um estudante. Permite visualizar estatísticas, filtrar por urgência ou tipo,
+ * buscar atividades pelo nome ou disciplina, e acessar detalhes ou iniciar atividades.
+ *
+ * Funcionalidades principais:
+ * - Exibe estatísticas de atividades (pendentes, urgentes, etc.).
+ * - Permite busca por nome da atividade ou disciplina.
+ * - Permite filtragem por tipo de atividade (todas, urgentes, simulados).
+ * - Lista atividades com informações detalhadas: prazo, dias restantes, disciplina, urgência, tipo.
+ * - Botões para iniciar atividade ou ver detalhes.
+ * - Feedback visual quando não há atividades correspondentes à busca ou filtros.
+ *
+ * Entrada:
+ * - Nenhuma entrada externa (o componente usa dados internos simulados `atividades` e `estatisticas`).
+ *
+ * Saída:
+ * - JSX que renderiza o dashboard de atividades, filtros, estatísticas e lista de atividades.
+ *
+ * Estados internos:
+ * @state {string} searchQuery - Texto da busca digitado pelo usuário.
+ * @state {string} filterActive - Filtro ativo ("todas", "urgentes" ou "simulados").
+ *
+ * Observações:
+ * - Componentes do pacote `lucide-react` são usados como ícones.
+ * - Estilos com Tailwind CSS + animações definidas via JSX `<style>` embutido.
+ */
+
 export default function ManagementActivity() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterActive, setFilterActive] = useState("todas");

@@ -20,6 +20,44 @@ import {
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+
+/**
+ * ManagementClasses
+ *
+ * Componente React que exibe e gerencia as turmas de um usuário (professor ou estudante),
+ * permitindo visualizar estatísticas, buscar turmas, filtrar por período e acessar detalhes
+ * ou ações rápidas de cada turma.
+ *
+ * Funcionalidades principais:
+ * - Exibe estatísticas das turmas e atividades (turmas ativas, notificações).
+ * - Permite busca por nome da turma ou professor.
+ * - Permite filtragem por período (todas, hoje, esta semana).
+ * - Lista turmas com informações detalhadas: professor, quantidade de alunos, progresso,
+ *   próxima aula, notificações.
+ * - Botões de ação rápida para acessar atividades ou materiais.
+ * - Botão principal para acessar a turma.
+ * - Feedback visual quando não há turmas correspondentes à busca ou filtros.
+ *
+ * Entrada:
+ * - Nenhuma entrada externa (dados simulados de `turmas` e `estatisticas` são usados internamente).
+ *
+ * Saída:
+ * - JSX que renderiza o dashboard de turmas, filtros, estatísticas e lista de cards de turmas.
+ *
+ * Estados internos:
+ * @state {string} searchQuery - Texto da busca digitado pelo usuário.
+ * @state {string} filterActive - Filtro ativo ("todas", "hoje" ou "semana").
+ *
+ * Dependências:
+ * - `lucide-react` para ícones.
+ * - `react-router-dom` para navegação com `useNavigate`.
+ * - Tailwind CSS para estilização e animações.
+ *
+ * Observações:
+ * - O componente contém animações CSS via `<style jsx>` embutido.
+ * - Cards de turmas têm efeitos visuais avançados, incluindo gradientes, sombras e hover.
+ */
+
 export default function ManagementClasses() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterActive, setFilterActive] = useState("todas");

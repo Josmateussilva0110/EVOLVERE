@@ -23,7 +23,8 @@ import {
   Briefcase,
 } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"; // 🔹 Import necessário para mudar de rota
+import { useNavigate } from "react-router-dom";
+
 
 /**
  * Componente Dashboard

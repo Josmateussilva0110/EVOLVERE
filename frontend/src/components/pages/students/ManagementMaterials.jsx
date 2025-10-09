@@ -20,6 +20,68 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+
+/**
+ * ManagementMaterials
+ *
+ * Componente React que exibe e gerencia materiais de aula de diferentes disciplinas,
+ * permitindo busca, filtros por tipo de arquivo e download direto.
+ *
+ * Funcionalidades principais:
+ * - Header com botão de voltar, título do módulo e ícone animado.
+ * - Estatísticas resumidas sobre os materiais (ex.: total de materiais disponíveis).
+ * - Barra de busca para pesquisar por título ou disciplina.
+ * - Filtros por categoria de material (Todos, PDFs, Arquivos ZIP, etc.).
+ * - Lista de materiais renderizada em cards com:
+ *   - Tipo de arquivo e ícone correspondente.
+ *   - Tamanho, data, disciplina e título do material.
+ *   - Botão para baixar o material.
+ * - Feedback visual quando nenhum resultado é encontrado.
+ * - Animações em fade-in e slide-up para cards e seções.
+ *
+ * Entrada:
+ * - Estado interno controlado por useState:
+ *   @state {string} searchQuery - Texto da busca para filtrar títulos e disciplinas.
+ *   @state {string} filterActive - Categoria ativa do filtro ("todos", "pdf", "arquivo").
+ *
+ * - Dados simulados internos:
+ *   @var {Array} materiais - Lista de materiais com campos:
+ *     - id: number
+ *     - titulo: string
+ *     - tipo: string (ex.: "PDF", "ZIP", "PPTX")
+ *     - tamanho: string (ex.: "2.1 MB")
+ *     - data: string (ex.: "15 Out 2024")
+ *     - disciplina: string (ex.: "Estruturas de Dados")
+ *     - cor: string (gradiente para o header do card)
+ *     - corClara: string (gradiente claro para fundos)
+ *     - icon: componente React do lucide-react (ex.: FileText, Archive)
+ *     - categoria: string ("pdf" | "arquivo" | etc.)
+ *   @var {Array} estatisticas - Lista de estatísticas com campos:
+ *     - label: string (ex.: "Total de Materiais")
+ *     - valor: string (ex.: "24")
+ *     - sublabel: string (ex.: "Arquivos disponíveis")
+ *     - icon: componente React do lucide-react (ex.: FolderOpen)
+ *     - cor: string (gradiente do ícone)
+ *     - corFundo: string (gradiente de fundo do card)
+ *   @var {Array} filtros - Lista de filtros de categoria com campos:
+ *     - id: string ("todos", "pdf", "arquivo")
+ *     - label: string ("Todos", "PDFs", "Arquivos")
+ *
+ * Saída:
+ * - JSX que renderiza:
+ *   - Header com botão voltar, título e ícone animado.
+ *   - Cards de estatísticas.
+ *   - Barra de busca e filtros de categoria.
+ *   - Grid de cards de materiais filtrados com informações e botão de download.
+ *   - Mensagem de feedback quando nenhum material corresponde aos filtros.
+ *
+ * Observações:
+ * - Cards e estatísticas possuem animações (fade-in, slide-up e transformações ao hover).
+ * - Gradientes e cores são usadas para diferenciar tipos de materiais e destacar elementos.
+ * - Busca e filtros podem ser combinados.
+ * - Responsivo e compatível com diferentes tamanhos de tela.
+ */
+
 export default function ManagementMaterials() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterActive, setFilterActive] = useState("todos");

@@ -11,6 +11,41 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+
+/**
+ * SistemasInformacao
+ *
+ * Componente React que exibe e gerencia as disciplinas do curso de Sistemas de Informação,
+ * permitindo visualizar estatísticas, buscar disciplinas e filtrar por semestre.
+ *
+ * Funcionalidades principais:
+ * - Exibe cards de estatísticas (total de disciplinas, progresso, média).
+ * - Permite busca por código da disciplina.
+ * - Permite filtragem por semestre (2º, 3º, 4º, 5º ou todos).
+ * - Lista disciplinas com informações detalhadas: código, professor(es), quantidade de alunos, semestre e status.
+ * - Indicadores visuais de status (Concluída, Em processo) com cores diferenciadas.
+ * - Feedback visual quando não há disciplinas correspondentes à busca ou filtros.
+ *
+ * Entrada:
+ * - Nenhuma entrada externa (dados simulados de `disciplinas` são usados internamente).
+ *
+ * Saída:
+ * - JSX que renderiza o dashboard de disciplinas, filtros, estatísticas e cards de disciplinas.
+ *
+ * Estados internos:
+ * @state {string} searchTerm - Texto da busca digitado pelo usuário.
+ * @state {string} selectedSemester - Semestre selecionado para filtro.
+ *
+ * Dependências:
+ * - `lucide-react` para ícones.
+ * - Tailwind CSS para estilização, gradientes e animações.
+ *
+ * Observações:
+ * - Cards de disciplinas possuem hover com efeitos visuais e gradientes.
+ * - O componente é responsivo e ajusta grid e tamanhos conforme a tela.
+ * - O botão voltar usa `window.history.back()` para retornar à página anterior.
+ */
+
 export default function SistemasInformacao() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSemester, setSelectedSemester] = useState("Semestre");
