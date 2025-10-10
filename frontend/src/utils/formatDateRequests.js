@@ -1,6 +1,6 @@
 function formatDateRequests(dateString) {
   const date = new Date(dateString)
-  const dia = String(date.getDay()).padStart(2, "0")
+  const dia = String(date.getDate()).padStart(2, "0")
   const mes = String(date.getMonth() + 1).padStart(2, "0")
   const ano = date.getFullYear()
   const horas = String(date.getHours()).padStart(2, "0")

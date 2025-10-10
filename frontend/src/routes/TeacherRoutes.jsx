@@ -41,7 +41,7 @@ export default function TeacherRoutes() {
        * @route /teacher/discipline/list
        * @element ViewDiscipline
        */}
-      <Route path="discipline/list" element={<ViewDiscipline />} />
+      <Route path="discipline/list/:id" element={<ViewDiscipline />} />
 
       {/**
        * Página para cadastro e upload de materiais didáticos.

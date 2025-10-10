@@ -1,6 +1,8 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useState, useEffect } from "react"
+import { useNavigate, useParams } from "react-router-dom"
 import { ArrowLeft, MoreVertical, FileText, Users, X, Plus, Download, Calendar, BookOpen } from "lucide-react"
+import requestData from "../../../utils/requestApi"
+import formatDateRequests from "../../../utils/formatDateRequests"
 
 /**
  * ViewSubjectDetails
@@ -30,6 +32,19 @@ function ViewSubjectDetails() {
   const [nomeTurma, setNomeTurma] = useState("")
   const [capacidade, setCapacidade] = useState("")
   const navigate = useNavigate()
+  const { id } = useParams()
+  const [materials, setMaterials] = useState([])
+
+  useEffect(() => {
+    async function fetchSubject() {
+      const response = await requestData(`/subject/materiais/${id}`)
+      console.log(response)
+      if (response.success) {
+        setMaterials(response.data.materials)
+      }
+    }
+    fetchSubject()
+  }, [id])
 
   /**
    * handleVoltar
@@ -45,7 +60,7 @@ function ViewSubjectDetails() {
    * Alterna a visibilidade do menu de ações (mais opções) no cabeçalho.
    */
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
-  
+
   /**
    * handleAddTurma
    *
@@ -56,7 +71,7 @@ function ViewSubjectDetails() {
     setShowAddTurmaPopup(true)
     setIsMenuOpen(false)
   }
-  
+
   /**
    * handleConfirmar
    *
@@ -73,7 +88,7 @@ function ViewSubjectDetails() {
     setNomeTurma("")
     setCapacidade("")
   }
-  
+
   /**
    * handleCancelar
    *
@@ -101,28 +116,12 @@ function ViewSubjectDetails() {
     { nome: "C", cor: "from-gray-700 to-gray-600", alunos: 45 },
   ]
 
-  /**
-   * Dados de exemplo: materiais globais
-   *
-   * Estrutura de cada item:
-   * - titulo: string — título do material
-   * - data: string — data de publicação/formato amigável (ex.: "06/09/2025")
-   * - tipo: string — tipo/etiqueta (ex.: "PDF")
-   * - tamanho: string — string legível com o tamanho do arquivo
-   *
-   * Em produção: carregar metadados reais do backend (incluindo URL para download).
-   */
-  const materiais = [
-    { titulo: "Prova ED", data: "06/09/2025", tipo: "PDF", tamanho: "2.4 MB" },
-    { titulo: "Simulado PAA", data: "06/09/2025", tipo: "PDF", tamanho: "1.8 MB" },
-  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 pt-4 pb-10 px-4">
-      {/* Container Principal */}
       <div className="max-w-7xl mx-auto py-8 space-y-8">
-        
-        {/* Header Card */}
+
+        {/* Header */}
         <div className="bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700/50 overflow-hidden">
           <div className="flex justify-between items-center px-6 py-6 bg-gray-800/90 border-b border-gray-700/50">
             <button
@@ -131,14 +130,17 @@ function ViewSubjectDetails() {
             >
               <ArrowLeft className="w-6 h-6" />
             </button>
-            
+
             <div className="text-center flex-1">
               <h1 className="text-2xl md:text-3xl font-bold text-white drop-shadow-sm">
-                Calculo
+                {materials.length > 0 ? materials[0].subject_name : "Carregando..."}
               </h1>
-              <p className="text-sm text-gray-400 mt-1">Período 2025.1 • Sistemas de Informação</p>
+              <p className="text-sm text-gray-400 mt-1">
+                Período 2025.1 • Sistemas de Informação
+              </p>
             </div>
 
+            {/* Menu de ações */}
             <div className="relative">
               <button
                 onClick={toggleMenu}
@@ -150,15 +152,18 @@ function ViewSubjectDetails() {
                 <div className="absolute right-0 mt-3 w-72 bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-700/50 overflow-hidden z-20">
                   <ul className="py-2">
                     <li>
-                      <button className="w-full text-left px-5 py-3 hover:bg-gray-700/50 flex items-center gap-3 text-gray-300 hover:text-white transition-all duration-200">
+                      <button
+                        className="w-full text-left px-5 py-3 hover:bg-gray-700/50 flex items-center gap-3 text-gray-300 hover:text-white transition-all duration-200"
+                        onClick={() => navigate("/teacher/simulated/list")}
+                      >
                         <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
                           <span className="text-sm">📝</span>
                         </div>
-                        <span onClick={() => navigate('/teacher/simulated/list')} className="font-medium">Corrigir simulados</span>
+                        <span className="font-medium">Corrigir simulados</span>
                       </button>
                     </li>
                     <li>
-                      <button 
+                      <button
                         onClick={handleAddTurma}
                         className="w-full text-left px-5 py-3 hover:bg-gray-700/50 flex items-center gap-3 text-gray-300 hover:text-white transition-all duration-200"
                       >
@@ -182,7 +187,7 @@ function ViewSubjectDetails() {
             </div>
           </div>
 
-          {/* Info Banner */}
+          {/* Banner */}
           <div className="px-6 py-4 bg-gray-700/30 border-b border-gray-700/50">
             <p className="text-center text-gray-300 text-sm leading-relaxed flex items-center justify-center gap-2">
               <BookOpen className="w-4 h-4 text-blue-400" />
@@ -191,10 +196,9 @@ function ViewSubjectDetails() {
           </div>
         </div>
 
-        {/* Grid de Conteúdo */}
+        {/* Grid principal */}
         <div className="grid lg:grid-cols-2 gap-5">
-          
-          {/* Card Materiais Globais */}
+          {/* Materiais Globais */}
           <div className="bg-gray-800/60 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700/50 overflow-hidden">
             <div className="bg-gradient-to-r from-gray-700 to-gray-600 px-6 py-5 border-b border-gray-700/50">
               <h2 className="text-lg font-bold text-white flex items-center gap-3">
@@ -204,45 +208,61 @@ function ViewSubjectDetails() {
                 Materiais Globais
               </h2>
             </div>
-            
+
             <div className="p-6 space-y-4">
-              {materiais.map((material, idx) => (
-                <div 
-                  key={idx}
-                  className="group bg-gray-700/40 hover:bg-gray-700/60 rounded-xl p-4 border border-gray-600/30 hover:border-gray-500/50 transition-all duration-200 cursor-pointer"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="text-xs text-gray-400 flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {material.data}
-                        </span>
-                        <span className="text-xs px-2 py-1 bg-blue-500/20 text-blue-400 rounded-lg font-medium border border-blue-500/30">
-                          {material.tipo}
-                        </span>
+              {materials.length > 0 && materials.some(m => m.archive) ? (
+                materials
+                  .filter(m => m.archive) // só os materiais com arquivo
+                  .map(material => (
+                    <div
+                      key={material.id}
+                      className="group bg-gray-700/40 hover:bg-gray-700/60 rounded-xl p-4 border border-gray-600/30 hover:border-gray-500/50 transition-all duration-200 cursor-pointer"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="text-xs text-gray-400 flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {formatDateRequests(material.updated_at)}
+                            </span>
+                            <span className="text-xs px-2 py-1 bg-blue-500/20 text-blue-400 rounded-lg font-medium border border-blue-500/30">
+                              {material.type_file}
+                            </span>
+                          </div>
+                          <h3 className="font-semibold text-white group-hover:text-blue-400 transition-colors flex items-center gap-2 mb-1">
+                            <FileText className="w-4 h-4 text-gray-400" />
+                            {material.title || material.name}
+                          </h3>
+                        </div>
+                        <a
+                          href={material.archive}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-10 h-10 bg-blue-600/80 hover:bg-blue-500 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-110 shadow-lg border border-blue-500/30"
+                        >
+                          <Download className="w-4 h-4 text-white" />
+                        </a>
                       </div>
-                      <h3 className="font-semibold text-white group-hover:text-blue-400 transition-colors flex items-center gap-2 mb-1">
-                        <FileText className="w-4 h-4 text-gray-400" />
-                        {material.titulo}
-                      </h3>
-                      <p className="text-xs text-gray-400">{material.tamanho}</p>
                     </div>
-                    <button className="w-10 h-10 bg-blue-600/80 hover:bg-blue-500 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-110 shadow-lg border border-blue-500/30">
-                      <Download className="w-4 h-4 text-white" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-              
-              <button onClick={() => navigate('/teacher/material/register')} className="w-full py-4 border-2 border-dashed border-gray-600/50 rounded-xl text-gray-300 hover:text-white hover:border-gray-500/50 hover:bg-gray-700/30 transition-all duration-200 font-medium flex items-center justify-center gap-2">
+                  ))
+              ) : (
+                <p className="text-gray-400 text-sm text-center py-6">
+                  Nenhum material disponível para esta disciplina.
+                </p>
+              )}
+
+              <button
+                onClick={() => navigate("/teacher/material/register")}
+                className="w-full py-4 border-2 border-dashed border-gray-600/50 rounded-xl text-gray-300 hover:text-white hover:border-gray-500/50 hover:bg-gray-700/30 transition-all duration-200 font-medium flex items-center justify-center gap-2"
+              >
                 <Plus className="w-4 h-4" />
                 Adicionar Material
               </button>
             </div>
           </div>
 
-          {/* Card Turmas */}
+
+          {/* Turmas */}
           <div className="bg-gray-800/60 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700/50 overflow-hidden">
             <div className="bg-gradient-to-r from-gray-700 to-gray-600 px-6 py-5 border-b border-gray-700/50">
               <h2 className="text-lg font-bold text-white flex items-center gap-3">
@@ -252,28 +272,28 @@ function ViewSubjectDetails() {
                 Turmas 2025.1
               </h2>
             </div>
-            
+
             <div className="p-6 space-y-4">
               {turmas.map((turma) => (
-                <a
+                <div
                   key={turma.nome}
-                  href="#"
                   className={`group relative bg-gradient-to-br ${turma.cor} rounded-xl p-5 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] overflow-hidden block border border-gray-600/30 hover:border-gray-500/50`}
+                  onClick={() => navigate("/teacher/class/view")}
                 >
                   <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   <div className="relative z-10 flex items-center justify-between">
                     <div>
-                      <h3 onClick={() => navigate('/teacher/class/view')} className="text-xl font-bold text-white mb-1">Turma {turma.nome}</h3>
+                      <h3 className="text-xl font-bold text-white mb-1">Turma {turma.nome}</h3>
                       <p className="text-gray-300 text-sm font-medium flex items-center gap-2">
                         <Users className="w-4 h-4" />
                         {turma.alunos} alunos matriculados
                       </p>
                     </div>
                   </div>
-                </a>
+                </div>
               ))}
-              
-              <button 
+
+              <button
                 onClick={handleAddTurma}
                 className="w-full py-4 border-2 border-dashed border-gray-600/50 rounded-xl text-gray-300 hover:text-white hover:border-gray-500/50 hover:bg-gray-700/30 transition-all duration-200 font-medium flex items-center justify-center gap-2"
               >
@@ -282,15 +302,13 @@ function ViewSubjectDetails() {
               </button>
             </div>
           </div>
-
         </div>
       </div>
 
-      {/* Pop-up Modernizado */}
+      {/* Popup Adicionar Turma */}
       {showAddTurmaPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md px-4">
           <div className="bg-gray-800/95 backdrop-blur-sm rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-700/50">
-            {/* Header do Pop-up */}
             <div className="bg-gradient-to-r from-gray-700 to-gray-600 px-6 py-5 flex items-center justify-between border-b border-gray-700/50">
               <div>
                 <h3 className="text-white font-bold text-xl">Adicionar Turma</h3>
@@ -304,13 +322,12 @@ function ViewSubjectDetails() {
               </button>
             </div>
 
-            {/* Conteúdo do Pop-up */}
             <div className="px-6 py-6 space-y-5">
               <p className="text-center text-gray-400 text-sm">
                 Preencha as informações abaixo
               </p>
 
-              {/* Campo Nome da turma */}
+              {/* Campo nome */}
               <div>
                 <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Nome da turma
@@ -324,7 +341,7 @@ function ViewSubjectDetails() {
                 />
               </div>
 
-              {/* Campo Capacidade */}
+              {/* Campo capacidade */}
               <div>
                 <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Capacidade

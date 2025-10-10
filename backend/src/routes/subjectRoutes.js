@@ -1,7 +1,6 @@
 const express = require("express")
 const router = express.Router()
 const subjectController = require("../controllers/subjectController")
-const TeacherController = require("../controllers/teacherController")
 const teacherController = require("../controllers/teacherController")
 
 /**
@@ -88,5 +87,7 @@ router.delete('/subjects/:id', subjectController.delete)
  * ]
  */
 router.get("/subjects/teacher/:id", teacherController.getAllSubjects)
+
+router.get("/subject/materiais/:id", subjectController.getAllMateriais)
 
 module.exports = router
