@@ -167,6 +167,14 @@ public/diplomas/*
 !/diplomas/.gitkeep
 **/diplomas/
 
+public/materials/*
+!public/materials/.gitkeep
+
+
+/materials/*
+!/materials/.gitkeep
+**/materials/
+
 
 ### CocoaPods ###
 ## CocoaPods GitIgnore Template
