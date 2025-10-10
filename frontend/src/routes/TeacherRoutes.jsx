@@ -48,7 +48,7 @@ export default function TeacherRoutes() {
        * @route /teacher/material/register
        * @element RegisterMaterial
        */}
-      <Route path="material/register" element={<RegisterMaterial />} />
+      <Route path="material/register/:subject_id" element={<RegisterMaterial />} />
 
       {/**
        * Página para visualização das turmas associadas às disciplinas do professor.

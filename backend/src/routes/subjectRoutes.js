@@ -90,4 +90,6 @@ router.get("/subjects/teacher/:id", teacherController.getAllSubjects)
 
 router.get("/subject/materiais/:id", subjectController.getAllMateriais)
 
+router.get('/subject/user/:id', subjectController.findSubjectByUser)
+
 module.exports = router

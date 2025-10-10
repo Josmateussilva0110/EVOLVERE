@@ -330,6 +330,23 @@ class Subject {
             return undefined
         }
     } 
+
+    async subjectUser(id) {
+        try {
+            const result = await knex
+            .select("id")
+            .from("subjects")
+            .where({ professional_id: id })
+            .first() // pega apenas o primeiro registro
+
+            return result ? result: null
+        } catch (err) {
+            console.error("Erro ao buscar matéria do usuário:", err)
+            return null
+        }
+    }
+
+
 }
 
 module.exports = new Subject();

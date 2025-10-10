@@ -11,7 +11,7 @@ import {
 import CustomSelect from "../../form/SelectTeacher";
 import requestData from "../../../utils/requestApi";
 import useFlashMessage from "../../../hooks/useFlashMessage"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { Context } from "../../../context/UserContext"
 
 /* ---------------------- Componente Principal ---------------------- */
@@ -61,6 +61,9 @@ function CadastrarMaterial() {
   const { setFlashMessage } = useFlashMessage()
   const navigate = useNavigate()
   const { user } = useContext(Context)
+  const { subject_id } = useParams()
+
+
 
   useEffect(() => {
     if (archive) setError("");
@@ -78,7 +81,7 @@ function CadastrarMaterial() {
     if(user) {
       formData.append("created_by", user.id); 
     }
-    formData.append("subject_id", 1); 
+    formData.append("subject_id", subject_id); 
     const response = await requestData('/material', 'POST', formData, true)
     if(response.success) {
       console.log('id da materia: ', response)

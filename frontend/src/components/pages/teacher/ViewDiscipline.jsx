@@ -116,6 +116,25 @@ function ViewSubjectDetails() {
     { nome: "C", cor: "from-gray-700 to-gray-600", alunos: 45 },
   ]
 
+  function getColorByType(type) {
+    switch (type.toLowerCase()) {
+      case "pdf":
+        return "bg-red-500/20 text-red-400 border-red-500/30"
+      case "doc":
+      case "docx":
+        return "bg-blue-500/20 text-blue-400 border-blue-500/30"
+      case "ppt":
+      case "pptx":
+        return "bg-orange-500/20 text-orange-400 border-orange-500/30"
+      case "xlsx":
+      case "xls":
+        return "bg-green-500/20 text-green-400 border-green-500/30"
+      default:
+        return "bg-gray-500/20 text-gray-400 border-gray-500/30"
+    }
+  }
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 pt-4 pb-10 px-4">
@@ -162,25 +181,6 @@ function ViewSubjectDetails() {
                         <span className="font-medium">Corrigir simulados</span>
                       </button>
                     </li>
-                    <li>
-                      <button
-                        onClick={handleAddTurma}
-                        className="w-full text-left px-5 py-3 hover:bg-gray-700/50 flex items-center gap-3 text-gray-300 hover:text-white transition-all duration-200"
-                      >
-                        <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center">
-                          <span className="text-sm">👩‍🏫</span>
-                        </div>
-                        <span className="font-medium">Adicionar turma</span>
-                      </button>
-                    </li>
-                    <li>
-                      <button className="w-full text-left px-5 py-3 hover:bg-gray-700/50 flex items-center gap-3 text-gray-300 hover:text-white transition-all duration-200">
-                        <div className="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center">
-                          <span className="text-sm">📊</span>
-                        </div>
-                        <span className="font-medium">Relatórios</span>
-                      </button>
-                    </li>
                   </ul>
                 </div>
               )}
@@ -225,9 +225,14 @@ function ViewSubjectDetails() {
                               <Calendar className="w-3 h-3" />
                               {formatDateRequests(material.updated_at)}
                             </span>
-                            <span className="text-xs px-2 py-1 bg-blue-500/20 text-blue-400 rounded-lg font-medium border border-blue-500/30">
+                            <span
+                              className={`text-xs px-2 py-1 rounded-lg font-medium border
+    ${getColorByType(material.type_file)}
+  `}
+                            >
                               {material.type_file}
                             </span>
+
                           </div>
                           <h3 className="font-semibold text-white group-hover:text-blue-400 transition-colors flex items-center gap-2 mb-1">
                             <FileText className="w-4 h-4 text-gray-400" />
@@ -252,7 +257,7 @@ function ViewSubjectDetails() {
               )}
 
               <button
-                onClick={() => navigate("/teacher/material/register")}
+                onClick={() => navigate(`/teacher/material/register/${id}`)}
                 className="w-full py-4 border-2 border-dashed border-gray-600/50 rounded-xl text-gray-300 hover:text-white hover:border-gray-500/50 hover:bg-gray-700/30 transition-all duration-200 font-medium flex items-center justify-center gap-2"
               >
                 <Plus className="w-4 h-4" />

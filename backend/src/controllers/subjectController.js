@@ -293,7 +293,23 @@ class subjectController {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
-};
+
+    async findSubjectByUser(request, response) {
+        try {
+            const { id } = request.params
+            if (!validator.isInt(id + '', { min: 1 })) {
+                return res.status(422).json({ success: false, message: "ID inválido." });
+            }
+            const subject_id = await Subject.subjectUser(id)
+            if(!subject_id) {
+                return response.status(404).json({ status: false, message: "Nenhum material encontrado." })
+            }
+            return response.status(200).json({ status: true, subject_id})
+        } catch(err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+}
 
 module.exports = new subjectController();
 
