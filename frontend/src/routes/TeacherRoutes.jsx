@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom"
+import { Route, Routes } from "react-router-dom"
 import DisciplineManagement from "../components/pages/teacher/DisciplineManagement"
 import ViewDiscipline from "../components/pages/teacher/ViewDiscipline"
 import RegisterMaterial from "../components/pages/teacher/RegisterMaterial"
