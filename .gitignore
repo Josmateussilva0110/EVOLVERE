@@ -168,8 +168,7 @@ public/diplomas/*
 **/diplomas/
 
 public/materials/*
-!public/materials/.gitkeep
-
+!/public/materials/.gitkeep
 
 /materials/*
 !/materials/.gitkeep
