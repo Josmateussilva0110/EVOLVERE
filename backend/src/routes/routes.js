@@ -24,11 +24,13 @@ const userRoutes = require("./userRoutes")
 const accountRoutes = require("./accountRoutes")
 const courseRoutes = require("./courseRoutes")
 const subjectRoutes = require("./subjectRoutes")
+const materialRoutes = require("./materialsRoutes")
 
 // Usar rotas
 router.use(userRoutes)
 router.use(accountRoutes)
 router.use(courseRoutes)
 router.use(subjectRoutes)
+router.use(materialRoutes)
 
 module.exports = router

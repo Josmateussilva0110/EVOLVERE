@@ -304,6 +304,49 @@ class Subject {
             return [];
         }
     }
+
+    async getMaterialsGlobal(subject_id) {
+        try {
+            const result = await knex.raw(`
+                select 
+                    s.id as subject_id,
+                    s.name as subject_name,
+                    case 
+                        when m.type = 1 then 'PDF'
+                        when m.type = 2 then 'DOC'
+                        when m.type = 3 then 'PPT'
+                        else 'Desconhecido'
+                    end as type_file,
+                    m.*
+                from subjects s
+                left join materials m
+                    on m.subject_id  = s.id
+                where s.id = ?
+            `, [subject_id])
+            const rows = result.rows
+            return rows.length > 0 ? rows : undefined
+        } catch(err) {
+            console.error("Erro ao buscar materiais globais:", err);
+            return undefined
+        }
+    } 
+
+    async subjectUser(id) {
+        try {
+            const result = await knex
+            .select("id")
+            .from("subjects")
+            .where({ professional_id: id })
+            .first() // pega apenas o primeiro registro
+
+            return result ? result: null
+        } catch (err) {
+            console.error("Erro ao buscar matéria do usuário:", err)
+            return null
+        }
+    }
+
+
 }
 
 module.exports = new Subject();

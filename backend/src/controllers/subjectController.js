@@ -4,7 +4,7 @@ const validator = require('validator');
 /**
  * Controlador para gerir as operações CRUD de disciplinas.
  */
-const subjectController = {
+class subjectController {
     /**
      * @summary Lista todas as disciplinas com informações adicionais.
      * @param {import("express").Request} req - O objeto da requisição Express.
@@ -43,7 +43,7 @@ const subjectController = {
                 message: 'Erro interno do servidor' 
             });
         }
-    },
+    }
 
     /**
      * @summary Cria uma nova disciplina após validar os dados de entrada.
@@ -110,7 +110,7 @@ const subjectController = {
                 message: 'Erro interno do servidor' 
             });
         }
-    },
+    }
 
     /**
      * @summary Obtém uma disciplina específica pelo seu ID.
@@ -152,7 +152,7 @@ const subjectController = {
                 message: 'Erro interno do servidor' 
             });
         }
-    },
+    }
 
     /**
      * @summary Atualiza os dados de uma disciplina após validar os dados.
@@ -236,7 +236,7 @@ const subjectController = {
                 message: 'Erro interno do servidor' 
             });
         }
-    },
+    }
 
     /**
      * @summary Apaga uma disciplina pelo seu ID.
@@ -276,7 +276,40 @@ const subjectController = {
             });
         }
     }
-};
 
-module.exports = subjectController;
+
+    async getAllMateriais(request, response) {
+        try {
+            const { id } = request.params
+            if (!validator.isInt(id + '', { min: 1 })) {
+                return res.status(422).json({ success: false, message: "ID inválido." });
+            }
+            const materials = await Subject.getMaterialsGlobal(id)
+            if(!materials) {
+                return response.status(404).json({ status: false, message: "Nenhum material encontrado." })
+            }
+            return response.status(200).json({ status: true, materials})
+        } catch(err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
+    async findSubjectByUser(request, response) {
+        try {
+            const { id } = request.params
+            if (!validator.isInt(id + '', { min: 1 })) {
+                return res.status(422).json({ success: false, message: "ID inválido." });
+            }
+            const subject_id = await Subject.subjectUser(id)
+            if(!subject_id) {
+                return response.status(404).json({ status: false, message: "Nenhum material encontrado." })
+            }
+            return response.status(200).json({ status: true, subject_id})
+        } catch(err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+}
+
+module.exports = new subjectController();
 

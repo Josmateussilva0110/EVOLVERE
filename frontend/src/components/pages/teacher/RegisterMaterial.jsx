@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useContext } from "react";
 import {
   ArrowLeft,
   UploadCloud,
@@ -8,126 +8,11 @@ import {
   File,
 } from "lucide-react";
 
-
-/* ---------------------- CustomSelect (estilizado, acessível) ---------------------- */
-
-/**
- * CustomSelect
- *
- * Componente de seleção estilizado e acessível, pensado para substituir um <select>
- * nativo quando é necessário maior controle visual e de interação.
- *
- * Comportamento / características:
- * - Suporta teclado (ArrowUp, ArrowDown, Enter, Escape).
- * - Fecha ao clicar fora do componente.
- * - Mantém destaque (highlight) visual do item navegável.
- * - Utiliza ARIA attributes: aria-haspopup, aria-expanded, role="listbox", role="option".
- * - Renderiza placeholder quando nenhum valor está selecionado.
- *
- * Props:
- * @param {string} value - Valor atualmente selecionado (corresponde a `option.value`).
- * @param {(value: string) => void} onChange - Callback chamado quando o usuário seleciona um item.
- * @param {Array<{value: string, label: string}>} options - Lista de opções disponíveis.
- * @param {string} [placeholder="Selecione o tipo"] - Texto exibido quando nada está selecionado.
- * @param {string} id - ID usado para ligação aria (aria-labelledby) e identificação do botão.
- *
- * Retorno:
- * @returns {JSX.Element} Elemento React que representa o select customizado.
- */
-function CustomSelect({ value, onChange, options = [], placeholder = "Selecione o tipo", id }) {
-  const [open, setOpen] = useState(false);
-  const [highlight, setHighlight] = useState(0);
-  const containerRef = useRef(null);
-
-  useEffect(() => {
-    function onDoc(e) {
-      if (!containerRef.current) return;
-      if (!containerRef.current.contains(e.target)) setOpen(false);
-    }
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, []);
-
-  useEffect(() => {
-    const idx = options.findIndex((o) => o.value === value);
-    if (idx >= 0) setHighlight(idx);
-  }, [value, options]);
-
-  const handleKeyDown = (e) => {
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setOpen(true);
-      setHighlight((h) => (options.length ? (h + 1) % options.length : 0));
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setOpen(true);
-      setHighlight((h) => (options.length ? (h - 1 + options.length) % options.length : 0));
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      const opt = options[highlight];
-      if (opt) {
-        onChange(opt.value);
-        setOpen(false);
-      }
-    } else if (e.key === "Escape") {
-      setOpen(false);
-    }
-  };
-
-  const selected = options.find((o) => o.value === value);
-
-  return (
-    <div ref={containerRef} className="relative w-full">
-      <button
-        id={id}
-        type="button"
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        onClick={() => setOpen((s) => !s)}
-        onKeyDown={handleKeyDown}
-        className="w-full text-left mt-2 bg-transparent border border-white/10 rounded-xl px-4 py-3 flex items-center justify-between text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
-      >
-        <div className="truncate">
-          {selected ? selected.label : <span className="text-slate-400">{placeholder}</span>}
-        </div>
-        <svg className={`w-4 h-4 transition-transform ${open ? "rotate-180" : ""}`} viewBox="0 0 20 20" fill="none" aria-hidden>
-          <path d="M6 8l4 4 4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
-
-      {open && (
-        <ul
-          role="listbox"
-          aria-labelledby={id}
-          tabIndex={-1}
-          className="absolute z-50 mt-2 w-full max-h-56 overflow-auto rounded-xl border border-white/10 bg-slate-800 shadow-lg py-1"
-        >
-          {options.map((opt, i) => {
-            const isSelected = value === opt.value;
-            const isHighlighted = i === highlight;
-            return (
-              <li
-                key={opt.value + i}
-                role="option"
-                aria-selected={isSelected}
-                onMouseEnter={() => setHighlight(i)}
-                onClick={() => {
-                  onChange(opt.value);
-                  setOpen(false);
-                }}
-                className={`cursor-pointer px-4 py-2 text-sm flex items-center gap-2 ${
-                  isHighlighted ? "bg-indigo-600/40 text-white" : "text-slate-200 hover:bg-white/5"
-                } ${isSelected ? "font-semibold" : ""}`}
-              >
-                {opt.label}
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </div>
-  );
-}
+import CustomSelect from "../../form/SelectTeacher";
+import requestData from "../../../utils/requestApi";
+import useFlashMessage from "../../../hooks/useFlashMessage"
+import { useNavigate, useParams } from "react-router-dom"
+import { Context } from "../../../context/UserContext"
 
 /* ---------------------- Componente Principal ---------------------- */
 
@@ -135,59 +20,89 @@ function CustomSelect({ value, onChange, options = [], placeholder = "Selecione 
  * CadastrarMaterial
  *
  * Componente principal para cadastro de materiais na biblioteca do curso.
- * Fornece inputs para título, descrição, tipo e upload de arquivo com suporte a:
+ * Fornece inputs para título, descrição, type e upload de archive com suporte a:
  * - Drag and drop
  * - Validação de tamanho (máx. 50MB)
- * - Visualização básica do arquivo selecionado
+ * - Visualização básica do archive selecionado
  * - Acessibilidade básica (botões, labels, comportamento de teclado para upload via Enter)
  *
  * Estado interno:
- * - titulo: string — título do material
- * - descricao: string — descrição opcional
- * - tipo: string — tipo do material (pdf, doc, ppt, video, outro)
- * - arquivo: File | null — arquivo selecionado
+ * - title: string — título do material
+ * - description: string — descrição opcional
+ * - type: string — type do material (pdf, doc, ppt, video, outro)
+ * - archive: File | null — archive selecionado
  * - dragActive: boolean — estado visual para drag-and-drop
  * - error: string — mensagem de erro a ser exibida ao usuário
  *
  * Principais handlers / utilitários (definidos localmente):
  * - handleVoltar: volta na navegação do browser (window.history.back()).
- * - validateFile(file): valida o arquivo (tamanho máximo) e atualiza `error` quando necessário.
+ * - validateFile(file): valida o archive (tamanho máximo) e atualiza `error` quando necessário.
  * - handleFileChange(e): lida com seleção via input[type=file].
- * - handleDrop(e): lida com drop de arquivo no contêiner.
+ * - handleDrop(e): lida com drop de archive no contêiner.
  * - handleDragOver(e), handleDragLeave(e): controlam estado visual de drag.
- * - clearFile(): remove o arquivo selecionado.
+ * - clearFile(): remove o archive selecionado.
  * - handleCadastrar(): valida campos obrigatórios e simula cadastro (console.log + alert).
  *
  * Observações de usabilidade:
- * - O campo 'Cadastrar' é habilitado apenas quando título, tipo e arquivo estão presentes.
+ * - O campo 'Cadastrar' é habilitado apenas quando título, type e archive estão presentes.
  * - O upload é simulado; substitua a lógica em `handleCadastrar` para integrar com back-end.
  *
  * Retorno:
  * @returns {JSX.Element} Formulário completo de cadastro de material.
  */
 function CadastrarMaterial() {
-  const [titulo, setTitulo] = useState("");
-  const [descricao, setDescricao] = useState("");
-  const [tipo, setTipo] = useState("");
-  const [arquivo, setArquivo] = useState(null);
+  const [title, setTitulo] = useState("");
+  const [description, setDescricao] = useState("");
+  const [type, setTipo] = useState("");
+  const [archive, setArquivo] = useState(null);
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState("");
   const inputRef = useRef(null);
+  const { setFlashMessage } = useFlashMessage()
+  const navigate = useNavigate()
+  const { user } = useContext(Context)
+  const { subject_id } = useParams()
+
+
 
   useEffect(() => {
-    if (arquivo) setError("");
-  }, [arquivo]);
+    if (archive) setError("");
+  }, [archive]);
+
+  async function submitForm(e) {
+    e.preventDefault()
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("type", type);
+    if (archive) {
+      formData.append("materials", archive); 
+    }
+    if(user) {
+      formData.append("created_by", user.id); 
+    }
+    formData.append("subject_id", subject_id); 
+    const response = await requestData('/material', 'POST', formData, true)
+    if(response.success) {
+      console.log('id da materia: ', response)
+      setFlashMessage(response.data.message, 'success')
+      navigate(`/teacher/discipline/list/${response.data.subject_id}`)
+    }
+    else {
+      setFlashMessage(response.message, 'error')
+    }
+  }
 
   const handleVoltar = () => window.history.back();
 
   /**
    * validateFile
    *
-   * Valida um File antes de aceitá-lo como `arquivo`:
+   * Valida um File antes de aceitá-lo como `archive`:
    * - Verifica existência
    * - Verifica tamanho (máx. 50MB)
    *
-   * @param {File} file - O arquivo a validar
+   * @param {File} file - O archive a validar
    * @returns {boolean} true se válido; false e atualiza `error` caso contrário
    */
   const validateFile = (file) => {
@@ -202,7 +117,7 @@ function CadastrarMaterial() {
   /**
    * handleFileChange
    *
-   * Handler para input[type=file]. Atualiza o estado `arquivo` quando o arquivo
+   * Handler para input[type=file]. Atualiza o estado `archive` quando o archive
    * selecionado passa na validação.
    *
    * @param {React.ChangeEvent<HTMLInputElement>} e - evento de mudança do input file
@@ -216,7 +131,7 @@ function CadastrarMaterial() {
    * handleDrop
    *
    * Handler para evento de drop. Previne comportamento padrão, desativa o estado
-   * visual de drag e tenta validar e atribuir o arquivo arrastado.
+   * visual de drag e tenta validar e atribuir o archive arrastado.
    *
    * @param {React.DragEvent<HTMLDivElement>} e - evento de drop
    */
@@ -254,29 +169,29 @@ function CadastrarMaterial() {
   /**
    * clearFile
    *
-   * Remove o arquivo atualmente selecionado e limpa mensagens de erro relacionadas a arquivo.
+   * Remove o archive atualmente selecionado e limpa mensagens de erro relacionadas a archive.
    */
   const clearFile = () => setArquivo(null);
 
   /**
    * handleCadastrar
    *
-   * Valida campos obrigatórios (título, tipo e arquivo). Em caso de sucesso,
+   * Valida campos obrigatórios (título, type e archive). Em caso de sucesso,
    * realiza uma simulação de cadastro (console.log e alert). Em produção,
    * aqui é o lugar para enviar os dados ao servidor (fetch / axios / FormData).
    */
   const handleCadastrar = () => {
-    if (!titulo.trim() || !tipo || !arquivo) {
+    if (!title.trim() || !type || !archive) {
       setError("Preencha todos os campos obrigatórios.");
       return;
     }
 
-    console.log("Cadastrar material:", { titulo, descricao, tipo, arquivo });
+    console.log("Cadastrar material:", { title, description, type, archive });
     alert("Material cadastrado (simulação).");
   };
 
-  const isValid = titulo.trim() && tipo && arquivo;
-  const fileExt = arquivo ? arquivo.name.split(".").pop().toLowerCase() : "";
+  const isValid = title.trim() && type && archive;
+  const fileExt = archive ? archive.name.split(".").pop().toLowerCase() : "";
 
   return (
     // AJUSTE 1: Padding lateral responsivo
@@ -300,12 +215,12 @@ function CadastrarMaterial() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Formulário */}
           <div className="lg:col-span-2 bg-white/6 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-lg">
-            <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+            <form className="space-y-5" onSubmit={submitForm}>
               {/* Título */}
               <div>
                 <label className="text-sm font-medium text-slate-200">Título <span className="text-rose-400">*</span></label>
                 <input
-                  value={titulo}
+                  value={title}
                   onChange={(e) => setTitulo(e.target.value)}
                   type="text"
                   placeholder="Digite o título do material"
@@ -317,7 +232,7 @@ function CadastrarMaterial() {
               <div>
                 <label className="text-sm font-medium text-slate-200">Descrição</label>
                 <textarea
-                  value={descricao}
+                  value={description}
                   onChange={(e) => setDescricao(e.target.value)}
                   rows={4}
                   placeholder="Breve descrição (opcional)"
@@ -330,22 +245,20 @@ function CadastrarMaterial() {
                 <div className="md:col-span-1">
                   <label className="text-sm font-medium text-slate-200">Tipo <span className="text-rose-400">*</span></label>
                   <CustomSelect
-                    id="tipo-material"
-                    value={tipo}
+                    id={type}
+                    value={type}
                     onChange={(v) => setTipo(v)}
                     options={[
                       { value: "", label: "Selecione o tipo" },
-                      { value: "pdf", label: "PDF" },
-                      { value: "doc", label: "DOC" },
-                      { value: "ppt", label: "PPT" },
-                      { value: "video", label: "Vídeo" },
-                      { value: "outro", label: "Outro" },
+                      { value: "1", label: "PDF" },
+                      { value: "2", label: "DOC" },
+                      { value: "3", label: "PPT" },
                     ]}
                   />
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="text-sm font-medium text-slate-200">Arquivo <span className="text-rose-400">*</span></label>
+                  <label className="text-sm font-medium text-slate-200">arquivo <span className="text-rose-400">*</span></label>
 
                   <div
                     onDrop={handleDrop}
@@ -365,11 +278,11 @@ function CadastrarMaterial() {
                       </div>
                       <div className="overflow-hidden"> {/* Adicionado overflow-hidden para garantir o truncate */}
                         <div className="text-sm text-slate-200">
-                          {arquivo ? (
+                          {archive ? (
                             <span className="flex items-center gap-2">
                               <File className="w-4 h-4 flex-shrink-0" />
-                              {/* AJUSTE 3: Largura máxima do nome do arquivo responsiva */}
-                              <strong className="truncate max-w-[12rem] sm:max-w-[18rem]">{arquivo.name}</strong>
+                              {/* AJUSTE 3: Largura máxima do nome do archive responsiva */}
+                              <strong className="truncate max-w-[12rem] sm:max-w-[18rem]">{archive.name}</strong>
                             </span>
                           ) : (
                             <span>Arraste ou clique para selecionar</span>
@@ -379,14 +292,14 @@ function CadastrarMaterial() {
                       </div>
                     </div>
 
-                    {arquivo ? (
+                    {archive ? (
                       <div className="flex items-center gap-3">
-                        <div className="text-xs text-slate-300">{Math.round(arquivo.size / 1024)} KB</div>
+                        <div className="text-xs text-slate-300">{Math.round(archive.size / 1024)} KB</div>
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); clearFile(); }}
                           className="p-2 rounded-md bg-white/6 hover:bg-white/10"
-                          aria-label="Remover arquivo"
+                          aria-label="Remover archive"
                         >
                           <X className="w-4 h-4 text-white" />
                         </button>
@@ -411,8 +324,7 @@ function CadastrarMaterial() {
 
               <div className="flex items-center gap-4 mt-2">
                 <button
-                  type="button"
-                  onClick={handleCadastrar}
+                  type="submit"
                   disabled={!isValid}
                   className={`flex-1 inline-flex items-center justify-center gap-3 rounded-xl py-3 font-semibold text-sm transition shadow ${
                     isValid
@@ -450,19 +362,19 @@ function CadastrarMaterial() {
               <li className="flex items-start gap-3">
                 <div className="pt-1"><File className="w-4 h-4 text-indigo-300" /></div>
                 <div>
-                  Aceitamos formatos comuns: <span className="font-medium">PDF, DOC, PPT, MP4</span>.
+                  Aceitamos formatos comuns: <span className="font-medium">PDF, DOC, PPT</span>.
                 </div>
               </li>
               <li className="flex items-start gap-3">
                 <div className="pt-1"><X className="w-4 h-4 text-indigo-300" /></div>
                 <div>
-                  Tamanho máximo recomendado: <span className="font-medium">50MB</span>.
+                  Tamanho máximo recomendado: <span className="font-medium">5MB</span>.
                 </div>
               </li>
             </ul>
 
             {/* Preview simples */}
-            {arquivo && (
+            {archive && (
               <div className="mt-5 bg-white/4 p-3 rounded-lg">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 overflow-hidden">
@@ -470,11 +382,11 @@ function CadastrarMaterial() {
                       <File className="w-5 h-5" />
                     </div>
                     <div className="text-sm overflow-hidden">
-                      <div className="font-medium text-white truncate max-w-[12rem]">{arquivo.name}</div>
+                      <div className="font-medium text-white truncate max-w-[12rem]">{archive.name}</div>
                       <div className="text-xs text-slate-300">{fileExt.toUpperCase()}</div>
                     </div>
                   </div>
-                  <div className="text-xs text-slate-300">{Math.round(arquivo.size / 1024)} KB</div>
+                  <div className="text-xs text-slate-300">{Math.round(archive.size / 1024)} KB</div>
                 </div>
               </div>
             )}
