@@ -34,7 +34,7 @@ import useFlashMessage from "../../../hooks/useFlashMessage"
 function DisciplineManagement() {
 
   const { user } = useContext(Context)
-  const [ data, setData ] = useState([])
+  const [data, setData] = useState([])
   const { setFlashMessage } = useFlashMessage()
   const navigate = useNavigate()
 
@@ -42,14 +42,14 @@ function DisciplineManagement() {
     async function fetchSubjects() {
       const response = await requestData(`/subjects/teacher/${user.id}`, 'GET', {}, true)
       console.log(response.data.subjects)
-      if(response.success) {
+      if (response.success) {
         setData(response.data.subjects)
       }
     }
     fetchSubjects()
   }, [user])
 
-  
+
   const handleVoltar = () => {
     window.history.back()
   }
@@ -99,43 +99,48 @@ function DisciplineManagement() {
         </div>
 
         {/* Grid de disciplinas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {data.map((discipline) => (
-            <div key={discipline.id} className="bg-gray-800/60 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700/50 p-6 hover:shadow-3xl hover:border-gray-600/50 transition-all duration-300">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-white mb-1">{discipline.name}</h3>
-                  <p className="text-sm text-gray-300">{discipline.course_name}</p>
-                </div>
-                <span
+        {data.length === 0 ? (
+          <div className="text-center text-gray-400 text-lg py-20">
+            Você ainda não tem disciplinas associadas
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {data.map((discipline) => (
+              <div key={discipline.id} className="bg-gray-800/60 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700/50 p-6 hover:shadow-3xl hover:border-gray-600/50 transition-all duration-300">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-white mb-1">{discipline.name}</h3>
+                    <p className="text-sm text-gray-300">{discipline.course_name}</p>
+                  </div>
+                  <span
                     className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium 
-                      ${discipline.status === 1 
-                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
+                ${discipline.status === 1
+                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                         : 'bg-gray-500/20 text-gray-400 border border-gray-500/30'}`}
                   >
                     {discipline.status === 1 ? 'Ativa' : 'Inativa'}
                   </span>
+                </div>
 
-              </div>
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center text-sm text-gray-300">
+                    <svg className="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                    </svg>
+                    Turma: {discipline.period}
+                  </div>
+                </div>
 
-              <div className="space-y-3 mb-6">
-                <div className="flex items-center text-sm text-gray-300">
-                  <svg className="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                  </svg>
-                  Turma: {discipline.period}
+                <div className="flex items-center justify-between">
+                  <div className="flex space-x-2"></div>
+                  <button onClick={() => navigate(`/teacher/discipline/list/${discipline.id}`)} className="px-4 py-2 bg-blue-600 text-white text-sm rounded-xl hover:bg-blue-500 transition-all duration-200 font-medium shadow-lg hover:shadow-blue-500/25">
+                    Acessar
+                  </button>
                 </div>
               </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex space-x-2"></div>
-                <button onClick={() => navigate(`/teacher/discipline/list/${discipline.id}`)} className="px-4 py-2 bg-blue-600 text-white text-sm rounded-xl hover:bg-blue-500 transition-all duration-200 font-medium shadow-lg hover:shadow-blue-500/25">
-                  Acessar
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Paginação moderna */}
         <div className="flex items-center justify-between mt-8">
