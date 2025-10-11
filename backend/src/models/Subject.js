@@ -311,6 +311,7 @@ class Subject {
                 select 
                     s.id as subject_id,
                     s.name as subject_name,
+
                     (
                         EXTRACT(YEAR FROM s.updated_at)::TEXT || '.' ||
                         CASE 
