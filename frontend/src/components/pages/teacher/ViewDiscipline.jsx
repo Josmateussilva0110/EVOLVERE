@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { ArrowLeft, MoreVertical, FileText, Users, X, Plus, Download, Calendar, BookOpen } from "lucide-react"
+import { ArrowLeft, MoreVertical, FileText, Users, X, Plus, Download, Calendar, BookOpen, Trash } from "lucide-react"
 import requestData from "../../../utils/requestApi"
 import formatDateRequests from "../../../utils/formatDateRequests"
+import useFlashMessage from "../../../hooks/useFlashMessage"
+
 
 /**
  * ViewSubjectDetails
@@ -34,10 +36,11 @@ function ViewSubjectDetails() {
   const navigate = useNavigate()
   const { id } = useParams()
   const [materials, setMaterials] = useState([])
+  const { setFlashMessage } = useFlashMessage()
 
   useEffect(() => {
     async function fetchSubject() {
-      const response = await requestData(`/subject/materiais/${id}`)
+      const response = await requestData(`/subject/materiais/${id}`, 'GET', {}, true)
       console.log(response)
       if (response.success) {
         setMaterials(response.data.materials)
@@ -45,6 +48,17 @@ function ViewSubjectDetails() {
     }
     fetchSubject()
   }, [id])
+
+  async function deleteMaterial(id) {
+      const response = await requestData(`/material/${id}`, 'DELETE', {}, true)
+      if (response.success) {
+        setMaterials(prev => prev.filter(d => d.id !== id))
+        setFlashMessage(response.data.message, 'success')
+      }
+      else {
+        setFlashMessage(response.message, 'error')
+      }
+  }
 
   /**
    * handleVoltar
@@ -155,7 +169,7 @@ function ViewSubjectDetails() {
                 {materials.length > 0 ? materials[0].subject_name : "Carregando..."}
               </h1>
               <p className="text-sm text-gray-400 mt-1">
-                Período 2025.1 • Sistemas de Informação
+                {materials.length > 0 ? materials[0].period : "Carregando..."} • {materials.length > 0 ? materials[0].course_name : "Carregando..."}
               </p>
             </div>
 
@@ -191,7 +205,7 @@ function ViewSubjectDetails() {
           <div className="px-6 py-4 bg-gray-700/30 border-b border-gray-700/50">
             <p className="text-center text-gray-300 text-sm leading-relaxed flex items-center justify-center gap-2">
               <BookOpen className="w-4 h-4 text-blue-400" />
-              Aqui você encontra os conteúdos globais desta disciplina: materiais para download, datas importantes e turmas vinculadas.
+              Aqui você encontra os conteúdos desta disciplina: materiais para download, datas importantes e turmas vinculadas.
             </p>
           </div>
         </div>
@@ -205,7 +219,7 @@ function ViewSubjectDetails() {
                 <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
                   <FileText className="w-5 h-5 text-blue-400" />
                 </div>
-                Materiais Globais
+                Materiais 
               </h2>
             </div>
 
@@ -234,15 +248,24 @@ function ViewSubjectDetails() {
                             </span>
 
                           </div>
-                          <h3 className="font-semibold text-white group-hover:text-blue-400 transition-colors flex items-center gap-2 mb-1">
+                          <a
+                            href={`${import.meta.env.VITE_BASE_URL}/${material.archive}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-semibold text-white group-hover:text-blue-400 transition-colors flex items-center gap-2 mb-1"
+                          >
                             <FileText className="w-4 h-4 text-gray-400" />
-                            {material.title || material.name}
-                          </h3>
+                            {material.title}
+                          </a>
                         </div>
+                        <button onClick={() => deleteMaterial(material.id)}
+                          href={`${import.meta.env.VITE_BASE_URL}/${material.archive}?download=true`}
+                          className="w-10 h-10 bg-red-600/80 hover:bg-red-500 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-110 shadow-lg border border-red-500/30"
+                        >
+                          <Trash className="w-4 h-4 text-white" />
+                        </button>
                         <a
-                          href={material.archive}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          href={`${import.meta.env.VITE_BASE_URL}/${material.archive}?download=true`}
                           className="w-10 h-10 bg-blue-600/80 hover:bg-blue-500 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-110 shadow-lg border border-blue-500/30"
                         >
                           <Download className="w-4 h-4 text-white" />

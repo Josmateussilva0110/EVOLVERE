@@ -311,6 +311,15 @@ class Subject {
                 select 
                     s.id as subject_id,
                     s.name as subject_name,
+
+                    (
+                        EXTRACT(YEAR FROM s.updated_at)::TEXT || '.' ||
+                        CASE 
+                            WHEN EXTRACT(MONTH FROM s.updated_at) <= 6 THEN '1'
+                            ELSE '2'
+                        END
+                    ) AS period,
+                    cv.name as course_name,
                     case 
                         when m.type = 1 then 'PDF'
                         when m.type = 2 then 'DOC'
@@ -321,7 +330,10 @@ class Subject {
                 from subjects s
                 left join materials m
                     on m.subject_id  = s.id
+                inner join course_valid cv
+                    on cv.id = s.course_valid_id
                 where s.id = ?
+                order by m.updated_at desc
             `, [subject_id])
             const rows = result.rows
             return rows.length > 0 ? rows : undefined

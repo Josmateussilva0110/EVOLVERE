@@ -5,6 +5,7 @@ const pgSession = require("connect-pg-simple")(session)
 const { Pool } = require("pg")
 const path = require("path")
 require('dotenv').config({ path: '../.env' })
+const downloadRoute = require("../src/routes/downloadRoute")
 
 const router = require("./routes/routes")
 
@@ -72,6 +73,8 @@ app.use(
   })
 )
 
+
+app.use("/", downloadRoute)
 // Rotas da API
 app.use("/", router)
 
