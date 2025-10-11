@@ -15,6 +15,8 @@ router.post("/material", (request, response, next) => {
     })
 }, materialController.register)
 
+router.delete("/material/:id", materialController.delete)
+
 
 
 module.exports = router
