@@ -240,9 +240,7 @@ function ViewSubjectDetails() {
                           </h3>
                         </div>
                         <a
-                          href={material.archive}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          href={`${import.meta.env.VITE_BASE_URL}/${material.archive}?download=true`}
                           className="w-10 h-10 bg-blue-600/80 hover:bg-blue-500 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-110 shadow-lg border border-blue-500/30"
                         >
                           <Download className="w-4 h-4 text-white" />
