@@ -128,23 +128,21 @@ class subjectController {
     async getById(req, res) {
         try {
             const { id } = req.params;
-            if (!validator.isInt(String(id), { min: 1 })) {
-                return res.status(422).json({ success: false, message: "ID inválido." });
-            }
+            // ... sua validação de ID ...
 
-            const subject = await Subject.getById(parseInt(id));
-            
-            if (!subject) {
-                return res.status(404).json({ 
-                    success: false, 
-                    message: 'Disciplina não encontrada' 
-                });
+            // Use o novo método que busca com os dados do curso
+            const subjectDetails = await Subject.findByIdWithCourse(Number(id));
+
+            if (!subjectDetails) {
+                return res.status(404).json({ status: false, message: 'Disciplina não encontrada.' });
             }
             
-            res.status(200).json({ 
-                status: true, 
-                subject
+            // Agora a resposta inclui os dados do curso
+            res.status(200).json({
+                status: true,
+                data: subjectDetails 
             });
+
         } catch (error) {
             console.error('Erro ao buscar disciplina:', error);
             res.status(500).json({ 
@@ -275,6 +273,7 @@ class subjectController {
                 message: 'Erro interno do servidor' 
             });
         }
+<<<<<<< HEAD
     }
 
 
@@ -395,3 +394,52 @@ class subjectController {
 
 module.exports = new subjectController();
 
+=======
+    },
+        /**
+     * @summary Obtém todos os dados de uma disciplina para a tela de gerenciamento do coordenador.
+     * @description Retorna os detalhes da disciplina, a lista de materiais globais e a lista de turmas com a contagem de alunos.
+     * @param {import("express").Request} req - O objeto da requisição Express.
+     * @param {import("express").Response} res - O objeto da resposta Express.
+     * @returns {Promise<void>}
+     */
+    async getScreenDetails(req, res) {
+        try {
+            const { id } = req.params;
+            // Assumindo que um middleware de autenticação anexa o usuário em req.user
+            const coordinator = req.user; 
+
+            if (!coordinator) {
+                return res.status(401).json({ success: false, message: "Acesso não autorizado. Faça login novamente." });
+            }
+
+            if (!validator.isInt(String(id), { min: 1 })) {
+                return res.status(422).json({ success: false, message: "ID da disciplina é inválido." });
+            }
+
+            // --- 1. Checagem de Permissão ---
+            const hasPermission = await Subject.isCoordinatorOfSubject(Number(id), coordinator.id);
+            if (!hasPermission) {
+                return res.status(403).json({ success: false, message: "Você não tem permissão para acessar os detalhes desta disciplina." });
+            }
+
+            // --- 2. Busca dos Dados ---
+            const details = await Subject.findScreenDetailsById(Number(id));
+
+            if (!details) {
+                return res.status(404).json({ success: false, message: 'Disciplina não encontrada.' });
+            }
+            
+            res.status(200).json({ success: true, data: details });
+
+        } catch (error) {
+            console.error('Erro ao buscar detalhes da disciplina para a tela:', error);
+            res.status(500).json({ success: false, message: 'Erro interno do servidor' });
+        }
+    },
+
+    
+};
+
+module.exports = subjectController;
+>>>>>>> b2415bd1aabded10d1c6c0a52a30697f5237cbe3

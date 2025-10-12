@@ -12,7 +12,11 @@ class Class {
     async create(data) {
         try {
             // CORREÇÃO: Usando o nome da tabela 'Class'
+<<<<<<< HEAD
             const [newClass] = await knex('classes')
+=======
+            const [newClass] = await knex('Class')
+>>>>>>> b2415bd1aabded10d1c6c0a52a30697f5237cbe3
                 .insert(data)
                 .returning('*');
             return newClass;
@@ -28,6 +32,7 @@ class Class {
     async findBySubjectId(subjectId) {
         try {
             // CORREÇÃO: Nomes da tabela e colunas ajustados
+<<<<<<< HEAD
             const classes = await knex('classes')
                 .select(
                     'classes.id',
@@ -40,6 +45,20 @@ class Class {
                 .where('classes.subject_id', subjectId)
                 .groupBy('classes.id')
                 .orderBy('classes.name', 'asc');
+=======
+            const classes = await knex('Class')
+                .select(
+                    'Class.id',
+                    'Class.name',
+                    'Class.period',
+                    'Class.capacity',
+                    knex.raw('count("Class_alunos".aluno_id) as student_count')
+                )
+                .leftJoin('Class_alunos', 'Class.id', '=', 'Class_alunos.Class_id')
+                .where('Class.subject_id', subjectId)
+                .groupBy('Class.id')
+                .orderBy('Class.name', 'asc');
+>>>>>>> b2415bd1aabded10d1c6c0a52a30697f5237cbe3
 
             return classes;
         } catch (err) {
@@ -56,7 +75,11 @@ class Class {
     async getDetails(id) {
         try {
             // CORREÇÃO: Nome da tabela
+<<<<<<< HEAD
             const classDetails = await knex('classes')
+=======
+            const classDetails = await knex('Class')
+>>>>>>> b2415bd1aabded10d1c6c0a52a30697f5237cbe3
                 .where({ id })
                 .first();
 
@@ -67,8 +90,13 @@ class Class {
             // CORREÇÃO: Nomes da tabela e colunas
             const alunos = await knex('users')
                 .select('users.id', 'users.username')
+<<<<<<< HEAD
                 .join('classes_alunos', 'users.id', '=', 'classes_alunos.aluno_id')
                 .where('classes_alunos.classes_id', id);
+=======
+                .join('Class_alunos', 'users.id', '=', 'Class_alunos.aluno_id')
+                .where('Class_alunos.Class_id', id);
+>>>>>>> b2415bd1aabded10d1c6c0a52a30697f5237cbe3
 
             classDetails.alunos = alunos;
             
@@ -88,7 +116,11 @@ class Class {
     async removeStudent(turmaId, alunoId) {
         try {
             // CORREÇÃO: Nomes da tabela e colunas ajustados para corresponder às migrations e aos parâmetros.
+<<<<<<< HEAD
             const deleted = await knex('classes_alunos')
+=======
+            const deleted = await knex('Class_alunos')
+>>>>>>> b2415bd1aabded10d1c6c0a52a30697f5237cbe3
                 .where({
                     Class_id: turmaId,
                     aluno_id: alunoId

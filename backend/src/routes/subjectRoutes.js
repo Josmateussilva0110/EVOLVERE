@@ -109,4 +109,13 @@ router.get("/subject/materiais/:id", subjectController.getAllMateriais)
 
 router.get('/subject/user/:id', subjectController.findSubjectByUser)
 
+
+
+/**
+ * @route GET /:id/details
+ * @summary Busca todos os detalhes de uma disciplina para a tela de gerenciamento.
+ * @param {number} id.path.required - ID da disciplina.
+ */
+router.get('/:id/details', subjectController.getScreenDetails)
+
 module.exports = router
