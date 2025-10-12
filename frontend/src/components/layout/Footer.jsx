@@ -22,12 +22,12 @@ function Footer() {
   const path = location.pathname
 
  
-  const bgColor =
-    path.startsWith('/') ? 'bg-[#26267A]' :
-    path.startsWith("/teacher") ? 'bg-[#192333]' :
-    path.startsWith("/student") ? "bg-green-900" :
-    path.startsWith("/coordinator") ? "bg-[#060060]" :
-    "bg-transparent"
+    const bgColor =
+      path.startsWith('/teacher') ? 'bg-[#1A2434]' :
+      path.startsWith('/student') ? 'bg-green-900' :
+      path.startsWith('/coordinator') ? 'bg-gray-900' :
+      path === '/' ? 'bg-[#26267B]' :
+      'bg-transparent'
 
   return (
     <footer className={`${bgColor} text-gray-300 py-4 bottom-0 w-full transition-colors duration-500`}>

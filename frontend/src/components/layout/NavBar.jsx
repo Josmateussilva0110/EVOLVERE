@@ -63,11 +63,11 @@ function Navbar() {
 
   const path = location.pathname
   const bgColor =
-    path.startsWith('/') ? 'bg-[#060060]' :
-      path.startsWith('/teacher') ? 'bg-[#192333]' :
-        path.startsWith('/student') ? 'bg-green-900' :
-          path.startsWith('/coordinator') ? 'bg-gray-900' :
-            'bg-transparent'
+    path.startsWith('/teacher') ? 'bg-[#1A2434]' :
+    path.startsWith('/student') ? 'bg-green-900' :
+    path.startsWith('/coordinator') ? 'bg-gray-900' :
+    path === '/' ? 'bg-[#15165E]' :
+    'bg-transparent'
 
   return (
     <nav className={`w-full top-0 left-0 z-50 transition-colors duration-500 ${bgColor}`}>
@@ -123,7 +123,7 @@ function Navbar() {
                 {/* 🔹 Menu dropdown */}
                 {dropdownOpen && (
                   <div
-                    className="absolute right-0 top-[72px] w-44 bg-white text-gray-800 rounded-xl shadow-lg py-2 z-50
+                    className="absolute right-0 top-[72px] w-60 bg-white text-gray-800 rounded-xl shadow-lg py-2 z-50
       before:content-[''] before:absolute before:-top-2 before:right-4 before:border-8 before:border-transparent before:border-b-white"
                   >
                     <button
@@ -132,6 +132,35 @@ function Navbar() {
                     >
                       Perfil
                     </button>
+                    
+                    {(requestUser?.role === 'Coordenador' || requestUser?.registration === 'admin') && (
+                      <button
+                        onClick={() => navigate("/coordinator")}
+                        className="block w-full text-left px-4 py-3 hover:bg-gray-100 transition-colors duration-200"
+                      >
+                        área do Coordenador
+                      </button>
+
+                    )}
+
+                    {(requestUser?.role === 'Professor' || requestUser?.registration === 'admin') ? (
+                      <button
+                        onClick={() => navigate("/teacher/discipline/manage")}
+                        className="block w-full text-left px-4 py-3 hover:bg-gray-100 transition-colors duration-200"
+                      >
+                        área do Professor
+                      </button>
+
+                    ) : (
+                      <button
+                        onClick={() => navigate("/student/home")}
+                        className="block w-full text-left px-4 py-3 hover:bg-gray-100 transition-colors duration-200"
+                      >
+                        área do Aluno
+                      </button>
+                    )}
+
+
                     <button
                       onClick={logout}
                       className="block w-full text-left px-4 py-3 hover:bg-gray-100 transition-colors duration-200"
