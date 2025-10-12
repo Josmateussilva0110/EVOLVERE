@@ -1,7 +1,7 @@
-import { Link } from 'react-router-dom'
-import { useContext, useState, useEffect} from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useContext, useState, useEffect } from 'react'
 import { Context } from '../../context/UserContext'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, User } from 'lucide-react'
 import Image from '../form/Image'
 import requestData from '../../utils/requestApi'
 
@@ -45,73 +45,109 @@ function Navbar() {
   const { authenticated, logout, user } = useContext(Context)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [requestUser, setRequestUser] = useState(null)
+  const location = useLocation()
+  const navigate = useNavigate()
 
-
-  /**
-   * Efeito colateral responsável por buscar os dados do usuário autenticado.
-   *
-   * - Executa sempre que o valor de `user` mudar.
-   * - Se existir um usuário válido (`user`), faz uma requisição GET para
-   *   a rota `/user/:id` usando o utilitário `requestData`.
-   * - Caso a resposta seja bem-sucedida (`response.success === true`),
-   *   armazena os dados do usuário em `requestUser`.
-   * - Caso contrário, limpa o estado (`setRequestUser(null)`).
-   *
-   * @function useEffect
-   * @dependency [user] → dispara sempre que o objeto `user` mudar.
-   */
   useEffect(() => {
-    if(user) {
+    if (user) {
       async function fetchUser() {
         const response = await requestData(`/user/${user.id}`, "GET", {}, true)
-        if (response.success) {
-          setRequestUser(response.data.user)
-        } else {
-          setRequestUser(null)
-        }
+        console.log(response)
+        if (response.success) setRequestUser(response.data.user)
+        else setRequestUser(null)
       }
       fetchUser()
-      }
+    }
   }, [user])
 
+
+  const path = location.pathname
+  const bgColor =
+    path.startsWith('/') ? 'bg-[#060060]' :
+      path.startsWith('/teacher') ? 'bg-[#192333]' :
+        path.startsWith('/student') ? 'bg-green-900' :
+          path.startsWith('/coordinator') ? 'bg-gray-900' :
+            'bg-transparent'
+
   return (
-    <nav className="bg-[#060060] shadow-md px-6 py-4 flex justify-between items-center">
-    <Link to="/">
-      <Image src="/logo.png" alt="logo" size={70} />
-    </Link>
+    <nav className={`w-full top-0 left-0 z-50 transition-colors duration-500 ${bgColor}`}>
+      <div className="container mx-auto px-6 py-4 flex justify-between items-center">
 
-      <ul className="flex items-center space-x-6">
-        {!authenticated ? (
-          <>
-            <li><Link to="/register" className="text-white hover:text-yellow-300">Registrar</Link></li>
-            <li><Link to="/login" className="text-white hover:text-yellow-300">Login</Link></li>
-          </>
-        ) : (
-          <li className="relative">
-            <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-2 text-yellow-400 hover:text-yellow-600 font-medium"
-            >
-              {requestUser?.photo ? (
-                <Image src={`${import.meta.env.VITE_API_URL}images/users/${requestUser.photo}`} alt={requestUser?.username} size={55}/>
-              ) : (
-                <span>Olá, {requestUser?.username}</span>
-              )}
-              <ChevronDown className={`w-4 h-4 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
-            </button>
+        {/* ---------- LOGO ---------- */}
+        <div className="flex items-center space-x-3">
+          <Image src="/logo.png" alt="Evolvere Logo" size={48} />
+          <h1 className="text-3xl font-bold text-white">Evolvere</h1>
+        </div>
 
-            {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                <Link to="/profile" className="block px-4 py-2 text-gray-700 hover:bg-red-100" onClick={() => setDropdownOpen(false)}>Perfil</Link>
-                <button onClick={logout} className="w-full text-left px-4 py-2 text-gray-700 hover:bg-red-100">Sair</button>
+        {/* ---------- SEÇÃO DIREITA ---------- */}
+        <div className="flex items-center space-x-4 relative">
+          {!authenticated ? (
+            <>
+              {/* 🔹 Se não estiver logado, mostra os botões */}
+              <button
+                onClick={() => navigate("/login")}
+                className="px-6 py-3 text-white font-semibold rounded-xl hover:bg-white/10 transition-all duration-300"
+              >
+                Entrar
+              </button>
+              <button
+                onClick={() => navigate("/register")}
+                className="px-6 py-3 bg-yellow-400 text-[#060060] font-bold rounded-xl hover:bg-yellow-500 transition-all duration-300"
+              >
+                Começar
+              </button>
+            </>
+          ) : (
+            <>
+
+              {/* 🔹 Se estiver logado, mostra a foto de perfil ou ícone padrão */}
+              <div className="relative flex items-center gap-2 cursor-pointer">
+                <div
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center gap-2"
+                >
+                  {requestUser?.photo ? (
+                    <Image
+                      src={`${import.meta.env.VITE_BASE_URL}/${requestUser.photo}`}
+                      alt={requestUser.username || "Foto do usuário"}
+                      size={58}
+                    />
+                  ) : (
+                    <div className="w-10 h-10 flex items-center justify-center bg-white/10 rounded-full">
+                      <User className="text-white" size={40} />
+                    </div>
+                  )}
+                  <ChevronDown className="text-white" size={20} />
+                </div>
+
+                {/* 🔹 Menu dropdown */}
+                {dropdownOpen && (
+                  <div
+                    className="absolute right-0 top-[72px] w-44 bg-white text-gray-800 rounded-xl shadow-lg py-2 z-50
+      before:content-[''] before:absolute before:-top-2 before:right-4 before:border-8 before:border-transparent before:border-b-white"
+                  >
+                    <button
+                      onClick={() => navigate("/profile")}
+                      className="block w-full text-left px-4 py-3 hover:bg-gray-100 transition-colors duration-200"
+                    >
+                      Perfil
+                    </button>
+                    <button
+                      onClick={logout}
+                      className="block w-full text-left px-4 py-3 hover:bg-gray-100 transition-colors duration-200"
+                    >
+                      Sair
+                    </button>
+                  </div>
+                )}
               </div>
-            )}
-          </li>
-        )}
-      </ul>
+
+            </>
+          )}
+        </div>
+      </div>
     </nav>
   )
 }
-
 
 export default Navbar

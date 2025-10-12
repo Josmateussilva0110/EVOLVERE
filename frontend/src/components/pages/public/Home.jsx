@@ -43,32 +43,7 @@ function Home() {
         <Star className="w-5 h-5 text-yellow-400/40" />
       </div>
 
-      {/* Header */}
-      <div className="container mx-auto px-6 py-8 relative z-10">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <div className="relative">
-              <Image src="/logo.png" alt="Evolvere Logo" size={48} />
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-ping"></div>
-            </div>
-            <h1 className="text-3xl font-bold text-white">Evolvere</h1>
-          </div>
-          <div className="flex space-x-4">
-            <button 
-              onClick={() => navigate("/login")}
-              className="px-6 py-3 text-white font-semibold rounded-xl hover:bg-white/10 transition-all duration-300 backdrop-blur-sm"
-            >
-              Entrar
-            </button>
-            <button 
-              onClick={() => navigate("/register")}
-              className="px-6 py-3 bg-yellow-400 text-[#060060] font-bold rounded-xl hover:bg-yellow-500 transition-all duration-300 shadow-lg hover:shadow-yellow-400/25"
-            >
-              Começar
-            </button>
-          </div>
-        </div>
-      </div>
+
 
       {/* Hero Section */}
       <div className="container mx-auto px-6 py-16 relative z-10">
@@ -222,13 +197,6 @@ function Home() {
           >
             <span className="group-hover:translate-x-1 transition-transform inline-block">Criar Conta Grátis</span>
           </button>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <div className="container mx-auto px-6 py-12 border-t border-white/10">
-        <div className="text-center text-gray-400">
-          <p>&copy; 2025 Evolvere. Todos os direitos reservados.</p>
         </div>
       </div>
     </div>
