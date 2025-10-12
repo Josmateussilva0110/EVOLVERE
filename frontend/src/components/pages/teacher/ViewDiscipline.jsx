@@ -1,154 +1,134 @@
-import { useState, useEffect } from "react"
-import { useNavigate, useParams } from "react-router-dom"
-import { ArrowLeft, MoreVertical, FileText, Users, X, Plus, Download, Calendar, BookOpen, Trash } from "lucide-react"
-import requestData from "../../../utils/requestApi"
-import formatDateRequests from "../../../utils/formatDateRequests"
-import useFlashMessage from "../../../hooks/useFlashMessage"
+import React, { useState, useEffect, useContext } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, MoreVertical, FileText, Users, X, Plus, Download, Calendar, BookOpen, Trash } from "lucide-react";
+import requestData from "../../../utils/requestApi";
+import formatDateRequests from "../../../utils/formatDateRequests";
+import useFlashMessage from "../../../hooks/useFlashMessage";
+import { Context } from "../../../context/UserContext";
 
-
-/**
- * ViewSubjectDetails
- *
- * Tela de detalhes da disciplina que reúne:
- * - Cabeçalho com título da disciplina e menu de ações.
- * - Banner informativo.
- * - Cards com Materiais Globais e Turmas vinculadas.
- * - Popup para criação rápida de uma nova turma.
- *
- * Comportamento:
- * - Gerencia estados locais para abertura de menu, exibição do pop-up de adicionar turma,
- *   campos do formulário (nome da turma, capacidade) e ações de confirmar/cancelar.
- * - Dados de `turmas` e `materiais` são exemplos estáticos; em produção, devem vir de uma API/props.
- *
- * Observações de integração:
- * - `handleConfirmar` atualmente apenas loga no console e reseta os campos; substitua pela lógica
- *   de persistência (fetch/axios) para enviar ao backend.
- * - O componente usa estilos utilitários (Tailwind) e ícones do lucide-react.
- *
- * Retorno:
- * @returns {JSX.Element} Layout completo da página de detalhes da disciplina.
- */
 function ViewSubjectDetails() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [showAddTurmaPopup, setShowAddTurmaPopup] = useState(false)
-  const [nomeTurma, setNomeTurma] = useState("")
-  const [capacidade, setCapacidade] = useState("")
-  const navigate = useNavigate()
-  const { id } = useParams()
-  const [materials, setMaterials] = useState([])
-  const { setFlashMessage } = useFlashMessage()
+  // --- ESTADO UNIFICADO PARA OS DADOS DA DISCIPLINA ---
+  const [details, setDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
+  // Estados para controle da UI
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showAddTurmaPopup, setShowAddTurmaPopup] = useState(false);
+  const [nomeTurma, setNomeTurma] = useState("");
+  const [capacidade, setCapacidade] = useState("");
+  
+  // Hooks
+  const navigate = useNavigate();
+  const { id: subjectId } = useParams();
+  const { setFlashMessage } = useFlashMessage();
+  const { user } = useContext(Context);
+
+  // --- EFEITO PARA BUSCAR TODOS OS DADOS DA DISCIPLINA ---
   useEffect(() => {
-    async function fetchSubject() {
-      const response = await requestData(`/subject/materiais/${id}`, 'GET', {}, true)
-      console.log(response)
-      if (response.success) {
-        setMaterials(response.data.materials)
-      }
+    if (subjectId && user) {
+      setLoading(true);
+      requestData(`/subjects/teacher/${subjectId}/details`, 'GET', {}, true)
+        .then(response => {
+          if (response.success) {
+            console.log("DADOS DOS MATERIAIS RECEBIDOS:", response.data.data.materials);
+            setDetails(response.data.data);
+          } else {
+            setError(response.message || "Não foi possível carregar os dados.");
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          setError("Ocorreu um erro na comunicação com o servidor.");
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
     }
-    fetchSubject()
-  }, [id])
+  }, [subjectId, user]);
 
-  async function deleteMaterial(id) {
-      const response = await requestData(`/material/${id}`, 'DELETE', {}, true)
-      if (response.success) {
-        setMaterials(prev => prev.filter(d => d.id !== id))
-        setFlashMessage(response.data.message, 'success')
-      }
-      else {
-        setFlashMessage(response.message, 'error')
-      }
+  // --- FUNÇÕES DE MANIPULAÇÃO DE DADOS ---
+
+  // Função para deletar material
+  async function deleteMaterial(materialId) {
+    const response = await requestData(`/materials/${materialId}`, 'DELETE', {}, true);
+    if (response.success) {
+      setDetails(prevDetails => ({
+        ...prevDetails,
+        materials: prevDetails.materials.filter(m => m.id !== materialId)
+      }));
+      setFlashMessage(response.message || 'Material deletado com sucesso.', 'success');
+    } else {
+      setFlashMessage(response.message, 'error');
+    }
   }
 
-  /**
-   * handleVoltar
-   *
-   * Volta à página anterior usando o histórico do browser.
-   * Uso: chamado pelo botão de voltar no cabeçalho.
-   */
-  const handleVoltar = () => window.history.back()
+  // Função para criar turma
+  const handleConfirmar = async () => {
+    if (!nomeTurma || !capacidade) {
+      setFlashMessage("Preencha todos os campos.", "error");
+      return;
+    }
+    const body = {
+      name: nomeTurma,
+      capacity: parseInt(capacidade),
+      period: details.period.split(' • ')[0].replace('Período ', ''),
+      subject_id: parseInt(subjectId),
+      course_id: details.courseId,
+    };
+    const response = await requestData('/classes', 'POST', body, true);
+    if (response.status) {
+      setFlashMessage(response.message, 'success');
+      setDetails(prevDetails => ({
+        ...prevDetails,
+        classes: [...prevDetails.classes, response.data]
+      }));
+      handleCancelar();
+    } else {
+      setFlashMessage(response.message || 'Erro ao criar turma.', 'error');
+    }
+  };
 
-  /**
-   * toggleMenu
-   *
-   * Alterna a visibilidade do menu de ações (mais opções) no cabeçalho.
-   */
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
-
-  /**
-   * handleAddTurma
-   *
-   * Abre o pop-up de adicionar turma e fecha o menu (caso esteja aberto).
-   * Uso: item do menu "Adicionar turma".
-   */
+  // Funções de UI
+  const handleVoltar = () => window.history.back();
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const handleAddTurma = () => {
-    setShowAddTurmaPopup(true)
-    setIsMenuOpen(false)
-  }
-
-  /**
-   * handleConfirmar
-   *
-   * Confirmar criação de turma.
-   * Atualmente:
-   * - Loga o objeto { nome, capacidade } no console.
-   * - Fecha o pop-up e limpa os campos.
-   *
-   * Em produção: substitua por chamada à API que cria a turma e trate erros.
-   */
-  const handleConfirmar = () => {
-    console.log("Nova turma:", { nome: nomeTurma, capacidade })
-    setShowAddTurmaPopup(false)
-    setNomeTurma("")
-    setCapacidade("")
-  }
-
-  /**
-   * handleCancelar
-   *
-   * Fecha o pop-up de adicionar turma e reseta os campos do formulário.
-   */
+    setShowAddTurmaPopup(true);
+    setIsMenuOpen(false);
+  };
   const handleCancelar = () => {
-    setShowAddTurmaPopup(false)
-    setNomeTurma("")
-    setCapacidade("")
-  }
+    setShowAddTurmaPopup(false);
+    setNomeTurma("");
+    setCapacidade("");
+  };
 
-  /**
-   * Dados de exemplo: turmas
-   *
-   * Estrutura de cada item:
-   * - nome: string — identificador curto da turma (ex.: "A")
-   * - cor: string — classes utilitárias para gradiente de fundo (Tailwind)
-   * - alunos: number — quantidade de alunos matriculados
-   *
-   * Em produção: substituir por dados carregados do backend.
-   */
-  const turmas = [
-    { nome: "Turma de Algoritmos Avançados", cor: "from-gray-700 to-gray-600", alunos: 42 },
-    { nome: "B", cor: "from-gray-700 to-gray-600", alunos: 38 },
-    { nome: "C", cor: "from-gray-700 to-gray-600", alunos: 45 },
-  ]
-
+  // Função para determinar cor baseada no tipo de arquivo
   function getColorByType(type) {
+    if (!type) return "bg-gray-500/20 text-gray-400 border-gray-500/30";
     switch (type.toLowerCase()) {
-      case "pdf":
-        return "bg-red-500/20 text-red-400 border-red-500/30"
-      case "doc":
-      case "docx":
-        return "bg-blue-500/20 text-blue-400 border-blue-500/30"
+      case "pdf": return "bg-red-500/20 text-red-400 border-red-500/30";
+      case "doc": 
+      case "docx": return "bg-blue-500/20 text-blue-400 border-blue-500/30";
       case "ppt":
-      case "pptx":
-        return "bg-orange-500/20 text-orange-400 border-orange-500/30"
+      case "pptx": return "bg-orange-500/20 text-orange-400 border-orange-500/30";
       case "xlsx":
-      case "xls":
-        return "bg-green-500/20 text-green-400 border-green-500/30"
-      default:
-        return "bg-gray-500/20 text-gray-400 border-gray-500/30"
+      case "xls": return "bg-green-500/20 text-green-400 border-green-500/30";
+      default: return "bg-gray-500/20 text-gray-400 border-gray-500/30";
     }
   }
 
-
+  // --- RENDERIZAÇÃO CONDICIONAL ---
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">Carregando detalhes...</div>;
+  }
+  if (error) {
+    return <div className="flex items-center justify-center min-h-screen bg-gray-900 text-red-400">Erro: {error}</div>;
+  }
+  if (!details) {
+    return <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">Não foi possível encontrar a disciplina.</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 pt-4 pb-10 px-4">
@@ -157,41 +137,23 @@ function ViewSubjectDetails() {
         {/* Header */}
         <div className="bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700/50 overflow-hidden">
           <div className="flex justify-between items-center px-6 py-6 bg-gray-800/90 border-b border-gray-700/50">
-            <button
-              onClick={handleVoltar}
-              className="p-3 rounded-xl text-gray-300 hover:text-white hover:bg-gray-700/50 transition-all duration-200 border border-gray-600/30 hover:border-gray-500/50"
-            >
+            <button onClick={handleVoltar} className="p-3 rounded-xl text-gray-300 hover:text-white hover:bg-gray-700/50 transition-all duration-200 border border-gray-600/30 hover:border-gray-500/50">
               <ArrowLeft className="w-6 h-6" />
             </button>
-
             <div className="text-center flex-1">
-              <h1 className="text-2xl md:text-3xl font-bold text-white drop-shadow-sm">
-                {materials.length > 0 ? materials[0].subject_name : "Carregando..."}
-              </h1>
-              <p className="text-sm text-gray-400 mt-1">
-                {materials.length > 0 ? materials[0].period : "Carregando..."} • {materials.length > 0 ? materials[0].course_name : "Carregando..."}
-              </p>
+              <h1 className="text-2xl md:text-3xl font-bold text-white drop-shadow-sm">{details.name}</h1>
+              <p className="text-sm text-gray-400 mt-1">{details.period}</p>
             </div>
-
-            {/* Menu de ações */}
             <div className="relative">
-              <button
-                onClick={toggleMenu}
-                className="p-3 rounded-xl text-gray-300 hover:text-white hover:bg-gray-700/50 transition-all duration-200 border border-gray-600/30 hover:border-gray-500/50"
-              >
+              <button onClick={toggleMenu} className="p-3 rounded-xl text-gray-300 hover:text-white hover:bg-gray-700/50 transition-all duration-200 border border-gray-600/30 hover:border-gray-500/50">
                 <MoreVertical className="w-6 h-6" />
               </button>
               {isMenuOpen && (
                 <div className="absolute right-0 mt-3 w-72 bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-700/50 overflow-hidden z-20">
                   <ul className="py-2">
                     <li>
-                      <button
-                        className="w-full text-left px-5 py-3 hover:bg-gray-700/50 flex items-center gap-3 text-gray-300 hover:text-white transition-all duration-200"
-                        onClick={() => navigate("/teacher/simulated/list")}
-                      >
-                        <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                          <span className="text-sm">📝</span>
-                        </div>
+                      <button className="w-full text-left px-5 py-3 hover:bg-gray-700/50 flex items-center gap-3 text-gray-300 hover:text-white transition-all duration-200" onClick={() => navigate("/teacher/simulated/list")}>
+                        <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center"><span className="text-sm">📝</span></div>
                         <span className="font-medium">Corrigir simulados</span>
                       </button>
                     </li>
@@ -200,133 +162,112 @@ function ViewSubjectDetails() {
               )}
             </div>
           </div>
-
-          {/* Banner */}
           <div className="px-6 py-4 bg-gray-700/30 border-b border-gray-700/50">
             <p className="text-center text-gray-300 text-sm leading-relaxed flex items-center justify-center gap-2">
               <BookOpen className="w-4 h-4 text-blue-400" />
-              Aqui você encontra os conteúdos desta disciplina: materiais para download, datas importantes e turmas vinculadas.
+              {details.description}
             </p>
           </div>
         </div>
 
         {/* Grid principal */}
         <div className="grid lg:grid-cols-2 gap-5">
-          {/* Materiais Globais */}
+          
+          {/* Materiais Globais - TOTALMENTE DINÂMICO */}
           <div className="bg-gray-800/60 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700/50 overflow-hidden">
             <div className="bg-gradient-to-r from-gray-700 to-gray-600 px-6 py-5 border-b border-gray-700/50">
               <h2 className="text-lg font-bold text-white flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
                   <FileText className="w-5 h-5 text-blue-400" />
                 </div>
-                Materiais 
+                Materiais
               </h2>
             </div>
-
             <div className="p-6 space-y-4">
-              {materials.length > 0 && materials.some(m => m.archive) ? (
-                materials
-                  .filter(m => m.archive) // só os materiais com arquivo
-                  .map(material => (
-                    <div
-                      key={material.id}
-                      className="group bg-gray-700/40 hover:bg-gray-700/60 rounded-xl p-4 border border-gray-600/30 hover:border-gray-500/50 transition-all duration-200 cursor-pointer"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <span className="text-xs text-gray-400 flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              {formatDateRequests(material.updated_at)}
-                            </span>
-                            <span
-                              className={`text-xs px-2 py-1 rounded-lg font-medium border
-    ${getColorByType(material.type_file)}
-  `}
-                            >
-                              {material.type_file}
-                            </span>
-
-                          </div>
-                          <a
-                            href={`${import.meta.env.VITE_BASE_URL}/${material.archive}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="font-semibold text-white group-hover:text-blue-400 transition-colors flex items-center gap-2 mb-1"
-                          >
-                            <FileText className="w-4 h-4 text-gray-400" />
-                            {material.title}
-                          </a>
+              {details.materials && details.materials.length > 0 ? (
+                details.materials.map(material => (
+                  <div key={material.id} className="group bg-gray-700/40 hover:bg-gray-700/60 rounded-xl p-4 border border-gray-600/30 hover:border-gray-500/50 transition-all duration-200">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="text-xs text-gray-400 flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {formatDateRequests(material.uploadDate || material.updated_at)}
+                          </span>
+                          <span className={`text-xs px-2 py-1 rounded-lg font-medium border ${getColorByType(material.fileType || material.type_file)}`}>
+                            {material.fileType || material.type_file}
+                          </span>
                         </div>
-                        <button onClick={() => deleteMaterial(material.id)}
-                          href={`${import.meta.env.VITE_BASE_URL}/${material.archive}?download=true`}
-                          className="w-10 h-10 bg-red-600/80 hover:bg-red-500 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-110 shadow-lg border border-red-500/30"
-                        >
-                          <Trash className="w-4 h-4 text-white" />
-                        </button>
-                        <a
-                          href={`${import.meta.env.VITE_BASE_URL}/${material.archive}?download=true`}
-                          className="w-10 h-10 bg-blue-600/80 hover:bg-blue-500 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-110 shadow-lg border border-blue-500/30"
-                        >
-                          <Download className="w-4 h-4 text-white" />
-                        </a>
+                        <div className="font-semibold text-white group-hover:text-blue-400 transition-colors flex items-center gap-2 mb-1">
+                          <FileText className="w-4 h-4 text-gray-400" />
+                          {material.name || material.title}
+                        </div>
                       </div>
+                      <button 
+                        onClick={() => deleteMaterial(material.id)} 
+                        className="w-10 h-10 bg-red-600/80 hover:bg-red-500 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-110 shadow-lg border border-red-500/30"
+                      >
+                        <Trash className="w-4 h-4 text-white" />
+                      </button>
+                      <a 
+                        href={`${import.meta.env.VITE_BASE_URL}/${material.file_path || material.archive}?download=true`} 
+                        className="w-10 h-10 bg-blue-600/80 hover:bg-blue-500 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-110 shadow-lg border border-blue-500/30"
+                      >
+                        <Download className="w-4 h-4 text-white" />
+                      </a>
                     </div>
-                  ))
+                  </div>
+                ))
               ) : (
-                <p className="text-gray-400 text-sm text-center py-6">
-                  Nenhum material disponível para esta disciplina.
-                </p>
+                <p className="text-gray-400 text-sm text-center py-6">Nenhum material disponível para esta disciplina.</p>
               )}
-
-              <button
-                onClick={() => navigate(`/teacher/material/register/${id}`)}
+              <button 
+                onClick={() => navigate(`/teacher/material/register/${subjectId}`)} 
                 className="w-full py-4 border-2 border-dashed border-gray-600/50 rounded-xl text-gray-300 hover:text-white hover:border-gray-500/50 hover:bg-gray-700/30 transition-all duration-200 font-medium flex items-center justify-center gap-2"
               >
-                <Plus className="w-4 h-4" />
-                Adicionar Material
+                <Plus className="w-4 h-4" />Adicionar Material
               </button>
             </div>
           </div>
 
-
-          {/* Turmas */}
+          {/* Turmas - TOTALMENTE DINÂMICO */}
           <div className="bg-gray-800/60 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700/50 overflow-hidden">
             <div className="bg-gradient-to-r from-gray-700 to-gray-600 px-6 py-5 border-b border-gray-700/50">
               <h2 className="text-lg font-bold text-white flex items-center gap-3">
                 <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center">
                   <Users className="w-5 h-5 text-emerald-400" />
                 </div>
-                Turmas 2025.1
+                Turmas {details.period ? details.period.split(' • ')[0].replace('Período ', '') : ''}
               </h2>
             </div>
-
             <div className="p-6 space-y-4">
-              {turmas.map((turma) => (
-                <div
-                  key={turma.nome}
-                  className={`group relative bg-gradient-to-br ${turma.cor} rounded-xl p-5 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] overflow-hidden block border border-gray-600/30 hover:border-gray-500/50`}
-                  onClick={() => navigate("/teacher/class/view")}
-                >
-                  <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <div className="relative z-10 flex items-center justify-between">
-                    <div>
-                      <h3 className="text-xl font-bold text-white mb-1">Turma {turma.nome}</h3>
-                      <p className="text-gray-300 text-sm font-medium flex items-center gap-2">
-                        <Users className="w-4 h-4" />
-                        {turma.alunos} alunos matriculados
-                      </p>
+              {details.classes && details.classes.length > 0 ? (
+                details.classes.map((turma) => (
+                  <div 
+                    key={turma.id} 
+                    className="group relative bg-gradient-to-br from-gray-700 to-gray-600 rounded-xl p-5 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] overflow-hidden block border border-gray-600/30 hover:border-gray-500/50 cursor-pointer" 
+                    onClick={() => navigate(`/teacher/class/view/${turma.id}`)}
+                  >
+                    <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div className="relative z-10 flex items-center justify-between">
+                      <div>
+                        <h3 className="text-xl font-bold text-white mb-1">Turma {turma.name}</h3>
+                        <p className="text-gray-300 text-sm font-medium flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          {turma.studentCount} alunos matriculados
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-
-              <button
-                onClick={handleAddTurma}
+                ))
+              ) : (
+                <p className="text-center text-gray-400 text-sm py-6">Nenhuma turma criada para esta disciplina.</p>
+              )}
+              <button 
+                onClick={handleAddTurma} 
                 className="w-full py-4 border-2 border-dashed border-gray-600/50 rounded-xl text-gray-300 hover:text-white hover:border-gray-500/50 hover:bg-gray-700/30 transition-all duration-200 font-medium flex items-center justify-center gap-2"
               >
-                <Plus className="w-4 h-4" />
-                Adicionar Turma
+                <Plus className="w-4 h-4" />Adicionar Turma
               </button>
             </div>
           </div>
@@ -342,65 +283,49 @@ function ViewSubjectDetails() {
                 <h3 className="text-white font-bold text-xl">Adicionar Turma</h3>
                 <p className="text-gray-300 text-sm mt-0.5">Crie uma nova turma para a disciplina</p>
               </div>
-              <button
-                onClick={handleCancelar}
-                className="w-10 h-10 bg-gray-600/50 hover:bg-gray-500/50 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110 border border-gray-600/30"
-              >
+              <button onClick={handleCancelar} className="w-10 h-10 bg-gray-600/50 hover:bg-gray-500/50 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110 border border-gray-600/30">
                 <X className="w-5 h-5 text-gray-300" />
               </button>
             </div>
-
             <div className="px-6 py-6 space-y-5">
-              <p className="text-center text-gray-400 text-sm">
-                Preencha as informações abaixo
-              </p>
-
-              {/* Campo nome */}
+              <p className="text-center text-gray-400 text-sm">Preencha as informações abaixo</p>
               <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-2">
-                  Nome da turma
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ex: Turma D"
-                  value={nomeTurma}
-                  onChange={(e) => setNomeTurma(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600/50 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 placeholder-gray-400 transition-all duration-200"
+                <label className="block text-sm font-semibold text-gray-300 mb-2">Nome da turma</label>
+                <input 
+                  type="text" 
+                  placeholder="Ex: Turma D" 
+                  value={nomeTurma} 
+                  onChange={(e) => setNomeTurma(e.target.value)} 
+                  className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600/50 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 placeholder-gray-400 transition-all duration-200" 
                 />
               </div>
-
-              {/* Campo capacidade */}
               <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-2">
-                  Capacidade
-                </label>
+                <label className="block text-sm font-semibold text-gray-300 mb-2">Capacidade</label>
                 <div className="relative">
-                  <input
-                    type="number"
-                    placeholder="Número de alunos"
-                    value={capacidade}
-                    onChange={(e) => setCapacidade(e.target.value)}
-                    className="w-full px-4 py-3 pr-14 bg-gray-700/50 border border-gray-600/50 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 placeholder-gray-400 transition-all duration-200"
+                  <input 
+                    type="number" 
+                    placeholder="Número de alunos" 
+                    value={capacidade} 
+                    onChange={(e) => setCapacidade(e.target.value)} 
+                    className="w-full px-4 py-3 pr-14 bg-gray-700/50 border border-gray-600/50 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 placeholder-gray-400 transition-all duration-200" 
                   />
-                  <button
-                    onClick={() => setCapacidade((prev) => String(Number(prev || 0) + 1))}
+                  <button 
+                    onClick={() => setCapacidade((prev) => String(Number(prev || 0) + 1))} 
                     className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-blue-600/80 hover:bg-blue-500 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105 shadow-lg border border-blue-500/30"
                   >
                     <Plus className="w-4 h-4 text-white" />
                   </button>
                 </div>
               </div>
-
-              {/* Botões */}
               <div className="flex items-center gap-3 pt-2">
-                <button
-                  onClick={handleConfirmar}
+                <button 
+                  onClick={handleConfirmar} 
                   className="flex-1 bg-blue-600/80 hover:bg-blue-500 text-white font-semibold py-3 rounded-xl transition-all duration-200 hover:scale-105 shadow-lg flex items-center justify-center gap-2 border border-blue-500/30"
                 >
                   <span className="text-lg">✓</span> Confirmar
                 </button>
-                <button
-                  onClick={handleCancelar}
+                <button 
+                  onClick={handleCancelar} 
                   className="flex-1 bg-gray-700/50 hover:bg-gray-600/50 text-gray-300 hover:text-white font-semibold py-3 rounded-xl transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2 border border-gray-600/30"
                 >
                   <span className="text-lg">✗</span> Cancelar
@@ -414,4 +339,4 @@ function ViewSubjectDetails() {
   )
 }
 
-export default ViewSubjectDetails
+export default ViewSubjectDetails;

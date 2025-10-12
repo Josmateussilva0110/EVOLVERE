@@ -1,7 +1,7 @@
 const express = require("express")
 const router = express.Router()
 const subjectController = require("../controllers/subjectController")
-const teacherController = require("../controllers/teacherController")
+const teacherController = require("../controllers/teacherController");
 
 /**
  * @module subjectRoutes
@@ -9,13 +9,46 @@ const teacherController = require("../controllers/teacherController")
  */
 
 /**
- * @route GET /subjects
- * @group Subjects
- * @summary Lista todas as disciplinas disponíveis.
- * @returns {Array<Subject>} 200 - Lista de disciplinas
- * @returns {Error} 500 - Erro interno do servidor
+ * @route GET /subjects/teacher/:id/details
+ * @summary Rota para o PROFESSOR buscar os DETALHES de UMA disciplina.
+ * @description VEM ANTES de '/subjects/teacher/:id' para ser encontrada primeiro.
  */
-router.get('/subjects', subjectController.list)
+router.get("/subjects/teacher/:id/details", subjectController.getScreenDetailsForTeacher);
+
+
+
+/**
+ * @route GET /subjects/teacher/:id
+ * @description Retorna todas as disciplinas associadas a um professor específico.
+ * 
+ * @param {string} id - ID do professor (passado como parâmetro de rota).
+ * 
+ * @returns {Object[]} Lista de disciplinas do professor, cada uma contendo informações
+ *  sobre a disciplina, o professor e o curso associado.
+ * 
+ * @example
+ * // GET /subjects/teacher/123
+ * [
+ *   {
+ *     "id": 1,
+ *     "name": "Matemática",
+ *     "professor_nome": "João Silva",
+ *     "course_name": "Engenharia",
+ *     "photo": "/uploads/professor1.jpg",
+ *     ...
+ *   }
+ * ]
+ */
+router.get("/subjects/teacher/:id", teacherController.getAllSubjects)
+
+/**
+ * @route GET /subjects/:id/details
+ * @summary Rota para o COORDENADOR buscar os DETALHES de UMA disciplina.
+ * @description VEM ANTES de '/subjects/:id' para não haver conflito.
+ */
+router.get('/subjects/:id/details', subjectController.getScreenDetails);
+
+
 
 /**
  * @route GET /subjects/:id
@@ -26,6 +59,15 @@ router.get('/subjects', subjectController.list)
  * @returns {Error} 404 - Disciplina não encontrada
  */
 router.get('/subjects/:id', subjectController.getById)
+
+/**
+ * @route GET /subjects
+ * @group Subjects
+ * @summary Lista todas as disciplinas disponíveis.
+ * @returns {Array<Subject>} 200 - Lista de disciplinas
+ * @returns {Error} 500 - Erro interno do servidor
+ */
+router.get('/subjects', subjectController.list)
 
 /**
  * @route POST /subjects
@@ -62,31 +104,6 @@ router.put('/subjects/:id', subjectController.update)
  * @returns {Error} 404 - Disciplina não encontrada
  */
 router.delete('/subjects/:id', subjectController.delete)
-
-
-/**
- * @route GET /subjects/teacher/:id
- * @description Retorna todas as disciplinas associadas a um professor específico.
- * 
- * @param {string} id - ID do professor (passado como parâmetro de rota).
- * 
- * @returns {Object[]} Lista de disciplinas do professor, cada uma contendo informações
- *  sobre a disciplina, o professor e o curso associado.
- * 
- * @example
- * // GET /subjects/teacher/123
- * [
- *   {
- *     "id": 1,
- *     "name": "Matemática",
- *     "professor_nome": "João Silva",
- *     "course_name": "Engenharia",
- *     "photo": "/uploads/professor1.jpg",
- *     ...
- *   }
- * ]
- */
-router.get("/subjects/teacher/:id", teacherController.getAllSubjects)
 
 router.get("/subject/materiais/:id", subjectController.getAllMateriais)
 
