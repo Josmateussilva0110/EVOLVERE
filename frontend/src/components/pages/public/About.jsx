@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom"
-import { ArrowLeft, BookOpen, Users, Trophy, Target, Award, Clock, CheckCircle, Star, Brain, Zap, Sparkles } from "lucide-react"
-import Image from "../../form/Image"
+import { BookOpen, Users, Trophy, Target, Award, Clock, CheckCircle, Star, Brain, Zap, Sparkles } from "lucide-react"
+import { useContext } from "react"
+import { Context } from "../../../context/UserContext"
 
 /**
  * Componente da página "Sobre" da aplicação Evolvere.
@@ -18,6 +19,7 @@ import Image from "../../form/Image"
  */
 function About() {
   const navigate = useNavigate()
+  const { authenticated } = useContext(Context)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#060060] via-[#1a1a5e] to-[#2d2d8a] relative overflow-hidden">
@@ -42,25 +44,6 @@ function About() {
         <Star className="w-5 h-5 text-yellow-400/40" />
       </div>
 
-      {/* Header */}
-      <div className="container mx-auto px-6 py-8 relative z-10">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <div className="relative">
-              <Image src="/logo.png" alt="Evolvere Logo" size={48} />
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-ping"></div>
-            </div>
-            <h1 className="text-3xl font-bold text-white">Evolvere</h1>
-          </div>
-          <button 
-            onClick={() => navigate("/")}
-            className="flex items-center space-x-2 px-4 py-2 text-white hover:text-yellow-400 transition-colors duration-300 backdrop-blur-sm bg-white/5 rounded-lg"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span>Voltar</span>
-          </button>
-        </div>
-      </div>
 
       {/* Hero Section */}
       <div className="container mx-auto px-6 py-16 relative z-10">
@@ -263,9 +246,9 @@ function About() {
           {/* Creator 1 */}
           <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-6 text-center hover:bg-white/20 transition-all duration-300 group">
             <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-              <span className="text-xl font-bold text-[#060060]">L</span>
+              <span className="text-xl font-bold text-[#060060]">M</span>
             </div>
-            <h4 className="text-lg font-bold text-white mb-2">Lucas</h4>
+            <h4 className="text-lg font-bold text-white mb-2">Mateus</h4>
             <p className="text-yellow-400 font-medium mb-3 text-sm">Desenvolvedor Full-Stack</p>
             <p className="text-gray-300 text-xs leading-relaxed">
               Especialista em React e Node.js, apaixonado por criar experiências digitais incríveis.
@@ -275,9 +258,9 @@ function About() {
           {/* Creator 2 */}
           <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-6 text-center hover:bg-white/20 transition-all duration-300 group">
             <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-              <span className="text-xl font-bold text-white">J</span>
+              <span className="text-xl font-bold text-white">G</span>
             </div>
-            <h4 className="text-lg font-bold text-white mb-2">José</h4>
+            <h4 className="text-lg font-bold text-white mb-2">Gabriel</h4>
             <p className="text-yellow-400 font-medium mb-3 text-sm">Arquiteto de Software</p>
             <p className="text-gray-300 text-xs leading-relaxed">
               Focado em arquiteturas escaláveis e soluções robustas para educação online.
@@ -287,9 +270,9 @@ function About() {
           {/* Creator 3 */}
           <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-6 text-center hover:bg-white/20 transition-all duration-300 group">
             <div className="w-20 h-20 bg-gradient-to-br from-purple-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-              <span className="text-xl font-bold text-white">M</span>
+              <span className="text-xl font-bold text-white">L</span>
             </div>
-            <h4 className="text-lg font-bold text-white mb-2">Maria</h4>
+            <h4 className="text-lg font-bold text-white mb-2">Lucas</h4>
             <p className="text-yellow-400 font-medium mb-3 text-sm">Designer UX/UI</p>
             <p className="text-gray-300 text-xs leading-relaxed">
               Criadora de interfaces intuitivas e experiências visuais memoráveis.
@@ -299,9 +282,9 @@ function About() {
           {/* Creator 4 */}
           <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-6 text-center hover:bg-white/20 transition-all duration-300 group">
             <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-              <span className="text-xl font-bold text-white">A</span>
+              <span className="text-xl font-bold text-white">R</span>
             </div>
-            <h4 className="text-lg font-bold text-white mb-2">Ana</h4>
+            <h4 className="text-lg font-bold text-white mb-2">Rai</h4>
             <p className="text-yellow-400 font-medium mb-3 text-sm">Especialista em Educação</p>
             <p className="text-gray-300 text-xs leading-relaxed">
               Pedagoga especializada em metodologias de ensino e aprendizagem digital.
@@ -342,12 +325,14 @@ function About() {
             Junte-se a milhares de estudantes que já transformaram sua forma de aprender
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button 
-              onClick={() => navigate("/register")}
-              className="px-10 py-4 bg-[#060060] text-white text-xl font-bold rounded-2xl hover:bg-[#060060]/90 hover:scale-105 transition-all duration-300 shadow-2xl hover:shadow-[#060060]/25 group"
-            >
-              <span className="group-hover:translate-x-1 transition-transform inline-block">Criar Conta Grátis</span>
-            </button>
+            {!authenticated && (
+              <button 
+                onClick={() => navigate("/register")}
+                className="px-10 py-4 bg-[#060060] text-white text-xl font-bold rounded-2xl hover:bg-[#060060]/90 hover:scale-105 transition-all duration-300 shadow-2xl hover:shadow-[#060060]/25 group"
+              >
+                <span className="group-hover:translate-x-1 transition-transform inline-block">Criar Conta Grátis</span>
+              </button>
+            )}
             <button 
               onClick={() => navigate("/")}
               className="px-10 py-4 border-2 border-[#060060] text-[#060060] text-xl font-semibold rounded-2xl hover:bg-[#060060] hover:text-white hover:scale-105 transition-all duration-300 group"
@@ -355,13 +340,6 @@ function About() {
               <span className="group-hover:translate-x-1 transition-transform inline-block">Voltar ao Início</span>
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <div className="container mx-auto px-6 py-12 border-t border-white/10">
-        <div className="text-center text-gray-400">
-          <p>&copy; 2024 Evolvere. Todos os direitos reservados.</p>
         </div>
       </div>
     </div>

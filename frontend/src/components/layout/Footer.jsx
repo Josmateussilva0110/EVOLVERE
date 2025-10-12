@@ -1,3 +1,4 @@
+import { useLocation } from "react-router-dom"
 /**
  * Componente de rodapé da aplicação.
  *
@@ -17,11 +18,24 @@
  * @returns {JSX.Element} Rodapé fixo com marca e ano.
  */
 function Footer() {
+  const location = useLocation()
+  const path = location.pathname
+
+ 
+    const bgColor =
+      path.startsWith('/teacher') ? 'bg-[#1A2434]' :
+      path.startsWith('/student') ? 'bg-green-900' :
+      path.startsWith('/coordinator') ? 'bg-gray-900' :
+      path.startsWith('/about') ? 'bg-[#26267B]' :
+      path === '/' ? 'bg-[#26267B]' :
+      'bg-transparent'
+
   return (
-    <footer className="bg-[#060060] text-gray-300 py-4 fixed bottom-0 w-full">
-      <p className="text-center text-sm">
-        <span className="font-semibold text-white">EVOLVERE</span> &copy; 2025
-      </p>
+    <footer className={`${bgColor} text-gray-300 py-4 bottom-0 w-full transition-colors duration-500`}>
+    <p className="text-center text-sm">
+      <span className="font-semibold text-white">&copy; EVOLVERE</span>{" "}
+      {new Date().getFullYear()} — Todos os direitos reservados.
+    </p>
     </footer>
   )
 }

@@ -13,10 +13,10 @@ function App() {
 
   // Lista de rotas exatas
   const staticPaths = [
-    "/login", "/register", "/forgot_password", "/help", "/", "/about",
+    "/login", "/register", "/forgot_password", "/help",
     "/teacher/material/register", "/teacher/class/view",
     "/await/approval", "/user/account", "/student/home",
-    "/student/disciplines/view", "/teacher/discipline/manage",
+    "/student/disciplines/view",
     "/profile", "/settings", "/teacher/simulated/register",
     "/teacher/simulated/list", "/teacher/simulated/response/list"
   ]

@@ -142,7 +142,13 @@ function CoordinatorProfile() {
           <div className="flex items-center justify-between mb-4">
             <button
               type="button"
-              onClick={() => navigate('/coordinator')}
+              onClick={() => {
+                if (window.history.state && window.history.state.idx > 0) {
+                  navigate(-1)
+                } else {
+                  navigate('/coordinator')
+                }
+              }}
               className="inline-flex items-center gap-2 rounded-lg ring-1 ring-gray-300 px-3 py-2 text-sm text-gray-800 hover:bg-gray-50"
             >
               <FiArrowLeft /> Voltar
