@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom"
 import { Users, Trophy, Target, ArrowRight, Play, BookOpen, Brain, Zap, Star, CheckCircle } from "lucide-react"
-import Image from "../../form/Image"
 import CursorFollower from "../../CursorFollower"
+import { useContext } from "react"
+import { Context } from "../../../context/UserContext"
 
 /**
  * Componente da página inicial da aplicação Evolvere.
@@ -17,6 +18,7 @@ import CursorFollower from "../../CursorFollower"
  */
 function Home() {
   const navigate = useNavigate()
+  const { authenticated } = useContext(Context)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#060060] via-[#1a1a5e] to-[#2d2d8a] relative overflow-hidden">
@@ -86,13 +88,16 @@ function Home() {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button 
-              onClick={() => navigate("/register")}
-              className="px-8 py-4 bg-yellow-400 text-[#060060] text-xl font-bold rounded-2xl hover:bg-yellow-500 transition-all duration-300 shadow-2xl hover:shadow-yellow-400/25 flex items-center justify-center space-x-3 group"
-            >
-              <Play className="w-6 h-6 group-hover:scale-110 transition-transform" />
-              <span>Começar Agora</span>
-            </button>
+            {!authenticated && (
+              <button 
+                onClick={() => navigate("/register")}
+                className="px-8 py-4 bg-yellow-400 text-[#060060] text-xl font-bold rounded-2xl hover:bg-yellow-500 transition-all duration-300 shadow-2xl hover:shadow-yellow-400/25 flex items-center justify-center space-x-3 group"
+              >
+                <Play className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                <span>Começar Agora</span>
+              </button>
+            )}
+
             <button 
               onClick={() => navigate("/about")}
               className="px-8 py-4 border-2 border-white text-white text-xl font-semibold rounded-2xl hover:bg-white hover:text-[#060060] transition-all duration-300 flex items-center justify-center space-x-3 backdrop-blur-sm"
@@ -182,23 +187,27 @@ function Home() {
       </div>
 
 
-      {/* CTA Section */}
-      <div className="container mx-auto px-6 py-20 relative z-10">
-        <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-3xl p-12 text-center">
-          <h3 className="text-4xl font-bold text-[#060060] mb-6">
-            Pronto para começar sua jornada?
-          </h3>
-          <p className="text-xl text-[#060060]/80 mb-8 max-w-2xl mx-auto">
-            Junte-se a milhares de estudantes que já transformaram sua forma de aprender
-          </p>
-          <button 
-            onClick={() => navigate("/register")}
-            className="px-10 py-4 bg-[#060060] text-white text-xl font-bold rounded-2xl hover:bg-[#060060]/90 hover:scale-105 transition-all duration-300 shadow-2xl hover:shadow-[#060060]/25 group"
-          >
-            <span className="group-hover:translate-x-1 transition-transform inline-block">Criar Conta Grátis</span>
-          </button>
-        </div>
-      </div>
+        {/* CTA Section */}
+        {!authenticated && (
+          <div className="container mx-auto px-6 py-20 relative z-10">
+            <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-3xl p-12 text-center">
+              <h3 className="text-4xl font-bold text-[#060060] mb-6">
+                Pronto para começar sua jornada?
+              </h3>
+              <p className="text-xl text-[#060060]/80 mb-8 max-w-2xl mx-auto">
+                Junte-se a milhares de estudantes que já transformaram sua forma de aprender
+              </p>
+              <button 
+                onClick={() => navigate("/register")}
+                className="px-10 py-4 bg-[#060060] text-white text-xl font-bold rounded-2xl hover:bg-[#060060]/90 hover:scale-105 transition-all duration-300 shadow-2xl hover:shadow-[#060060]/25 group"
+              >
+                <span className="group-hover:translate-x-1 transition-transform inline-block">
+                  Criar Conta Grátis
+                </span>
+              </button>
+            </div>
+          </div>
+        )}
     </div>
   )
 }
