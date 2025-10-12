@@ -66,6 +66,7 @@ function Navbar() {
     path.startsWith('/teacher') ? 'bg-[#1A2434]' :
     path.startsWith('/student') ? 'bg-green-900' :
     path.startsWith('/coordinator') ? 'bg-gray-900' :
+    path.startsWith('/about') ? 'bg-[#15165E]' :
     path === '/' ? 'bg-[#15165E]' :
     'bg-transparent'
 

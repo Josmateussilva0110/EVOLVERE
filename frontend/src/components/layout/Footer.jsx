@@ -26,6 +26,7 @@ function Footer() {
       path.startsWith('/teacher') ? 'bg-[#1A2434]' :
       path.startsWith('/student') ? 'bg-green-900' :
       path.startsWith('/coordinator') ? 'bg-gray-900' :
+      path.startsWith('/about') ? 'bg-[#26267B]' :
       path === '/' ? 'bg-[#26267B]' :
       'bg-transparent'
 
