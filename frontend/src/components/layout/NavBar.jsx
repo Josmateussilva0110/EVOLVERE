@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { useContext, useState, useEffect } from 'react'
+import { useContext, useState, useEffect, useRef } from 'react'
 import { Context } from '../../context/UserContext'
-import { ChevronDown, User } from 'lucide-react'
+import { ChevronDown, User, LogOut, UserCircle2, GraduationCap, BookOpen, Shield, Settings } from 'lucide-react'
 import Image from '../form/Image'
 import requestData from '../../utils/requestApi'
 
@@ -47,12 +47,24 @@ function Navbar() {
   const [requestUser, setRequestUser] = useState(null)
   const location = useLocation()
   const navigate = useNavigate()
+  const dropdownRef = useRef(null)
 
+  // 🔹 Fecha o dropdown ao clicar fora
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false)
+      }
+    }
+    if (dropdownOpen) document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [dropdownOpen])
+
+  // 🔹 Busca dados do usuário
   useEffect(() => {
     if (user) {
       async function fetchUser() {
         const response = await requestData(`/user/${user.id}`, "GET", {}, true)
-        console.log(response)
         if (response.success) setRequestUser(response.data.user)
         else setRequestUser(null)
       }
@@ -60,7 +72,7 @@ function Navbar() {
     }
   }, [user])
 
-
+  // 🔹 Define cores conforme rota
   const path = location.pathname
   const bgColor =
     path.startsWith('/teacher') ? 'bg-[#1A2434]' :
@@ -69,6 +81,14 @@ function Navbar() {
     path.startsWith('/about') ? 'bg-[#15165E]' :
     path === '/' ? 'bg-[#15165E]' :
     'bg-transparent'
+
+  const dropdownColorMap = {
+    'bg-[#1A2434]': 'bg-[#1A2434]/95 text-white',
+    'bg-green-900': 'bg-green-900/95 text-white',
+    'bg-gray-900': 'bg-gray-900/95 text-white',
+    'bg-[#15165E]': 'bg-[#15165E]/95 text-white',
+  }
+  const dropdownColor = dropdownColorMap[bgColor] || 'bg-white text-gray-800'
 
   return (
     <nav className={`w-full top-0 left-0 z-50 transition-colors duration-500 ${bgColor}`}>
@@ -84,7 +104,6 @@ function Navbar() {
         <div className="flex items-center space-x-4 relative">
           {!authenticated ? (
             <>
-              {/* 🔹 Se não estiver logado, mostra os botões */}
               <button
                 onClick={() => navigate("/login")}
                 className="px-6 py-3 text-white font-semibold rounded-xl hover:bg-white/10 transition-all duration-300"
@@ -99,80 +118,93 @@ function Navbar() {
               </button>
             </>
           ) : (
-            <>
-
-              {/* 🔹 Se estiver logado, mostra a foto de perfil ou ícone padrão */}
-              <div className="relative flex items-center gap-2 cursor-pointer">
-                <div
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center gap-2"
-                >
-                  {requestUser?.photo ? (
-                    <Image
-                      src={`${import.meta.env.VITE_BASE_URL}/${requestUser.photo}`}
-                      alt={requestUser.username || "Foto do usuário"}
-                      size={58}
-                    />
-                  ) : (
-                    <div className="w-10 h-10 flex items-center justify-center bg-white/10 rounded-full">
-                      <User className="text-white" size={40} />
-                    </div>
-                  )}
-                  <ChevronDown className="text-white" size={20} />
-                </div>
-
-                {/* 🔹 Menu dropdown */}
-                {dropdownOpen && (
-                  <div
-                    className="absolute right-0 top-[72px] w-60 bg-white text-gray-800 rounded-xl shadow-lg py-2 z-50
-      before:content-[''] before:absolute before:-top-2 before:right-4 before:border-8 before:border-transparent before:border-b-white"
-                  >
-                    <button
-                      onClick={() => navigate("/profile")}
-                      className="block w-full text-left px-4 py-3 hover:bg-gray-100 transition-colors duration-200"
-                    >
-                      Perfil
-                    </button>
-                    
-                    {(requestUser?.role === 'Coordenador' || requestUser?.registration === 'admin') && (
-                      <button
-                        onClick={() => navigate("/coordinator")}
-                        className="block w-full text-left px-4 py-3 hover:bg-gray-100 transition-colors duration-200"
-                      >
-                        área do Coordenador
-                      </button>
-
-                    )}
-
-                    {(requestUser?.role === 'Professor' || requestUser?.registration === 'admin') ? (
-                      <button
-                        onClick={() => navigate("/teacher/discipline/manage")}
-                        className="block w-full text-left px-4 py-3 hover:bg-gray-100 transition-colors duration-200"
-                      >
-                        área do Professor
-                      </button>
-
-                    ) : (
-                      <button
-                        onClick={() => navigate("/student/home")}
-                        className="block w-full text-left px-4 py-3 hover:bg-gray-100 transition-colors duration-200"
-                      >
-                        área do Aluno
-                      </button>
-                    )}
-
-
-                    <button
-                      onClick={logout}
-                      className="block w-full text-left px-4 py-3 hover:bg-gray-100 transition-colors duration-200"
-                    >
-                      Sair
-                    </button>
+            <div ref={dropdownRef} className="relative flex items-center gap-2">
+              {/* Avatar + Nome */}
+              <div
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center gap-2 cursor-pointer select-none"
+              >
+                {requestUser?.photo ? (
+                  <Image
+                    src={`${import.meta.env.VITE_BASE_URL}/${requestUser.photo}`}
+                    alt={requestUser.username || "Foto do usuário"}
+                    size={48}
+                    className="rounded-full border-2 border-white/30"
+                  />
+                ) : (
+                  <div className="w-10 h-10 flex items-center justify-center bg-white/10 rounded-full">
+                    <User className="text-white" size={28} />
                   </div>
                 )}
+                <ChevronDown
+                  className={`text-white transition-transform duration-300 ${dropdownOpen ? 'rotate-180' : ''}`}
+                  size={20}
+                />
               </div>
 
-            </>
+              {/* ---------- DROPDOWN ---------- */}
+              <div
+                className={`absolute right-0 top-[72px] w-64 rounded-xl shadow-2xl backdrop-blur-md overflow-hidden transform transition-all duration-300 ease-out origin-top-right z-[9999]
+                ${dropdownOpen ? 'scale-100 opacity-100 translate-y-0 pointer-events-auto' : 'scale-95 opacity-0 -translate-y-2 pointer-events-none'} 
+                ${dropdownColor}`}
+              >
+                <button
+                  onClick={() => {
+                    navigate("/profile")
+                    setDropdownOpen(false)
+                  }}
+                  className="w-full flex items-center gap-3 px-5 py-3 hover:bg-white/10 transition-all duration-200"
+                >
+                  <UserCircle2 size={18} /> Perfil
+                </button>
+
+                {(requestUser?.role === 'Coordenador' || requestUser?.registration === 'admin') && (
+                  <button
+                    onClick={() => {
+                      navigate("/coordinator")
+                      setDropdownOpen(false)
+                    }}
+                    className="w-full flex items-center gap-3 px-5 py-3 hover:bg-white/10 transition-all duration-200"
+                  >
+                    <Shield size={18} /> Área do Coordenador
+                  </button>
+                )}
+
+                {(requestUser?.role === 'Professor' || requestUser?.registration === 'admin') ? (
+                  <button
+                    onClick={() => {
+                      navigate("/teacher/discipline/manage")
+                      setDropdownOpen(false)
+                    }}
+                    className="w-full flex items-center gap-3 px-5 py-3 hover:bg-white/10 transition-all duration-200"
+                  >
+                    <BookOpen size={18} /> Área do Professor
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      navigate("/student/home")
+                      setDropdownOpen(false)
+                    }}
+                    className="w-full flex items-center gap-3 px-5 py-3 hover:bg-white/10 transition-all duration-200"
+                  >
+                    <GraduationCap size={18} /> Área do Aluno
+                  </button>
+                )}
+
+                <div className="border-t border-white/10 my-1"></div>
+
+                <button
+                  onClick={() => {
+                    logout()
+                    setDropdownOpen(false)
+                  }}
+                  className="w-full flex items-center gap-3 px-5 py-3 hover:bg-red-500/20 text-red-400 transition-all duration-200"
+                >
+                  <LogOut size={18} /> Sair
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </div>
