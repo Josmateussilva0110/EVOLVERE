@@ -47,10 +47,6 @@ class ClassController {
                 period,
                 subject_id: parseInt(subject_id),
                 course_id: parseInt(course_id),
-<<<<<<< HEAD
-=======
-                // Adicionando 'capacity' no objeto de criação
->>>>>>> b2415bd1aabded10d1c6c0a52a30697f5237cbe3
                 capacity: parseInt(capacity)
             });
 
@@ -61,7 +57,6 @@ class ClassController {
                 });
             }
 
-<<<<<<< HEAD
             const responseData = {
                 id: newClass.id,
                 name: newClass.name,
@@ -72,12 +67,6 @@ class ClassController {
                 status: true,
                 message: 'Turma criada com sucesso!',
                 data: responseData 
-=======
-            res.status(201).json({
-                status: true,
-                message: 'Turma criada com sucesso!',
-                data: newClass
->>>>>>> b2415bd1aabded10d1c6c0a52a30697f5237cbe3
             });
 
         } catch (error) {
