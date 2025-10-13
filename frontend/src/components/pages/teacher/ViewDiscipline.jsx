@@ -36,6 +36,7 @@ function ViewSubjectDetails() {
   const [capacidade, setCapacidade] = useState("")
   const navigate = useNavigate()
   const { id } = useParams()
+  const [course_id, setCourseId] = useState(null)
   const [materials, setMaterials] = useState([])
   const { setFlashMessage } = useFlashMessage()
 
@@ -43,8 +44,14 @@ function ViewSubjectDetails() {
     async function fetchSubject() {
       const response = await requestData(`/subject/materiais/${id}`, 'GET', {}, true)
       console.log(response)
+
       if (response.success) {
-        setMaterials(response.data.materials)
+        const mats = response.data.materials
+        setMaterials(mats)
+
+        if (mats.length > 0) {
+          setCourseId(mats[0].course_id)
+        }
       }
     }
     fetchSubject()
@@ -87,21 +94,24 @@ function ViewSubjectDetails() {
     setIsMenuOpen(false)
   }
 
-  /**
-   * handleConfirmar
-   *
-   * Confirmar criação de turma.
-   * Atualmente:
-   * - Loga o objeto { nome, capacidade } no console.
-   * - Fecha o pop-up e limpa os campos.
-   *
-   * Em produção: substitua por chamada à API que cria a turma e trate erros.
-   */
-  const handleConfirmar = () => {
-    console.log("Nova turma:", { nome: nomeTurma, capacidade })
-    setShowAddTurmaPopup(false)
-    setNomeTurma("")
-    setCapacidade("")
+  async function registerClass(e) {
+      e.preventDefault()
+      const body = {
+        name: nomeTurma,
+        capacity: capacidade,
+        period: materials[0].period,
+        course_id,
+        subject_id: id
+      }
+
+      const response = await requestData('/classes', 'POST', body, true)
+      if(response.success) {
+        setFlashMessage(response.data.message, 'success')
+        navigate(`/teacher/discipline/view/${id}`)
+      }
+      else {
+        setFlashMessage(response.message, 'error')
+      }
   }
 
   /**
@@ -298,7 +308,7 @@ function ViewSubjectDetails() {
                 <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center">
                   <Users className="w-5 h-5 text-emerald-400" />
                 </div>
-                Turmas 2025.1
+                Turmas {materials.length > 0 ? materials[0].period : ""}
               </h2>
             </div>
 
@@ -336,7 +346,7 @@ function ViewSubjectDetails() {
       <RegisterClasses
         show={showAddTurmaPopup}
         onCancel={handleCancelar}
-        onConfirm={handleConfirmar}
+        onConfirm={registerClass}
         nomeTurma={nomeTurma}
         setNomeTurma={setNomeTurma}
         capacidade={capacidade}

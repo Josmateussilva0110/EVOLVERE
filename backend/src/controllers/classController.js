@@ -32,6 +32,11 @@ class ClassController {
         try {
             // Agora incluindo 'capacity'
             const { name, period, subject_id, course_id, capacity } = req.body;
+            console.log(name)
+            console.log(period)
+            console.log(subject_id)
+            console.log(course_id)
+            console.log(capacity)
 
             // Adicionando 'capacity' na validação
             if (!name || !period || !subject_id || !course_id || !capacity) {
@@ -57,16 +62,9 @@ class ClassController {
                 });
             }
 
-            const responseData = {
-                id: newClass.id,
-                name: newClass.name,
-                studentCount: 0 
-            };
-
             res.status(201).json({
                 status: true,
                 message: 'Turma criada com sucesso!',
-                data: responseData 
             });
 
         } catch (error) {
