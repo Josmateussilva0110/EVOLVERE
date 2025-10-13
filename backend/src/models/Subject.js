@@ -357,6 +357,127 @@ class Subject {
             return null
         }
     }
+    
+        /**
+     * @summary Busca os detalhes completos de uma disciplina para a tela de gerenciamento.
+     * @description Reúne dados da disciplina, seus materiais e suas turmas com contagem de alunos.
+     * @param {number} id - O ID da disciplina.
+     * @returns {Promise<Object|null>} Um objeto com todos os dados formatados ou null se não for encontrado.
+     */
+
+   // Dentro do seu arquivo models/Subject.js
+
+async findScreenDetailsById(id) {
+    try {
+        const [subject, materials, classes] = await Promise.all([
+            
+            // 1. Consulta dos detalhes da disciplina (sem alteração)
+            knex('subjects')
+                .join('course_valid', 'subjects.course_valid_id', 'course_valid.id')
+                .where('subjects.id', id)
+                .first(
+                    'subjects.*', 
+                    'course_valid.name as course_name', 
+                    'course_valid.acronym_IES as course_acronym'
+                ),
+            
+            // 2. Consulta de materiais CORRIGIDA para usar os nomes de coluna corretos
+            knex('materials')
+                .where({ subject_id: id })
+                .select(
+                    'id',
+                    'title as name',        
+                    'archive as file_path', 
+                    'created_at',
+                    'updated_at',
+                    knex.raw(`
+                        CASE 
+                            WHEN type = 1 THEN 'PDF'
+                            WHEN type = 2 THEN 'DOCX'
+                            WHEN type = 3 THEN 'PPTX'
+                            ELSE 'file'
+                        END as "fileType"
+                    `)
+                )
+                .orderBy('updated_at', 'desc'),
+
+            // 3. Consulta das turmas (sem alteração)
+            knex('classes as c')
+                .leftJoin('classes_alunos as cs', 'c.id', 'cs.classes_id') // Verifique o nome da sua tabela pivo
+                .where('c.subject_id', id)
+                .groupBy('c.id', 'c.name', 'c.period')
+                .select('c.id', 'c.name', 'c.period')
+                .count('cs.aluno_id as studentCount')
+        ]);
+
+        if (!subject) return null;
+
+        // 4. Formatação final dos dados (NÃO precisa mudar, pois usamos aliases)
+        return {
+            id: subject.id,
+            name: subject.name,
+            period: `Período ${subject.period || 'N/A'} • ${subject.course_acronym || 'N/A'}`,
+            description: subject.description || 'Nenhuma descrição fornecida.',
+            courseId: subject.course_valid_id,
+            materials: materials.map(m => ({
+                id: m.id,
+                name: m.name,           // Funciona por causa do alias 'title as name'
+                fileType: m.fileType,
+                uploadDate: m.updated_at,
+                file_path: m.file_path, // Funciona por causa do alias 'archive as file_path'
+            })),
+            classes: classes.map(c => ({
+                id: c.id,
+                name: c.name,
+                studentCount: parseInt(c.studentCount, 10)
+            }))
+        };
+    } catch (error) {
+        console.error("Erro ao buscar detalhes completos da disciplina:", error);
+        return undefined;
+    }
+}
+
+
+    /**
+     * @summary Verifica se um usuário (coordenador) tem permissão sobre uma disciplina.
+     * @description A permissão é validada checando se o ID do coordenador corresponde ao coordenador do curso ao qual a disciplina pertence.
+     * @param {number} subjectId - O ID da disciplina.
+     * @param {number} coordinatorId - O ID do usuário coordenador.
+     * @returns {Promise<boolean>} Retorna `true` se o usuário for o coordenador do curso.
+     */
+    async isCoordinatorOfSubject(subjectId, coordinatorId) {
+        try {
+            const subject = await knex('subjects')
+                .join('course_valid', 'subjects.course_valid_id', 'course_valid.id')
+                .where('subjects.id', subjectId)
+                .andWhere('course_valid.coordinator_id', coordinatorId)
+                .first('subjects.id');
+            return !!subject;
+        } catch (error) {
+            console.error('Erro ao verificar permissão do coordenador:', error);
+            return false;
+        }
+    }
+
+/**
+     * @summary Verifica se um usuário (professor) tem permissão sobre uma disciplina.
+     * @description A permissão é validada checando se o ID do professor corresponde ao 'professional_id' da disciplina.
+     * @param {number} subjectId - O ID da disciplina.
+     * @param {number} teacherId - O ID do usuário professor.
+     * @returns {Promise<boolean>} Retorna `true` se o usuário for o professor da disciplina.
+     */
+    async isTeacherOfSubject(subjectId, teacherId) {
+        try {
+            const subject = await knex('subjects')
+                .where({ id: subjectId, professional_id: teacherId })
+                .first('id');
+            return !!subject;
+        } catch (error) {
+            console.error("Erro ao verificar permissão do professor:", error);
+            return false;
+        }
+    }
 
 
 }

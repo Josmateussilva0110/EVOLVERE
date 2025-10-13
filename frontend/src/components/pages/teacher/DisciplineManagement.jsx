@@ -133,7 +133,7 @@ function DisciplineManagement() {
 
                 <div className="flex items-center justify-between">
                   <div className="flex space-x-2"></div>
-                  <button onClick={() => navigate(`/teacher/discipline/list/${discipline.id}`)} className="px-4 py-2 bg-blue-600 text-white text-sm rounded-xl hover:bg-blue-500 transition-all duration-200 font-medium shadow-lg hover:shadow-blue-500/25">
+                  <button onClick={() => navigate(`/teacher/discipline/view/${discipline.id}`)} className="px-4 py-2 bg-blue-600 text-white text-sm rounded-xl hover:bg-blue-500 transition-all duration-200 font-medium shadow-lg hover:shadow-blue-500/25">
                     Acessar
                   </button>
                 </div>

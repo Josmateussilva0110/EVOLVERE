@@ -86,7 +86,7 @@ function CadastrarMaterial() {
     if(response.success) {
       console.log('id da materia: ', response)
       setFlashMessage(response.data.message, 'success')
-      navigate(`/teacher/discipline/list/${response.data.subject_id}`)
+      navigate(`/teacher/discipline/view/${response.data.subject_id}`)
     }
     else {
       setFlashMessage(response.message, 'error')
