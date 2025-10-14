@@ -67,8 +67,8 @@ class Class {
             // CORREÇÃO: Nomes da tabela e colunas
             const alunos = await knex('users')
                 .select('users.id', 'users.username')
-                .join('classes_alunos', 'users.id', '=', 'classes_alunos.aluno_id')
-                .where('classes_alunos.classes_id', id);
+                .join('class_student', 'users.id', '=', 'class_student.student_id')
+                .where('class_student.class_id', id);
 
             classDetails.alunos = alunos;
             
@@ -101,6 +101,53 @@ class Class {
             return false;
         }
     }
+
+    async findIdSubject(id) {
+        try {
+            const result = await knex.select(["subject_id"]).where({id}).table("classes")
+            if(result.length > 0) {
+                return result[0]
+            }
+            else {
+                return undefined
+            }
+        } catch (err) {
+            console.error("Erro ao buscar id da disciplina:", err)
+            return undefined
+        }
+    }
+
+    async getMaterialsClass(class_id) {
+        try {
+            const result = await knex.raw(`
+                select 
+                    c.id,
+                    c.subject_id,
+                    c.name as class_name,
+                    cv.id as course_id,
+                    cv.name as course_name,
+                    case 
+                        when m.type = 1 then 'PDF'
+                        when m.type = 2 then 'DOC'
+                        when m.type = 3 then 'PPT'
+                        else 'Desconhecido'
+                    end as type_file,
+                    m.*
+                from classes c
+                left join materials m
+                    on m.class_id  = c.id
+                inner join course_valid cv
+                    on cv.id = c.course_id
+                where c.id = ?
+                order by m.updated_at desc
+            `, [class_id])
+            const rows = result.rows
+            return rows.length > 0 ? rows : undefined
+        } catch(err) {
+            console.error("Erro ao buscar materiais da turma: ", err);
+            return undefined
+        }
+    } 
 }
 
 module.exports = new Class();

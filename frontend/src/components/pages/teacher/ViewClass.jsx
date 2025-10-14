@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
     Trash2, 
     Eye, 
@@ -13,6 +13,7 @@ import {
     ArrowLeft
 } from "lucide-react";
 import { useNavigate, useParams} from "react-router-dom";
+import requestData from "../../../utils/requestApi"
 
 /**
  * Módulo: ViewClass
@@ -127,6 +128,24 @@ export default function ViewClass() {
     const navigate = useNavigate();
     const { id } = useParams()
 
+    const [materials, setMaterials] = useState([])
+
+    useEffect(() => {
+        async function fetchSubject() {
+            const response = await requestData(`/classes/materials/${id}`, 'GET', {}, true)
+            console.log(response)
+
+            if (response.success) {
+                const mats = response.data.materials
+                setMaterials(mats)
+            }
+        }
+        fetchSubject()
+    }, [id])
+
+
+
+
     // Dados de exemplo
     const alunos = ["Lucas", "Mateus", "Gabriel", "Rai Damásio", "João", "Maria", "Ana", "Pedro", "Sofia"];
     const simulados = [
@@ -136,13 +155,7 @@ export default function ViewClass() {
         { nome: "Estruturas de Repetição", respondido: 4 },
         { nome: "Complexidade de Vetores", respondido: 1 },
     ];
-    const materiais = [
-        { nome: "Livro de Redes de Computadores" },
-        { nome: "Slides - Aula 01 (Introdução)" },
-        { nome: "Gravação - Aula 02 (Revisão)", type: "video" },
-        { nome: "Artigo sobre Complexidade", type: "pdf" },
-        { nome: "Lista de Exercícios 01" },
-    ];
+
 
     // Paginação
     const ITEMS_PER_PAGE = 5;
@@ -171,20 +184,22 @@ export default function ViewClass() {
      */
     const getTotalPages = arr => Math.ceil(arr.length / ITEMS_PER_PAGE);
 
-    return (
+        return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white p-4 sm:p-6 lg:p-8">
             <div className="w-full max-w-7xl mx-auto">
                 {/* Botão Voltar */}
                 <button
                     onClick={() => navigate(-1)}
                     className="p-3 rounded-xl text-gray-300 hover:text-white hover:bg-gray-700/50 transition-all duration-200 border border-gray-600/30 hover:border-gray-500/50"
-                    >
+                >
                     <ArrowLeft className="w-6 h-6" />
                 </button>
+
+
                 {/* Cabeçalho */}
                 <header className="flex flex-col sm:flex-row justify-between sm:items-center mb-8 animate-fade-in">
                     <h1 className="text-3xl font-bold tracking-tight text-white mb-4 sm:mb-0">
-                        Turma de Algoritmos Avançados
+                        {materials.length > 0 ? materials[0].class_name : "Carregando..."}
                     </h1>
                     <div className="flex flex-wrap gap-3">
                         <button className="px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 bg-white/5 hover:bg-white/10 transition-colors">
@@ -193,12 +208,15 @@ export default function ViewClass() {
                         </button>
                         <button 
                             className="px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 transition-colors shadow-lg shadow-yellow-400/20"
-                            onClick={() => navigate("/teacher/material/register")}
+                            onClick={() => navigate(`/teacher/material/register/${id}`, { state: { origin: "class" } })}
                         >
                             <PlusCircle className="w-4 h-4 text-blue-700" />
                             Cadastrar Material
                         </button>
-                        <button onClick={() => navigate('/teacher/simulated/register')} className="px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 transition-colors shadow-lg shadow-yellow-400/20">
+                        <button 
+                            onClick={() => navigate('/teacher/simulated/register')} 
+                            className="px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 transition-colors shadow-lg shadow-yellow-400/20"
+                        >
                             <PlusCircle className="w-4 h-4 text-blue-700" />
                             Cadastrar Simulado
                         </button>
@@ -250,45 +268,35 @@ export default function ViewClass() {
                         <Pagination currentPage={pageSimulados} totalPages={getTotalPages(simulados)} onPageChange={setPageSimulados} />
                     </DashboardCard>
                     
-                    {/* Card de Materiais */}
+                    {/* Card de Materiais (dados da API) */}
                     <DashboardCard 
                         title="Materiais de Aula" 
                         icon={<BookOpen className="w-6 h-6 text-blue-400" />}
                         delay={300}
                     >
                         <ul className="space-y-2 flex-grow">
-                            {getPageData(materiais, pageMateriais).map((mat) => (
-                                <li key={mat.nome} className="flex justify-between items-center p-2.5 rounded-md hover:bg-white/5 transition-colors group">
-                                    <span className="text-slate-200 text-sm truncate pr-4">{mat.nome}</span>
-                                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button><ArrowDownToLine className="w-4 h-4 text-blue-400 hover:text-blue-300" /></button>
-                                        <button><Trash2 className="w-4 h-4 text-red-400 hover:text-red-300" /></button>
-                                    </div>
-                                </li>
-                            ))}
+                            {materials.length > 0 ? (
+                                getPageData(materials, pageMateriais).map((mat) => (
+                                    <li key={mat.id} className="flex justify-between items-center p-2.5 rounded-md hover:bg-white/5 transition-colors group">
+                                        <span className="text-slate-200 text-sm truncate pr-4">{mat.title}</span>
+                                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button>
+                                                <ArrowDownToLine className="w-4 h-4 text-blue-400 hover:text-blue-300" />
+                                            </button>
+                                            <button>
+                                                <Trash2 className="w-4 h-4 text-red-400 hover:text-red-300" />
+                                            </button>
+                                        </div>
+                                    </li>
+                                ))
+                            ) : (
+                                <p className="text-slate-400 text-sm italic">Nenhum material encontrado.</p>
+                            )}
                         </ul>
-                        <Pagination currentPage={pageMateriais} totalPages={getTotalPages(materiais)} onPageChange={setPageMateriais} />
+                        <Pagination currentPage={pageMateriais} totalPages={getTotalPages(materials)} onPageChange={setPageMateriais} />
                     </DashboardCard>
-
                 </main>
             </div>
-
-            {/* Estilos Globais e Animações */}
-            <style>{`
-                body {
-                    background: linear-gradient(180deg, #111827 0%, #1f2937 50%, #111827 100%);
-                    background-color: #111827;
-                    background-image: radial-gradient(circle at 10% 10%, rgba(129, 140, 248, 0.06), transparent 30%),
-                                      radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.06), transparent 30%);
-                }
-                .animate-fade-in {
-                    animation: fadeIn 0.7s cubic-bezier(.4,0,.2,1) both;
-                }
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-            `}</style>
         </div>
     );
 }
