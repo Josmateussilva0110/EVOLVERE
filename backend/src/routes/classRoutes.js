@@ -31,6 +31,7 @@ router.get('/classes/detail/:id', classController.getDetails);
 router.delete('/classes/:id/students/:studentId', classController.removeStudent);
 
 router.get('/classes/:subject_id', classController.listBySubject)
+router.get('/classes/subject_id/:id', classController.getIdSubject)
 
 module.exports = router;
 

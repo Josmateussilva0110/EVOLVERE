@@ -193,7 +193,7 @@ export default function ViewClass() {
                         </button>
                         <button 
                             className="px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 transition-colors shadow-lg shadow-yellow-400/20"
-                            onClick={() => navigate("/teacher/material/register")}
+                            onClick={() => navigate(`/teacher/material/register/${id}`, { state: { origin: "class" } })}
                         >
                             <PlusCircle className="w-4 h-4 text-blue-700" />
                             Cadastrar Material

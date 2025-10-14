@@ -213,6 +213,25 @@ class ClassController {
             });
         }
     }
+
+    async getIdSubject(request, response) {
+        try {
+            const {id} = request.params
+            if (!validator.isInt(id + '', { min: 1 })) {
+                return res.status(422).json({ status: false, message: "ID da turma inválido." });
+            }
+
+            const result = await Class.findIdSubject(id)
+            if(!result) {
+                return response.status(404).json({ status: false, message: "Id da materia não encontrado." })
+            }
+            const subject_id = result.subject_id
+            return response.status(200).json({status: true, subject_id})
+
+        } catch (err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
 }
 
 module.exports = new ClassController();

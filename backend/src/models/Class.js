@@ -67,8 +67,8 @@ class Class {
             // CORREÇÃO: Nomes da tabela e colunas
             const alunos = await knex('users')
                 .select('users.id', 'users.username')
-                .join('classes_alunos', 'users.id', '=', 'classes_alunos.aluno_id')
-                .where('classes_alunos.classes_id', id);
+                .join('class_student', 'users.id', '=', 'class_student.student_id')
+                .where('class_student.class_id', id);
 
             classDetails.alunos = alunos;
             
@@ -99,6 +99,21 @@ class Class {
         } catch (err) {
             console.error('Erro ao remover aluno da turma:', err);
             return false;
+        }
+    }
+
+    async findIdSubject(id) {
+        try {
+            const result = await knex.select(["subject_id"]).where({id}).table("classes")
+            if(result.length > 0) {
+                return result[0]
+            }
+            else {
+                return undefined
+            }
+        } catch (err) {
+            console.error("Erro ao buscar id da disciplina:", err)
+            return undefined
         }
     }
 }

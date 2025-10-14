@@ -11,7 +11,7 @@ import {
 import CustomSelect from "../../form/SelectTeacher";
 import requestData from "../../../utils/requestApi";
 import useFlashMessage from "../../../hooks/useFlashMessage"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams, useLocation } from "react-router-dom"
 import { Context } from "../../../context/UserContext"
 
 /* ---------------------- Componente Principal ---------------------- */
@@ -61,7 +61,29 @@ function CadastrarMaterial() {
   const { setFlashMessage } = useFlashMessage()
   const navigate = useNavigate()
   const { user } = useContext(Context)
-  const { subject_id } = useParams()
+  const { id } = useParams()
+  const [subject_id, setSubject_id] = useState(null)
+  const location = useLocation()
+  const origin = location.state?.origin || null
+
+  console.log('id: ', id)
+  console.log('origin: ', origin)
+
+  if(origin === 'class') {
+    useEffect(() => {
+      async function fetchSubject_id() {
+        const response = await requestData(`/classes/subject_id/${id}`, 'GET', {}, true)
+        if(response.success) {
+          setSubject_id(response.data.subject_id)
+        }
+      }
+      fetchSubject_id()
+      
+    }, [id])
+  }
+
+  console.log('subject_id: ', subject_id)
+
 
 
 
@@ -81,12 +103,23 @@ function CadastrarMaterial() {
     if(user) {
       formData.append("created_by", user.id); 
     }
-    formData.append("subject_id", subject_id); 
+    if(origin === 'subject') {
+      formData.append("subject_id", id); 
+    }
+    else {
+      formData.append("class_id", id); 
+      formData.append("subject_id", subject_id); 
+    }
     const response = await requestData('/material', 'POST', formData, true)
     if(response.success) {
       console.log('id da materia: ', response)
       setFlashMessage(response.data.message, 'success')
-      navigate(`/teacher/discipline/view/${response.data.subject_id}`)
+      if(origin === 'subject') {
+        navigate(`/teacher/discipline/view/${response.data.subject_id}`)
+      }
+      else {
+        navigate(`/teacher/class/view/${id}`)
+      }
     }
     else {
       setFlashMessage(response.message, 'error')
@@ -173,22 +206,6 @@ function CadastrarMaterial() {
    */
   const clearFile = () => setArquivo(null);
 
-  /**
-   * handleCadastrar
-   *
-   * Valida campos obrigatórios (título, type e archive). Em caso de sucesso,
-   * realiza uma simulação de cadastro (console.log e alert). Em produção,
-   * aqui é o lugar para enviar os dados ao servidor (fetch / axios / FormData).
-   */
-  const handleCadastrar = () => {
-    if (!title.trim() || !type || !archive) {
-      setError("Preencha todos os campos obrigatórios.");
-      return;
-    }
-
-    console.log("Cadastrar material:", { title, description, type, archive });
-    alert("Material cadastrado (simulação).");
-  };
 
   const isValid = title.trim() && type && archive;
   const fileExt = archive ? archive.name.split(".").pop().toLowerCase() : "";

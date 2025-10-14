@@ -287,7 +287,7 @@ function ViewSubjectDetails() {
               )}
 
               <button
-                onClick={() => navigate(`/teacher/material/register/${id}`)}
+                onClick={() => navigate(`/teacher/material/register/${id}`, { state: { origin: "subject" } })}
                 className="w-full py-4 border-2 border-dashed border-gray-600/50 rounded-xl text-gray-300 hover:text-white hover:border-gray-500/50 hover:bg-gray-700/30 transition-all duration-200 font-medium flex items-center justify-center gap-2"
               >
                 <Plus className="w-4 h-4" />

@@ -9,9 +9,22 @@ const validator = require('validator');
 class MaterialController {
     async register(request, response) {
         try {
-            const {title, description, type, created_by, subject_id} = request.body
+            const {title, description, type, created_by, subject_id, class_id} = request.body
+            console.log(title)
+            console.log(description)
+            console.log(type)
+            console.log(created_by)
+            console.log(subject_id)
+            console.log(class_id)
+
             const error = MaterialFieldValidator.validate({ title, description, type, created_by, subject_id })
             if (error) return response.status(422).json({ status: false, message: error })
+            
+            if(class_id) {
+                if (!validator.isInt(class_id + '', { min: 1 })) {
+                    return res.status(422).json({ success: false, message: "ID da turma invalido." });
+                }
+            }
 
             if (!request.file) {
                 return response.status(400).json({ status: false, message: "O upload de um arquivo é obrigatório." })
@@ -35,6 +48,10 @@ class MaterialController {
                 archive: archivePath, 
                 created_by, 
                 subject_id
+            }
+            if(class_id) {
+                data.class_id = class_id
+                data.origin = 2
             }
             const valid = await Material.save(data)
             if(!valid) {
