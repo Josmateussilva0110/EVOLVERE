@@ -34,9 +34,9 @@ class Class {
                     'classes.name',
                     'classes.period',
                     'classes.capacity',
-                    knex.raw('count("classes_alunos".aluno_id) as student_count')
+                    knex.raw('count("class_student".student_id) as student_count')
                 )
-                .leftJoin('classes_alunos', 'classes.id', '=', 'classes_alunos.classes_id')
+                .leftJoin('class_student', 'classes.id', '=', 'class_student.class_id')
                 .where('classes.subject_id', subjectId)
                 .groupBy('classes.id')
                 .orderBy('classes.name', 'asc');

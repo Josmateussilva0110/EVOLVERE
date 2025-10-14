@@ -38,6 +38,7 @@ function ViewSubjectDetails() {
   const { id } = useParams()
   const [course_id, setCourseId] = useState(null)
   const [materials, setMaterials] = useState([])
+  const [classes, setClasses] = useState([])
   const { setFlashMessage } = useFlashMessage()
 
   useEffect(() => {
@@ -57,24 +58,30 @@ function ViewSubjectDetails() {
     fetchSubject()
   }, [id])
 
-  async function deleteMaterial(id) {
-      const response = await requestData(`/material/${id}`, 'DELETE', {}, true)
+  useEffect(() => {
+    async function fetchClasses() {
+      const response = await requestData(`/classes/${id}`, 'GET', {}, true)
+      console.log('turmas: ', response)
+
       if (response.success) {
-        setMaterials(prev => prev.filter(d => d.id !== id))
-        setFlashMessage(response.data.message, 'success')
+        setClasses(response.data.classes)
       }
-      else {
-        setFlashMessage(response.message, 'error')
-      }
+    }
+    fetchClasses()
+  }, [id])
+
+
+  async function deleteMaterial(id) {
+    const response = await requestData(`/material/${id}`, 'DELETE', {}, true)
+    if (response.success) {
+      setMaterials(prev => prev.filter(d => d.id !== id))
+      setFlashMessage(response.data.message, 'success')
+    }
+    else {
+      setFlashMessage(response.message, 'error')
+    }
   }
 
-  /**
-   * handleVoltar
-   *
-   * Volta à página anterior usando o histórico do browser.
-   * Uso: chamado pelo botão de voltar no cabeçalho.
-   */
-  const handleVoltar = () => window.history.back()
 
   /**
    * toggleMenu
@@ -95,23 +102,27 @@ function ViewSubjectDetails() {
   }
 
   async function registerClass(e) {
-      e.preventDefault()
-      const body = {
-        name: nomeTurma,
-        capacity: capacidade,
-        period: materials[0].period,
-        course_id,
-        subject_id: id
-      }
+    e.preventDefault()
+    const body = {
+      name: nomeTurma,
+      capacity: capacidade,
+      period: materials[0].period,
+      course_id,
+      subject_id: id
+    }
 
-      const response = await requestData('/classes', 'POST', body, true)
-      if(response.success) {
-        setFlashMessage(response.data.message, 'success')
-        navigate(`/teacher/discipline/view/${id}`)
-      }
-      else {
-        setFlashMessage(response.message, 'error')
-      }
+    const response = await requestData('/classes', 'POST', body, true)
+    if (response.success) {
+      setFlashMessage(response.data.message, 'success')
+      setShowAddTurmaPopup(false)
+      setNomeTurma("")
+      setCapacidade("")
+
+      setClasses(prev => [...prev, response.data.classes])
+    }
+    else {
+      setFlashMessage(response.message, 'error')
+    }
   }
 
   /**
@@ -125,21 +136,6 @@ function ViewSubjectDetails() {
     setCapacidade("")
   }
 
-  /**
-   * Dados de exemplo: turmas
-   *
-   * Estrutura de cada item:
-   * - nome: string — identificador curto da turma (ex.: "A")
-   * - cor: string — classes utilitárias para gradiente de fundo (Tailwind)
-   * - alunos: number — quantidade de alunos matriculados
-   *
-   * Em produção: substituir por dados carregados do backend.
-   */
-  const turmas = [
-    { nome: "Turma de Algoritmos Avançados", cor: "from-gray-700 to-gray-600", alunos: 42 },
-    { nome: "B", cor: "from-gray-700 to-gray-600", alunos: 38 },
-    { nome: "C", cor: "from-gray-700 to-gray-600", alunos: 45 },
-  ]
 
   function getColorByType(type) {
     switch (type.toLowerCase()) {
@@ -169,7 +165,7 @@ function ViewSubjectDetails() {
         <div className="bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700/50 overflow-hidden">
           <div className="flex justify-between items-center px-6 py-6 bg-gray-800/90 border-b border-gray-700/50">
             <button
-              onClick={handleVoltar}
+              onClick={() => navigate('/teacher/discipline/manage')}
               className="p-3 rounded-xl text-gray-300 hover:text-white hover:bg-gray-700/50 transition-all duration-200 border border-gray-600/30 hover:border-gray-500/50"
             >
               <ArrowLeft className="w-6 h-6" />
@@ -230,7 +226,7 @@ function ViewSubjectDetails() {
                 <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
                   <FileText className="w-5 h-5 text-blue-400" />
                 </div>
-                Materiais 
+                Materiais
               </h2>
             </div>
 
@@ -313,24 +309,35 @@ function ViewSubjectDetails() {
             </div>
 
             <div className="p-6 space-y-4">
-              {turmas.map((turma) => (
-                <div
-                  key={turma.nome}
-                  className={`group relative bg-gradient-to-br ${turma.cor} rounded-xl p-5 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] overflow-hidden block border border-gray-600/30 hover:border-gray-500/50`}
-                  onClick={() => navigate("/teacher/class/view")}
-                >
-                  <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <div className="relative z-10 flex items-center justify-between">
-                    <div>
-                      <h3 className="text-xl font-bold text-white mb-1">Turma {turma.nome}</h3>
-                      <p className="text-gray-300 text-sm font-medium flex items-center gap-2">
-                        <Users className="w-4 h-4" />
-                        {turma.alunos} alunos matriculados
-                      </p>
+              {classes.length > 0 ? (
+                classes.map((classe) => (
+                  <div
+                    key={classe.id}
+                    className={`group relative bg-gradient-to-br from-gray-700 to-gray-600 rounded-xl p-5 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] overflow-hidden block border border-gray-600/30 hover:border-gray-500/50`}
+                    onClick={() => navigate(`/teacher/class/view/${classe.id}`)}
+                  >
+                    <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div className="relative z-10 flex items-center justify-between">
+                      <div>
+                        <h3 className="text-xl font-bold text-white mb-1">
+                          {classe.name}
+                        </h3>
+                        <p className="text-gray-300 text-sm font-medium flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          {classe.student_count || 0} aluno{classe.student_count === 1 ? "" : "s"} matriculado{classe.student_count === 1 ? "" : "s"}
+                        </p>
+                        <p className="text-gray-400 text-xs mt-1">
+                          Capacidade: {classe.capacity} alunos
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-gray-400 text-sm text-center py-6">
+                  Nenhuma turma cadastrada para esta disciplina.
+                </p>
+              )}
 
               <button
                 onClick={handleAddTurma}
@@ -341,6 +348,7 @@ function ViewSubjectDetails() {
               </button>
             </div>
           </div>
+
         </div>
       </div>
       <RegisterClasses

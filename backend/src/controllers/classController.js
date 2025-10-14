@@ -32,11 +32,6 @@ class ClassController {
         try {
             // Agora incluindo 'capacity'
             const { name, period, subject_id, course_id, capacity } = req.body;
-            console.log(name)
-            console.log(period)
-            console.log(subject_id)
-            console.log(course_id)
-            console.log(capacity)
 
             // Adicionando 'capacity' na validação
             if (!name || !period || !subject_id || !course_id || !capacity) {
@@ -62,8 +57,16 @@ class ClassController {
                 });
             }
 
+            const responseData = {
+                id: newClass.id,
+                name: newClass.name,
+                capacity: newClass.capacity,
+                student_count: 0
+            }
+
             res.status(201).json({
                 status: true,
+                classes: responseData,
                 message: 'Turma criada com sucesso!',
             });
 
@@ -94,21 +97,22 @@ class ClassController {
      */
     async listBySubject(req, res) {
         try {
-            const { subjectId } = req.params;
+            const { subject_id } = req.params;
+            console.log(subject_id)
 
-            if (!validator.isInt(subjectId + '', { min: 1 })) {
+            if (!validator.isInt(subject_id + '', { min: 1 })) {
                 return res.status(422).json({ status: false, message: "ID da disciplina inválido." });
             }
 
-            const classes = await Class.findBySubjectId(Number(subjectId));
+            const classes = await Class.findBySubjectId(Number(subject_id));
 
             if (!classes) {
-                return res.status(500).json({ status: false, message: 'Ocorreu um erro ao buscar as turmas.' });
+                return res.status(404).json({ status: false, message: 'Nenhuma turma encontrada.' });
             }
 
             res.status(200).json({
                 status: true,
-                data: classes
+                classes
             });
 
         } catch (error) {
