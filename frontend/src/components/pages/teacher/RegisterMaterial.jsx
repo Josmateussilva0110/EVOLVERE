@@ -66,8 +66,6 @@ function CadastrarMaterial() {
   const location = useLocation()
   const origin = location.state?.origin || null
 
-  console.log('id: ', id)
-  console.log('origin: ', origin)
 
   if(origin === 'class') {
     useEffect(() => {
@@ -82,9 +80,6 @@ function CadastrarMaterial() {
     }, [id])
   }
 
-  console.log('subject_id: ', subject_id)
-
-
 
 
   useEffect(() => {
@@ -92,39 +87,45 @@ function CadastrarMaterial() {
   }, [archive]);
 
   async function submitForm(e) {
-    e.preventDefault()
+    e.preventDefault();
+
     const formData = new FormData();
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("type", type);
-    if (archive) {
-      formData.append("materials", archive); 
+    const baseData = {
+      title,
+      description,
+      type,
+      created_by: user?.id,
+    };
+
+    Object.entries(baseData).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) formData.append(key, value);
+    });
+
+    if (archive) formData.append("materials", archive);
+
+    if (origin === "subject") {
+      formData.append("subject_id", id);
+    } else {
+      formData.append("class_id", id);
+      formData.append("subject_id", subject_id);
     }
-    if(user) {
-      formData.append("created_by", user.id); 
-    }
-    if(origin === 'subject') {
-      formData.append("subject_id", id); 
-    }
-    else {
-      formData.append("class_id", id); 
-      formData.append("subject_id", subject_id); 
-    }
-    const response = await requestData('/material', 'POST', formData, true)
-    if(response.success) {
-      console.log('id da materia: ', response)
-      setFlashMessage(response.data.message, 'success')
-      if(origin === 'subject') {
-        navigate(`/teacher/discipline/view/${response.data.subject_id}`)
-      }
-      else {
-        navigate(`/teacher/class/view/${id}`)
-      }
-    }
-    else {
-      setFlashMessage(response.message, 'error')
+
+    const response = await requestData("/material", "POST", formData, true);
+
+    if (response.success) {
+      setFlashMessage(response.data.message, "success");
+
+      const redirectPath =
+        origin === "subject"
+          ? `/teacher/discipline/view/${response.data.subject_id}`
+          : `/teacher/class/view/${id}`;
+
+      navigate(redirectPath);
+    } else {
+      setFlashMessage(response.message, "error");
     }
   }
+
 
   const handleVoltar = () => window.history.back();
 

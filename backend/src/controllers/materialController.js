@@ -10,13 +10,6 @@ class MaterialController {
     async register(request, response) {
         try {
             const {title, description, type, created_by, subject_id, class_id} = request.body
-            console.log(title)
-            console.log(description)
-            console.log(type)
-            console.log(created_by)
-            console.log(subject_id)
-            console.log(class_id)
-
             const error = MaterialFieldValidator.validate({ title, description, type, created_by, subject_id })
             if (error) return response.status(422).json({ status: false, message: error })
             
