@@ -39,7 +39,7 @@ class Class {
                 .leftJoin('class_student', 'classes.id', '=', 'class_student.class_id')
                 .where('classes.subject_id', subjectId)
                 .groupBy('classes.id')
-                .orderBy('classes.name', 'asc');
+                .orderBy(knex.raw('LOWER(classes.name)'), 'asc')
 
             return classes;
         } catch (err) {

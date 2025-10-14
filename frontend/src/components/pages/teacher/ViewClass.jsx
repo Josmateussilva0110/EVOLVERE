@@ -9,9 +9,10 @@ import {
     ChevronLeft, 
     ChevronRight,
     PlusCircle,
-    Link
+    Link,
+    ArrowLeft
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams} from "react-router-dom";
 
 /**
  * Módulo: ViewClass
@@ -124,6 +125,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
  */
 export default function ViewClass() {
     const navigate = useNavigate();
+    const { id } = useParams()
 
     // Dados de exemplo
     const alunos = ["Lucas", "Mateus", "Gabriel", "Rai Damásio", "João", "Maria", "Ana", "Pedro", "Sofia"];
@@ -172,6 +174,13 @@ export default function ViewClass() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white p-4 sm:p-6 lg:p-8">
             <div className="w-full max-w-7xl mx-auto">
+                {/* Botão Voltar */}
+                <button
+                    onClick={() => navigate(-1)}
+                    className="p-3 rounded-xl text-gray-300 hover:text-white hover:bg-gray-700/50 transition-all duration-200 border border-gray-600/30 hover:border-gray-500/50"
+                    >
+                    <ArrowLeft className="w-6 h-6" />
+                </button>
                 {/* Cabeçalho */}
                 <header className="flex flex-col sm:flex-row justify-between sm:items-center mb-8 animate-fade-in">
                     <h1 className="text-3xl font-bold tracking-tight text-white mb-4 sm:mb-0">

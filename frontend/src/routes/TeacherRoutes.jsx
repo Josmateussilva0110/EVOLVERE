@@ -55,7 +55,7 @@ export default function TeacherRoutes() {
        * @route /teacher/class/view
        * @element ViewClass
        */}
-      <Route path="class/view" element={<ViewClass />} />
+      <Route path="class/view/:id" element={<ViewClass />} />
 
       {/**
        * Página para criação de simulados (testes avaliativos).
