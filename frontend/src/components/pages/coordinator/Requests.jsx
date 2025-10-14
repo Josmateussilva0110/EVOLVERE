@@ -273,16 +273,18 @@ function RequestsTeachers() {
                   </td>
 
                   {/* Cargo */}
-                  <td className="py-3 px-4 text-sm text-gray-700">
-                    <div className="flex items-center gap-1">
-                      {prof.role === "Professor" ? (
-                        <FaChalkboardTeacher className="text-gray-500" />
-                      ) : (
-                        <FiBriefcase className="text-gray-500" />
-                      )}
-                      {prof.role}
-                    </div>
-                  </td>
+                  {showRoleColumn && ( 
+                    <td className="py-3 px-4 text-sm text-gray-700">
+                      <div className="flex items-center gap-1">
+                        {prof.role === "Professor" ? (
+                          <FaChalkboardTeacher className="text-gray-500" />
+                        ) : (
+                          <FiBriefcase className="text-gray-500" />
+                        )}
+                        {prof.role}
+                      </div>
+                    </td>
+                  )}
 
 
                   {/* Criado em */}

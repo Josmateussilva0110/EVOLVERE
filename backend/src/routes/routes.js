@@ -24,26 +24,17 @@ const userRoutes = require("./userRoutes")
 const accountRoutes = require("./accountRoutes")
 const courseRoutes = require("./courseRoutes")
 const subjectRoutes = require("./subjectRoutes")
-<<<<<<< HEAD
 const materialRoutes = require("./materialsRoutes")
 const classRoutes = require("./classRoutes")
 
-=======
-const classRoutes = require("./classRoutes") 
->>>>>>> b2415bd1aabded10d1c6c0a52a30697f5237cbe3
 
 //Usar a rota
 router.use(userRoutes)
 router.use(accountRoutes)
 router.use(courseRoutes)
-<<<<<<< HEAD
 router.use(subjectRoutes)
 router.use(materialRoutes)
 router.use(classRoutes)
 
-=======
-router.use(subjectRoutes) 
-router.use(classRoutes)   
->>>>>>> b2415bd1aabded10d1c6c0a52a30697f5237cbe3
 
 module.exports = router

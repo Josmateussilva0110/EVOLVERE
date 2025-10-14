@@ -19,7 +19,7 @@ router.post('/classes', classController.create);
  * @param {number} id.path.required - ID da turma.
  * @returns {object} 200 - Detalhes da turma e lista de alunos.
  */
-router.get('/classes/:id', classController.getDetails);
+router.get('/classes/detail/:id', classController.getDetails);
 
 /**
  * @route DELETE /:id/students/:studentId
@@ -29,6 +29,8 @@ router.get('/classes/:id', classController.getDetails);
  * @returns {object} 200 - Mensagem de sucesso.
  */
 router.delete('/classes/:id/students/:studentId', classController.removeStudent);
+
+router.get('/classes/:subject_id', classController.listBySubject)
 
 module.exports = router;
 

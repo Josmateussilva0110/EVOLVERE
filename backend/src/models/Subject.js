@@ -319,6 +319,7 @@ class Subject {
                             ELSE '2'
                         END
                     ) AS period,
+                    cv.id as course_id,
                     cv.name as course_name,
                     case 
                         when m.type = 1 then 'PDF'

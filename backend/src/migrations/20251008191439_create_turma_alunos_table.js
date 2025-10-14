@@ -4,23 +4,23 @@
      */
     exports.up = function(knex) {
         // Cria a tabela 'Class_alunos' para ligar os alunos às turmas
-        return knex.schema.createTable("classes_alunos", function (table) {
+        return knex.schema.createTable("class_student", function (table) {
             // Chave estrangeira para a turma
-            table.integer('classes_id').unsigned().notNullable();
-            table.foreign('classes_id')
+            table.integer('class_id').unsigned().notNullable();
+            table.foreign('class_id')
                 .references('id')
                 .inTable('classes')
                 .onDelete('CASCADE');
 
             // Chave estrangeira para o aluno (utilizador)
-            table.integer('aluno_id').unsigned().notNullable();
-            table.foreign('aluno_id')
+            table.integer('student_id').unsigned().notNullable();
+            table.foreign('student_id')
                 .references('id')
                 .inTable('users')
                 .onDelete('CASCADE');
 
             // Chave primária composta
-            table.primary(['classes_id', 'aluno_id']);
+            table.primary(['class_id', 'student_id']);
 
             table.timestamps(true, true);
         });
@@ -31,5 +31,5 @@
      * @returns { Promise<void> }
      */
     exports.down = function(knex) {
-        return knex.schema.dropTable("classes_alunos");
+        return knex.schema.dropTable("class_student");
     };

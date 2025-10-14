@@ -10,6 +10,7 @@ const up = function (knex) {
     table.integer('subject_id').notNullable()
     table.foreign('subject_id').references('id').inTable('subjects').onDelete('CASCADE').onUpdate('CASCADE')
     table.integer('class_id').nullable()
+    table.foreign('class_id').references('id').inTable('classes').onDelete('SET NULL').onUpdate('CASCADE')
     table.integer('status').defaultTo(1)
     table.timestamps(true, true)
   })
