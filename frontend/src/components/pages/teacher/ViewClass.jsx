@@ -127,6 +127,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
 export default function ViewClass() {
     const navigate = useNavigate();
     const { id } = useParams()
+
     const [materials, setMaterials] = useState([])
 
     useEffect(() => {
@@ -141,6 +142,7 @@ export default function ViewClass() {
         }
         fetchSubject()
     }, [id])
+
 
 
 
@@ -192,6 +194,7 @@ export default function ViewClass() {
                 >
                     <ArrowLeft className="w-6 h-6" />
                 </button>
+
 
                 {/* Cabeçalho */}
                 <header className="flex flex-col sm:flex-row justify-between sm:items-center mb-8 animate-fade-in">
