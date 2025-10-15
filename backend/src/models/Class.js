@@ -7,7 +7,23 @@ const knex = require("../database/connection");
 class Class {
 
     /**
-     * Cria uma nova turma na base de dados.
+     * @summary Cria uma nova turma na base de dados.
+     * @param {Object} data - Dados da turma a ser criada.
+     * @param {string} data.name - Nome da turma.
+     * @param {string} data.period - Período da turma.
+     * @param {number} data.subject_id - ID da disciplina.
+     * @param {number} data.course_id - ID do curso.
+     * @param {number} data.capacity - Capacidade máxima de alunos.
+     * @returns {Promise<Object|undefined>} Objeto da turma criada ou undefined em caso de erro.
+     * @example
+     * // Uso:
+     * const newClass = await Class.create({
+     *   name: "Turma A",
+     *   period: "2025.1",
+     *   subject_id: 1,
+     *   course_id: 2,
+     *   capacity: 40
+     * });
      */
     async create(data) {
         try {
@@ -23,7 +39,17 @@ class Class {
     }
 
     /**
-     * Busca todas as turmas de uma disciplina específica, incluindo a contagem de alunos.
+     * @summary Busca todas as turmas de uma disciplina específica, incluindo a contagem de alunos.
+     * @param {number} subjectId - ID da disciplina.
+     * @returns {Promise<Array|undefined>} Array de turmas com contagem de alunos ou undefined em caso de erro.
+     * @example
+     * // Uso:
+     * const classes = await Class.findBySubjectId(1);
+     * // Retorno:
+     * // [
+     * //   { id: 1, name: "A", period: "2025.1", capacity: 40, student_count: "35" },
+     * //   { id: 2, name: "B", period: "2025.1", capacity: 35, student_count: "30" }
+     * // ]
      */
     async findBySubjectId(subjectId) {
         try {
@@ -49,9 +75,25 @@ class Class {
     }
 
     /**
-     * ✅ FUNÇÃO ADICIONADA: Busca os detalhes de uma turma e a lista de seus alunos.
+     * @summary Busca os detalhes de uma turma e a lista de seus alunos.
      * @param {number} id - O ID da turma.
      * @returns {Promise<Object|undefined>} Um objeto com os detalhes da turma e um array de alunos.
+     * @example
+     * // Uso:
+     * const classDetails = await Class.getDetails(1);
+     * // Retorno:
+     * // {
+     * //   id: 1,
+     * //   name: "Turma A",
+     * //   period: "2025.1",
+     * //   subject_id: 1,
+     * //   course_id: 2,
+     * //   capacity: 40,
+     * //   alunos: [
+     * //     { id: 10, username: "João Silva" },
+     * //     { id: 15, username: "Maria Oliveira" }
+     * //   ]
+     * // }
      */
     async getDetails(id) {
         try {
@@ -80,10 +122,14 @@ class Class {
     }
 
     /**
-     * ✅ FUNÇÃO ADICIONADA: Remove a associação de um aluno a uma turma.
+     * @summary Remove a associação de um aluno a uma turma.
      * @param {number} turmaId - O ID da turma.
      * @param {number} alunoId - O ID do aluno a ser removido.
      * @returns {Promise<boolean>} Retorna true se a remoção for bem-sucedida.
+     * @example
+     * // Uso:
+     * const success = await Class.removeStudent(1, 10);
+     * // Retorno: true (se removido com sucesso)
      */
     async removeStudent(turmaId, alunoId) {
         try {
@@ -102,6 +148,15 @@ class Class {
         }
     }
 
+    /**
+     * @summary Busca o ID da disciplina associada a uma turma.
+     * @param {number} id - ID da turma.
+     * @returns {Promise<Object|undefined>} Objeto contendo o subject_id ou undefined se não encontrado.
+     * @example
+     * // Uso:
+     * const result = await Class.findIdSubject(1);
+     * // Retorno: { subject_id: 5 }
+     */
     async findIdSubject(id) {
         try {
             const result = await knex.select(["subject_id"]).where({id}).table("classes")
@@ -117,6 +172,27 @@ class Class {
         }
     }
 
+    /**
+     * @summary Busca todos os materiais associados a uma turma específica.
+     * @param {number} class_id - ID da turma.
+     * @returns {Promise<Array|undefined>} Array de materiais da turma ou undefined se não encontrados.
+     * @example
+     * // Uso:
+     * const materials = await Class.getMaterialsClass(1);
+     * // Retorno:
+     * // [
+     * //   {
+     * //     id: 1,
+     * //     subject_id: 5,
+     * //     class_name: "Turma A",
+     * //     course_id: 2,
+     * //     course_name: "Engenharia",
+     * //     type_file: "PDF",
+     * //     name: "Apostila 1",
+     * //     file_path: "/materials/apostila1.pdf"
+     * //   }
+     * // ]
+     */
     async getMaterialsClass(class_id) {
         try {
             const result = await knex.raw(`

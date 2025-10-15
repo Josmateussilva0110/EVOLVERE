@@ -275,78 +275,127 @@ class subjectController {
         }
     }
 
-
-    async getAllMateriais(request, response) {
-        try {
-            const { id } = request.params
-            if (!validator.isInt(id + '', { min: 1 })) {
-                return res.status(422).json({ success: false, message: "ID inválido." });
-            }
-            const materials = await Subject.getMaterialsGlobal(id)
-            if(!materials) {
-                return response.status(404).json({ status: false, message: "Nenhum material encontrado." })
-            }
-            return response.status(200).json({ status: true, materials})
-        } catch(err) {
-            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+/**
+ * @summary Obtém todos os materiais globais associados a uma disciplina específica.
+ * @param {import("express").Request} request - O objeto da requisição Express.
+ * @param {import("express").Response} response - O objeto da resposta Express.
+ * @returns {Promise<void>}
+ * @example
+ * // GET /api/subjects/1/materials
+ * // Resposta de sucesso:
+ * {
+ * "status": true,
+ * "materials": [
+ *   { "id": 1, "name": "Apostila Geral", "type": "pdf", "is_global": true },
+ *   { "id": 2, "name": "Slides Teóricos", "type": "ppt", "is_global": true }
+ * ]
+ * }
+ */
+async getAllMateriais(request, response) {
+    try {
+        const { id } = request.params
+        if (!validator.isInt(id + '', { min: 1 })) {
+            return response.status(422).json({ success: false, message: "ID inválido." });
         }
-    }
-
-    async findSubjectByUser(request, response) {
-        try {
-            const { id } = request.params
-            if (!validator.isInt(id + '', { min: 1 })) {
-                return res.status(422).json({ success: false, message: "ID inválido." });
-            }
-            const subject_id = await Subject.subjectUser(id)
-            if(!subject_id) {
-                return response.status(404).json({ status: false, message: "Nenhum material encontrado." })
-            }
-            return response.status(200).json({ status: true, subject_id})
-        } catch(err) {
-            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        const materials = await Subject.getMaterialsGlobal(id)
+        if(!materials) {
+            return response.status(404).json({ status: false, message: "Nenhum material encontrado." })
         }
+        return response.status(200).json({ status: true, materials})
+    } catch(err) {
+        return response.status(500).json({ status: false, message: "Erro interno no servidor." })
     }
+}
 
-
-    /**
-     * @summary Obtém os detalhes de uma disciplina para a tela de um PROFESSOR.
-     * @description Protegida por uma lógica que verifica se o usuário logado é o professor da disciplina.
-     */
-    async getScreenDetailsForTeacher(req, res) {
-        try {
-            const { id } = req.params;
-            const teacher = req.session.user;
-
-            if (!teacher) {
-                return res.status(401).json({ success: false, message: "Acesso não autorizado. Faça login novamente." });
-            }
-
-            if (!validator.isInt(String(id), { min: 1 })) {
-                return res.status(422).json({ success: false, message: "ID da disciplina é inválido." });
-            }
-
-            // Usando a nova e correta função de permissão
-            const hasPermission = await Subject.isTeacherOfSubject(Number(id), teacher.id);
-            
-            if (!hasPermission) {
-                return res.status(403).json({ success: false, message: "Você não tem permissão para acessar os detalhes desta disciplina." });
-            }
-
-            // A lógica para buscar os dados é a mesma, reutilizamos a função do Model
-            const details = await Subject.findScreenDetailsById(Number(id));
-
-            if (!details) {
-                return res.status(404).json({ success: false, message: 'Disciplina não encontrada.' });
-            }
-            
-            res.status(200).json({ success: true, data: details });
-
-        } catch (error) {
-            console.error('Erro ao buscar detalhes da disciplina para o professor:', error);
-            res.status(500).json({ success: false, message: 'Erro interno do servidor' });
+/**
+ * @summary Encontra as disciplinas associadas a um usuário específico.
+ * @param {import("express").Request} request - O objeto da requisição Express.
+ * @param {import("express").Response} response - O objeto da resposta Express.
+ * @returns {Promise<void>}
+ * @example
+ * // GET /api/users/1/subjects
+ * // Resposta de sucesso:
+ * {
+ * "status": true,
+ * "subject_id": [
+ *   { "id": 1, "name": "Matemática" },
+ *   { "id": 2, "name": "Física" }
+ * ]
+ * }
+ */
+async findSubjectByUser(request, response) {
+    try {
+        const { id } = request.params
+        if (!validator.isInt(id + '', { min: 1 })) {
+            return response.status(422).json({ success: false, message: "ID inválido." });
         }
+        const subject_id = await Subject.subjectUser(id)
+        if(!subject_id) {
+            return response.status(404).json({ status: false, message: "Nenhuma disciplina encontrada." })
+        }
+        return response.status(200).json({ status: true, subject_id})
+    } catch(err) {
+        return response.status(500).json({ status: false, message: "Erro interno no servidor." })
     }
+}
+
+/**
+ * @summary Obtém os detalhes de uma disciplina para a tela de um PROFESSOR.
+ * @description Protegida por uma lógica que verifica se o usuário logado é o professor da disciplina.
+ * @param {import("express").Request} req - O objeto da requisição Express.
+ * @param {import("express").Response} res - O objeto da resposta Express.
+ * @returns {Promise<void>}
+ * @example
+ * // GET /api/subjects/1/teacher-details
+ * // Requer autenticação de professor
+ * // Resposta de sucesso:
+ * {
+ * "success": true,
+ * "data": {
+ *   "id": 1,
+ *   "name": "Matemática Avançada",
+ *   "description": "Disciplina de matemática para curso superior",
+ *   "classes": [
+ *     { "id": 1, "name": "Turma A", "student_count": 30 },
+ *     { "id": 2, "name": "Turma B", "student_count": 25 }
+ *   ],
+ *   "materials_count": 5,
+ *   "teacher_info": { "id": 10, "name": "Prof. Silva" }
+ * }
+ * }
+ */
+async getScreenDetailsForTeacher(req, res) {
+    try {
+        const { id } = req.params;
+        const teacher = req.session.user;
+
+        if (!teacher) {
+            return res.status(401).json({ success: false, message: "Acesso não autorizado. Faça login novamente." });
+        }
+
+        if (!validator.isInt(String(id), { min: 1 })) {
+            return res.status(422).json({ success: false, message: "ID da disciplina é inválido." });
+        }
+
+        const hasPermission = await Subject.isTeacherOfSubject(Number(id), teacher.id);
+        
+        if (!hasPermission) {
+            return res.status(403).json({ success: false, message: "Você não tem permissão para acessar os detalhes desta disciplina." });
+        }
+
+        const details = await Subject.findScreenDetailsById(Number(id));
+
+        if (!details) {
+            return res.status(404).json({ success: false, message: 'Disciplina não encontrada.' });
+        }
+        
+        res.status(200).json({ success: true, data: details });
+
+    } catch (error) {
+        console.error('Erro ao buscar detalhes da disciplina para o professor:', error);
+        res.status(500).json({ success: false, message: 'Erro interno do servidor' });
+    }
+}
 
             /**
      * @summary Obtém todos os dados de uma disciplina para a tela de gerenciamento do coordenador.
