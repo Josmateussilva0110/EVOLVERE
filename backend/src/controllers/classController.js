@@ -1,5 +1,14 @@
 const Class = require('../models/Class');
 const validator = require('validator');
+const crypto = require('crypto');
+
+// Função auxiliar para gerar um código amigável
+function generateInviteCode() {
+    // Gera 3 bytes aleatórios e converte para uma string hexadecimal de 6 caracteres
+    const randomPart = crypto.randomBytes(3).toString('hex').toUpperCase();
+    // Formata para "ABC-DEF" para facilitar a leitura
+    return `${randomPart.substring(0, 3)}-${randomPart.substring(3, 6)}`;
+}
 
 /**
  * Controlador para gerir as operações relacionadas a Turmas (Classes).
@@ -214,11 +223,24 @@ class ClassController {
         }
     }
 
+    /**
+     * @summary Obtém o ID da disciplina associada a uma turma específica.
+     * @param {import("express").Request} request - O objeto da requisição Express.
+     * @param {import("express").Response} response - O objeto da resposta Express.
+     * @returns {Promise<void>}
+     * @example
+     * // GET /api/classes/1/subject-id
+     * // Resposta de sucesso:
+     * {
+     * "status": true,
+     * "subject_id": 5
+     * }
+     */
     async getIdSubject(request, response) {
         try {
             const {id} = request.params
             if (!validator.isInt(id + '', { min: 1 })) {
-                return res.status(422).json({ status: false, message: "ID da turma inválido." });
+                return response.status(422).json({ status: false, message: "ID da turma inválido." });
             }
 
             const result = await Class.findIdSubject(id)
@@ -233,11 +255,27 @@ class ClassController {
         }
     }
 
+    /**
+     * @summary Obtém todos os materiais associados a uma turma específica.
+     * @param {import("express").Request} request - O objeto da requisição Express.
+     * @param {import("express").Response} response - O objeto da resposta Express.
+     * @returns {Promise<void>}
+     * @example
+     * // GET /api/classes/1/materials
+     * // Resposta de sucesso:
+     * {
+     * "status": true,
+     * "materials": [
+     * { "id": 1, "name": "Apostila 1", "type": "pdf" },
+     * { "id": 2, "name": "Exercícios", "type": "doc" }
+     * ]
+     * }
+     */
     async getAllMateriais(request, response) {
         try {
             const { id } = request.params
             if (!validator.isInt(id + '', { min: 1 })) {
-                return res.status(422).json({ success: false, message: "ID inválido." });
+                return response.status(422).json({ success: false, message: "ID inválido." });
             }
             const materials = await Class.getMaterialsClass(id)
             if(!materials) {
@@ -248,7 +286,86 @@ class ClassController {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
+
+    /**
+     * @summary Gera um novo código de convite para uma turma.
+     * @param {import("express").Request} req - O objeto da requisição Express.
+     * @param {import("express").Response} res - O objeto da resposta Express.
+     * @returns {Promise<void>}
+     * @example
+     * // POST /api/classes/1/generate-invite
+     * // Corpo da requisição (Body):
+     * {
+     * "expiration": "7_days",
+     * "maxUses": "unlimited"
+     * }
+     * // Resposta de sucesso:
+     * {
+     * "success": true,
+     * "message": "Código de convite gerado com sucesso!",
+     * "data": {
+     * "code": "ABC-123",
+     * "expires_at": "2025-01-01T00:00:00.000Z"
+     * }
+     * }
+     */
+    async generateInvite(req, res) {
+        try {
+            const { id: classId } = req.params;
+            const { expiration, maxUses } = req.body;
+
+            const expirationDate = new Date();
+            switch (expiration) {
+                case '1_day':
+                    expirationDate.setDate(expirationDate.getDate() + 1);
+                    break;
+                case '7_days':
+                    expirationDate.setDate(expirationDate.getDate() + 7);
+                    break;
+                case '30_days':
+                    expirationDate.setDate(expirationDate.getDate() + 30);
+                    break;
+                case 'never':
+                    // Define uma data muito no futuro para "nunca" expirar
+                    expirationDate.setFullYear(expirationDate.getFullYear() + 100);
+                    break;
+                default:
+                    // Padrão de 1 dia se o valor for inválido
+                    expirationDate.setDate(expirationDate.getDate() + 1);
+            }
+
+            // Se o frontend enviar 'unlimited', salvamos NULL no banco.
+            const dbMaxUses = (maxUses === 'unlimited' || !maxUses) ? null : parseInt(maxUses, 10);
+
+            let inviteCode;
+            let isCodeUnique = false;
+            while (!isCodeUnique) {
+                inviteCode = generateInviteCode();
+                const existingCode = await knex('class_invites').where({ code: inviteCode }).first();
+                if (!existingCode) isCodeUnique = true;
+            }
+            
+            const [newInvite] = await knex('class_invites')
+                .insert({
+                    code: inviteCode,
+                    class_id: parseInt(classId),
+                    expires_at: expirationDate, // Valor calculado
+                    max_uses: dbMaxUses        // Valor tratado
+                })
+                .returning(['code', 'expires_at']); // Retorna só o necessário
+            
+            res.status(201).json({ 
+                success: true, 
+                message: "Código de convite gerado com sucesso!", 
+                data: newInvite
+            });
+
+        } catch (error) {
+            console.error('Erro ao gerar código de convite:', error);
+            res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
+        }
+    }
+
 }
 
 module.exports = new ClassController();
-

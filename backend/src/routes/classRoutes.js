@@ -13,6 +13,17 @@ const classController = require("../controllers/classController");
  */
 router.post('/classes', classController.create);
 
+
+
+/**
+ * @route POST /
+ * @summary rota para chamar a função de criação de convite de turma.
+ */
+
+router.post('/classes/:id/invite', classController.generateInvite);
+
+
+
 /**
  * @route GET /:id
  * @summary Busca os detalhes de uma turma específica, incluindo a lista de alunos.
