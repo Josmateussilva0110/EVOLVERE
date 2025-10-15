@@ -1,3 +1,4 @@
+// ViewClass.jsx
 import { useState, useEffect } from "react";
 import { 
     Trash2, 
@@ -10,45 +11,56 @@ import {
     ChevronRight,
     PlusCircle,
     Link,
-    ArrowLeft
+    ArrowLeft,
+    X,
+    Copy,
+    Check,
+    Clock
 } from "lucide-react";
-import { useNavigate, useParams} from "react-router-dom";
-import requestData from "../../../utils/requestApi"
+import { useNavigate, useParams } from "react-router-dom";
+import requestData from "../../../utils/requestApi";
+import InviteModal from "./InviteModal";
 
 /**
- * Módulo: ViewClass
+ * ViewClass.jsx
+ * Página que apresenta detalhes da turma (alunos, simulados e materiais) e
+ * fornece ações rápidas como geração de convites e cadastro de materiais.
  *
- * Visão geral:
- * Componente de dashboard para visualizar uma turma, com três cards principais:
- * - Alunos
- * - Simulados
- * - Materiais de Aula
- *
- * Contém componentes auxiliares reutilizáveis:
- * - DashboardCard: wrapper estilizado para cards do dashboard.
- * - Pagination: componente simples de paginação (anterior/próxima).
+ * Responsabilidades principais:
+ * - Buscar materiais da turma via API quando o componente é montado / id muda;
+ * - Exibir cards para Alunos, Simulados e Materiais com paginação local;
+ * - Abrir modal de geração de convites (InviteModal) para compartilhar link da turma;
+ * - Navegar para rotas de cadastro de materiais e simulados.
  *
  * Observações:
- * - Dados são estáticos para demonstração (arrays `alunos`, `simulados`, `materiais`).
- * - Substitua por chamadas a API / props conforme necessário em produção.
+ * - A chamada à API utiliza o util `requestData` que deve retornar um objeto
+ *   com { success: boolean, data: ... }.
+ * - O componente assume que `materials` retornados pela API possuem ao menos
+ *   { id, title, class_name }.
+ * - Interação com arquivos:
+ *   - Visualização: ao clicar no nome do material, o frontend solicita
+ *     `/api/materials/<filename>?preview=true`. Se o backend suportar, ele
+ *     deve retornar um PDF (ou o arquivo original quando aplicável) para
+ *     ser exibido em uma nova aba. Caso contrário, uma mensagem de erro é
+ *     exibida.
+ *   - Download: ao clicar no ícone de download, o frontend solicita
+ *     `/api/materials/<filename>?download=true` para forçar o download via
+ *     Content-Disposition.
+ *
+ * Sem props: o componente obtém `id` via useParams() do React Router.
  */
 
 /**
  * DashboardCard
+ * Componente visual simples que renderiza um cartão com cabeçalho (ícone + título)
+ * e conteúdo. Fornece uma prop `delay` para animação sequencial.
  *
- * Componente reutilizável para encapsular um cartão do dashboard com ícone,
- * título e conteúdo filho. Inclui uma pequena animação de entrada e aceita
- * classes adicionais e atraso (delay) para escalonar animações.
- *
- * Props:
- * @param {JSX.Element} icon - Ícone exibido à esquerda do título.
- * @param {string} title - Título do card.
- * @param {React.ReactNode} children - Conteúdo interno do card.
- * @param {string} [className] - Classes CSS adicionais para customização.
- * @param {number} [delay=0] - Atraso em milissegundos para a animação de entrada.
- *
- * Retorno:
- * @returns {JSX.Element} Card estilizado contendo título, ícone e conteúdo.
+ * @param {Object} props
+ * @param {React.ReactNode} props.icon - Componente de ícone exibido ao lado do título
+ * @param {string} props.title - Título do cartão
+ * @param {React.ReactNode} props.children - Conteúdo do cartão
+ * @param {string} [props.className] - Classes adicionais (Tailwind)
+ * @param {number} [props.delay=0] - Delay em ms para a animação de entrada
  */
 const DashboardCard = ({ icon, title, children, className, delay = 0 }) => (
     <div 
@@ -65,17 +77,13 @@ const DashboardCard = ({ icon, title, children, className, delay = 0 }) => (
 
 /**
  * Pagination
+ * Componente de paginação simples e sem dependências externas.
+ * Retorna `null` quando `totalPages <= 1`.
  *
- * Componente simples de paginação com botões "anterior" e "próxima".
- * Não renderiza nada se só houver uma página.
- *
- * Props:
- * @param {number} currentPage - Página atual (1-indexed).
- * @param {number} totalPages - Total de páginas disponíveis.
- * @param {(updater: (prev:number)=>number)|((n:number)=>void)} onPageChange - Função para atualizar a página.
- *
- * Retorno:
- * @returns {JSX.Element|null} Controles de paginação ou null se não aplicável.
+ * @param {Object} props
+ * @param {number} props.currentPage - Página atual (1-based)
+ * @param {number} props.totalPages - Número total de páginas
+ * @param {function} props.onPageChange - Callback (novoNumeroPagina) quando pagina for alterada
  */
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
     if (totalPages <= 1) return null;
@@ -106,45 +114,54 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
 };
 
 /**
- * ViewClass
+ * ViewClass (componente principal)
  *
- * Tela principal que exibe informações sobre uma turma:
- * - Cabeçalho com ações (gerar convite, cadastrar material/simulado).
- * - Três cards contendo listas paginadas: Alunos, Simulados e Materiais.
- * - Utiliza DashboardCard e Pagination como componentes auxiliares.
+ * Estado local principal:
+ * - materials: lista de materiais obtida da API
+ * - inviteOpen: boolean que controla visibilidade do InviteModal
+ * - pageAlunos, pageSimulados, pageMateriais: estados de paginação locais
  *
- * Comportamento / estado:
- * - pageAlunos, pageSimulados, pageMateriais: páginas ativas para cada lista.
- * - ITEMS_PER_PAGE: constante para definir quantos itens por página.
+ * Comportamento:
+ * - Ao montar (ou quando `id` muda) faz requisição para `/classes/materials/:id`
+ *   via `requestData` e popula `materials` com `response.data.materials`.
+ * - Renderiza cards para alunos, simulados e materiais. Cada card possui
+ *   paginação local gerenciada pelo componente.
  *
- * Observações de implementação:
- * - getPageData e getTotalPages são helpers locais para paginação.
- * - A navegação para cadastro de material usa useNavigate do react-router.
+ * Nota: não recebe props - `id` é lido via `useParams()`.
  *
- * Retorno:
- * @returns {JSX.Element} Layout completo do dashboard da turma.
+ * @returns {JSX.Element} A view completa da turma para o professor.
  */
 export default function ViewClass() {
     const navigate = useNavigate();
-    const { id } = useParams()
+    const { id } = useParams();
 
-    const [materials, setMaterials] = useState([])
+    const [materials, setMaterials] = useState([]);
+    const [inviteOpen, setInviteOpen] = useState(false);
 
     useEffect(() => {
         async function fetchSubject() {
-            const response = await requestData(`/classes/materials/${id}`, 'GET', {}, true)
-            console.log(response)
+            if (!id) return; // evita chamada quando id não está disponível
+            try {
+                const response = await requestData(`/classes/materials/${id}`, 'GET', {}, true);
+                // eslint-disable-next-line no-console
+                console.log(response);
 
-            if (response.success) {
-                const mats = response.data.materials
-                setMaterials(mats)
+                if (response && response.success) {
+                    const mats = response.data?.materials || [];
+                    setMaterials(mats);
+                } else {
+                    // em caso de resposta sem sucesso, limpa a lista
+                    setMaterials([]);
+                }
+            } catch (err) {
+                // console para debugging e limpa materiais para evitar estados inconsistentes
+                // eslint-disable-next-line no-console
+                console.error('Erro ao carregar materiais da turma:', err);
+                setMaterials([]);
             }
         }
-        fetchSubject()
-    }, [id])
-
-
-
+        fetchSubject();
+    }, [id]);
 
     // Dados de exemplo
     const alunos = ["Lucas", "Mateus", "Gabriel", "Rai Damásio", "João", "Maria", "Ana", "Pedro", "Sofia"];
@@ -156,35 +173,53 @@ export default function ViewClass() {
         { nome: "Complexidade de Vetores", respondido: 1 },
     ];
 
-
     // Paginação
     const ITEMS_PER_PAGE = 5;
     const [pageAlunos, setPageAlunos] = useState(1);
     const [pageSimulados, setPageSimulados] = useState(1);
     const [pageMateriais, setPageMateriais] = useState(1);
 
-    /**
-     * getPageData
-     *
-     * Retorna os itens correspondentes à página solicitada.
-     *
-     * @param {Array<any>} arr - Array de itens
-     * @param {number} page - Página (1-indexed)
-     * @returns {Array<any>} Subarray com os itens da página
-     */
     const getPageData = (arr, page) => arr.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
-
-    /**
-     * getTotalPages
-     *
-     * Calcula o número total de páginas para um array dado o ITEMS_PER_PAGE.
-     *
-     * @param {Array<any>} arr - Array de itens
-     * @returns {number} Total de páginas (inteiro)
-     */
     const getTotalPages = arr => Math.ceil(arr.length / ITEMS_PER_PAGE);
 
-        return (
+    /**
+     * Abre o material em nova aba para visualização.
+     * Usa o campo `archive` retornado pela API, que geralmente possui o formato
+     * "materials/<filename>". Para facilitar o desenvolvimento local com o Vite
+     * proxy, usamos o prefixo `/api` — o Vite irá encaminhar para o backend e o
+     * backend responde em `/materials/:filename`.
+     *
+     * @param {Object} mat - Objeto de material retornado pela API
+     */
+    const openMaterial = (mat) => {
+        const archive = mat.archive || mat.archive_path || mat.file || null;
+        if (!archive) return alert('Arquivo não disponível para este material.');
+        const filename = archive.split('/').pop();
+        const url = `/api/materials/${encodeURIComponent(filename)}`; // Vite proxy -> backend
+        window.open(url, '_blank', 'noopener');
+    };
+
+    /**
+     * Força o download do material utilizando a query `download=true` que ativa
+     * o Content-Disposition de attachment no backend.
+     *
+     * @param {Object} mat - Objeto de material retornado pela API
+     */
+    const downloadMaterial = (mat) => {
+        const archive = mat.archive || mat.archive_path || mat.file || null;
+        if (!archive) return alert('Arquivo não disponível para este material.');
+        const filename = archive.split('/').pop();
+        const url = `/api/materials/${encodeURIComponent(filename)}?download=true`;
+        // Criar e acionar um link para forçar o download
+        const a = document.createElement('a');
+        a.href = url;
+        a.setAttribute('download', filename);
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    };
+
+    return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white p-4 sm:p-6 lg:p-8">
             <div className="w-full max-w-7xl mx-auto">
                 {/* Botão Voltar */}
@@ -195,14 +230,16 @@ export default function ViewClass() {
                     <ArrowLeft className="w-6 h-6" />
                 </button>
 
-
                 {/* Cabeçalho */}
                 <header className="flex flex-col sm:flex-row justify-between sm:items-center mb-8 animate-fade-in">
                     <h1 className="text-3xl font-bold tracking-tight text-white mb-4 sm:mb-0">
                         {materials.length > 0 ? materials[0].class_name : "Carregando..."}
                     </h1>
                     <div className="flex flex-wrap gap-3">
-                        <button className="px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 bg-white/5 hover:bg-white/10 transition-colors">
+                        <button
+                            onClick={() => setInviteOpen(true)}
+                            className="px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 bg-white/5 hover:bg-white/10 transition-colors"
+                        >
                             <Link className="w-4 h-4 text-blue-400" />
                             Gerar Convite
                         </button>
@@ -278,9 +315,11 @@ export default function ViewClass() {
                             {materials.length > 0 ? (
                                 getPageData(materials, pageMateriais).map((mat) => (
                                     <li key={mat.id} className="flex justify-between items-center p-2.5 rounded-md hover:bg-white/5 transition-colors group">
-                                        <span className="text-slate-200 text-sm truncate pr-4">{mat.title}</span>
+                                        <button onClick={() => openMaterial(mat)} className="text-slate-200 text-sm truncate pr-4 text-left hover:underline">
+                                            {mat.title}
+                                        </button>
                                         <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button>
+                                            <button onClick={() => downloadMaterial(mat)} title="Baixar">
                                                 <ArrowDownToLine className="w-4 h-4 text-blue-400 hover:text-blue-300" />
                                             </button>
                                             <button>
@@ -297,6 +336,9 @@ export default function ViewClass() {
                     </DashboardCard>
                 </main>
             </div>
+
+            {/* Invite Modal */}
+            <InviteModal open={inviteOpen} onClose={() => setInviteOpen(false)} classId={id} />
         </div>
     );
 }

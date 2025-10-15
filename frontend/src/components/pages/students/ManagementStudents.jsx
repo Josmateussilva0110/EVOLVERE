@@ -27,35 +27,43 @@ import { useNavigate } from "react-router-dom";
 
 
 /**
- * Componente Dashboard
- * 
- * O que faz:
- *  - Exibe o painel principal do usuário, incluindo menu lateral, cartões de estatísticas, atividades pendentes,
- *    atualizações recentes e simulado disponível.
- *  - Permite navegação entre seções como Meu Curso, Turmas, Materiais, Atividades/Simulados, Desempenho e Medalhas.
- *  - Mostra informações personalizadas, como nome do usuário e notificações importantes.
- * 
- * Entrada:
- *  - Estado interno controlado por useState:
- *    - activeSection: string, controla a seção ativa do menu lateral.
- *    - usuario: string, nome do usuário a ser exibido no header.
- *  - Menu e dados mockados diretamente no componente.
- * 
- * Exemplo de entrada:
- *  {
- *    activeSection: "dashboard",
- *    usuario: "Lucas Emanuel"
- *  }
- * 
- * Exemplo de saída:
- *  - Layout renderizado com:
- *      - Sidebar com menu e botões de configurações/ajuda/logout
- *      - Cartões de estatísticas (notas recentes, atividades pendentes)
- *      - Lista de atividades pendentes com urgência e prazos
- *      - Atualizações recentes do curso
- *      - Simulado disponível com botão para iniciar
+ * ManagementStudents / Dashboard (componente)
+ *
+ * Painel principal do estudante que agrega:
+ *  - Sidebar de navegação (Meu curso, Turmas, Materiais, Atividades/Simulados, Desempenho, Medalhas);
+ *  - Header com informações do usuário e acesso rápido à turma atual;
+ *  - Cards de estatísticas, lista de atividades pendentes e área de atualizações/simulados.
+ *
+ * Comportamento / efeitos colaterais:
+ *  - Mantém estado local `activeSection` via useState para controlar a seção ativa;
+ *  - Usa `useNavigate` do React Router para roteamento ao alterar a seção;
+ *  - Não faz fetchs por conta própria (dados atualmente mockados); pode ser adaptado para consumir
+ *    dados de contexto, hooks ou props para uso em produção.
+ *
+ * Tipos e formato esperados:
+ * @typedef {Object} MenuItem
+ * @property {string} id - Identificador único da opção (ex: 'curso', 'turmas')
+ * @property {string} label - Texto exibido no menu
+ * @property {React.ComponentType} icon - Componente de ícone (lucide-react)
+ *
+ * Estado local relevante:
+ * @property {string} activeSection - seção atualmente selecionada no menu
+ *
+ * Acessibilidade / notas de implementação:
+ *  - Recomenda-se adicionar aria-current="true" no item ativo do menu para melhorar a experiência de leitores de tela;
+ *  - Ao navegar via `navigate()`, garantir gerenciamento de foco (ex.: foco no título da nova rota) se necessário;
+ *  - Componentes interativos são botões; verifique contraste de cores em variações de tema.
+ *
+ * Exemplo de uso:
+ * <ManagementStudents /> // componente autônomo que pode ser usado em uma rota de estudante
+ *
+ * Observações para desenvolvedores:
+ *  - Para testes unitários, simular `useNavigate` e verificar mudanças no `activeSection` ao clicar nos itens do menu;
+ *  - Para integração/prod, extraia dados mockados para props ou para um provider/context para facilitar testes e SSR.
+ *
+ * @component
+ * @returns {JSX.Element} Painel do estudante com navegação e widgets informativos.
  */
-
 
 export default function Dashboard() {
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -157,14 +165,26 @@ export default function Dashboard() {
       <main className="flex-1 overflow-y-auto bg-gradient-to-br from-gray-50 to-blue-50">
         {/* Header */}
         <header className="bg-white/80 backdrop-blur-xl border-b border-gray-200 px-8 py-6 shadow-sm">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-1">
-                Bem vindo, <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">{usuario}</span>
-              </h2>
-              <p className="text-gray-600">Continue sua jornada de aprendizado hoje! 🚀</p>
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900 mb-1">
+                  Bem vindo, <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">{usuario}</span>
+                </h2>
+                <p className="text-gray-600">Continue sua jornada de aprendizado hoje! 🚀</p>
+              </div>
+
+              {/* Right controls: Access current class button */}
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => { setActiveSection('turmas'); navigate('/student/classes/view'); }}
+                  className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md hover:opacity-95 transition-all"
+                  aria-label="Acessar Turma Atual"
+                >
+                  <GraduationCap size={16} />
+                  Acessar Turma Atual
+                </button>
+              </div>
             </div>
-          </div>
         </header>
 
         <div className="p-8">
