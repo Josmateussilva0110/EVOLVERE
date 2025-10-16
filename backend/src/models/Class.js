@@ -212,9 +212,10 @@ class Class {
                 from classes c
                 left join materials m
                     on m.class_id  = c.id
+                    and m.origin = 2
                 inner join course_valid cv
                     on cv.id = c.course_id
-                where c.id = ?
+                where c.id = ? 
                 order by m.updated_at desc
             `, [class_id])
             const rows = result.rows

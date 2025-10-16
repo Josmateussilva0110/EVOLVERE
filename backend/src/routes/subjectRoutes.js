@@ -105,8 +105,53 @@ router.put('/subjects/:id', subjectController.update)
  */
 router.delete('/subjects/:id', subjectController.delete)
 
+
+/**
+ * @route GET /subject/materiais/:id
+ * @description Retorna todos os materiais de uma disciplina específica.
+ * 
+ * Esta rota aciona o método `getAllMateriais` do `subjectController`, que busca 
+ * no banco todos os materiais cadastrados para a disciplina informada pelo ID.
+ * 
+ * @param {number} id - ID da disciplina cujos materiais devem ser retornados.
+ * @returns {Object[]} 200 - Lista de materiais associados à disciplina.
+ * @returns {Object} 404 - Caso não existam materiais associados.
+ * @returns {Object} 422 - Caso o ID informado seja inválido.
+ * @returns {Object} 500 - Em caso de erro interno no servidor.
+ * 
+ * @example
+ * // Requisição:
+ * GET /subject/materiais/3
+ * 
+ * // Resposta de sucesso:
+ * [
+ *   { id: 12, title: "Aula 1 - Introdução", type_file: "PDF", created_by: 1 },
+ *   { id: 13, title: "Aula 2 - Exercícios", type_file: "DOC", created_by: 2 }
+ * ]
+ */
 router.get("/subject/materiais/:id", subjectController.getAllMateriais)
 
+
+/**
+ * @route GET /subject/user/:id
+ * @description Retorna a disciplina associada a um usuário/profissional específico.
+ * 
+ * Esta rota chama o método `findSubjectByUser` do `subjectController`, que busca 
+ * no banco a disciplina vinculada ao ID do usuário informado.
+ * 
+ * @param {number} id - ID do usuário/profissional.
+ * @returns {Object} 200 - Objeto contendo o ID da disciplina associada ao usuário.
+ * @returns {Object} 404 - Caso o usuário não possua nenhuma disciplina associada.
+ * @returns {Object} 422 - Caso o ID informado seja inválido.
+ * @returns {Object} 500 - Em caso de erro interno no servidor.
+ * 
+ * @example
+ * // Requisição:
+ * GET /subject/user/5
+ * 
+ * // Resposta de sucesso:
+ * { "subject_id": 7 }
+ */
 router.get('/subject/user/:id', subjectController.findSubjectByUser)
 
 

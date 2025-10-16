@@ -1,0 +1,8 @@
+HOST=db
+USER='root'
+PASSWORD='12345678'
+DATABASE='evolvere'
+PORT='5432'
+SECRET='nvmvapjaewpiorutihjshdfhvd'
+EMAIL='evolvereaplicacoes@gmail.com' 
+EMAIL_PASS='zdbybrzoicjvbouc'
