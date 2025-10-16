@@ -1,7 +1,28 @@
 const knex = require("../database/connection")
 
-
+/**
+ * Classe responsável por gerenciar operações relacionadas aos materiais no banco de dados.
+ * Fornece métodos para salvar, deletar e verificar a existência de materiais.
+ * 
+ * @class Material
+ */
 class Material {
+
+    /**
+     * Insere um novo material na tabela "materials".
+     * 
+     * @async
+     * @param {Object} data - Dados do material a serem salvos.
+     * @param {string} data.title - Título do material.
+     * @param {string} [data.description] - Descrição opcional do material.
+     * @param {number} data.type - Tipo do material (ex: 1 = PDF, 2 = vídeo, etc).
+     * @param {string} data.archive - Caminho do arquivo salvo.
+     * @param {number} data.created_by - ID do usuário que criou o material.
+     * @param {number} data.subject_id - ID da disciplina à qual o material pertence.
+     * @param {number} [data.class_id] - ID da turma associada (caso exista).
+     * @param {number} [data.origin] - Indica a origem do material (1 = disciplina, 2 = turma).
+     * @returns {Promise<boolean>} Retorna `true` se o material for salvo com sucesso, ou `false` em caso de erro.
+     */
     async save(data) {
         try {
             await knex("materials").insert(data)
@@ -12,6 +33,14 @@ class Material {
         }
     }
 
+
+    /**
+     * Deleta um material com base no ID.
+     * 
+     * @async
+     * @param {number} id - ID do material a ser deletado.
+     * @returns {Promise<boolean>} Retorna `true` se o material for deletado com sucesso, ou `false` caso contrário.
+     */
     async deleteById(id) {
         try {
             const deleted = await knex('materials').where({ id }).delete();
@@ -22,6 +51,14 @@ class Material {
         }
     }
 
+
+    /**
+     * Verifica se um material existe no banco de dados.
+     * 
+     * @async
+     * @param {number} id - ID do material a ser verificado.
+     * @returns {Promise<boolean>} Retorna `true` se o material existir, ou `false` caso contrário.
+     */
     async materialExist(id) {
         try {
             const result = await knex.select("*").where({id}).table("materials")

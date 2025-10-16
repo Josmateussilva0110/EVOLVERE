@@ -1,13 +1,13 @@
 // ViewClass.jsx
 import { useState, useEffect } from "react";
-import { 
-    Trash2, 
-    Eye, 
-    ArrowDownToLine, 
-    Users, 
-    BookOpen, 
-    FileText, 
-    ChevronLeft, 
+import {
+    Trash2,
+    Eye,
+    ArrowDownToLine,
+    Users,
+    BookOpen,
+    FileText,
+    ChevronLeft,
     ChevronRight,
     PlusCircle,
     Link,
@@ -63,7 +63,7 @@ import InviteModal from "./InviteModal";
  * @param {number} [props.delay=0] - Delay em ms para a animação de entrada
  */
 const DashboardCard = ({ icon, title, children, className, delay = 0 }) => (
-    <div 
+    <div
         className={`bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-5 flex flex-col animate-fade-in ${className}`}
         style={{ animationDelay: `${delay}ms` }}
     >
@@ -219,6 +219,24 @@ export default function ViewClass() {
         a.remove();
     };
 
+    function getColorByType(type) {
+        switch (type.toLowerCase()) {
+            case "pdf":
+                return "bg-red-500/20 text-red-400 border-red-500/30"
+            case "doc":
+            case "docx":
+                return "bg-blue-500/20 text-blue-400 border-blue-500/30"
+            case "ppt":
+            case "pptx":
+                return "bg-orange-500/20 text-orange-400 border-orange-500/30"
+            case "xlsx":
+            case "xls":
+                return "bg-green-500/20 text-green-400 border-green-500/30"
+            default:
+                return "bg-gray-500/20 text-gray-400 border-gray-500/30"
+        }
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white p-4 sm:p-6 lg:p-8">
             <div className="w-full max-w-7xl mx-auto">
@@ -243,15 +261,15 @@ export default function ViewClass() {
                             <Link className="w-4 h-4 text-blue-400" />
                             Gerar Convite
                         </button>
-                        <button 
+                        <button
                             className="px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 transition-colors shadow-lg shadow-yellow-400/20"
                             onClick={() => navigate(`/teacher/material/register/${id}`, { state: { origin: "class" } })}
                         >
                             <PlusCircle className="w-4 h-4 text-blue-700" />
                             Cadastrar Material
                         </button>
-                        <button 
-                            onClick={() => navigate('/teacher/simulated/register')} 
+                        <button
+                            onClick={() => navigate('/teacher/simulated/register')}
                             className="px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 transition-colors shadow-lg shadow-yellow-400/20"
                         >
                             <PlusCircle className="w-4 h-4 text-blue-700" />
@@ -262,10 +280,10 @@ export default function ViewClass() {
 
                 {/* Grid principal do Dashboard */}
                 <main className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
+
                     {/* Card de Alunos */}
-                    <DashboardCard 
-                        title="Alunos" 
+                    <DashboardCard
+                        title="Alunos"
                         icon={<Users className="w-6 h-6 text-blue-400" />}
                         delay={100}
                     >
@@ -283,8 +301,8 @@ export default function ViewClass() {
                     </DashboardCard>
 
                     {/* Card de Simulados */}
-                    <DashboardCard 
-                        title="Simulados" 
+                    <DashboardCard
+                        title="Simulados"
                         icon={<FileText className="w-6 h-6 text-blue-400" />}
                         delay={200}
                     >
@@ -304,36 +322,73 @@ export default function ViewClass() {
                         </ul>
                         <Pagination currentPage={pageSimulados} totalPages={getTotalPages(simulados)} onPageChange={setPageSimulados} />
                     </DashboardCard>
-                    
+
                     {/* Card de Materiais (dados da API) */}
-                    <DashboardCard 
-                        title="Materiais de Aula" 
+                    <DashboardCard
+                        title="Materiais de Aula"
                         icon={<BookOpen className="w-6 h-6 text-blue-400" />}
                         delay={300}
                     >
                         <ul className="space-y-2 flex-grow">
-                            {materials.length > 0 ? (
-                                getPageData(materials, pageMateriais).map((mat) => (
-                                    <li key={mat.id} className="flex justify-between items-center p-2.5 rounded-md hover:bg-white/5 transition-colors group">
-                                        <button onClick={() => openMaterial(mat)} className="text-slate-200 text-sm truncate pr-4 text-left hover:underline">
-                                            {mat.title}
-                                        </button>
-                                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button onClick={() => downloadMaterial(mat)} title="Baixar">
+                            {materials.length > 0 && materials.some(m => m.archive) ? (
+                                getPageData(materials.filter(m => m.archive), pageMateriais).map((mat) => (
+                                    <li
+                                        key={mat.id}
+                                        className="flex justify-between items-center p-2.5 rounded-md hover:bg-white/5 transition-colors group"
+                                    >
+                                        {/* Linha com título e tipo alinhados */}
+                                        <div className="flex flex-col flex-grow">
+                                            <div className="flex items-center justify-between gap-3">
+                                                <button
+                                                    onClick={() => openMaterial(mat)}
+                                                    className="text-slate-200 text-sm truncate text-left hover:underline flex-1"
+                                                >
+                                                    {mat.title}
+                                                </button>
+
+                                                <span
+                                                    className={`text-xs px-2 py-1 rounded-lg font-medium border whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200
+
+                  ${getColorByType(mat.type_file)}
+                `}
+                                                >
+                                                    {mat.type_file}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Botões de ação */}
+                                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+                                            <button
+                                                onClick={() => downloadMaterial(mat)}
+                                                title="Baixar"
+                                            >
                                                 <ArrowDownToLine className="w-4 h-4 text-blue-400 hover:text-blue-300" />
                                             </button>
-                                            <button>
+                                            <button
+                                                onClick={() => deleteMaterial(mat.id)}
+                                                title="Excluir"
+                                            >
                                                 <Trash2 className="w-4 h-4 text-red-400 hover:text-red-300" />
                                             </button>
                                         </div>
                                     </li>
                                 ))
                             ) : (
-                                <p className="text-slate-400 text-sm italic">Nenhum material encontrado.</p>
+                                <p className="text-slate-400 text-sm italic text-center py-4">
+                                    Nenhum material encontrado.
+                                </p>
                             )}
                         </ul>
-                        <Pagination currentPage={pageMateriais} totalPages={getTotalPages(materials)} onPageChange={setPageMateriais} />
+
+                        <Pagination
+                            currentPage={pageMateriais}
+                            totalPages={getTotalPages(materials.filter(m => m.archive))}
+                            onPageChange={setPageMateriais}
+                        />
                     </DashboardCard>
+
+
                 </main>
             </div>
 

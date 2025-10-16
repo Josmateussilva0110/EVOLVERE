@@ -305,6 +305,45 @@ class Subject {
         }
     }
 
+
+    /**
+     * Retorna todos os materiais associados a uma disciplina (subject) no contexto global,
+     * ou seja, aqueles vinculados diretamente à disciplina e não a uma turma específica.
+     * 
+     * A consulta retorna informações combinadas da disciplina, curso e materiais,
+     * incluindo o tipo de arquivo (PDF, DOC, PPT) e o período acadêmico derivado
+     * da data de atualização da disciplina.
+     * 
+     * @async
+     * @param {number} subject_id - ID da disciplina cujos materiais globais serão buscados.
+     * @returns {Promise<Object[]|undefined>} Retorna um array de objetos contendo os materiais encontrados,
+     * ou `undefined` caso nenhum material seja encontrado ou ocorra um erro.
+     * 
+     * @example
+     * // Exemplo de uso:
+     * const materiais = await Material.getMaterialsGlobal(3);
+     * console.log(materiais);
+     * 
+     * // Estrutura esperada de retorno:
+     * [
+     *   {
+     *     subject_id: 3,
+     *     subject_name: "Matemática",
+     *     period: "2025.2",
+     *     course_id: 2,
+     *     course_name: "Licenciatura em Matemática",
+     *     type_file: "PDF",
+     *     id: 12,
+     *     title: "Derivadas - Aula 1",
+     *     description: "Material introdutório sobre derivadas",
+     *     archive: "materials/1733458291_32.pdf",
+     *     created_by: 5,
+     *     subject_id: 3,
+     *     origin: 1,
+     *     updated_at: "2025-10-12T13:22:00.000Z"
+     *   }
+     * ]
+     */
     async getMaterialsGlobal(subject_id) {
         try {
             const result = await knex.raw(`
@@ -331,6 +370,7 @@ class Subject {
                 from subjects s
                 left join materials m
                     on m.subject_id  = s.id
+                    and m.origin = 1
                 inner join course_valid cv
                     on cv.id = s.course_valid_id
                 where s.id = ?
@@ -344,6 +384,30 @@ class Subject {
         }
     } 
 
+
+    /**
+     * Busca a primeira disciplina (subject) associada a um determinado usuário (profissional).
+     * 
+     * Esta função consulta a tabela `subjects` para encontrar uma disciplina
+     * cujo campo `professional_id` corresponda ao ID informado.
+     * Retorna apenas o primeiro resultado encontrado.
+     * 
+     * @async
+     * @param {number} id - ID do profissional (usuário) para o qual se deseja buscar a disciplina.
+     * @returns {Promise<Object|null>} Retorna um objeto contendo o `id` da disciplina associada
+     * ao usuário, ou `null` caso nenhuma disciplina seja encontrada ou ocorra um erro.
+     * 
+     * @example
+     * // Exemplo de uso:
+     * const subject = await Subject.subjectUser(5);
+     * console.log(subject);
+     * 
+     * // Possível retorno:
+     * // { id: 12 }
+     * 
+     * // Caso o usuário não possua disciplina:
+     * // null
+     */
     async subjectUser(id) {
         try {
             const result = await knex
@@ -365,79 +429,76 @@ class Subject {
      * @param {number} id - O ID da disciplina.
      * @returns {Promise<Object|null>} Um objeto com todos os dados formatados ou null se não for encontrado.
      */
+    async findScreenDetailsById(id) {
+        try {
+            const [subject, materials, classes] = await Promise.all([
+                
+                // 1. Consulta dos detalhes da disciplina (sem alteração)
+                knex('subjects')
+                    .join('course_valid', 'subjects.course_valid_id', 'course_valid.id')
+                    .where('subjects.id', id)
+                    .first(
+                        'subjects.*', 
+                        'course_valid.name as course_name', 
+                        'course_valid.acronym_IES as course_acronym'
+                    ),
+                
+                // 2. Consulta de materiais CORRIGIDA para usar os nomes de coluna corretos
+                knex('materials')
+                    .where({ subject_id: id })
+                    .select(
+                        'id',
+                        'title as name',        
+                        'archive as file_path', 
+                        'created_at',
+                        'updated_at',
+                        knex.raw(`
+                            CASE 
+                                WHEN type = 1 THEN 'PDF'
+                                WHEN type = 2 THEN 'DOCX'
+                                WHEN type = 3 THEN 'PPTX'
+                                ELSE 'file'
+                            END as "fileType"
+                        `)
+                    )
+                    .orderBy('updated_at', 'desc'),
 
-   // Dentro do seu arquivo models/Subject.js
+                // 3. Consulta das turmas (sem alteração)
+                knex('classes as c')
+                    .leftJoin('classes_alunos as cs', 'c.id', 'cs.classes_id') // Verifique o nome da sua tabela pivo
+                    .where('c.subject_id', id)
+                    .groupBy('c.id', 'c.name', 'c.period')
+                    .select('c.id', 'c.name', 'c.period')
+                    .count('cs.aluno_id as studentCount')
+            ]);
 
-async findScreenDetailsById(id) {
-    try {
-        const [subject, materials, classes] = await Promise.all([
-            
-            // 1. Consulta dos detalhes da disciplina (sem alteração)
-            knex('subjects')
-                .join('course_valid', 'subjects.course_valid_id', 'course_valid.id')
-                .where('subjects.id', id)
-                .first(
-                    'subjects.*', 
-                    'course_valid.name as course_name', 
-                    'course_valid.acronym_IES as course_acronym'
-                ),
-            
-            // 2. Consulta de materiais CORRIGIDA para usar os nomes de coluna corretos
-            knex('materials')
-                .where({ subject_id: id })
-                .select(
-                    'id',
-                    'title as name',        
-                    'archive as file_path', 
-                    'created_at',
-                    'updated_at',
-                    knex.raw(`
-                        CASE 
-                            WHEN type = 1 THEN 'PDF'
-                            WHEN type = 2 THEN 'DOCX'
-                            WHEN type = 3 THEN 'PPTX'
-                            ELSE 'file'
-                        END as "fileType"
-                    `)
-                )
-                .orderBy('updated_at', 'desc'),
+            if (!subject) return null;
 
-            // 3. Consulta das turmas (sem alteração)
-            knex('classes as c')
-                .leftJoin('classes_alunos as cs', 'c.id', 'cs.classes_id') // Verifique o nome da sua tabela pivo
-                .where('c.subject_id', id)
-                .groupBy('c.id', 'c.name', 'c.period')
-                .select('c.id', 'c.name', 'c.period')
-                .count('cs.aluno_id as studentCount')
-        ]);
-
-        if (!subject) return null;
-
-        // 4. Formatação final dos dados (NÃO precisa mudar, pois usamos aliases)
-        return {
-            id: subject.id,
-            name: subject.name,
-            period: `Período ${subject.period || 'N/A'} • ${subject.course_acronym || 'N/A'}`,
-            description: subject.description || 'Nenhuma descrição fornecida.',
-            courseId: subject.course_valid_id,
-            materials: materials.map(m => ({
-                id: m.id,
-                name: m.name,           // Funciona por causa do alias 'title as name'
-                fileType: m.fileType,
-                uploadDate: m.updated_at,
-                file_path: m.file_path, // Funciona por causa do alias 'archive as file_path'
-            })),
-            classes: classes.map(c => ({
-                id: c.id,
-                name: c.name,
-                studentCount: parseInt(c.studentCount, 10)
-            }))
-        };
-    } catch (error) {
-        console.error("Erro ao buscar detalhes completos da disciplina:", error);
-        return undefined;
+            // 4. Formatação final dos dados (NÃO precisa mudar, pois usamos aliases)
+            return {
+                id: subject.id,
+                name: subject.name,
+                period: `Período ${subject.period || 'N/A'} • ${subject.course_acronym || 'N/A'}`,
+                description: subject.description || 'Nenhuma descrição fornecida.',
+                courseId: subject.course_valid_id,
+                materials: materials.map(m => ({
+                    id: m.id,
+                    name: m.name,           // Funciona por causa do alias 'title as name'
+                    fileType: m.fileType,
+                    uploadDate: m.updated_at,
+                    file_path: m.file_path, // Funciona por causa do alias 'archive as file_path'
+                })),
+                classes: classes.map(c => ({
+                    id: c.id,
+                    name: c.name,
+                    studentCount: parseInt(c.studentCount, 10)
+                }))
+            };
+        } catch (error) {
+            console.error("Erro ao buscar detalhes completos da disciplina:", error);
+            return undefined;
+        }
     }
-}
 
 
     /**
