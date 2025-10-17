@@ -4,6 +4,7 @@ const Subject = require("../models/Subject")
 const Class = require("../models/Class")
 const validator = require('validator')
 
+
 class FormController {
     async publish(request, response) {
         try {

@@ -374,6 +374,7 @@ export default function CreateQuiz() {
                 {question.type === "verdadeiro/falso" && (
                   <div className="flex gap-4 pt-4">
                     {["Verdadeiro", "Falso"].map((label) => (
+
                       <button
                         key={label}
                         type="button"
