@@ -89,12 +89,14 @@ export default function CreateQuiz() {
     {
       text: "",
       type: "multipla_escolha",
+      points: 0,
       options: [
         { text: "", correct: false },
         { text: "", correct: false },
       ],
     },
   ]);
+
 
   useEffect(() => {
     async function fetchRelations() {
@@ -114,6 +116,7 @@ export default function CreateQuiz() {
       {
         text: "",
         type: "multipla_escolha",
+        points: 0,
         options: [
           { text: "", correct: false },
           { text: "", correct: false },
@@ -277,6 +280,20 @@ export default function CreateQuiz() {
                   required
                   rows={2}
                 />
+
+                <div className="mt-4 flex items-center gap-3">
+                  <label className="font-semibold text-slate-200">Pontos:</label>
+                  <input
+                    type="number"
+                    min="0.0"
+                    step="0.1"
+                    className="w-24 bg-transparent border border-white/10 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400 outline-none text-white"
+                    value={question.points}
+                    onChange={(e) => updateQuestion(qIndex, "points", parseFloat(e.target.value))}
+                    placeholder="ex: 0.5"
+                  />
+                </div>
+
 
                 {/* Type Selector */}
                 <div className="mt-6">

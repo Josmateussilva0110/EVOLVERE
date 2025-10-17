@@ -69,6 +69,7 @@ class Form {
                     json_build_object(
                         'id', q.id,
                         'text', q.text,
+                        'points', q.points,
                         'type', q.type,
                         'options', (
                         SELECT json_agg(
@@ -112,6 +113,7 @@ class Form {
                     json_build_object(
                         'id', q.id,
                         'text', q.text,
+                        'points', q.points,
                         'type', q.type,
                         'options', (
                         SELECT json_agg(

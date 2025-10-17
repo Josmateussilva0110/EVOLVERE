@@ -86,9 +86,15 @@ export default function ViewForm() {
                   {idx + 1}
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-white font-medium text-lg mb-3">
-                    {q.text}
-                  </h3>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-white font-medium text-lg">
+                        {q.text}
+                    </h3>
+                    <div className="px-3 py-1 rounded-full bg-yellow-400/20 text-yellow-300 text-sm font-semibold border border-yellow-300/40">
+                        {q.points ?? 0} {q.points === 1 ? "ponto" : "pontos"}
+                    </div>
+                    </div>
+
 
                   <ul className="space-y-2">
                     {q.options?.map((opt) => (

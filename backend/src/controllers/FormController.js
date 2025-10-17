@@ -32,7 +32,7 @@ class FormController {
             const formId = savedForm.insertId
 
             for (const q of questions) {
-                const questionData = { form_id: formId, text: q.text, type: q.type }
+                const questionData = { form_id: formId, text: q.text, points: q.points, type: q.type }
                 const savedQuestion = await Form.saveQuestion(questionData)
                 const questionId = savedQuestion.insertId
 
