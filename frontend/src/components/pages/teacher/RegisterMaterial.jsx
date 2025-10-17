@@ -141,12 +141,41 @@ function CadastrarMaterial() {
    */
   const validateFile = (file) => {
     if (!file) return false;
-    if (file.size > 50 * 1024 * 1024) {
-      setError("Arquivo muito grande. Máx. 50MB.");
+
+    // Verifica tamanho
+    if (file.size > 10 * 1024 * 1024) {
+      setError("Arquivo muito grande. Máx. 10MB.");
       return false;
     }
+
+    // Extensão do arquivo
+    const ext = file.name.split(".").pop().toLowerCase();
+
+    // Mapeamento de tipos permitidos
+    const allowedExtensions = {
+      "1": ["pdf"],
+      "2": ["doc", "docx"],
+      "3": ["ppt", "pptx"],
+    };
+
+    // Caso o usuário ainda não tenha selecionado o tipo
+    if (!type) {
+      setError("Selecione o tipo de material antes de enviar o arquivo.");
+      return false;
+    }
+
+    // Verifica compatibilidade tipo ↔ extensão
+    const validExts = allowedExtensions[type] || [];
+    if (!validExts.includes(ext)) {
+      setError(
+        `Tipo de arquivo inválido. Esperado: ${validExts.join(", ").toUpperCase()}`
+      );
+      return false;
+    }
+
     return true;
   };
+
 
   /**
    * handleFileChange

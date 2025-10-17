@@ -17,6 +17,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import requestData from "../../../utils/requestApi";
 import InviteModal from "./InviteModal";
 import { Context } from "../../../context/UserContext"
+import useFlashMessage from "../../../hooks/useFlashMessage"
 
 /**
  * ViewClass.jsx
@@ -132,10 +133,11 @@ export default function ViewClass() {
     const navigate = useNavigate();
     const { id } = useParams();
 
-    const [materials, setMaterials] = useState([]);
-    const [inviteOpen, setInviteOpen] = useState(false);
+    const [materials, setMaterials] = useState([])
+    const [inviteOpen, setInviteOpen] = useState(false)
     const { user } = useContext(Context)
     const [form, setForm] = useState([])
+    const { setFlashMessage } = useFlashMessage()
 
     useEffect(() => {
         async function fetchSubject() {
@@ -167,15 +169,20 @@ export default function ViewClass() {
         fetchForm()
     }, [id])
 
+    async function deleteMaterial(id) {
+        const response = await requestData(`/material/${id}`, 'DELETE', {}, true)
+        if (response.success) {
+            setMaterials(prev => prev.filter(d => d.id !== id))
+            setFlashMessage(response.data.message, 'success')
+        }
+        else {
+            setFlashMessage(response.message, 'error')
+        }
+    }
+
+
     // Dados de exemplo
     const alunos = ["Lucas", "Mateus", "Gabriel", "Rai Damásio", "João", "Maria", "Ana", "Pedro", "Sofia"];
-    const simulados = [
-        { nome: "Questões sobre Laços", respondido: 3 },
-        { nome: "Árvores Binárias", respondido: 5 },
-        { nome: "Conceitos de Funções", respondido: 2 },
-        { nome: "Estruturas de Repetição", respondido: 4 },
-        { nome: "Complexidade de Vetores", respondido: 1 },
-    ];
 
     // Paginação
     const ITEMS_PER_PAGE = 5;
@@ -350,7 +357,7 @@ export default function ViewClass() {
                         />
                     </DashboardCard>
 
-                    {/* Card de Materiais (dados da API) */}
+                    {/* Card de Materiais */}
                     <DashboardCard
                         title="Materiais de Aula"
                         icon={<BookOpen className="w-6 h-6 text-blue-400" />}
