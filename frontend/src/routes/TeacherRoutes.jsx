@@ -6,6 +6,7 @@ import ViewClass from "../components/pages/teacher/ViewClass"
 import RegisterSimulated from "../components/pages/teacher/RegisterSimulated"
 import ListSimulated from "../components/pages/teacher/ListSimulated"
 import ResponseList from "../components/pages/teacher/ResponseList"
+import ViewForm from "../components/pages/teacher/ViewForm"
 
 
 /**
@@ -77,6 +78,7 @@ export default function TeacherRoutes() {
        * @element ResponseList
        */}
       <Route path="simulated/response/list" element={<ResponseList />} />
+      <Route path="simulated/view/:id" element={<ViewForm />} />
     </Routes>
   )
 }
