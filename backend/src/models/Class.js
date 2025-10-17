@@ -225,6 +225,21 @@ class Class {
             return undefined
         }
     } 
+
+    async getIdClassBySubject(subject_id) {
+        try {
+            const result = await knex
+            .select("id")
+            .from("classes")
+            .where({ subject_id })
+            .first() 
+
+            return result ? result: null
+        } catch (err) {
+            console.error("Erro ao buscar id da classe:", err)
+            return null
+        }
+    }
 }
 
 module.exports = new Class();

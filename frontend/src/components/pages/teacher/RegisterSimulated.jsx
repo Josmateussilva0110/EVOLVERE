@@ -1,5 +1,9 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import { Plus, X, Trash2, Check, FileText } from "lucide-react";
+import { Context } from "../../../context/UserContext"
+import requestData from "../../../utils/requestApi"
+import { useNavigate } from "react-router-dom"
+import useFlashMessage from "../../../hooks/useFlashMessage"
 
 /**
  * AutoResizeTextarea
@@ -58,8 +62,8 @@ const tiposPergunta = [
  * - Simulação de envio (handleSubmit faz console.log e alert).
  *
  * Estado interno (useState):
- * - titulo: string — título do simulado.
- * - descricao: string — descrição/instruções (opcional).
+ * - title: string — título do simulado.
+ * - description: string — descrição/instruções (opcional).
  * - perguntas: Array — lista de perguntas contendo { texto, tipo, opcoes }.
  *
  * Estrutura de `perguntas`:
@@ -74,8 +78,12 @@ const tiposPergunta = [
  * @returns {JSX.Element} Formulário completo para criar e publicar um simulado.
  */
 export default function CreateQuiz() {
-  const [titulo, setTitulo] = useState("");
-  const [descricao, setDescricao] = useState("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const { user } = useContext(Context)
+  const [class_id, setClassId] = useState(null)
+  const [subject_id, setSubjectId] = useState(null)
+  const { setFlashMessage } = useFlashMessage()
   const [perguntas, setPerguntas] = useState([
     {
       texto: "",
@@ -84,6 +92,19 @@ export default function CreateQuiz() {
     },
   ]);
 
+  useEffect(() => {
+    async function fetchRelations() {
+      const response = await requestData(`/form/relations/${user.id}`, 'GET', {}, true)
+      if(response.success) {
+        setClassId(response.data.class_id.id)
+        setSubjectId(response.data.subject_id.id)
+      }
+    }
+    fetchRelations()
+  }, [user])
+
+
+  
   /**
    * adicionarPergunta
    *
@@ -216,7 +237,7 @@ export default function CreateQuiz() {
    * Handler do envio do formulário.
    * Atualmente realiza:
    * - e.preventDefault() para prevenir reload.
-   * - console.log do payload { titulo, descricao, perguntas }.
+   * - console.log do payload { title, description, perguntas }.
    * - alert informando que o simulado foi criado (simulação).
    *
    * Em produção:
@@ -225,11 +246,29 @@ export default function CreateQuiz() {
    *
    * @param {React.FormEvent} e - evento de submissão do formulário
    */
-  const handleSubmit = (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
-    console.log({ titulo, descricao, perguntas });
-    alert("Simulado criado com sucesso! (Verifique o console)");
-  };
+    const data = {
+      title,
+      description,
+      class_id,
+      subject_id,
+      created_by: user.id
+    }
+
+    console.log('data: ',data)
+
+    const response = await requestData("/form/publish", 'POST', data, true)
+    if(response.success) {
+      setFlashMessage(response.data.message, 'success')
+    }
+    else {
+      setFlashMessage(response.message, 'error')
+    }
+  }
+
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white font-sans">
@@ -246,8 +285,8 @@ export default function CreateQuiz() {
                   type="text"
                   className="w-full bg-transparent border border-white/10 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-400 outline-none transition text-white placeholder:text-slate-400"
                   placeholder="Ex: Prova de Algoritmos I"
-                  value={titulo}
-                  onChange={(e) => setTitulo(e.target.value)}
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
                   required
                 />
               </div>
@@ -256,9 +295,9 @@ export default function CreateQuiz() {
                 <textarea
                   className="w-full bg-transparent border border-white/10 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-400 outline-none transition text-white placeholder:text-slate-400"
                   placeholder="Instruções para os alunos, tópicos abordados, etc."
-                  value={descricao}
+                  value={description}
                   rows={3}
-                  onChange={(e) => setDescricao(e.target.value)}
+                  onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
             </div>
