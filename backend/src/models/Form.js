@@ -97,6 +97,49 @@ class Form {
         }
     }
 
+    async getFormById(id) {
+        try {
+            const result = await knex.raw(`
+                
+                select
+                    f.id,
+                    f.title,
+                    f.description,
+                    f.subject_id,
+                    f.class_id,
+                    f.updated_at,
+                    json_agg(
+                    json_build_object(
+                        'id', q.id,
+                        'text', q.text,
+                        'type', q.type,
+                        'options', (
+                        SELECT json_agg(
+                            json_build_object(
+                            'id', o.id,
+                            'text', o.text,
+                            'correct', o.correct
+                            )
+                        )
+                        FROM options o
+                        WHERE o.question_id = q.id
+                        )
+                    )
+                    ) AS questions
+                from form f
+                inner join questions q ON q.form_id = f.id
+                where f.id = ?
+                group by f.id
+                order by f.updated_at DESC;
+                `, [id]);
+            const rows = result.rows
+            return rows.length > 0 ? rows : undefined
+        } catch(err) {
+            console.error("Erro ao buscar formulários:", err);
+            return undefined
+        }
+    }
+
     async formExist(id) {
         try {
             const result = await knex.select("*").where({id}).table("form")

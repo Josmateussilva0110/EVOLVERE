@@ -187,8 +187,8 @@ export default function CreateQuiz() {
   const handleTrueFalseSelect = (qIndex, correctOption) => {
     const updated = [...questions];
     updated[qIndex].options = [
-      { text: "True", correct: correctOption === "True" },
-      { text: "False", correct: correctOption === "False" },
+      { text: "Verdadeiro", correct: correctOption === "Verdadeiro" },
+      { text: "Falso", correct: correctOption === "Falso" },
     ];
     setQuestions(updated);
   };
@@ -356,7 +356,7 @@ export default function CreateQuiz() {
                 {/* verdadeiro/Falso */}
                 {question.type === "verdadeiro/falso" && (
                   <div className="flex gap-4 pt-4">
-                    {["True", "False"].map((label) => (
+                    {["Verdadeiro", "Falso"].map((label) => (
                       <button
                         key={label}
                         type="button"

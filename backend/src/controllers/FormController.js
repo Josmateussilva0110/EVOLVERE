@@ -111,6 +111,22 @@ class FormController {
         }
     }
 
+    async view(request, response) {
+        try {
+            const { id } = request.params
+            if (!validator.isInt(id + '', { min: 1 })) {
+                return response.status(422).json({ success: false, message: "ID inválido." });
+            }
+            const form = await Form.getFormById(id)
+            if(!form) {
+                return response.status(404).json({ status: false, message: "Nenhum formulário encontrado." })
+            }
+            return response.status(200).json({ status: true, form})
+        } catch(err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
 
 }
 
