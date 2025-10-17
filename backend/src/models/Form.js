@@ -18,13 +18,17 @@ class Form {
 
     async save(data) {
         try {
-            await knex("form").insert(data)
-            return true
-        } catch(err) {
-            console.error('Erro ao cadastrar formulário:', err)
-            return false
+            const [result] = await knex("form")
+            .insert(data)
+            .returning("id") 
+            return { success: true, insertId: result.id }
+        } catch (err) {
+            console.error("Erro ao cadastrar formulário:", err)
+            return { success: false }
         }
     }
+
+
 
     
 }

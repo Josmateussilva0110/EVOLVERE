@@ -3,19 +3,17 @@ const Form = require("../models/Form")
 const Subject = require("../models/Subject")
 const Class = require("../models/Class")
 const validator = require('validator');
+const Question = require("../models/Question")
+const Option = require("../models/Option")
 
 class FormController {
     async publish(request, response) {
         try {
-            const {title, description, created_by, subject_id, class_id} = request.body
+            const {title, description, created_by, subject_id, class_id, questions} = request.body
             const error = MaterialFieldValidator.validate({ title, description, created_by, subject_id, class_id})
             if (error) return response.status(422).json({ status: false, message: error })
 
-            console.log(title)
-            console.log(class_id)
-            
             const formExist = await Form.formExists(title, class_id)
-            console.log(formExist)
             if(formExist) {
                 return response.status(422).json({ status: false, message: "Titulo de formulário já existe." })
             }
@@ -28,9 +26,27 @@ class FormController {
                 class_id
             }
 
-            const valid = await Form.save(data)
-            if(!valid) {
+            const savedForm = await Form.save(data)
+            if(!savedForm.success) {
                 return response.status(500).json({ status: false, message: "Erro ao cadastrar formulário." })
+            }
+
+            const formId = savedForm.insertId
+
+            for (const q of questions) {
+                const questionData = { form_id: formId, text: q.text, type: q.type }
+                const savedQuestion = await Question.save(questionData)
+                const questionId = savedQuestion.insertId
+
+                if (q.options && q.options.length > 0) {
+                    for (const opt of q.options) {
+                    await Option.save({
+                        question_id: questionId,
+                        text: opt.text,
+                        correct: opt.correct || false
+                    })
+                    }
+                }
             }
 
             return response.status(200).json({ status: true, message: "Formulário cadastrado com sucesso." })
