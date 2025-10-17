@@ -5,7 +5,7 @@ const formController = require("../controllers/FormController")
 router.get("/form/relations/:id", formController.getRelations)
 router.post("/form/publish", formController.publish)
 router.get("/form/:id", formController.findFormByUser)
-
+router.delete("/form/:id", formController.delete)
 
 
 

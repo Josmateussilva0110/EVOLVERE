@@ -180,6 +180,17 @@ export default function ViewClass() {
         }
     }
 
+    async function deleteForm(id) {
+        const response = await requestData(`/form/${id}`, 'DELETE', {}, true)
+        if (response.success) {
+            setForm(prev => prev.filter(d => d.id !== id))
+            setFlashMessage(response.data.message, 'success')
+        }
+        else {
+            setFlashMessage(response.message, 'error')
+        }
+    }
+
 
     // Dados de exemplo
     const alunos = ["Lucas", "Mateus", "Gabriel", "Rai Damásio", "João", "Maria", "Ana", "Pedro", "Sofia"];
@@ -336,7 +347,7 @@ export default function ViewClass() {
                                                 <Eye className="w-4 h-4 text-blue-400 hover:text-blue-300" />
                                             </button>
                                             <button
-                                                onClick={() => console.log("Excluir simulado:", f.id)}
+                                                onClick={() => deleteForm(f.id)}
                                                 title="Excluir"
                                             >
                                                 <Trash2 className="w-4 h-4 text-red-400 hover:text-red-300" />

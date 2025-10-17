@@ -97,6 +97,26 @@ class Form {
         }
     }
 
+    async formExist(id) {
+        try {
+            const result = await knex.select("*").where({id}).table("form")
+            return result.length > 0
+        } catch(err) {
+            console.error('Erro ao verificar formulário:', err)
+            return false
+        }
+    }
+
+    async deleteById(id) {
+        try {
+            const deleted = await knex('form').where({ id }).delete();
+            return deleted > 0;
+        } catch (err) {
+            console.error("Erro ao deletar formulário:", err);
+            return false;
+        }
+    }
+
 
     
 }

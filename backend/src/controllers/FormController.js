@@ -91,6 +91,26 @@ class FormController {
         }
     }
 
+    async delete(request, response) {
+        try {
+            const { id } = request.params
+            if (!validator.isInt(id + '', { min: 1 })) {
+                return res.status(422).json({ success: false, message: "ID inválido." });
+            }
+            const formExist = await Form.formExist(id)
+            if(!formExist) {
+                return response.status(404).json({ status: false, message: "Formulário não encontrado." })
+            }
+            const valid = await Form.deleteById(id)
+            if(!valid) {
+                return response.status(500).json({ status: false, message: "Erro ao deletar formulário." })
+            }
+            return response.status(200).json({ status: true, message: "Formulário deletado com sucesso." })
+        } catch(err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
 
 }
 
