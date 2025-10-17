@@ -1,5 +1,5 @@
 // ViewClass.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
     Trash2,
     Eye,
@@ -12,14 +12,11 @@ import {
     PlusCircle,
     Link,
     ArrowLeft,
-    X,
-    Copy,
-    Check,
-    Clock
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import requestData from "../../../utils/requestApi";
 import InviteModal from "./InviteModal";
+import { Context } from "../../../context/UserContext"
 
 /**
  * ViewClass.jsx
@@ -137,31 +134,38 @@ export default function ViewClass() {
 
     const [materials, setMaterials] = useState([]);
     const [inviteOpen, setInviteOpen] = useState(false);
+    const { user } = useContext(Context)
+    const [form, setForm] = useState([])
 
     useEffect(() => {
         async function fetchSubject() {
-            if (!id) return; // evita chamada quando id não está disponível
-            try {
-                const response = await requestData(`/classes/materials/${id}`, 'GET', {}, true);
-                // eslint-disable-next-line no-console
-                console.log(response);
+            if (!id) return
+            const response = await requestData(`/classes/materials/${id}`, 'GET', {}, true)
+            console.log(response)
 
-                if (response && response.success) {
-                    const mats = response.data?.materials || [];
-                    setMaterials(mats);
-                } else {
-                    // em caso de resposta sem sucesso, limpa a lista
-                    setMaterials([]);
-                }
-            } catch (err) {
-                // console para debugging e limpa materiais para evitar estados inconsistentes
-                // eslint-disable-next-line no-console
-                console.error('Erro ao carregar materiais da turma:', err);
-                setMaterials([]);
+            if (response && response.success) {
+                const mats = response.data?.materials || []
+                setMaterials(mats)
+            } else {
+                setMaterials([])
             }
         }
-        fetchSubject();
-    }, [id]);
+        fetchSubject()
+    }, [id])
+
+    useEffect(() => {
+        async function fetchForm() {
+            const response = await requestData(`/form/${user.id}`, 'GET', {}, true)
+            console.log('form: ',response)
+
+            if (response && response.success) {
+                setForm(response.data.form)
+            } else {
+                setForm([])
+            }
+        }
+        fetchForm()
+    }, [id])
 
     // Dados de exemplo
     const alunos = ["Lucas", "Mateus", "Gabriel", "Rai Damásio", "João", "Maria", "Ana", "Pedro", "Sofia"];
@@ -307,20 +311,43 @@ export default function ViewClass() {
                         delay={200}
                     >
                         <ul className="space-y-2 flex-grow">
-                            {getPageData(simulados, pageSimulados).map((sim) => (
-                                <li key={sim.nome} className="flex justify-between items-center p-2.5 rounded-md hover:bg-white/5 transition-colors group">
-                                    <div className="flex flex-col">
-                                        <span className="text-slate-200 text-sm">{sim.nome}</span>
-                                        <span className="text-xs text-slate-400">{sim.respondido} de {alunos.length} alunos responderam</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button><Eye className="w-4 h-4 text-blue-400 hover:text-blue-300" /></button>
-                                        <button><Trash2 className="w-4 h-4 text-red-400 hover:text-red-300" /></button>
-                                    </div>
-                                </li>
-                            ))}
+                            {form.length > 0 ? (
+                                getPageData(form, pageSimulados).map((f) => (
+                                    <li
+                                        key={f.id}
+                                        className="flex justify-between items-center p-2.5 rounded-md hover:bg-white/5 transition-colors group"
+                                    >
+                                        <div className="flex flex-col">
+                                            <span className="text-slate-200 text-sm">{f.title}</span>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button
+                                                onClick={() => navigate(`/teacher/simulated/view/${f.id}`)}
+                                                title="Visualizar"
+                                            >
+                                                <Eye className="w-4 h-4 text-blue-400 hover:text-blue-300" />
+                                            </button>
+                                            <button
+                                                onClick={() => console.log("Excluir simulado:", f.id)}
+                                                title="Excluir"
+                                            >
+                                                <Trash2 className="w-4 h-4 text-red-400 hover:text-red-300" />
+                                            </button>
+                                        </div>
+                                    </li>
+                                ))
+                            ) : (
+                                <p className="text-slate-400 text-sm italic text-center py-4">
+                                    Nenhum simulado encontrado.
+                                </p>
+                            )}
                         </ul>
-                        <Pagination currentPage={pageSimulados} totalPages={getTotalPages(simulados)} onPageChange={setPageSimulados} />
+                        <Pagination
+                            currentPage={pageSimulados}
+                            totalPages={getTotalPages(form)}
+                            onPageChange={setPageSimulados}
+                        />
                     </DashboardCard>
 
                     {/* Card de Materiais (dados da API) */}

@@ -83,6 +83,7 @@ export default function CreateQuiz() {
   const [classId, setClassId] = useState(null);
   const [subjectId, setSubjectId] = useState(null);
   const { setFlashMessage } = useFlashMessage();
+  const navigate = useNavigate()
 
   const [questions, setQuestions] = useState([
     {
@@ -208,6 +209,7 @@ export default function CreateQuiz() {
     const response = await requestData("/form/publish", "POST", data, true);
     if (response.success) {
       setFlashMessage(response.data.message, "success");
+      navigate(`/teacher/class/view/${classId}`)
     } else {
       setFlashMessage(response.message, "error");
     }
