@@ -1,8 +1,7 @@
 const Class = require('../models/Class');
 const validator = require('validator');
 const crypto = require('crypto');
-const knex = require("../database/connection"); 
-
+const Invite = require('../models/Invite'); 
 
 function generateInviteCode() {
     const randomPart = crypto.randomBytes(3).toString('hex').toUpperCase();
@@ -313,6 +312,7 @@ async generateInvite(req, res) {
             const { id: classId } = req.params;
             const { expires_in_minutes, max_uses } = req.body;
 
+            // Lógica de cálculo de data e max_uses (continua no controller)
             let expirationDate;
             if (expires_in_minutes > 0) {
                 expirationDate = new Date();
@@ -321,36 +321,33 @@ async generateInvite(req, res) {
                 expirationDate = new Date();
                 expirationDate.setFullYear(expirationDate.getFullYear() + 100);
             }
-
             const dbMaxUses = (max_uses === 0) ? null : max_uses;
 
             let inviteCode;
             let isCodeUnique = false;
             while (!isCodeUnique) {
                 inviteCode = generateInviteCode();
-                const existingCode = await knex('classes_invites').where({ code: inviteCode }).first();
+                const existingCode = await Invite.findByCode(inviteCode);
                 if (!existingCode) isCodeUnique = true;
             }
             
-            // 4. Salvar no banco (lógica sem alteração)
-            const [newInvite] = await knex('classes_invites')
-                .insert({
-                    code: inviteCode,
-                    classes_id: parseInt(classId),
-                    expires_at: expirationDate,
-                    max_uses: dbMaxUses
-                })
-                .returning('*');
-            
+            const newInvite = await Invite.create({
+                code: inviteCode,
+                classes_id: parseInt(classId),
+                expires_at: expirationDate,
+                max_uses: dbMaxUses
+            });
+
+
             const responseData = {
-                code: newInvite.code, // <-- Enviamos o código
+                code: newInvite.code,
                 expires_at: newInvite.expires_at.toISOString(),
                 max_uses: newInvite.max_uses === null ? 0 : newInvite.max_uses,
             };
             
-            res.status(201).json({ 
-                success: true, 
-                message: "Código de convite gerado com sucesso!", 
+            res.status(201).json({
+                success: true,
+                message: "Código de convite gerado com sucesso!",
                 data: responseData
             });
 
