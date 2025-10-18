@@ -1,12 +1,11 @@
 const Class = require('../models/Class');
 const validator = require('validator');
 const crypto = require('crypto');
+const knex = require("../database/connection"); 
 
-// Função auxiliar para gerar um código amigável
+
 function generateInviteCode() {
-    // Gera 3 bytes aleatórios e converte para uma string hexadecimal de 6 caracteres
     const randomPart = crypto.randomBytes(3).toString('hex').toUpperCase();
-    // Formata para "ABC-DEF" para facilitar a leitura
     return `${randomPart.substring(0, 3)}-${randomPart.substring(3, 6)}`;
 }
 
@@ -309,55 +308,50 @@ class ClassController {
      * }
      * }
      */
-    async generateInvite(req, res) {
+async generateInvite(req, res) {
         try {
             const { id: classId } = req.params;
-            const { expiration, maxUses } = req.body;
+            const { expires_in_minutes, max_uses } = req.body;
 
-            const expirationDate = new Date();
-            switch (expiration) {
-                case '1_day':
-                    expirationDate.setDate(expirationDate.getDate() + 1);
-                    break;
-                case '7_days':
-                    expirationDate.setDate(expirationDate.getDate() + 7);
-                    break;
-                case '30_days':
-                    expirationDate.setDate(expirationDate.getDate() + 30);
-                    break;
-                case 'never':
-                    // Define uma data muito no futuro para "nunca" expirar
-                    expirationDate.setFullYear(expirationDate.getFullYear() + 100);
-                    break;
-                default:
-                    // Padrão de 1 dia se o valor for inválido
-                    expirationDate.setDate(expirationDate.getDate() + 1);
+            let expirationDate;
+            if (expires_in_minutes > 0) {
+                expirationDate = new Date();
+                expirationDate.setMinutes(expirationDate.getMinutes() + expires_in_minutes);
+            } else {
+                expirationDate = new Date();
+                expirationDate.setFullYear(expirationDate.getFullYear() + 100);
             }
 
-            // Se o frontend enviar 'unlimited', salvamos NULL no banco.
-            const dbMaxUses = (maxUses === 'unlimited' || !maxUses) ? null : parseInt(maxUses, 10);
+            const dbMaxUses = (max_uses === 0) ? null : max_uses;
 
             let inviteCode;
             let isCodeUnique = false;
             while (!isCodeUnique) {
                 inviteCode = generateInviteCode();
-                const existingCode = await knex('class_invites').where({ code: inviteCode }).first();
+                const existingCode = await knex('classes_invites').where({ code: inviteCode }).first();
                 if (!existingCode) isCodeUnique = true;
             }
             
-            const [newInvite] = await knex('class_invites')
+            // 4. Salvar no banco (lógica sem alteração)
+            const [newInvite] = await knex('classes_invites')
                 .insert({
                     code: inviteCode,
-                    class_id: parseInt(classId),
-                    expires_at: expirationDate, // Valor calculado
-                    max_uses: dbMaxUses        // Valor tratado
+                    classes_id: parseInt(classId),
+                    expires_at: expirationDate,
+                    max_uses: dbMaxUses
                 })
-                .returning(['code', 'expires_at']); // Retorna só o necessário
+                .returning('*');
+            
+            const responseData = {
+                code: newInvite.code, // <-- Enviamos o código
+                expires_at: newInvite.expires_at.toISOString(),
+                max_uses: newInvite.max_uses === null ? 0 : newInvite.max_uses,
+            };
             
             res.status(201).json({ 
                 success: true, 
                 message: "Código de convite gerado com sucesso!", 
-                data: newInvite
+                data: responseData
             });
 
         } catch (error) {
