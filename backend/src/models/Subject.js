@@ -463,9 +463,8 @@ class Subject {
                     )
                     .orderBy('updated_at', 'desc'),
 
-                // 3. Consulta das turmas (sem alteração)
                 knex('classes as c')
-                    .leftJoin('classes_alunos as cs', 'c.id', 'cs.classes_id') // Verifique o nome da sua tabela pivo
+                    .leftJoin('class_student as cs', 'c.id', 'cs.classes_id') // Verifique o nome da sua tabela pivo
                     .where('c.subject_id', id)
                     .groupBy('c.id', 'c.name', 'c.period')
                     .select('c.id', 'c.name', 'c.period')

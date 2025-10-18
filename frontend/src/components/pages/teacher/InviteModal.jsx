@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Users, X, Copy, Check, Clock, Link as LinkIcon } from "lucide-react";
+import requestData from "../../../utils/requestApi"
 
 /**
  * InviteModal.jsx
@@ -26,27 +27,6 @@ import { Users, X, Copy, Check, Clock, Link as LinkIcon } from "lucide-react";
  * Autores: equipe Evolvere
  * Data: 2025-10-15
  */
-
-/* ===== Simulação da API (sem alterações) ===== */
-const requestData = async (url, method, body) => {
-  console.log("Requesting API:", { url, method, body });
-  await new Promise((res) => setTimeout(res, 1000));
-  const now = new Date();
-  const expires_at =
-    body.expires_in_minutes > 0
-      ? new Date(now.getTime() + body.expires_in_minutes * 60000).toISOString()
-      : null;
-  return {
-    success: true,
-    data: {
-      link: `https://sua-plataforma.com/invite/${Math.random()
-        .toString(36)
-        .substring(2, 12)}`,
-      expires_at: expires_at,
-      max_uses: body.max_uses,
-    },
-  };
-};
 
 /* ===== Hook de lógica interno ===== */
 /**
@@ -141,22 +121,24 @@ const useInviteGenerator = (classId) => {
     try {
       const body = { expires_in_minutes: expiresVal, max_uses: maxUsesVal, role: "student" };
       const resp = await requestData(`/classes/${classId}/invites`, "POST", body, true);
-      if (resp?.success && resp.data?.link) {
-        setInvite(resp.data);
-        await copyToClipboard(resp.data.link, true);
+      
+        if (resp?.success && resp.data?.success && resp.data?.data?.code) {
+        setInvite(resp.data.data);
+        await copyToClipboard(resp.data.data.code, true);
       } else {
-        setError(resp?.message || "Ocorreu um erro.");
+        setError(resp?.data?.message || reps?.message || "Ocorreu um erro.");
       }
     } catch (e) {
+      console.error("Erro de rede ao gerar convite:", e);
       setError("Erro de rede.");
     } finally {
       setLoading(false);
     }
   };
 
-  const copyLink = () => {
-    if (invite?.link) {
-      copyToClipboard(invite.link);
+  const copyCode = () => {
+    if (invite?.code) {
+      copyToClipboard(invite.code);
     }
   };
 
@@ -172,7 +154,7 @@ const useInviteGenerator = (classId) => {
     });
   };
 
-  return { form, handleFormChange, loading, error, invite, copied, generate, copyLink, reset };
+  return { form, handleFormChange, loading, error, invite, copied, generate, copyCode, reset };
 };
 
 /* ===== Componentes UI ===== */
@@ -327,24 +309,25 @@ const InviteOption = ({ label, description, options = [], isCustom = false, valu
  */
 const InviteResultDisplay = ({ invite, copied, onCopy }) => (
   <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4 space-y-3">
-    <div className="flex justify-between items-start gap-4">
+    <div className="flex justify-between items-center gap-4">
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-indigo-300 font-semibold uppercase tracking-wider">Link Gerado</p>
-        <p className="text-sm text-slate-100 break-words">{invite.link}</p>
+        <p className="text-xs text-indigo-300 font-semibold uppercase tracking-wider">Código Gerado</p>
+        {/* ----> MUDANÇA PRINCIPAL DE EXIBIÇÃO <---- */}
+        <p className="text-2xl sm:text-3xl font-mono tracking-widest text-emerald-400 break-all py-2">
+          {invite.code}
+        </p>
       </div>
       <div className="flex items-center gap-1 shrink-0">
         <button onClick={onCopy} title={copied ? "Copiado!" : "Copiar"} className="p-2 rounded-md text-slate-300 hover:bg-slate-700 transition-colors">
           {copied ? <Check className="w-5 h-5 text-green-400" /> : <Copy className="w-5 h-5" />}
         </button>
-        <a href={invite.link} target="_blank" rel="noopener noreferrer" title="Abrir link" className="p-2 rounded-md text-slate-300 hover:bg-slate-700 transition-colors">
-          <LinkIcon className="w-5 h-5" />
-        </a>
+        {/* ----> REMOVIDO <---- O ícone de link não faz mais sentido */}
       </div>
     </div>
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-slate-400 pt-3 border-t border-slate-700/50 gap-2">
       <div className="flex items-center gap-2">
         <Clock className="w-4 h-4" />
-        <span>{invite.expires_at ? `Expira em: ${new Date(invite.expires_at).toLocaleString()}` : "Não expira"}</span>
+        <span>{invite.expires_at ? `Expira em: ${new Date(invite.expires_at).toLocaleString('pt-BR')}` : "Não expira"}</span>
       </div>
       <span>Usos: {invite.max_uses > 0 ? invite.max_uses : "Ilimitados"}</span>
     </div>
@@ -360,7 +343,7 @@ export default function InviteModal({ open, onClose, classId }) {
    * - onClose: callback quando o modal deve ser fechado
    * - classId: id (string|number) da turma para a qual o convite será gerado
    */
-  const { form, handleFormChange, loading, error, invite, copied, generate, copyLink, reset } = useInviteGenerator(classId);
+  const { form, handleFormChange, loading, error, invite, copied, generate, copyCode, reset } = useInviteGenerator(classId);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -442,13 +425,13 @@ export default function InviteModal({ open, onClose, classId }) {
               Limpar
             </Button>
             <Button variant="primary" onClick={generate} disabled={loading}>
-              {loading ? "Gerando..." : "Gerar Link de Convite"}
+              {loading ? "Gerando..." : "Gerar código de Convite"}
             </Button>
           </div>
 
           {/* Resultados */}
           {error && <div className="text-sm text-center text-red-400 p-3 bg-red-900/50 border border-red-500/20 rounded-md">{error}</div>}
-          {invite && <InviteResultDisplay invite={invite} copied={copied} onCopy={copyLink} />}
+          {invite && <InviteResultDisplay invite={invite} copied={copied} onCopy={copyCode} />}
         </div>
       </div>
     </div>

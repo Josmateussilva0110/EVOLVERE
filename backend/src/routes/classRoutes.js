@@ -20,7 +20,7 @@ router.post('/classes', classController.create);
  * @summary rota para chamar a função de criação de convite de turma.
  */
 
-router.post('/classes/:id/invite', classController.generateInvite);
+router.post('/classes/:id/invites', classController.generateInvite);
 
 
 
