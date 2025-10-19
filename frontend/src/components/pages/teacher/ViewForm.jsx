@@ -66,13 +66,24 @@ export default function ViewForm() {
         </div>
 
         {/* Informações */}
-        <div className="flex items-center gap-2 text-slate-400 text-sm mb-6">
-          <Clock className="w-4 h-4" />
-          Última atualização:{" "}
-          <span className="text-slate-200 font-medium">
-            {formatDateRequests(form.updated_at)}
-          </span>
+        <div className="flex flex-wrap items-center gap-3 text-slate-400 text-sm mb-6">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            <span>
+              Última atualização:{" "}
+              <span className="text-slate-200 font-medium">
+                {formatDateRequests(form.updated_at)}
+              </span>
+            </span>
+          </div>
+
+          {/* Badge de Pontos Totais */}
+          <div className="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-sm font-semibold">
+            Total: {form.total_points ?? 0}{" "}
+            {form.total_points === 1 ? "ponto" : "pontos"}
+          </div>
         </div>
+
 
         {/* Lista de perguntas */}
         <div className="space-y-6">
@@ -86,14 +97,15 @@ export default function ViewForm() {
                   {idx + 1}
                 </div>
                 <div className="flex-1">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-white font-medium text-lg">
-                        {q.text}
+                  <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
+                    <h3 className="text-white font-medium text-lg flex-1 break-words">
+                      {q.text}
                     </h3>
-                    <div className="px-3 py-1 rounded-full bg-yellow-400/20 text-yellow-300 text-sm font-semibold border border-yellow-300/40">
-                        {q.points ?? 0} {q.points === 1 ? "ponto" : "pontos"}
+                    <div className="self-start px-3 py-1 rounded-full bg-yellow-400/20 text-yellow-300 text-sm font-semibold border border-yellow-300/40 whitespace-nowrap">
+                      {q.points ?? 0} {q.points === 1 ? "ponto" : "pontos"}
                     </div>
-                    </div>
+                  </div>
+
 
 
                   <ul className="space-y-2">

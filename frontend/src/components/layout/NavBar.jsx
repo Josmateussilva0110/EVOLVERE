@@ -72,6 +72,8 @@ function Navbar() {
     }
   }, [user])
 
+  console.log(requestUser)
+
   // 🔹 Define cores conforme rota
   const path = location.pathname
   const bgColor =
