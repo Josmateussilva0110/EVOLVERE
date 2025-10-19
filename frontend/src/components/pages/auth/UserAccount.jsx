@@ -150,17 +150,25 @@ function UserAccount() {
       if (user.id) formData.append("id", user.id)
       if (user.institution) formData.append("institution", user.institution)
       if (user.access_code) formData.append("access_code", user.access_code)
-      if (user.diploma) formData.append("diploma", user.diploma)
+      if (role !== 4 && user.diploma) {
+        formData.append("diploma", user.diploma);
+      }
 
-      formData.append("role", role)
-
-      await userService.registerAccount(formData, navigate, setFlashMessage)
-    }
-    else {
-      setFlashMessage("Usuário não autenticado", "error")
+      formData.append("role", role);
+      const success = await userService.registerAccount(formData, setFlashMessage);
+      
+      if (success) {
+        if (role === 4) { // Role 4 é Aluno
+          navigate('/');
+        } else {
+          navigate('/awaiting-approval');
+        }
+      }
+    } else {
+      setFlashMessage("Usuário não autenticado", "error");
     }
   }
-
+  
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#060060] px-4">

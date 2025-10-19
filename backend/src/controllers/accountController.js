@@ -51,73 +51,98 @@ class AccountController {
      * // Resposta em caso de sucesso
      * { "status": true, "message": "Conta cadastrada com sucesso." }
      */
-    async addRole(request, response) {
-        try {
-            const { id, institution, access_code, role } = request.body
-            let diplomaPath = null
+async addRole(request, response) {
+    try {
+        const { id, institution, access_code, role } = request.body;
+        // Inicializa diplomaPath como null. Só será alterado se necessário.
+        let diplomaPath = null;
+        // A variável 'diplomaFile' conterá os dados do arquivo SE ele for enviado.
+        const diplomaFile = request.file; 
 
-            if (id >= 1 && id <= 4) {
-                return response.status(422).json({
-                    status: false,
-                    message: "Não permitido, você já é admin",
-                })
-            }
-
-            const course_valid = await Course.getCourseByCode(access_code)
-            if(!course_valid) {
-                return response.status(404).json({status: false, message: "Nenhum curso encontrado com esse código"})
-            }
-            if (!request.file) {
-                return response.status(400).json({ status: false, message: "O upload de um PDF é obrigatório" })
-            }
-
-            if (!validator.isInt(id + '', { min: 1 })) {
-                return response.status(422).json({status: false, message: "Usuário invalido."})
-            }
-
-            if (!validator.isInt(access_code + '', { min: 1 })) {
-                return response.status(422).json({status: false, message: "Código de acesso invalido."})
-            }
-
-            if (validator.isEmpty(institution || '') || !validator.isLength(institution, { min: 3, max: 50 })) {
-                return response.status(422).json({status: false, message: "Nome de instituição invalido."})
-            }
-
-            const accountExists = await Account.accountExists(id)
-            if(accountExists) {
-                return response.status(422).json({status: false, message: "Usuário já tem conta."})
-            }
-
-            const rootDir = path.join(__dirname, "..", "..")
-            const uploadDir = path.join(rootDir, "public", "diplomas")
-
-            fs.mkdirSync(uploadDir, { recursive: true })
-            const uniqueName = Date.now() + "_" + Math.floor(Math.random() * 100) + path.extname(request.file.originalname)
-            const finalPath = path.join(uploadDir, uniqueName)
-
-            diplomaPath = path.join("diplomas", uniqueName)
- 
-            const data = {
-                professional_id: id,
-                institution,
-                access_code,
-                diploma: diplomaPath, 
-                role
-            }
-
-            const valid = await Account.save(data)
-            if(!valid) {
-                return response.status(500).json({status: false, message: "Erro ao cadastrar usuário."})
-            }
-
-            fs.writeFileSync(finalPath, request.file.buffer)
-            return response.status(200).json({status: true, message: "Conta cadastrada com sucesso."})
-        } catch(err) {
-            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        // --- VALIDAÇÕES GERAIS (sem alteração) ---
+        if (id >= 1 && id <= 4) { // Assumindo IDs 1-4 são admins
+            return response.status(422).json({
+                status: false,
+                message: "Não permitido, você já é admin",
+            });
         }
+        if (!validator.isInt(id + '', { min: 1 })) {
+            return response.status(422).json({status: false, message: "Usuário invalido."});
+        }
+        if (!validator.isInt(access_code + '', { min: 1 })) {
+            return response.status(422).json({status: false, message: "Código de acesso invalido."});
+        }
+        if (validator.isEmpty(institution || '') || !validator.isLength(institution, { min: 3, max: 50 })) {
+            return response.status(422).json({status: false, message: "Nome de instituição invalido."});
+        }
+
+        const course_valid = await Course.getCourseByCode(access_code);
+        if(!course_valid) {
+            return response.status(404).json({status: false, message: "Nenhum curso encontrado com esse código"});
+        }
+        const accountExists = await Account.accountExists(id);
+        if(accountExists) {
+            return response.status(422).json({status: false, message: "Usuário já tem conta."});
+        }
+
+        // --- VALIDAÇÃO CONDICIONAL DO DIPLOMA ---
+        // Só exigimos o diploma se o role NÃO for Aluno (4)
+        if (role !== '4' && !diplomaFile) {
+            // Se NÃO é aluno (é professor '3' ou coordenador '2') E não enviou o arquivo
+            return response.status(400).json({ status: false, message: "O upload de um PDF (diploma) é obrigatório para este perfil." });
+        }
+
+        // --- PROCESSAMENTO CONDICIONAL DO ARQUIVO ---
+        let finalPath = null; // Caminho completo no servidor
+        if (diplomaFile) { // Só processa o arquivo se ele foi enviado
+            const rootDir = path.join(__dirname, "..", "..");
+            const uploadDir = path.join(rootDir, "public", "diplomas");
+
+            // Cria o diretório se não existir
+            fs.mkdirSync(uploadDir, { recursive: true });
+
+            // Gera um nome único e define o caminho final
+            const uniqueName = Date.now() + "_" + Math.floor(Math.random() * 100) + path.extname(diplomaFile.originalname);
+            finalPath = path.join(uploadDir, uniqueName);
+
+            // Define o caminho relativo para salvar no banco
+            diplomaPath = path.join("diplomas", uniqueName);
+        }
+
+        // --- SALVAR NO BANCO ---
+        // Monta os dados, 'diplomaPath' será null se for Aluno
+        const data = {
+            professional_id: id,
+            institution,
+            access_code,
+            diploma: diplomaPath, // Será NULL para alunos, ou o caminho do arquivo para outros
+            role
+        };
+
+        const valid = await Account.save(data);
+        if(!valid) {
+            // Se falhou ao salvar, e tínhamos um arquivo para salvar, tentamos removê-lo
+            // (Opcional, mas boa prática para não deixar lixo no servidor)
+            if (finalPath && fs.existsSync(finalPath)) {
+                fs.unlinkSync(finalPath);
+            }
+            return response.status(500).json({status: false, message: "Erro ao cadastrar usuário."});
+        }
+
+        // --- SALVAR O ARQUIVO FÍSICO (somente se necessário) ---
+        if (finalPath && diplomaFile) { // Só salva o arquivo se ele existiu e foi processado
+            fs.writeFileSync(finalPath, diplomaFile.buffer);
+        }
+
+        // --- SUCESSO ---
+        return response.status(200).json({status: true, message: "Conta cadastrada com sucesso."});
+
+    } catch(err) {
+        // Logar o erro completo para debug
+        console.error("Erro interno em addRole:", err); 
+        return response.status(500).json({ status: false, message: "Erro interno no servidor." });
     }
-
-
+}
         
     /**
      * Retorna todas as solicitações de professores pendentes de aprovação.
