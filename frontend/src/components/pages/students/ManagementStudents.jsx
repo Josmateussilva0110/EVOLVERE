@@ -22,7 +22,7 @@ import {
   GraduationCap,
   Briefcase,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 
@@ -70,6 +70,31 @@ export default function Dashboard() {
   const usuario = "Lucas Emanuel";
   const navigate = useNavigate(); // 🔹 Hook para navegar entre rotas
 
+  // Modal para acessar turma por código
+  const [showClassModal, setShowClassModal] = useState(false);
+  const [classCode, setClassCode] = useState("");
+  const [classError, setClassError] = useState("");
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (showClassModal) {
+      setTimeout(() => inputRef.current?.focus(), 50);
+    } else {
+      setClassError("");
+      setClassCode("");
+    }
+  }, [showClassModal]);
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (!showClassModal) return;
+      if (e.key === "Escape") setShowClassModal(false);
+      if (e.key === "Enter") handleEnterClass();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [showClassModal, classCode]);
+
   // 🔹 Função que define rota de cada item
   const handleNavigation = (id) => {
     setActiveSection(id);
@@ -96,6 +121,22 @@ export default function Dashboard() {
       default:
         break;
     }
+  };
+
+  const handleEnterClass = () => {
+    const code = classCode.trim();
+    if (!code) {
+      setClassError("Insira o código da turma.");
+      inputRef.current?.focus();
+      return;
+    }
+
+    // Exemplo: navegando para a visualização de turmas com query string contendo o código.
+    // Em produção, substituir por verificação/entrada via API para validar o código sem sair da tela.
+    setActiveSection("turmas");
+    setShowClassModal(false);
+    navigate(`/student/classes/view?code=${encodeURIComponent(code)}`);
+    setClassCode("");
   };
 
   const menuItems = [
@@ -176,7 +217,7 @@ export default function Dashboard() {
               {/* Right controls: Access current class button */}
               <div className="flex items-center gap-4">
                 <button
-                  onClick={() => { setActiveSection('turmas'); navigate('/student/classes/view'); }}
+                  onClick={() => { setShowClassModal(true); }}
                   className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md hover:opacity-95 transition-all"
                   aria-label="Acessar Turma Atual"
                 >
@@ -186,6 +227,52 @@ export default function Dashboard() {
               </div>
             </div>
         </header>
+
+        {/* Modal: Inserir código da turma */}
+        {showClassModal && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center px-4"
+            aria-modal="true"
+            role="dialog"
+            aria-label="Acessar turma por código"
+          >
+            <div
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+              onClick={() => setShowClassModal(false)}
+            />
+            <div className="relative w-full max-w-md bg-white rounded-2xl shadow-xl p-6 z-10">
+              <h3 className="text-lg font-bold mb-2">Acessar Turma</h3>
+              <p className="text-sm text-gray-500 mb-4">Digite o código da turma que deseja acessar.</p>
+
+              <label className="block">
+                <input
+                  ref={inputRef}
+                  value={classCode}
+                  onChange={(e) => { setClassCode(e.target.value); setClassError(""); }}
+                  placeholder="Ex: ABC123"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  aria-label="Código da turma"
+                />
+              </label>
+              {classError && <p className="mt-2 text-sm text-red-600">{classError}</p>}
+
+              <div className="mt-4 flex justify-end gap-3">
+                <button
+                  onClick={() => setShowClassModal(false)}
+                  className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleEnterClass}
+                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold hover:opacity-95 transition-all"
+                >
+                  Entrar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="p-8">
           {/* Stats Cards */}
