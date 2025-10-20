@@ -1,12 +1,13 @@
 import { useNavigate } from "react-router-dom"
 import Input from "../../form/Input"
 import FileUpload from "../../form/FileUpload"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useContext } from "react"
 import { FaUserGraduate, FaChalkboardTeacher, FaUniversity } from "react-icons/fa"
 import requestData from "../../../utils/requestApi"
 import userService from "./service/userService"
 import useFlashMessage from "../../../hooks/useFlashMessage"
 import Select from "../../form/Select"
+import { Context } from "../../../context/UserContext"; 
 
 
 /**
@@ -59,7 +60,7 @@ function UserAccount() {
   const [courses, setCourses] = useState([])
   const { setFlashMessage } = useFlashMessage()
   const navigate = useNavigate()
-
+  const { logout } = useContext(Context);
 
 /**
  * useEffect para verificar a sessão atual do usuário.
@@ -158,10 +159,11 @@ function UserAccount() {
       const success = await userService.registerAccount(formData, setFlashMessage);
       
       if (success) {
-        if (role === 4) { // Role 4 é Aluno
+        if (role === 4) { 
           navigate('/');
         } else {
-          navigate('/awaiting-approval');
+          navigate('/await/approval');
+          await logout();
         }
       }
     } else {
