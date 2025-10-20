@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom"
 import PrivateRoute from "../context/PrivateRouter"
 import CoordinatorRoute from "../context/CoordinatorRoute"
 import TeacherRoute from "../context/TeacherRoute"
+import StudentRoute from "../context/StudentRoute"
 import CoordinatorProfile from "../components/pages/coordinator/CoordinatorProfile"
 import CoordinatorSettings from "../components/pages/coordinator/CoordinatorSettings"
 
@@ -73,7 +74,9 @@ export default function AppRoutes() {
              * @route /student/*
              * @element StudentRoutes
              */}
-            <Route path="/student/*" element={<StudentRoutes />} />
+            <Route element={<StudentRoute />}>
+                <Route path="/student/*" element={<StudentRoutes />} />
+            </Route>
             
             {/**
              * Agrupamento de rotas restritas a coordenadores.

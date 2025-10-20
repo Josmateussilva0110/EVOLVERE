@@ -98,6 +98,8 @@ class UserController {
                 user.role = 4
             }
 
+            console.log('user: ', user)
+
 
             request.session.user = { id: user.id, name: user.username, role: user.role}
             return response.status(200).json({status: true, message: "Dados salvo com sucesso.", user: { id: user.id, name: user.username, role: user.role}})
@@ -157,6 +159,11 @@ class UserController {
             if(user.registration === 'admin') {
                 user.role = 1
             }
+
+            if(user.role == null) {
+                user.role = 4
+            }
+
 
             request.session.user = { id: user.id, name: user.username, role: user.role }
             return response.status(200).json({
