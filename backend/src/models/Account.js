@@ -49,18 +49,35 @@ class Account {
      * const exists = await Account.accountExists(5)
      * // exists === true ou false
      */
-    async accountExists(id) {
-        try {
-            const result = await knex
-                .select(["professional_id"])
+
+async accountExists(id, role) {
+    try {
+        const roleStr = String(role);
+
+        if (roleStr === '4') { 
+            const user = await knex('users')
+                .select('id')
+                .where({ id: id })
+                .whereNotNull('institution')   
+                .whereNotNull('course_id')    
+                .first();
+
+            return !!user;
+
+        } else {
+            const result = await knex('validate_professionals')
+                .select('professional_id')
                 .where({ professional_id: id })
-                .table("validate_professionals")
-            return result.length > 0
-        } catch(err) {
-            console.error('Erro ao buscar conta:', err)
-            return false
+                .first();
+
+            return !!result;
         }
+
+    } catch(err) {
+        console.error('Erro ao verificar existência da conta:', err);
+        return false;
     }
+}
 
     /**
      * Retorna todas as solicitações de aprovação de professores que ainda não foram aprovadas.

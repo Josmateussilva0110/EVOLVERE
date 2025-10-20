@@ -23,7 +23,7 @@ const up = function (knex) {
     table.foreign('professional_id').references('id').inTable('users').onDelete('CASCADE').onUpdate('CASCADE');
     table.string('institution', 255).notNullable()
     table.string('access_code', 200).notNullable()
-    table.string('diploma', 150).notNullable()
+    table.string('diploma', 150).nullable()
     table.integer('role').notNullable()
     table.boolean('approved').defaultTo(false)
     table.timestamps(true, true)
