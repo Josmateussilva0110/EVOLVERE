@@ -240,6 +240,25 @@ class Class {
             return null
         }
     }
+
+    async Students(class_id) {
+        try {
+            const result = await knex.raw(`
+                select 
+                    cs.student_id,
+                    u.username
+                from class_student cs
+                inner join users u 
+                    on u.id = cs.student_id
+                where cs.class_id = ?
+            `, [class_id])
+            const rows = result.rows
+            return rows.length > 0 ? rows : undefined
+        } catch(err) {
+            console.error("Erro ao buscar alunos da turma: ", err);
+            return undefined
+        }
+    } 
 }
 
 module.exports = new Class();

@@ -357,6 +357,24 @@ async generateInvite(req, res) {
         }
     }
 
+    async getStudent(request, response) {
+        try {
+            const {class_id} = request.params
+            if (!validator.isInt(class_id + '', { min: 1 })) {
+                return response.status(422).json({ success: false, message: "ID inválido." });
+            }
+
+            const students = await Class.Students(class_id)
+            console.log('students: ',students)
+            if(!students) {
+                return response.status(404).json({ status: false, message: "Nenhum aluno encontrado." })
+            }
+            return response.status(200).json({status: true, students})
+        } catch(err) {
+            return response.status(500).json({ success: false, message: 'Erro interno do servidor.' });
+        }
+    }
+
 }
 
 module.exports = new ClassController();
