@@ -27,7 +27,7 @@ const subjectRoutes = require("./subjectRoutes")
 const materialRoutes = require("./materialsRoutes")
 const classRoutes = require("./classRoutes")
 const formRoutes = require("./formRoutes")
-
+const enrollmentRoutes = require("./enrollmentRoutes");
 
 //Usar a rota
 router.use(userRoutes)
@@ -37,5 +37,6 @@ router.use(subjectRoutes)
 router.use(materialRoutes)
 router.use(classRoutes)
 router.use(formRoutes)
+router.use(enrollmentRoutes);
 
 module.exports = router

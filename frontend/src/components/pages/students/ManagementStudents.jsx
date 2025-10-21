@@ -1,30 +1,13 @@
 import {
-  BookOpen,
-  Users,
-  Folder,
-  FileText,
-  BarChart3,
-  Award,
-  Settings,
-  HelpCircle,
-  LogOut,
-  ClipboardList,
-  Trophy,
-  Zap,
-  Target,
-  TrendingUp,
-  Clock,
-  Star,
-  Flame,
-  ChevronRight,
-  Bell,
-  User,
-  GraduationCap,
+  BookOpen, Users, Folder, FileText, BarChart3, Award, Settings, HelpCircle, LogOut, ClipboardList,
+  Trophy, Zap, Target, TrendingUp, Clock, Star, Flame, ChevronRight, Bell, User, GraduationCap,
   Briefcase,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-
+import requestData from "../../../utils/requestApi";
+import useFlashMessage from "../../../hooks/useFlashMessage";
+import { Context } from "../../../context/UserContext";
 
 /**
  * ManagementStudents / Dashboard (componente)
@@ -74,7 +57,9 @@ export default function Dashboard() {
   const [showClassModal, setShowClassModal] = useState(false);
   const [classCode, setClassCode] = useState("");
   const [classError, setClassError] = useState("");
+  const [isJoining, setIsJoining] = useState(false);
   const inputRef = useRef(null);
+  const { setFlashMessage } = useFlashMessage();
 
   useEffect(() => {
     if (showClassModal) {
@@ -87,13 +72,13 @@ export default function Dashboard() {
 
   useEffect(() => {
     const onKey = (e) => {
-      if (!showClassModal) return;
+      if (!showClassModal || isJoining) return;
       if (e.key === "Escape") setShowClassModal(false);
       if (e.key === "Enter") handleEnterClass();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [showClassModal, classCode]);
+  }, [showClassModal, classCode, isJoining]);
 
   // 🔹 Função que define rota de cada item
   const handleNavigation = (id) => {
@@ -123,20 +108,39 @@ export default function Dashboard() {
     }
   };
 
-  const handleEnterClass = () => {
-    const code = classCode.trim();
+  const handleEnterClass = async () => {
+    const code = classCode.trim().toUpperCase();
     if (!code) {
       setClassError("Insira o código da turma.");
       inputRef.current?.focus();
       return;
     }
 
-    // Exemplo: navegando para a visualização de turmas com query string contendo o código.
-    // Em produção, substituir por verificação/entrada via API para validar o código sem sair da tela.
-    setActiveSection("turmas");
-    setShowClassModal(false);
-    navigate(`/student/classes/view?code=${encodeURIComponent(code)}`);
-    setClassCode("");
+    setIsJoining(true); 
+    setClassError(""); 
+
+    try {
+        // Chama a nova API do backend
+        const response = await requestData("/enrollments/join-with-code", "POST", { code }, true);
+
+        if (response.success) {
+            setFlashMessage(response.message || "Matrícula realizada com sucesso!", "success");
+            setShowClassModal(false); // Fecha o modal
+            setClassCode(""); // Limpa o código
+            // Navega para a lista de turmas para o aluno ver a nova turma
+            navigate('/student/classes/view'); 
+        } else {
+            // Exibe o erro retornado pela API no modal
+            setClassError(response.message || "Código inválido ou erro ao processar.");
+            inputRef.current?.focus(); // Foca no input novamente
+        }
+    } catch (error) {
+        console.error("Erro ao tentar entrar na turma:", error);
+        setClassError("Erro de comunicação com o servidor. Tente novamente.");
+        inputRef.current?.focus();
+    } finally {
+        setIsJoining(false); // Desativa o loading, independente do resultado
+    }
   };
 
   const menuItems = [
@@ -228,51 +232,58 @@ export default function Dashboard() {
             </div>
         </header>
 
-        {/* Modal: Inserir código da turma */}
-        {showClassModal && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center px-4"
-            aria-modal="true"
-            role="dialog"
-            aria-label="Acessar turma por código"
-          >
-            <div
-              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-              onClick={() => setShowClassModal(false)}
-            />
-            <div className="relative w-full max-w-md bg-white rounded-2xl shadow-xl p-6 z-10">
-              <h3 className="text-lg font-bold mb-2">Acessar Turma</h3>
-              <p className="text-sm text-gray-500 mb-4">Digite o código da turma que deseja acessar.</p>
+          {/* Modal: Inserir código da turma (com ajustes no botão)*/}
+  {showClassModal && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6"> {/* <--- VERIFIQUE ESTAS CLASSES */}
+      {/* Overlay de fundo */}
+      <div
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm" // <--- E ESTAS CLASSES PARA O OVERLAY
+        onClick={() => setShowClassModal(false)}
+      ></div>
 
-              <label className="block">
-                <input
-                  ref={inputRef}
-                  value={classCode}
-                  onChange={(e) => { setClassCode(e.target.value); setClassError(""); }}
-                  placeholder="Ex: ABC123"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  aria-label="Código da turma"
-                />
-              </label>
-              {classError && <p className="mt-2 text-sm text-red-600">{classError}</p>}
-
-              <div className="mt-4 flex justify-end gap-3">
-                <button
-                  onClick={() => setShowClassModal(false)}
-                  className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleEnterClass}
-                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold hover:opacity-95 transition-all"
-                >
-                  Entrar
-                </button>
-              </div>
-            </div>
-          </div>
+      {/* Conteúdo do Modal */}
+      <div className="relative w-full max-w-md bg-white rounded-2xl p-6 shadow-xl z-10 animate-fade-in-up"> {/* <--- Conteúdo do Modal */}
+        <h3 className="text-2xl font-bold text-gray-900 mb-3">Acessar Turma</h3>
+        <p className="text-gray-600 mb-5">
+          Digite o código da turma que deseja acessar.
+        </p>
+        <label className="block">
+          <input
+            ref={inputRef}
+            value={classCode}
+            onChange={(e) => {
+              setClassCode(e.target.value);
+              setClassError("");
+            }}
+            placeholder="Ex: ABC-123"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+            disabled={isJoining}
+            aria-label="Código da turma"
+          />
+        </label>
+        {classError && (
+          <p className="mt-2 text-sm text-red-600">{classError}</p>
         )}
+
+        <div className="mt-6 flex justify-end gap-3"> {/* <--- E TAMBÉM ESTAS CLASSES PARA OS BOTÕES */}
+          <button
+            onClick={() => setShowClassModal(false)}
+            className="px-5 py-2.5 rounded-lg font-semibold text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isJoining}
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleEnterClass}
+            className="px-5 py-2.5 rounded-lg font-semibold text-sm bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md hover:opacity-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isJoining}
+          >
+            {isJoining ? "Entrando..." : "Entrar"}
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
 
         <div className="p-8">
           {/* Stats Cards */}
