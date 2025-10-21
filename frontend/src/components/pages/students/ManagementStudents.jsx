@@ -1,30 +1,13 @@
 import {
-  BookOpen,
-  Users,
-  Folder,
-  FileText,
-  BarChart3,
-  Award,
-  Settings,
-  HelpCircle,
-  LogOut,
-  ClipboardList,
-  Trophy,
-  Zap,
-  Target,
-  TrendingUp,
-  Clock,
-  Star,
-  Flame,
-  ChevronRight,
-  Bell,
-  User,
-  GraduationCap,
+  BookOpen, Users, Folder, FileText, BarChart3, Award, Settings, HelpCircle, LogOut, ClipboardList,
+  Trophy, Zap, Target, TrendingUp, Clock, Star, Flame, ChevronRight, Bell, User, GraduationCap,
   Briefcase,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-
+import requestData from "../../../utils/requestApi";
+import useFlashMessage from "../../../hooks/useFlashMessage";
+import { Context } from "../../../context/UserContext";
 
 /**
  * ManagementStudents / Dashboard (componente)
@@ -70,6 +53,33 @@ export default function Dashboard() {
   const usuario = "Lucas Emanuel";
   const navigate = useNavigate(); // 🔹 Hook para navegar entre rotas
 
+  // Modal para acessar turma por código
+  const [showClassModal, setShowClassModal] = useState(false);
+  const [classCode, setClassCode] = useState("");
+  const [classError, setClassError] = useState("");
+  const [isJoining, setIsJoining] = useState(false);
+  const inputRef = useRef(null);
+  const { setFlashMessage } = useFlashMessage();
+
+  useEffect(() => {
+    if (showClassModal) {
+      setTimeout(() => inputRef.current?.focus(), 50);
+    } else {
+      setClassError("");
+      setClassCode("");
+    }
+  }, [showClassModal]);
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (!showClassModal || isJoining) return;
+      if (e.key === "Escape") setShowClassModal(false);
+      if (e.key === "Enter") handleEnterClass();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [showClassModal, classCode, isJoining]);
+
   // 🔹 Função que define rota de cada item
   const handleNavigation = (id) => {
     setActiveSection(id);
@@ -95,6 +105,41 @@ export default function Dashboard() {
         break;
       default:
         break;
+    }
+  };
+
+  const handleEnterClass = async () => {
+    const code = classCode.trim().toUpperCase();
+    if (!code) {
+      setClassError("Insira o código da turma.");
+      inputRef.current?.focus();
+      return;
+    }
+
+    setIsJoining(true); 
+    setClassError(""); 
+
+    try {
+        // Chama a nova API do backend
+        const response = await requestData("/enrollments/join-with-code", "POST", { code }, true);
+
+        if (response.success) {
+            setFlashMessage(response.message || "Matrícula realizada com sucesso!", "success");
+            setShowClassModal(false); // Fecha o modal
+            setClassCode(""); // Limpa o código
+            // Navega para a lista de turmas para o aluno ver a nova turma
+            navigate('/student/classes/view'); 
+        } else {
+            // Exibe o erro retornado pela API no modal
+            setClassError(response.message || "Código inválido ou erro ao processar.");
+            inputRef.current?.focus(); // Foca no input novamente
+        }
+    } catch (error) {
+        console.error("Erro ao tentar entrar na turma:", error);
+        setClassError("Erro de comunicação com o servidor. Tente novamente.");
+        inputRef.current?.focus();
+    } finally {
+        setIsJoining(false); // Desativa o loading, independente do resultado
     }
   };
 
@@ -176,7 +221,7 @@ export default function Dashboard() {
               {/* Right controls: Access current class button */}
               <div className="flex items-center gap-4">
                 <button
-                  onClick={() => { setActiveSection('turmas'); navigate('/student/classes/view'); }}
+                  onClick={() => { setShowClassModal(true); }}
                   className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md hover:opacity-95 transition-all"
                   aria-label="Acessar Turma Atual"
                 >
@@ -186,6 +231,59 @@ export default function Dashboard() {
               </div>
             </div>
         </header>
+
+          {/* Modal: Inserir código da turma (com ajustes no botão)*/}
+  {showClassModal && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6"> {/* <--- VERIFIQUE ESTAS CLASSES */}
+      {/* Overlay de fundo */}
+      <div
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm" // <--- E ESTAS CLASSES PARA O OVERLAY
+        onClick={() => setShowClassModal(false)}
+      ></div>
+
+      {/* Conteúdo do Modal */}
+      <div className="relative w-full max-w-md bg-white rounded-2xl p-6 shadow-xl z-10 animate-fade-in-up"> {/* <--- Conteúdo do Modal */}
+        <h3 className="text-2xl font-bold text-gray-900 mb-3">Acessar Turma</h3>
+        <p className="text-gray-600 mb-5">
+          Digite o código da turma que deseja acessar.
+        </p>
+        <label className="block">
+          <input
+            ref={inputRef}
+            value={classCode}
+            onChange={(e) => {
+              setClassCode(e.target.value);
+              setClassError("");
+            }}
+            placeholder="Ex: ABC-123"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+            disabled={isJoining}
+            aria-label="Código da turma"
+          />
+        </label>
+        {classError && (
+          <p className="mt-2 text-sm text-red-600">{classError}</p>
+        )}
+
+        <div className="mt-6 flex justify-end gap-3"> {/* <--- E TAMBÉM ESTAS CLASSES PARA OS BOTÕES */}
+          <button
+            onClick={() => setShowClassModal(false)}
+            className="px-5 py-2.5 rounded-lg font-semibold text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isJoining}
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleEnterClass}
+            className="px-5 py-2.5 rounded-lg font-semibold text-sm bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md hover:opacity-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isJoining}
+          >
+            {isJoining ? "Entrando..." : "Entrar"}
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
 
         <div className="p-8">
           {/* Stats Cards */}
