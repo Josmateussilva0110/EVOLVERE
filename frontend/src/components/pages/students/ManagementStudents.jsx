@@ -1,13 +1,13 @@
 import {
-  BookOpen, Users, Folder, FileText, BarChart3, Award, Settings, HelpCircle, LogOut, ClipboardList,
-  Trophy, Zap, Target, TrendingUp, Clock, Star, Flame, ChevronRight, Bell, User, GraduationCap,
-  Briefcase,
+  BookOpen, Users, Folder, FileText, BarChart3, Award, Settings, HelpCircle, LogOut, ClipboardList, Zap, Clock, ChevronRight, User, GraduationCap
 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import requestData from "../../../utils/requestApi";
 import useFlashMessage from "../../../hooks/useFlashMessage";
 import { Context } from "../../../context/UserContext";
+import Image from "../../form/Image";
+
 
 /**
  * ManagementStudents / Dashboard (componente)
@@ -52,6 +52,8 @@ export default function Dashboard() {
   const [activeSection, setActiveSection] = useState("dashboard");
   const usuario = "Lucas Emanuel";
   const navigate = useNavigate(); // 🔹 Hook para navegar entre rotas
+  const { logout, user } = useContext(Context)
+
 
   // Modal para acessar turma por código
   const [showClassModal, setShowClassModal] = useState(false);
@@ -60,6 +62,7 @@ export default function Dashboard() {
   const [isJoining, setIsJoining] = useState(false);
   const inputRef = useRef(null);
   const { setFlashMessage } = useFlashMessage();
+  const [requestUser, setRequestUser] = useState(null)
 
   useEffect(() => {
     if (showClassModal) {
@@ -69,6 +72,18 @@ export default function Dashboard() {
       setClassCode("");
     }
   }, [showClassModal]);
+
+
+  useEffect(() => {
+    if (user) {
+      async function fetchUser() {
+        const response = await requestData(`/user/${user.id}`, "GET", {}, true)
+        if (response.success) setRequestUser(response.data.user)
+        else setRequestUser(null)
+      }
+      fetchUser()
+    }
+  }, [user])
 
   useEffect(() => {
     const onKey = (e) => {
@@ -160,7 +175,17 @@ export default function Dashboard() {
         <div className="flex items-center justify-center py-6 border-b border-blue-800">
           <div className="relative">
             <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-2xl flex items-center justify-center transform rotate-12 shadow-lg shadow-blue-500/50">
-              <User className="text-white transform -rotate-12" size={32} strokeWidth={2.5} />
+
+              {requestUser?.photo ? (
+                  <Image
+                    src={`${import.meta.env.VITE_BASE_URL}/${requestUser.photo}`}
+                    alt={requestUser.username || "Foto do usuário"}
+                    size={55}
+                    className="rounded-full border-2 border-white/30 -rotate-15"
+                  />
+              ) : (
+                <User className="text-white transform -rotate-12" size={32} strokeWidth={2.5} />
+              )}
             </div>
           </div>
         </div>
@@ -213,7 +238,7 @@ export default function Dashboard() {
             <div className="flex justify-between items-center">
               <div>
                 <h2 className="text-3xl font-bold text-gray-900 mb-1">
-                  Bem vindo, <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">{usuario}</span>
+                  Bem vindo, <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">{requestUser?.username}</span>
                 </h2>
                 <p className="text-gray-600">Continue sua jornada de aprendizado hoje! 🚀</p>
               </div>
