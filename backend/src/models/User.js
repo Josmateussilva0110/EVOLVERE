@@ -146,7 +146,7 @@ class User {
                 when vp.role = '2' then 'Coordenador'
                 when vp.role = '3' then 'Professor'
                 when vp.role = '4' then 'Aluno'
-                ELSE 'Desconhecido'
+                ELSE 'Aluno'
             END AS role
             from users u
             left join validate_professionals vp
