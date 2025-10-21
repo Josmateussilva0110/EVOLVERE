@@ -121,32 +121,6 @@ class Class {
         }
     }
 
-    /**
-     * @summary Remove a associação de um aluno a uma turma.
-     * @param {number} turmaId - O ID da turma.
-     * @param {number} alunoId - O ID do aluno a ser removido.
-     * @returns {Promise<boolean>} Retorna true se a remoção for bem-sucedida.
-     * @example
-     * // Uso:
-     * const success = await Class.removeStudent(1, 10);
-     * // Retorno: true (se removido com sucesso)
-     */
-    async removeStudent(turmaId, alunoId) {
-        try {
-            // CORREÇÃO: Nomes da tabela e colunas ajustados para corresponder às migrations e aos parâmetros.
-            const deleted = await knex('classes_alunos')
-                .where({
-                    Class_id: turmaId,
-                    aluno_id: alunoId
-                })
-                .delete();
-            
-            return deleted > 0;
-        } catch (err) {
-            console.error('Erro ao remover aluno da turma:', err);
-            return false;
-        }
-    }
 
     /**
      * @summary Busca o ID da disciplina associada a uma turma.
@@ -238,6 +212,45 @@ class Class {
         } catch (err) {
             console.error("Erro ao buscar id da classe:", err)
             return null
+        }
+    }
+
+    async Students(class_id) {
+        try {
+            const result = await knex.raw(`
+                select 
+                    cs.student_id,
+                    u.username
+                from class_student cs
+                inner join users u 
+                    on u.id = cs.student_id
+                where cs.class_id = ?
+            `, [class_id])
+            const rows = result.rows
+            return rows.length > 0 ? rows : undefined
+        } catch(err) {
+            console.error("Erro ao buscar alunos da turma: ", err);
+            return undefined
+        }
+    } 
+
+    async studentExist(id) {
+        try {
+            const result = await knex.select("*").where({ student_id: id }).table("class_student")
+            return result.length > 0
+        } catch(err) {
+            console.error('Erro ao verificar aluno:', err)
+            return false
+        }
+    }
+
+    async deleteStudentById(id) {
+        try {
+            const deleted = await knex('class_student').where({ student_id: id }).delete();
+            return deleted > 0;
+        } catch (err) {
+            console.error("Erro ao deletar aluno:", err);
+            return false;
         }
     }
 }

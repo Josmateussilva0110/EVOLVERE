@@ -105,7 +105,6 @@ class ClassController {
     async listBySubject(req, res) {
         try {
             const { subject_id } = req.params;
-            console.log(subject_id)
 
             if (!validator.isInt(subject_id + '', { min: 1 })) {
                 return res.status(422).json({ status: false, message: "ID da disciplina inválido." });
@@ -180,46 +179,6 @@ class ClassController {
         }
     }
 
-    /**
-     * @summary Remove um aluno de uma turma.
-     * @param {import("express").Request} req - O objeto da requisição Express.
-     * @param {import("express").Response} res - O objeto da resposta Express.
-     * @returns {Promise<void>}
-     * @example
-     * // DELETE /api/classes/1/students/10
-     * // Resposta de sucesso:
-     * {
-     * "status": true,
-     * "message": "Aluno removido da turma com sucesso."
-     * }
-     */
-    async removeStudent(req, res) {
-        try {
-            const { id, studentId } = req.params;
-
-            if (!validator.isInt(id + '', { min: 1 }) || !validator.isInt(studentId + '', { min: 1 })) {
-                return res.status(422).json({ status: false, message: "IDs da turma e do aluno devem ser válidos." });
-            }
-
-            const success = await Class.removeStudent(Number(id), Number(studentId));
-
-            if (!success) {
-                return res.status(404).json({ status: false, message: 'Associação entre aluno e turma não encontrada.' });
-            }
-
-            res.status(200).json({
-                status: true,
-                message: 'Aluno removido da turma com sucesso.'
-            });
-
-        } catch (error) {
-            console.error('Erro ao remover aluno da turma:', error);
-            res.status(500).json({ 
-                status: false, 
-                message: 'Erro interno do servidor.' 
-            });
-        }
-    }
 
     /**
      * @summary Obtém o ID da disciplina associada a uma turma específica.
@@ -354,6 +313,43 @@ async generateInvite(req, res) {
         } catch (error) {
             console.error('Erro ao gerar código de convite:', error);
             res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
+        }
+    }
+
+    async getStudent(request, response) {
+        try {
+            const {class_id} = request.params
+            if (!validator.isInt(class_id + '', { min: 1 })) {
+                return response.status(422).json({ success: false, message: "ID inválido." });
+            }
+
+            const students = await Class.Students(class_id)
+            if(!students) {
+                return response.status(404).json({ status: false, message: "Nenhum aluno encontrado." })
+            }
+            return response.status(200).json({status: true, students})
+        } catch(err) {
+            return response.status(500).json({ success: false, message: 'Erro interno do servidor.' });
+        }
+    }
+
+    async removeStudent(request, response) {
+        try {
+            const { student_id } = request.params
+            if (!validator.isInt(student_id + '', { min: 1 })) {
+                return res.status(422).json({ success: false, message: "ID inválido." });
+            }
+            const studentExist = await Class.studentExist(student_id)
+            if(!studentExist) {
+                return response.status(404).json({ status: false, message: "Aluno não encontrado." })
+            }
+            const valid = await Class.deleteStudentById(student_id)
+            if(!valid) {
+                return response.status(500).json({ status: false, message: "Erro ao deletar aluno." })
+            }
+            return response.status(200).json({ status: true, message: "Aluno removido com sucesso." })
+        } catch(err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
 

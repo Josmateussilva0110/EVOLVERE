@@ -39,7 +39,7 @@ router.get('/classes/detail/:id', classController.getDetails);
  * @param {number} studentId.path.required - ID do aluno a ser removido.
  * @returns {object} 200 - Mensagem de sucesso.
  */
-router.delete('/classes/:id/students/:studentId', classController.removeStudent);
+router.delete('/classes/students/:student_id', classController.removeStudent)
 
 /**
  * @route GET /classes/:subject_id
@@ -112,6 +112,9 @@ router.get('/classes/subject_id/:id', classController.getIdSubject)
  * ]
  */
 router.get('/classes/materials/:id', classController.getAllMateriais)
+
+
+router.get('/classes/students/:class_id', classController.getStudent)
 
 module.exports = router;
 

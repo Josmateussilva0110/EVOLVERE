@@ -137,6 +137,7 @@ export default function ViewClass() {
     const [inviteOpen, setInviteOpen] = useState(false)
     const { user } = useContext(Context)
     const [form, setForm] = useState([])
+    const [students, setStudents] = useState([])
     const { setFlashMessage } = useFlashMessage()
 
     useEffect(() => {
@@ -169,6 +170,23 @@ export default function ViewClass() {
         fetchForm()
     }, [id])
 
+
+    useEffect(() => {
+        async function fetchStudents() {
+            if (!id) return
+            const response = await requestData(`/classes/students/${id}`, 'GET', {}, true)
+            console.log('students: ', response)
+
+            if (response && response.success) {
+                setStudents(response.data.students)
+            } else {
+                setStudents([])
+            }
+        }
+        fetchStudents()
+    }, [id])
+
+
     async function deleteMaterial(id) {
         const response = await requestData(`/material/${id}`, 'DELETE', {}, true)
         if (response.success) {
@@ -191,9 +209,17 @@ export default function ViewClass() {
         }
     }
 
+    async function deleteStudent(id) {
+        const response = await requestData(`/classes/students/${id}`, 'DELETE', {}, true)
+        if (response.success) {
+            setStudents(prev => prev.filter(d => d.student_id !== id))
+            setFlashMessage(response.data.message, 'success')
+        }
+        else {
+            setFlashMessage(response.message, 'error')
+        }
+    }
 
-    // Dados de exemplo
-    const alunos = ["Lucas", "Mateus", "Gabriel", "Rai Damásio", "João", "Maria", "Ana", "Pedro", "Sofia"];
 
     // Paginação
     const ITEMS_PER_PAGE = 5;
@@ -303,23 +329,40 @@ export default function ViewClass() {
                 {/* Grid principal do Dashboard */}
                 <main className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                    {/* Card de Alunos */}
+                    {/* Card de Alunos (dados vindos da API) */}
                     <DashboardCard
                         title="Alunos"
                         icon={<Users className="w-6 h-6 text-blue-400" />}
                         delay={100}
                     >
                         <ul className="space-y-2 flex-grow">
-                            {getPageData(alunos, pageAlunos).map((aluno) => (
-                                <li key={aluno} className="flex justify-between items-center p-2.5 rounded-md hover:bg-white/5 transition-colors group">
-                                    <span className="text-slate-200 text-sm">{aluno}</span>
-                                    <button className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <Trash2 className="w-4 h-4 text-red-400 hover:text-red-300" />
-                                    </button>
-                                </li>
-                            ))}
+                            {students && students.length > 0 ? (
+                                getPageData(students, pageAlunos).map((aluno) => (
+                                    <li
+                                        key={aluno.student_id}
+                                        className="flex justify-between items-center p-2.5 rounded-md hover:bg-white/5 transition-colors group"
+                                    >
+                                        <span className="text-slate-200 text-sm">{aluno.username}</span>
+                                        <button
+                                            title="Remover aluno"
+                                            className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                            onClick={() => deleteStudent(aluno.student_id)} 
+                                        >
+                                            <Trash2 className="w-4 h-4 text-red-400 hover:text-red-300" />
+                                        </button>
+                                    </li>
+                                ))
+                            ) : (
+                                <p className="text-slate-400 text-sm italic text-center py-4">
+                                    Nenhum aluno encontrado.
+                                </p>
+                            )}
                         </ul>
-                        <Pagination currentPage={pageAlunos} totalPages={getTotalPages(alunos)} onPageChange={setPageAlunos} />
+                        <Pagination
+                            currentPage={pageAlunos}
+                            totalPages={getTotalPages(students)}
+                            onPageChange={setPageAlunos}
+                        />
                     </DashboardCard>
 
                     {/* Card de Simulados */}
