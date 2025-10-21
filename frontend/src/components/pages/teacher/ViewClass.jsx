@@ -209,9 +209,17 @@ export default function ViewClass() {
         }
     }
 
+    async function deleteStudent(id) {
+        const response = await requestData(`/classes/students/${id}`, 'DELETE', {}, true)
+        if (response.success) {
+            setStudents(prev => prev.filter(d => d.student_id !== id))
+            setFlashMessage(response.data.message, 'success')
+        }
+        else {
+            setFlashMessage(response.message, 'error')
+        }
+    }
 
-    // Dados de exemplo
-    const alunos = ["Lucas", "Mateus", "Gabriel", "Rai Damásio", "João", "Maria", "Ana", "Pedro", "Sofia"];
 
     // Paginação
     const ITEMS_PER_PAGE = 5;
@@ -338,7 +346,7 @@ export default function ViewClass() {
                                         <button
                                             title="Remover aluno"
                                             className="opacity-0 group-hover:opacity-100 transition-opacity"
-                                            onClick={() => console.log('Remover aluno:', aluno.student_id)} // 🔸 Troque por uma função real se quiser permitir exclusão
+                                            onClick={() => deleteStudent(aluno.student_id)} 
                                         >
                                             <Trash2 className="w-4 h-4 text-red-400 hover:text-red-300" />
                                         </button>
