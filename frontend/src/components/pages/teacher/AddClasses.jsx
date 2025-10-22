@@ -1,5 +1,34 @@
 import { X, Plus } from "lucide-react"
 
+/**
+ * @component RegisterClasses
+ * @description
+ * Modal responsável por exibir o formulário de criação de uma nova turma.
+ * Permite ao usuário inserir o nome da turma e sua capacidade (número de alunos).
+ * Inclui botões para confirmar ou cancelar a operação.
+ *
+ * @param {Object} props - Propriedades do componente.
+ * @param {boolean} props.show - Define se o modal deve ser exibido ou não.
+ * @param {Function} props.onCancel - Função chamada ao clicar no botão de cancelamento.
+ * @param {Function} props.onConfirm - Função chamada ao confirmar o registro da turma.
+ * @param {string} props.nomeTurma - Valor atual do campo "Nome da Turma".
+ * @param {Function} props.setNomeTurma - Função para atualizar o valor de `nomeTurma`.
+ * @param {string|number} props.capacidade - Valor atual do campo "Capacidade".
+ * @param {Function} props.setCapacidade - Função para atualizar o valor de `capacidade`.
+ *
+ * @example
+ * <RegisterClasses
+ *   show={modalAberto}
+ *   onCancel={() => setModalAberto(false)}
+ *   onConfirm={salvarTurma}
+ *   nomeTurma={nomeTurma}
+ *   setNomeTurma={setNomeTurma}
+ *   capacidade={capacidade}
+ *   setCapacidade={setCapacidade}
+ * />
+ *
+ * @returns {JSX.Element|null} Retorna o modal de registro de turma quando `show` for verdadeiro, caso contrário retorna `null`.
+ */
 function RegisterClasses({
   show,
   onCancel,
@@ -14,6 +43,7 @@ function RegisterClasses({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md px-4">
       <div className="bg-gray-800/95 backdrop-blur-sm rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-700/50">
+        {/* Cabeçalho */}
         <div className="bg-gradient-to-r from-gray-700 to-gray-600 px-6 py-5 flex items-center justify-between border-b border-gray-700/50">
           <div>
             <h3 className="text-white font-bold text-xl">Adicionar Turma</h3>
@@ -27,12 +57,13 @@ function RegisterClasses({
           </button>
         </div>
 
+        {/* Corpo do modal */}
         <div className="px-6 py-6 space-y-5">
           <p className="text-center text-gray-400 text-sm">
             Preencha as informações abaixo
           </p>
 
-          {/* Campo nome */}
+          {/* Campo: Nome da turma */}
           <div>
             <label className="block text-sm font-semibold text-gray-300 mb-2">
               Nome da turma
@@ -46,7 +77,7 @@ function RegisterClasses({
             />
           </div>
 
-          {/* Campo capacidade */}
+          {/* Campo: Capacidade */}
           <div>
             <label className="block text-sm font-semibold text-gray-300 mb-2">
               Capacidade
@@ -68,7 +99,7 @@ function RegisterClasses({
             </div>
           </div>
 
-          {/* Botões */}
+          {/* Botões de ação */}
           <div className="flex items-center gap-3 pt-2">
             <button
               onClick={onConfirm}

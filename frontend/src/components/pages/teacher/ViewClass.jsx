@@ -209,10 +209,13 @@ export default function ViewClass() {
         }
     }
 
-    async function deleteStudent(id) {
-        const response = await requestData(`/classes/students/${id}`, 'DELETE', {}, true)
+    async function deleteStudent(student_id) {
+        const data = {
+            class_id: id
+        }
+        const response = await requestData(`/classes/students/${student_id}`, 'DELETE', data, true)
         if (response.success) {
-            setStudents(prev => prev.filter(d => d.student_id !== id))
+            setStudents(prev => prev.filter(d => d.student_id !== student_id))
             setFlashMessage(response.data.message, 'success')
         }
         else {

@@ -1,27 +1,74 @@
+/**
+ * @file ViewForm.jsx
+ * @description Página de visualização de um formulário/simulado específico.
+ * Exibe título, descrição, data de atualização, pontuação total,
+ * perguntas e alternativas (destacando as corretas).
+ * 
+ * @module pages/Form/ViewForm
+ */
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle, XCircle, Clock } from "lucide-react";
 import requestData from "../../../utils/requestApi";
-import formatDateRequests from "../../../utils/formatDateRequests"
+import formatDateRequests from "../../../utils/formatDateRequests";
 
+/**
+ * @component ViewForm
+ * @description Exibe os detalhes completos de um formulário específico, incluindo
+ * suas perguntas, opções e informações gerais. 
+ * 
+ * O componente busca os dados do formulário com base no ID passado pela URL
+ * e renderiza as informações com destaque visual para as alternativas corretas.
+ */
 export default function ViewForm() {
-  const { id } = useParams(); // id do formulário
+  /** 
+   * @constant {string} id - ID do formulário obtido dos parâmetros da URL.
+   */
+  const { id } = useParams();
+
+  /**
+   * @constant {Function} navigate - Função do React Router para navegação programática.
+   */
   const navigate = useNavigate();
+
+  /**
+   * @constant {Object|null} form - Objeto contendo os dados do formulário retornado pela API.
+   */
   const [form, setForm] = useState(null);
+
+  /**
+   * @constant {boolean} loading - Estado de carregamento da página.
+   */
   const [loading, setLoading] = useState(true);
 
+  /**
+   * @function useEffect
+   * @description Efeito responsável por buscar os dados do formulário assim que
+   * o componente é montado ou o ID muda.
+   */
   useEffect(() => {
+    /**
+     * @async
+     * @function fetchForm
+     * @description Realiza uma requisição à API para buscar os dados do formulário.
+     */
     async function fetchForm() {
       const response = await requestData(`/form/view/${id}`, "GET", {}, true);
-      console.log(response)
+      console.log(response);
+
       if (response.success) {
         setForm(response.data.form[0]);
       }
       setLoading(false);
     }
+
     fetchForm();
   }, [id]);
 
+  /**
+   * @description Renderiza uma tela de carregamento enquanto os dados são buscados.
+   */
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
@@ -30,6 +77,9 @@ export default function ViewForm() {
     );
   }
 
+  /**
+   * @description Renderiza uma tela de erro quando nenhum formulário é encontrado.
+   */
   if (!form) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
@@ -44,6 +94,10 @@ export default function ViewForm() {
     );
   }
 
+  /**
+   * @description Renderiza o conteúdo principal do formulário:
+   * título, descrição, data, pontuação e lista de perguntas com alternativas.
+   */
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-4 sm:px-6 py-10">
       <div className="max-w-5xl mx-auto">
@@ -65,7 +119,7 @@ export default function ViewForm() {
           </div>
         </div>
 
-        {/* Informações */}
+        {/* Informações gerais */}
         <div className="flex flex-wrap items-center gap-3 text-slate-400 text-sm mb-6">
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4" />
@@ -77,13 +131,12 @@ export default function ViewForm() {
             </span>
           </div>
 
-          {/* Badge de Pontos Totais */}
+          {/* Pontuação total */}
           <div className="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-sm font-semibold">
             Total: {form.total_points ?? 0}{" "}
             {form.total_points === 1 ? "ponto" : "pontos"}
           </div>
         </div>
-
 
         {/* Lista de perguntas */}
         <div className="space-y-6">
@@ -93,10 +146,13 @@ export default function ViewForm() {
               className="bg-white/5 border border-white/10 rounded-2xl p-5 shadow-lg"
             >
               <div className="flex items-start gap-3">
+                {/* Número da pergunta */}
                 <div className="bg-indigo-500/20 text-indigo-300 w-8 h-8 flex items-center justify-center rounded-full font-semibold">
                   {idx + 1}
                 </div>
+
                 <div className="flex-1">
+                  {/* Texto da pergunta e pontos */}
                   <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
                     <h3 className="text-white font-medium text-lg flex-1 break-words">
                       {q.text}
@@ -106,8 +162,7 @@ export default function ViewForm() {
                     </div>
                   </div>
 
-
-
+                  {/* Opções */}
                   <ul className="space-y-2">
                     {q.options?.map((opt) => (
                       <li
@@ -135,7 +190,7 @@ export default function ViewForm() {
           ))}
         </div>
 
-        {/* Botão voltar */}
+        {/* Botão Voltar */}
         <div className="flex justify-end mt-8">
           <button
             onClick={() => navigate(-1)}

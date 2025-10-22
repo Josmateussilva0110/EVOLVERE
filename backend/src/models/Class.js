@@ -234,9 +234,9 @@ class Class {
         }
     } 
 
-    async studentExist(id) {
+    async studentExist(id, class_id) {
         try {
-            const result = await knex.select("*").where({ student_id: id }).table("class_student")
+            const result = await knex.select("*").where({ student_id: id, class_id}).table("class_student")
             return result.length > 0
         } catch(err) {
             console.error('Erro ao verificar aluno:', err)
@@ -244,12 +244,41 @@ class Class {
         }
     }
 
-    async deleteStudentById(id) {
+    async deleteStudentById(student_id, class_id) {
         try {
-            const deleted = await knex('class_student').where({ student_id: id }).delete();
-            return deleted > 0;
+            const deleted = await knex('class_student')
+            .where({ student_id, class_id })
+            .del()
+
+            return deleted > 0
         } catch (err) {
-            console.error("Erro ao deletar aluno:", err);
+            console.error("Erro ao deletar aluno:", err)
+            return false
+        }
+    }
+
+
+    async getClassByIdUser(student_id) {
+        try {
+            const result = await knex.raw(`
+                select 
+                    cs.student_id,
+                    cs.class_id,
+                    c.name as class_name,
+                    u.username as teacher_name
+                from class_student cs
+                inner join classes c
+                    on c.id = cs.class_id
+                inner join subjects s
+                    on s.id = c.subject_id
+                inner join users u 
+                    on u.id = s.professional_id
+                where cs.student_id = ?
+            `, [student_id])
+            const rows = result.rows
+            return rows.length > 0 ? rows : undefined
+        } catch(err) {
+            console.error("Erro ao buscar turmas do aluno:", err);
             return false;
         }
     }
