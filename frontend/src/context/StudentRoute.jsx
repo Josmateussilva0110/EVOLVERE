@@ -9,8 +9,6 @@ function StudentRoute() {
   const { setFlashMessage } = useFlashMessage()
   const { user } = useContext(UserContext)
 
-  console.log('user no context: ',user)
-
   if (!user) {
     return <Navigate to="/login" />
   }

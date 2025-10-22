@@ -1,24 +1,17 @@
 import { 
   Users, 
-  Calendar, 
   MessageSquare, 
-  Clock,
-  BookOpen,
-  Video,
   FileText,
-  TrendingUp,
-  Award,
   Search,
   Filter,
   ChevronRight,
   Bell,
-  Star,
-  UserCheck,
-  Activity,
   ArrowLeft
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Context } from "../../../context/UserContext";
+import requestData from "../../../utils/requestApi";
 
 
 /**
@@ -62,81 +55,45 @@ export default function ManagementClasses() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterActive, setFilterActive] = useState("todas");
   const navigate = useNavigate();
+  const { user } = useContext(Context)
+  const [classes, setClasses] = useState([])
 
-  const turmas = [
-    { 
-      id: 1,
-      nome: "Estruturas de Dados I", 
-      professor: "Prof. João Mendes", 
-      alunos: 32,
-      proximaAula: "Segunda-feira, 10:00",
-      progresso: 65,
-      cor: "from-blue-500 to-cyan-500",
-      corClara: "from-blue-50 to-cyan-50",
-      status: "ativa",
-      notificacoes: 3,
-    },
-    { 
-      id: 2,
-      nome: "Banco de Dados II", 
-      professor: "Profa. Ana Paula", 
-      alunos: 28,
-      proximaAula: "Terça-feira, 16:00",
-      progresso: 45,
-      cor: "from-purple-500 to-pink-500",
-      corClara: "from-purple-50 to-pink-50",
-      status: "ativa",
-      notificacoes: 1,
-    },
-    { 
-      id: 3,
-      nome: "Engenharia de Software", 
-      professor: "Prof. Carlos Silva", 
-      alunos: 35,
-      proximaAula: "Segunda-feira, 18:00",
-      progresso: 80,
-      cor: "from-green-500 to-emerald-500",
-      corClara: "from-green-50 to-emerald-50",
-      status: "ativa",
-      notificacoes: 5,
-    },
-    { 
-      id: 4,
-      nome: "Redes de Computadores", 
-      professor: "Profa. Maria Fernanda", 
-      alunos: 30,
-      proximaAula: "Terça-feira, 14:00",
-      progresso: 55,
-      cor: "from-orange-500 to-amber-500",
-      corClara: "from-orange-50 to-amber-50",
-      status: "ativa",
-      notificacoes: 2,
-    },
-    { 
-      id: 5,
-      nome: "Sistemas Operacionais", 
-      professor: "Prof. Ricardo Alves", 
-      alunos: 25,
-      proximaAula: "Quinta-feira, 18:00",
-      progresso: 40,
-      cor: "from-red-500 to-rose-500",
-      corClara: "from-red-50 to-rose-50",
-      status: "ativa",
-      notificacoes: 0,
-    },
-    { 
-      id: 6,
-      nome: "Desenvolvimento Web", 
-      professor: "Profa. Juliana Costa", 
-      alunos: 40,
-      proximaAula: "Quarta-feira, 16:00",
-      progresso: 70,
-      cor: "from-indigo-500 to-blue-500",
-      corClara: "from-indigo-50 to-blue-50",
-      status: "ativa",
-      notificacoes: 4,
+  const generateRandomColor = () => {
+    const colors = [
+      { cor: "from-blue-500 to-cyan-500", corClara: "from-blue-50 to-cyan-50" },
+      { cor: "from-purple-500 to-pink-500", corClara: "from-purple-50 to-pink-50" },
+      { cor: "from-green-500 to-emerald-500", corClara: "from-green-50 to-emerald-50" },
+      { cor: "from-orange-500 to-amber-500", corClara: "from-orange-50 to-amber-50" },
+      { cor: "from-red-500 to-rose-500", corClara: "from-red-50 to-rose-50" },
+      { cor: "from-indigo-500 to-blue-500", corClara: "from-indigo-50 to-blue-50" },
+    ];
+    return colors[Math.floor(Math.random() * colors.length)];
+  };
+
+  useEffect(() => {
+    async function fetchClasses() {
+      const response = await requestData(`/classes/student/${user.id}`, "GET", {}, true);
+      console.log("turmas:", response);
+
+      if (response.success && response.data?.classes) {
+        const classesWithColors = response.data.classes.map((turma) => {
+          const randomColor = generateRandomColor();
+          return {
+            id: turma.class_id,
+            nome: turma.class_name,
+            professor: turma.teacher_name,
+            alunos: 0, // caso não venha no retorno
+            notificacoes: 0,
+            cor: randomColor.cor,
+            corClara: randomColor.corClara,
+          };
+        });
+        setClasses(classesWithColors);
+      }
     }
-  ];
+    if (user?.id) fetchClasses();
+  }, [user]);
+
 
   const estatisticas = [
     {
@@ -163,7 +120,7 @@ export default function ManagementClasses() {
     { id: "semana", label: "Esta Semana" }
   ];
 
-  const turmasFiltradas = turmas.filter((turma) => {
+  const turmasFiltradas = classes.filter((turma) => {
     const matchBusca = turma.nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
                       turma.professor.toLowerCase().includes(searchQuery.toLowerCase());
     return matchBusca;
@@ -292,7 +249,7 @@ export default function ManagementClasses() {
                 </div>
                 
                 <h3 className="text-3xl font-black text-white mb-3 group-hover:scale-105 transition-transform duration-300">{turma.nome}</h3>
-                <p className="text-white/95 text-base font-medium mb-4">{turma.professor}</p>
+                <p className="text-white/95 text-base font-medium mb-4">Professor: {turma.professor}</p>
                 
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-2 rounded-xl">
@@ -338,39 +295,6 @@ export default function ManagementClasses() {
           <p className="text-gray-600 text-lg">Tente ajustar sua busca</p>
         </div>
       )}
-
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-fadeIn {
-          animation: fadeIn 0.6s ease-out;
-        }
-
-        .animate-slideUp {
-          animation: slideUp 0.6s ease-out;
-          animation-fill-mode: both;
-        }
-      `}</style>
     </div>
   );
 }

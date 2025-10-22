@@ -336,18 +336,40 @@ async generateInvite(req, res) {
     async removeStudent(request, response) {
         try {
             const { student_id } = request.params
+            const { class_id } = request.body
             if (!validator.isInt(student_id + '', { min: 1 })) {
                 return res.status(422).json({ success: false, message: "ID inválido." });
             }
-            const studentExist = await Class.studentExist(student_id)
+            if (!validator.isInt(class_id + '', { min: 1 })) {
+                return res.status(422).json({ success: false, message: "Turma invalida." });
+            }
+
+            const studentExist = await Class.studentExist(student_id, class_id)
             if(!studentExist) {
                 return response.status(404).json({ status: false, message: "Aluno não encontrado." })
             }
-            const valid = await Class.deleteStudentById(student_id)
+            const valid = await Class.deleteStudentById(student_id, class_id)
             if(!valid) {
                 return response.status(500).json({ status: false, message: "Erro ao deletar aluno." })
             }
             return response.status(200).json({ status: true, message: "Aluno removido com sucesso." })
+        } catch(err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
+    async getClasses(request, response) {
+        try {
+            const { student_id } = request.params
+            if (!validator.isInt(student_id + '', { min: 1 })) {
+                return res.status(422).json({ success: false, message: "ID inválido." });
+            }
+
+            const classes = await Class.getClassByIdUser(student_id)
+            if(!classes) {
+                return response.status(404).json({status: false, message: "Nenhuma turma encontrada."})
+            }
+            return response.status(200).json({status: true, classes})
         } catch(err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }

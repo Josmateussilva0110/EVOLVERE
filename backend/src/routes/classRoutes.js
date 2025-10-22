@@ -116,5 +116,7 @@ router.get('/classes/materials/:id', classController.getAllMateriais)
 
 router.get('/classes/students/:class_id', classController.getStudent)
 
+router.get('/classes/student/:student_id', classController.getClasses)
+
 module.exports = router;
 
