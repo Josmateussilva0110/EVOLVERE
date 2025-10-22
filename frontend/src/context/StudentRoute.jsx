@@ -56,11 +56,6 @@ function StudentRoute() {
    */
   const { user } = useContext(UserContext)
 
-  console.log("user no context:", user)
-
-  /**
-   * Caso o usuário não esteja logado, redireciona para a página de login.
-   */
   if (!user) {
     return <Navigate to="/login" />
   }
