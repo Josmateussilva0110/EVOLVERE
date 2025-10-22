@@ -4,25 +4,19 @@ import {
   Download,
   Search,
   Filter,
-  File,
   Archive,
-  Image,
-  Video,
-  Music,
-  ChevronRight,
   Calendar,
-  Eye,
-  Share2,
   ArrowLeft,
   FolderOpen,
-  Clock,
-  HardDrive
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import requestData from "../../../utils/requestApi";
+import { useNavigate, useParams } from "react-router-dom";
+import formatDateRequests from "../../../utils/formatDateRequests"
 
 
 /**
- * ManagementMaterials
+ * MaterialsClass
  *
  * Componente React que exibe e gerencia materiais de aula de diferentes disciplinas,
  * permitindo busca, filtros por tipo de arquivo e download direto.
@@ -82,84 +76,77 @@ import { useState } from "react";
  * - Responsivo e compatível com diferentes tamanhos de tela.
  */
 
-export default function ManagementMaterials() {
+export default function MaterialsClass() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterActive, setFilterActive] = useState("todos");
+  const navigate = useNavigate()
+  const { class_id } = useParams()
+  const [materials, setMaterials] = useState([])
+  const [total_materials, setTotalMaterials] = useState(0)
 
-  const materiais = [
-    { 
-      id: 1,
-      titulo: "Aula 1 - Estruturas de Dados", 
-      tipo: "PDF", 
-      tamanho: "2.1 MB",
-      data: "15 Out 2024",
-      disciplina: "Estruturas de Dados",
-      cor: "from-red-500 to-rose-500",
-      corClara: "from-red-50 to-rose-50",
-      icon: FileText,
-      categoria: "pdf"
-    },
-    { 
-      id: 2,
-      titulo: "Projeto Banco de Dados", 
-      tipo: "ZIP", 
-      tamanho: "5.4 MB",
-      data: "12 Out 2024",
-      disciplina: "Banco de Dados",
-      cor: "from-purple-500 to-pink-500",
-      corClara: "from-purple-50 to-pink-50",
-      icon: Archive,
-      categoria: "arquivo"
-    },
-    { 
-      id: 3,
-      titulo: "Slides - Engenharia de Software", 
-      tipo: "PPTX", 
-      tamanho: "8.7 MB",
-      data: "10 Out 2024",
-      disciplina: "Engenharia de Software",
-      cor: "from-orange-500 to-amber-500",
-      corClara: "from-orange-50 to-amber-50",
-      icon: FileText,
-      categoria: "pdf"
-    },
-    { 
-      id: 4,
-      titulo: "Exercícios Resolvidos - Redes", 
-      tipo: "PDF", 
-      tamanho: "1.8 MB",
-      data: "08 Out 2024",
-      disciplina: "Redes de Computadores",
-      cor: "from-blue-500 to-cyan-500",
-      corClara: "from-blue-50 to-cyan-50",
-      icon: FileText,
-      categoria: "pdf"
-    },
-    { 
-      id: 5,
-      titulo: "Código Fonte - Sistema Web", 
-      tipo: "ZIP", 
-      tamanho: "12.3 MB",
-      data: "05 Out 2024",
-      disciplina: "Desenvolvimento Web",
-      cor: "from-green-500 to-emerald-500",
-      corClara: "from-green-50 to-emerald-50",
-      icon: Archive,
-      categoria: "arquivo"
-    },
-    { 
-      id: 6,
-      titulo: "Apostila Completa - SO", 
-      tipo: "PDF", 
-      tamanho: "15.6 MB",
-      data: "03 Out 2024",
-      disciplina: "Sistemas Operacionais",
-      cor: "from-indigo-500 to-blue-500",
-      corClara: "from-indigo-50 to-blue-50",
-      icon: FileText,
-      categoria: "pdf"
+    const generateRandomColor = () => {
+        const colors = [
+        { cor: "from-blue-500 to-cyan-500", corClara: "from-blue-50 to-cyan-50" },
+        { cor: "from-purple-500 to-pink-500", corClara: "from-purple-50 to-pink-50" },
+        { cor: "from-green-500 to-emerald-500", corClara: "from-green-50 to-emerald-50" },
+        { cor: "from-orange-500 to-amber-500", corClara: "from-orange-50 to-amber-50" },
+        { cor: "from-red-500 to-rose-500", corClara: "from-red-50 to-rose-50" },
+        { cor: "from-indigo-500 to-blue-500", corClara: "from-indigo-50 to-blue-50" },
+        ];
+        return colors[Math.floor(Math.random() * colors.length)];
+    };
+
+    const getFileIcon = (type) => {
+      switch (type?.toLowerCase()) {
+        case "pdf":
+          return <FileText size={16} className="text-white" />;
+        case "zip":
+        case "rar":
+          return <Archive size={16} className="text-white" />;
+        case "doc":
+        case "docx":
+          return <FileText size={16} className="text-white" />;
+        case "ppt":
+        case "pptx":
+          return <Folder size={16} className="text-white" />;
+        default:
+          return <FolderOpen size={16} className="text-white" />;
+      }
+    };
+
+
+
+  useEffect(() => {
+    async function fetchMaterials() {
+      const response = await requestData(`/material/class/${class_id}`, "GET", {}, true);
+      console.log(response)
+
+      if (response.success && response.data?.materials) {
+        const total = response.data.total_materials;
+
+        const MaterialsWithColors = response.data.materials.map((material) => {
+          const randomColor = generateRandomColor();
+          return {
+            id: material.id,
+            nome: material.title,
+            type_file: material.type_file,
+            archive: material.archive,
+            class_name: material.class_name, 
+            date: material.updated_at,
+            cor: randomColor.cor,
+            corClara: randomColor.corClara,
+          };
+        });
+
+        setMaterials(MaterialsWithColors);
+        setTotalMaterials(total);
+      }
     }
-  ];
+
+    if (class_id) fetchMaterials()
+  }, [class_id])
+
+
 
   const estatisticas = [
     {
@@ -178,10 +165,9 @@ export default function ManagementMaterials() {
     { id: "arquivo", label: "Arquivos" }
   ];
 
-  const materiaisFiltrados = materiais.filter((material) => {
-    const matchFiltro = filterActive === "todos" || material.categoria === filterActive;
-    const matchBusca = material.titulo.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      material.disciplina.toLowerCase().includes(searchQuery.toLowerCase());
+  const materiaisFiltrados = materials.filter((material) => {
+    const matchFiltro = filterActive === "todos" || material.type_file === filterActive;
+    const matchBusca = material?.nome.toLowerCase().includes(searchQuery.toLowerCase())
     return matchFiltro && matchBusca;
   });
 
@@ -211,35 +197,35 @@ export default function ManagementMaterials() {
           </div>
           <div>
             <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-green-800 to-emerald-900">
-              Materiais de Aula
+              Turma {materials.length > 0 ? materials[0].class_name : "Carregando..."}
             </h1>
             <p className="text-gray-600 mt-2 text-lg">Acesse e baixe todos os materiais das suas disciplinas</p>
           </div>
         </div>
       </div>
 
-      {/* Estatísticas */}
+      {/* Estatística de Materiais */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {estatisticas.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={index}
-              style={{ animationDelay: `${index * 100}ms` }}
-              className="bg-white rounded-3xl p-7 shadow-xl border-2 border-gray-100 hover:shadow-2xl hover:border-green-200 transition-all duration-300 hover:-translate-y-2 cursor-pointer group animate-slideUp"
-            >
-              <div className="flex items-start justify-between mb-5">
-                <div className={`p-4 bg-gradient-to-br ${stat.corFundo} rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                  <Icon className={`bg-gradient-to-br ${stat.cor} bg-clip-text text-transparent`} size={28} strokeWidth={2.5} />
-                </div>
-              </div>
-              <div className="text-4xl font-black text-gray-900 mb-2 group-hover:scale-105 transition-transform">{stat.valor}</div>
-              <div className="text-sm font-bold text-gray-700 mb-1">{stat.label}</div>
-              <div className="text-xs text-gray-500">{stat.sublabel}</div>
+        <div
+          className="bg-white rounded-3xl p-7 shadow-xl border-2 border-gray-100 
+          hover:shadow-2xl hover:border-green-200 transition-all duration-300 
+          hover:-translate-y-2 cursor-pointer group animate-slideUp"
+        >
+          <div className="flex items-start justify-between mb-5">
+            <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center">
+              <Archive size={28} strokeWidth={2.5} className="text-white" />
             </div>
-          );
-        })}
+          </div>
+
+          <div className="text-4xl font-black text-gray-900 mb-2 group-hover:scale-105 transition-transform">
+            {total_materials}
+          </div>
+          <div className="text-sm font-bold text-gray-700 mb-1">Total de Materiais</div>
+          <div className="text-xs text-gray-500">Arquivos disponíveis</div>
+        </div>
       </div>
+
+
 
       {/* Filtros e Busca */}
       <div className="bg-white rounded-3xl p-6 shadow-xl border-2 border-gray-100 mb-8 hover:shadow-2xl transition-all duration-300">
@@ -288,7 +274,6 @@ export default function ManagementMaterials() {
       {/* Lista de Materiais */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {materiaisFiltrados.map((material, index) => {
-          const Icon = material.icon;
           return (
             <div
               key={material.id}
@@ -302,16 +287,12 @@ export default function ManagementMaterials() {
                 
                 <div className="relative flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-3 bg-white/20 backdrop-blur-md rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                      <Icon className="text-white" size={24} strokeWidth={2.5} />
+                    <div className="flex items-center gap-2 px-3 py-1 bg-white/30 backdrop-blur-md rounded-lg shadow-sm">
+                      {getFileIcon(material.type_file)}
+                      <span className="text-white font-semibold text-sm tracking-wide capitalize">
+                        {material.type_file}
+                      </span>
                     </div>
-                    <div className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-lg">
-                      <span className="text-white font-bold text-sm">{material.tipo}</span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-white/90 text-xs font-medium mb-1">Tamanho</div>
-                    <div className="text-white font-bold text-sm">{material.tamanho}</div>
                   </div>
                 </div>
               </div>
@@ -321,25 +302,29 @@ export default function ManagementMaterials() {
                 {/* Informações do Material */}
                 <div className="mb-4">
                   <h3 className="text-xl font-black text-gray-900 mb-2 group-hover:text-green-600 transition-colors">
-                    {material.titulo}
+                    {material.nome}
                   </h3>
-                  <p className="text-sm text-gray-600 font-medium mb-3">{material.disciplina}</p>
                   
                   <div className="flex items-center gap-4 text-xs text-gray-500">
                     <div className="flex items-center gap-1">
                       <Calendar size={14} strokeWidth={2.5} />
-                      <span>{material.data}</span>
+                      <span>{formatDateRequests(material.date)}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Ações */}
                 <div className="flex gap-3">
-                  <button className={`flex-1 bg-gradient-to-r ${material.cor} text-white py-3 rounded-2xl font-bold hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 group/btn`}>
+                  <a
+                    href={`${import.meta.env.VITE_BASE_URL}/${material.archive}?download=true`}
+                    download
+                    className={`flex-1 bg-gradient-to-r ${material.cor} text-white py-3 rounded-2xl font-bold hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 group/btn`}
+                  >
                     <Download size={18} strokeWidth={2.5} className="group-hover/btn:animate-bounce" />
                     Baixar
-                  </button>
+                  </a>
                 </div>
+
               </div>
             </div>
           );

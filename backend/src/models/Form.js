@@ -162,9 +162,122 @@ class Form {
         }
     }
 
+
     /**
-     * Retorna um formulário específico pelo seu ID, incluindo todas as questões e opções.
+     * Busca um formulário pelo ID, incluindo suas perguntas e opções.
+     *
+     * A consulta retorna o formulário com os campos principais (id, título, descrição, etc.),
+     * o total de pontos somando as questões e um array JSON com as perguntas e suas opções.
      *
      * @async
-     * @param {number} id - ID do formulário.
-     * @returns {Promise<Object|und*
+     * @function getFormById
+     * @param {number|string} id - ID do formulário a ser buscado.
+     * @returns {Promise<Object[]|undefined>} Retorna um array com os dados do formulário e suas perguntas, 
+     * ou `undefined` se o formulário não for encontrado.
+     *
+     * @example
+     * const form = await getFormById(3);
+     * if (form) {
+     *   console.log(form[0].title); // "Prova de Matemática"
+     * }
+     */
+    async getFormById(id) {
+        try {
+            const result = await knex.raw(`
+                
+                select
+                    f.id,
+                    f.title,
+                    f.description,
+                    f.subject_id,
+                    f.class_id,
+                    SUM(COALESCE(q.points, 0)) AS total_points,
+                    f.updated_at,
+                    json_agg(
+                    json_build_object(
+                        'id', q.id,
+                        'text', q.text,
+                        'points', q.points,
+                        'type', q.type,
+                        'options', (
+                        SELECT json_agg(
+                            json_build_object(
+                            'id', o.id,
+                            'text', o.text,
+                            'correct', o.correct
+                            )
+                        )
+                        FROM options o
+                        WHERE o.question_id = q.id
+                        )
+                    )
+                    ) AS questions
+                from form f
+                inner join questions q ON q.form_id = f.id
+                where f.id = ?
+                group by f.id
+                order by f.updated_at DESC;
+                `, [id]);
+            const rows = result.rows
+            return rows.length > 0 ? rows : undefined
+        } catch(err) {
+            console.error("Erro ao buscar formulários:", err);
+            return undefined
+        }
+    }
+
+
+    /**
+     * Verifica se um formulário existe pelo ID.
+     *
+     * @async
+     * @function formExist
+     * @param {number|string} id - ID do formulário a ser verificado.
+     * @returns {Promise<boolean>} Retorna `true` se o formulário existir, ou `false` caso contrário.
+     *
+     * @example
+     * const exists = await formExist(1);
+     * if (exists) {
+     *   console.log("Formulário encontrado!");
+     * }
+     */
+    async formExist(id) {
+        try {
+            const result = await knex.select("*").where({id}).table("form")
+            return result.length > 0
+        } catch(err) {
+            console.error('Erro ao verificar formulário:', err)
+            return false
+        }
+    }
+
+
+    /**
+     * Deleta um formulário com base no ID informado.
+     *
+     * @async
+     * @function deleteById
+     * @param {number|string} id - ID do formulário a ser deletado.
+     * @returns {Promise<boolean>} Retorna `true` se o formulário foi deletado com sucesso, 
+     * ou `false` caso contrário.
+     *
+     * @example
+     * const deleted = await deleteById(5);
+     * if (deleted) {
+     *   console.log("Formulário removido com sucesso!");
+     * }
+     */
+    async deleteById(id) {
+        try {
+            const deleted = await knex('form').where({ id }).delete();
+            return deleted > 0;
+        } catch (err) {
+            console.error("Erro ao deletar formulário:", err);
+            return false;
+        }
+    }
+
+
+}
+
+module.exports = new Form()

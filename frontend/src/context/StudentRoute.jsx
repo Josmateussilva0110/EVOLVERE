@@ -49,6 +49,7 @@ function StudentRoute() {
    */
   const { setFlashMessage } = useFlashMessage()
 
+
   /**
    * @constant {Object|null} user - Objeto do usuário autenticado obtido via `UserContext`.
    * Contém informações como nome, e-mail e nível de permissão (`role`).

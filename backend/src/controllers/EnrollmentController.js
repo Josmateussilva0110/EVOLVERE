@@ -5,6 +5,53 @@ const Invite = require("../models/Invite");
 
 class EnrollmentController {
 
+
+    /**
+     * Matricula um aluno em uma turma a partir de um código de convite.
+     *
+     * Essa função recebe um código de convite (`code`) enviado pelo corpo da requisição
+     * e o ID do aluno a partir da sessão (`req.session.user.id`) ou do token (`req.user.id`).
+     * Após validar os dados, ela verifica se o código é válido e se o aluno já está
+     * matriculado na turma. Caso contrário, insere o aluno na tabela `class_student`,
+     * incrementa o contador de usos do convite e retorna os dados da turma.
+     *
+     * @async
+     * @function joinWithCode
+     * @param {import('express').Request} req - Objeto da requisição Express contendo `code` no corpo e sessão com o usuário.
+     * @param {import('express').Response} res - Objeto da resposta Express para enviar os resultados ou erros.
+     * @returns {Promise<import('express').Response>} Retorna uma resposta JSON indicando sucesso ou falha da matrícula.
+     *
+     * @example
+     * // Exemplo de rota Express:
+     * router.post('/join', ClassController.joinWithCode);
+     *
+     * // Corpo da requisição:
+     * {
+     *   "code": "ABC123"
+     * }
+     *
+     * // Resposta de sucesso (200):
+     * {
+     *   "success": true,
+     *   "message": "Matrícula na turma Programação Web realizada com sucesso!",
+     *   "data": {
+     *     "classId": 5,
+     *     "className": "Programação Web"
+     *   }
+     * }
+     *
+     * // Resposta (400): Código ausente
+     * { "success": false, "message": "O código da turma é obrigatório." }
+     *
+     * // Resposta (404): Código inválido ou expirado
+     * { "success": false, "message": "Código inválido, expirado ou já atingiu o limite de usos." }
+     *
+     * // Resposta (409): Aluno já matriculado
+     * { "success": false, "message": "Você já está matriculado nesta turma." }
+     *
+     * // Resposta (500): Erro interno
+     * { "success": false, "message": "Erro interno do servidor." }
+     */
     async joinWithCode(req, res) {
         try {
             const { code } = req.body;

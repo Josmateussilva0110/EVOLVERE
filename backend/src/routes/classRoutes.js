@@ -113,9 +113,69 @@ router.get('/classes/subject_id/:id', classController.getIdSubject)
  */
 router.get('/classes/materials/:id', classController.getAllMateriais)
 
-
+/**
+ * @route GET /classes/students/:class_id
+ * @group Classes - Operações relacionadas às turmas
+ * @summary Retorna todos os alunos matriculados em uma turma específica.
+ * @param {number} class_id.path.required - ID da turma.
+ * 
+ * @returns {Object} 200 - Sucesso: Retorna um objeto contendo a lista de alunos.
+ * @returns {boolean} 200.status - Indica se a requisição foi bem-sucedida.
+ * @returns {Array<{ student_id: number, username: string }>} 200.students - Lista de alunos da turma.
+ * @returns {Object} 404 - Nenhum aluno encontrado para a turma informada.
+ * @returns {Object} 422 - ID inválido.
+ * @returns {Object} 500 - Erro interno do servidor.
+ * 
+ * @example
+ * // Exemplo de requisição
+ * GET /classes/students/5
+ * 
+ * // Exemplo de resposta (200)
+ * {
+ *   "status": true,
+ *   "students": [
+ *     { "student_id": 3, "username": "Lucas Andrade" },
+ *     { "student_id": 7, "username": "Maria Costa" }
+ *   ]
+ * }
+ * 
+ * @description
+ * Essa rota busca todos os alunos vinculados à turma informada por meio do `class_id`.
+ * Caso a turma não tenha alunos cadastrados, é retornada uma resposta 404.
+ */
 router.get('/classes/students/:class_id', classController.getStudent)
 
+
+/**
+ * @route GET /classes/student/:student_id
+ * @group Classes - Operações relacionadas às turmas
+ * @summary Retorna todas as turmas em que o aluno está matriculado.
+ * @param {number} student_id.path.required - ID do aluno.
+ * 
+ * @returns {Object} 200 - Sucesso: Retorna um objeto com as turmas associadas ao aluno.
+ * @returns {boolean} 200.status - Indica se a requisição foi bem-sucedida.
+ * @returns {Array<{ class_id: number, class_name: string, teacher_name: string }>} 200.classes - Lista de turmas.
+ * @returns {Object} 404 - Nenhuma turma encontrada para o aluno informado.
+ * @returns {Object} 422 - ID inválido.
+ * @returns {Object} 500 - Erro interno do servidor.
+ * 
+ * @example
+ * // Exemplo de requisição
+ * GET /classes/student/12
+ * 
+ * // Exemplo de resposta (200)
+ * {
+ *   "status": true,
+ *   "classes": [
+ *     { "class_id": 4, "class_name": "Matemática Avançada", "teacher_name": "Prof. Renato Lima" },
+ *     { "class_id": 8, "class_name": "Lógica de Programação", "teacher_name": "Profa. Carla Mendes" }
+ *   ]
+ * }
+ * 
+ * @description
+ * Essa rota retorna todas as turmas em que um aluno específico está matriculado.
+ * Caso o aluno não esteja vinculado a nenhuma turma, é retornado um erro 404.
+ */
 router.get('/classes/student/:student_id', classController.getClasses)
 
 module.exports = router;

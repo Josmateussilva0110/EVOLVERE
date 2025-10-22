@@ -266,7 +266,7 @@ class ClassController {
      * }
      * }
      */
-async generateInvite(req, res) {
+    async generateInvite(req, res) {
         try {
             const { id: classId } = req.params;
             const { expires_in_minutes, max_uses } = req.body;
@@ -316,6 +316,40 @@ async generateInvite(req, res) {
         }
     }
 
+
+    /**
+     * Retorna todos os alunos associados a uma turma específica.
+     *
+     * Essa função valida o `class_id` recebido via parâmetros,
+     * consulta os alunos vinculados à turma e retorna a lista.
+     * Caso o `class_id` seja inválido ou nenhum aluno seja encontrado,
+     * uma resposta com o código de status apropriado é enviada.
+     *
+     * @async
+     * @function getStudent
+     * @param {import('express').Request} request - Objeto da requisição Express contendo o parâmetro `class_id`.
+     * @param {import('express').Response} response - Objeto da resposta Express usado para retornar dados ou erros.
+     * @returns {Promise<import('express').Response>} Retorna uma resposta JSON contendo a lista de alunos ou uma mensagem de erro.
+     *
+     * @example
+     * // Rota de exemplo:
+     * router.get('/class/:class_id/students', ClassController.getStudent);
+     *
+     * // Resposta de sucesso (200):
+     * {
+     *   "status": true,
+     *   "students": [
+     *     { "id": 1, "name": "Maria Silva" },
+     *     { "id": 2, "name": "João Souza" }
+     *   ]
+     * }
+     *
+     * // Resposta (422): ID inválido
+     * { "success": false, "message": "ID inválido." }
+     *
+     * // Resposta (404): Nenhum aluno
+     * { "status": false, "message": "Nenhum aluno encontrado." }
+     */
     async getStudent(request, response) {
         try {
             const {class_id} = request.params
@@ -333,6 +367,36 @@ async generateInvite(req, res) {
         }
     }
 
+
+    /**
+     * Remove um aluno específico de uma turma.
+     *
+     * Essa função valida os parâmetros `student_id` e `class_id`,
+     * verifica se o aluno está associado à turma e, caso positivo,
+     * realiza a exclusão da relação entre o aluno e a turma.
+     *
+     * @async
+     * @function removeStudent
+     * @param {import('express').Request} request - Objeto da requisição Express contendo `student_id` nos parâmetros e `class_id` no corpo.
+     * @param {import('express').Response} response - Objeto da resposta Express usado para enviar o resultado.
+     * @returns {Promise<import('express').Response>} Retorna uma resposta JSON informando o sucesso ou falha da operação.
+     *
+     * @example
+     * // Rota de exemplo:
+     * router.delete('/students/:student_id', ClassController.removeStudent);
+     *
+     * // Corpo da requisição:
+     * { "class_id": 3 }
+     *
+     * // Resposta de sucesso (200):
+     * { "status": true, "message": "Aluno removido com sucesso." }
+     *
+     * // Resposta (404): Aluno não encontrado
+     * { "status": false, "message": "Aluno não encontrado." }
+     *
+     * // Resposta (500): Erro no servidor
+     * { "status": false, "message": "Erro interno no servidor." }
+     */
     async removeStudent(request, response) {
         try {
             const { student_id } = request.params
@@ -358,6 +422,39 @@ async generateInvite(req, res) {
         }
     }
 
+
+    /**
+     * Obtém todas as turmas associadas a um aluno.
+     *
+     * Essa função valida o `student_id` recebido via parâmetros e consulta
+     * as turmas em que o aluno está matriculado. Caso não encontre nenhuma turma,
+     * retorna um erro com código HTTP 404.
+     *
+     * @async
+     * @function getClasses
+     * @param {import('express').Request} request - Objeto da requisição Express contendo o parâmetro `student_id`.
+     * @param {import('express').Response} response - Objeto da resposta Express.
+     * @returns {Promise<import('express').Response>} Retorna uma resposta JSON com as turmas encontradas ou uma mensagem de erro.
+     *
+     * @example
+     * // Rota de exemplo:
+     * router.get('/students/:student_id/classes', ClassController.getClasses);
+     *
+     * // Resposta de sucesso (200):
+     * {
+     *   "status": true,
+     *   "classes": [
+     *     { "id": 1, "name": "Turma A", "year": 2025 },
+     *     { "id": 2, "name": "Turma B", "year": 2025 }
+     *   ]
+     * }
+     *
+     * // Resposta (422): ID inválido
+     * { "success": false, "message": "ID inválido." }
+     *
+     * // Resposta (404): Nenhuma turma encontrada
+     * { "status": false, "message": "Nenhuma turma encontrada." }
+     */
     async getClasses(request, response) {
         try {
             const { student_id } = request.params

@@ -68,6 +68,78 @@ class Material {
             return false
         }
     }
+
+
+    /**
+     * Busca todos os materiais associados a uma turma específica.
+     * 
+     * @async
+     * @function getMaterialsByIdClass
+     * @param {number} class_id - ID da turma cujos materiais serão buscados.
+     * @returns {Promise<{ total_materials: number, materials: Array<Object> } | false>}
+     * Retorna um objeto contendo:
+     * - `total_materials`: número total de materiais encontrados.
+     * - `materials`: lista de materiais com os seguintes campos:
+     *   - `id`: ID do material.
+     *   - `title`: título do material.
+     *   - `class_name`: nome da turma associada.
+     *   - `type_file`: tipo de arquivo (PDF, DOC, PPT ou Desconhecido).
+     *   - `archive`: caminho ou nome do arquivo armazenado.
+     *   - `updated_at`: data da última atualização.
+     * 
+     * Retorna `false` em caso de erro.
+     * 
+     * @throws {Error} Registra no console uma mensagem de erro caso ocorra falha na consulta.
+     * 
+     * @example
+     * const result = await getMaterialsByIdClass(10);
+     * if (result) {
+     *   console.log(`Total: ${result.total_materials} materiais`);
+     *   console.table(result.materials);
+     * }
+     */
+    async getMaterialsByIdClass(class_id) {
+        try {
+            const materialsResult = await knex.raw(`
+            select 
+                m.id,
+                m.title,
+                c.name as class_name,
+                case 
+                when m.type = 1 then 'PDF'
+                when m.type = 2 then 'DOC'
+                when m.type = 3 then 'PPT'
+                else 'Desconhecido'
+                end as type_file,
+                m.archive,
+                m.updated_at
+            from materials m
+            inner join classes c
+                on c.id = m.class_id
+            where m.class_id = ? and m.origin = 2
+            order by m.updated_at desc
+            `, [class_id]);
+
+            const materials = materialsResult.rows;
+            const countResult = await knex.raw(`
+            select count(*) as total_materials
+            from materials
+            where class_id = ? and origin = 2
+            `, [class_id]);
+
+            const total = Number(countResult.rows[0]?.total_materials || 0);
+
+            return {
+            total_materials: total,
+            materials: materials
+            };
+
+        } catch (err) {
+            console.error('Erro ao buscar materiais da turma:', err);
+            return false;
+        }
+    }
+
     
 }
 
