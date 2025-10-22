@@ -5,6 +5,17 @@ import Navbar from "./components/layout/NavBar"
 import Container from "./components/layout/Container"
 import AppRoutes from "./routes/Index"
 
+/**
+ * @component App
+ * @description Componente raiz da aplicação que gerencia a renderização
+ * da barra de navegação, rodapé, container principal e mensagens flash
+ * dependendo da rota atual.
+ *
+ * - Oculta Navbar e Footer em rotas específicas, incluindo rotas de coordenador,
+ *   rotas estáticas e padrões dinâmicos.
+ *
+ * @returns {JSX.Element} Estrutura principal da aplicação com layout condicional.
+ */
 function App() {
   const location = useLocation()
   const path = location.pathname
