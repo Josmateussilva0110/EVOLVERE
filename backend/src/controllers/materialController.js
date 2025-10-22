@@ -133,7 +133,7 @@ class MaterialController {
                 return response.status(404).json({status: false, message: "Nenhum material encontrado."})
             }
 
-            return response.status(200).json({status: true, materials})
+            return response.status(200).json({ status: true, ...materials })
             
             
         } catch(err) {
