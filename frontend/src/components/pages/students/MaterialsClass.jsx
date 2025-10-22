@@ -4,25 +4,18 @@ import {
   Download,
   Search,
   Filter,
-  File,
   Archive,
-  Image,
-  Video,
-  Music,
-  ChevronRight,
   Calendar,
-  Eye,
-  Share2,
   ArrowLeft,
   FolderOpen,
-  Clock,
-  HardDrive
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import requestData from "../../../utils/requestApi";
+import { useNavigate, useParams } from "react-router-dom";
 
 
 /**
- * ManagementMaterials
+ * MaterialsClass
  *
  * Componente React que exibe e gerencia materiais de aula de diferentes disciplinas,
  * permitindo busca, filtros por tipo de arquivo e download direto.
@@ -82,14 +75,53 @@ import { useState } from "react";
  * - Responsivo e compatível com diferentes tamanhos de tela.
  */
 
-export default function ManagementMaterials() {
+export default function MaterialsClass() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterActive, setFilterActive] = useState("todos");
+  const navigate = useNavigate()
+  const { class_id } = useParams()
+  const [materials, setMaterials] = useState([])
+
+    const generateRandomColor = () => {
+        const colors = [
+        { cor: "from-blue-500 to-cyan-500", corClara: "from-blue-50 to-cyan-50" },
+        { cor: "from-purple-500 to-pink-500", corClara: "from-purple-50 to-pink-50" },
+        { cor: "from-green-500 to-emerald-500", corClara: "from-green-50 to-emerald-50" },
+        { cor: "from-orange-500 to-amber-500", corClara: "from-orange-50 to-amber-50" },
+        { cor: "from-red-500 to-rose-500", corClara: "from-red-50 to-rose-50" },
+        { cor: "from-indigo-500 to-blue-500", corClara: "from-indigo-50 to-blue-50" },
+        ];
+        return colors[Math.floor(Math.random() * colors.length)];
+    };
+
+
+    useEffect(() => {
+        async function fetchMaterials() {
+        const response = await requestData(`/material/class/${class_id}`, "GET", {}, true);
+        console.log(response);
+
+        if (response.success && response.data?.materials) {
+            const MaterialsWithColors = response.data.materials.map((material) => {
+            const randomColor = generateRandomColor();
+            return {
+                id: material.id,
+                nome: material.title,
+                type_file: material.type_file,
+                date: material.updated_at,
+                cor: randomColor.cor,
+                corClara: randomColor.corClara,
+            };
+            });
+            setMaterials(MaterialsWithColors);
+        }
+        }
+        if (class_id) fetchMaterials();
+    }, [class_id]);
 
   const materiais = [
     { 
       id: 1,
-      titulo: "Aula 1 - Estruturas de Dados", 
+      titulo: "Aula 1 - Bolo", 
       tipo: "PDF", 
       tamanho: "2.1 MB",
       data: "15 Out 2024",

@@ -269,7 +269,7 @@ export default function ManagementClasses() {
                   <span className="text-sm font-bold text-blue-700">Atividades</span>
                 </button>
                 
-                <button className="flex flex-col items-center gap-3 p-5 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl hover:from-green-100 hover:to-emerald-100 transition-all duration-300 group/btn transform hover:scale-105 hover:shadow-xl border-2 border-green-100 hover:border-green-200">
+                <button onClick={() => navigate(`/student/materials/view/${turma.id}`)} className="flex flex-col items-center gap-3 p-5 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl hover:from-green-100 hover:to-emerald-100 transition-all duration-300 group/btn transform hover:scale-105 hover:shadow-xl border-2 border-green-100 hover:border-green-200">
                   <FileText className="text-green-600 group-hover/btn:scale-110 transition-transform duration-300" size={26} strokeWidth={2.5} />
                   <span className="text-sm font-bold text-green-700">Material</span>
                 </button>

@@ -1,5 +1,6 @@
 const MaterialFieldValidator = require("../utils/materialValidator")
 const Material = require("../models/Material")
+const Class = require("../models/Class")
 const path = require("path")
 const fs = require("fs")
 const validator = require('validator');
@@ -112,6 +113,29 @@ class MaterialController {
                 return response.status(500).json({ status: false, message: "Erro ao deletar material." })
             }
             return response.status(200).json({ status: true, message: "Material deletado com sucesso." })
+        } catch(err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
+    async getMaterialsClass(request, response) {
+        try {
+            const { class_id } = request.params
+            const error = MaterialFieldValidator.validate({class_id})
+            if (error) return response.status(422).json({ status: false, message: error })
+            const classExist = await Class.classExist(class_id)
+            if(!classExist) {
+                return response.status(404).json({status: false, message: "Turma não encontrada."})
+            }
+            
+            const materials = await Material.getMaterialsByIdClass(class_id)
+            if(!materials) {
+                return response.status(404).json({status: false, message: "Nenhum material encontrado."})
+            }
+
+            return response.status(200).json({status: true, materials})
+            
+            
         } catch(err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }

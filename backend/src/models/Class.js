@@ -282,6 +282,16 @@ class Class {
             return false;
         }
     }
+
+    async classExist(id) {
+        try {
+            const result = await knex.select("*").where({id}).table("classes")
+            return result.length > 0
+        } catch(err) {
+            console.error('Erro ao verificar material:', err)
+            return false
+        }
+    }
 }
 
 module.exports = new Class();

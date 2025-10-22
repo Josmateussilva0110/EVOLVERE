@@ -68,6 +68,32 @@ class Material {
             return false
         }
     }
+
+    async getMaterialsByIdClass(class_id) {
+        try {
+            const result = await knex.raw(`
+                select 
+                    m.id,
+                    m.title,
+                    case 
+                        when m.type = 1 then 'PDF'
+                        when m.type = 2 then 'DOC'
+                        when m.type = 3 then 'PPT'
+                        else 'Desconhecido'
+                    end as type_file,
+                    m.archive,
+                    m.updated_at
+                from materials m
+                where m.class_id = ? and m.origin = 2
+                order by m.updated_at desc
+            `, [class_id])
+            const rows = result.rows
+            return rows.length > 0 ? rows : undefined
+        } catch(err) {
+            console.error('Erro ao buscar materiais da turma:', err)
+            return false
+        }
+    }
     
 }
 

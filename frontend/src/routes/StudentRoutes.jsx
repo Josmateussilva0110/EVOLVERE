@@ -7,6 +7,7 @@ import ManagementMaterials from "../components/pages/students/ManagementMaterial
 import ManagementActivity from "../components/pages/students/ManagementActivity"
 import ManagementPerformace from "../components/pages/students/ManagementPerformance"
 import ManagementMedals from "../components/pages/students/ManagementMedals"
+import MaterialsClass from "../components/pages/students/MaterialsClass"
 
 
 /**
@@ -65,6 +66,8 @@ export default function StudentRoutes() {
        * @element ManagementMaterials
        */}
       <Route path="materials/view" element={<ManagementMaterials />} />
+
+      <Route path="materials/view/:class_id" element={<MaterialsClass />} />
 
       {/**
        * Página de visualização e submissão de atividades.

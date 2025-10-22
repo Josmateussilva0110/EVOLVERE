@@ -44,6 +44,8 @@ router.post("/material", (request, response, next) => {
 
 router.delete("/material/:id", materialController.delete)
 
+router.get('/material/class/:class_id', materialController.getMaterialsClass)
+
 
 
 
