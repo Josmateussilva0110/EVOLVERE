@@ -118,6 +118,49 @@ class MaterialController {
         }
     }
 
+
+    /**
+     * Obtém todos os materiais associados a uma turma específica.
+     *
+     * Essa função é responsável por validar o `class_id` recebido via parâmetros,
+     * verificar se a turma existe no banco de dados e, caso exista, retornar todos
+     * os materiais relacionados a ela. Caso a turma não exista ou não possua materiais,
+     * respostas adequadas são enviadas com os códigos HTTP correspondentes.
+     *
+     * @async
+     * @function getMaterialsClass
+     * @param {import('express').Request} request - Objeto de requisição do Express, contendo os parâmetros da rota.
+     * @param {import('express').Response} response - Objeto de resposta do Express, usado para retornar o resultado da operação.
+     * @returns {Promise<import('express').Response>} Retorna uma resposta JSON com o status da operação e os dados ou mensagem de erro.
+     *
+     * @example
+     * // Exemplo de rota Express usando o controlador:
+     * router.get('/materials/:class_id', MaterialController.getMaterialsClass);
+     *
+     * // Requisição:
+     * GET /materials/12
+     *
+     * // Resposta de sucesso (200):
+     * {
+     *   "status": true,
+     *   "materials": [
+     *     { "id": 1, "title": "Introdução ao JavaScript", "url": "https://..." },
+     *     { "id": 2, "title": "Banco de Dados Relacional", "url": "https://..." }
+     *   ]
+     * }
+     *
+     * // Resposta de erro (422): Campo inválido
+     * { "status": false, "message": "class_id é obrigatório." }
+     *
+     * // Resposta de erro (404): Turma não encontrada
+     * { "status": false, "message": "Turma não encontrada." }
+     *
+     * // Resposta de erro (404): Nenhum material encontrado
+     * { "status": false, "message": "Nenhum material encontrado." }
+     *
+     * // Resposta de erro (500): Erro interno
+     * { "status": false, "message": "Erro interno no servidor." }
+     */
     async getMaterialsClass(request, response) {
         try {
             const { class_id } = request.params

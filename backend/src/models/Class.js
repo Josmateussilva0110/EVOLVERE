@@ -200,6 +200,22 @@ class Class {
         }
     } 
 
+
+    /**
+     * Busca o ID da turma associada a uma determinada disciplina.
+     * 
+     * @async
+     * @function getIdClassBySubject
+     * @param {number} subject_id - ID da disciplina.
+     * @returns {Promise<Object|null>} Retorna um objeto contendo o ID da turma encontrada, 
+     * ou `null` caso não exista nenhuma turma associada.
+     * 
+     * @throws {Error} Registra no console caso ocorra erro na consulta.
+     * 
+     * @example
+     * const classData = await getIdClassBySubject(12);
+     * if (classData) console.log(classData.id);
+     */
     async getIdClassBySubject(subject_id) {
         try {
             const result = await knex
@@ -215,6 +231,25 @@ class Class {
         }
     }
 
+
+    /**
+     * Busca todos os alunos matriculados em uma turma específica.
+     * 
+     * @async
+     * @function Students
+     * @param {number} class_id - ID da turma.
+     * @returns {Promise<Array<Object>|undefined>} Retorna uma lista de alunos com os campos:
+     * - `student_id`: ID do aluno
+     * - `username`: nome de usuário do aluno
+     * 
+     * Retorna `undefined` se não houver alunos cadastrados.
+     * 
+     * @throws {Error} Registra no console caso ocorra falha na consulta SQL.
+     * 
+     * @example
+     * const students = await Students(5);
+     * if (students) console.log(students.length, "alunos encontrados");
+     */
     async Students(class_id) {
         try {
             const result = await knex.raw(`
@@ -234,6 +269,22 @@ class Class {
         }
     } 
 
+
+    /**
+     * Verifica se um aluno está matriculado em uma turma específica.
+     * 
+     * @async
+     * @function studentExist
+     * @param {number} id - ID do aluno.
+     * @param {number} class_id - ID da turma.
+     * @returns {Promise<boolean>} Retorna `true` se o aluno estiver matriculado, caso contrário `false`.
+     * 
+     * @throws {Error} Registra no console caso ocorra erro na verificação.
+     * 
+     * @example
+     * const exists = await studentExist(3, 7);
+     * if (exists) console.log("Aluno já está na turma.");
+     */
     async studentExist(id, class_id) {
         try {
             const result = await knex.select("*").where({ student_id: id, class_id}).table("class_student")
@@ -244,6 +295,22 @@ class Class {
         }
     }
 
+
+    /**
+     * Remove a matrícula de um aluno em uma turma específica.
+     * 
+     * @async
+     * @function deleteStudentById
+     * @param {number} student_id - ID do aluno a ser removido.
+     * @param {number} class_id - ID da turma da qual o aluno será removido.
+     * @returns {Promise<boolean>} Retorna `true` se a exclusão for bem-sucedida, caso contrário `false`.
+     * 
+     * @throws {Error} Registra no console caso ocorra falha ao deletar o registro.
+     * 
+     * @example
+     * const deleted = await deleteStudentById(5, 10);
+     * if (deleted) console.log("Aluno removido com sucesso.");
+     */
     async deleteStudentById(student_id, class_id) {
         try {
             const deleted = await knex('class_student')
@@ -258,6 +325,28 @@ class Class {
     }
 
 
+    /**
+     * Retorna todas as turmas em que um aluno está matriculado, 
+     * junto com informações adicionais da turma e do professor responsável.
+     * 
+     * @async
+     * @function getClassByIdUser
+     * @param {number} student_id - ID do aluno.
+     * @returns {Promise<Array<Object>|undefined|false>} 
+     * - Retorna uma lista de turmas com:
+     *   - `student_id`: ID do aluno
+     *   - `class_id`: ID da turma
+     *   - `class_name`: nome da turma
+     *   - `teacher_name`: nome do professor
+     * - Retorna `undefined` se o aluno não estiver em nenhuma turma.
+     * - Retorna `false` em caso de erro.
+     * 
+     * @throws {Error} Registra no console caso ocorra falha na consulta.
+     * 
+     * @example
+     * const classes = await getClassByIdUser(12);
+     * if (classes) console.log(classes.map(c => c.class_name));
+     */
     async getClassByIdUser(student_id) {
         try {
             const result = await knex.raw(`
@@ -283,6 +372,21 @@ class Class {
         }
     }
 
+
+    /**
+     * Verifica se uma turma existe pelo seu ID.
+     * 
+     * @async
+     * @function classExist
+     * @param {number} id - ID da turma a ser verificada.
+     * @returns {Promise<boolean>} Retorna `true` se a turma existir, caso contrário `false`.
+     * 
+     * @throws {Error} Registra no console caso ocorra erro na verificação.
+     * 
+     * @example
+     * const exists = await classExist(8);
+     * if (!exists) console.log("Turma não encontrada.");
+     */
     async classExist(id) {
         try {
             const result = await knex.select("*").where({id}).table("classes")

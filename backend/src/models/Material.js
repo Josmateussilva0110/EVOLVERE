@@ -69,6 +69,35 @@ class Material {
         }
     }
 
+
+    /**
+     * Busca todos os materiais associados a uma turma específica.
+     * 
+     * @async
+     * @function getMaterialsByIdClass
+     * @param {number} class_id - ID da turma cujos materiais serão buscados.
+     * @returns {Promise<{ total_materials: number, materials: Array<Object> } | false>}
+     * Retorna um objeto contendo:
+     * - `total_materials`: número total de materiais encontrados.
+     * - `materials`: lista de materiais com os seguintes campos:
+     *   - `id`: ID do material.
+     *   - `title`: título do material.
+     *   - `class_name`: nome da turma associada.
+     *   - `type_file`: tipo de arquivo (PDF, DOC, PPT ou Desconhecido).
+     *   - `archive`: caminho ou nome do arquivo armazenado.
+     *   - `updated_at`: data da última atualização.
+     * 
+     * Retorna `false` em caso de erro.
+     * 
+     * @throws {Error} Registra no console uma mensagem de erro caso ocorra falha na consulta.
+     * 
+     * @example
+     * const result = await getMaterialsByIdClass(10);
+     * if (result) {
+     *   console.log(`Total: ${result.total_materials} materiais`);
+     *   console.table(result.materials);
+     * }
+     */
     async getMaterialsByIdClass(class_id) {
         try {
             const materialsResult = await knex.raw(`
