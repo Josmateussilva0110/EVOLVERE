@@ -48,16 +48,20 @@ class FormController {
      */
     async publish(request, response) {
         try {
-            const {title, description, created_by, subject_id, class_id, questions} = request.body
+            const {title, description, created_by, subject_id, class_id, questions, deadline} = request.body
             const error = MaterialFieldValidator.validate({ title, description, created_by, subject_id, class_id })
             if (error) return response.status(422).json({ status: false, message: error })
+
+            if (!validator.isISO8601(deadline)) {
+                return res.status(400).json({ error: "O campo 'prazo' deve ser uma data válida (YYYY-MM-DD)." });
+            }
 
             const formExist = await Form.formExists(title, class_id)
             if(formExist) {
                 return response.status(422).json({ status: false, message: "Título de formulário já existe." })
             }
 
-            const data = { title, description, created_by, subject_id, class_id }
+            const data = { title, description, created_by, subject_id, class_id, deadline }
             const savedForm = await Form.save(data)
 
             if(!savedForm.success) {
@@ -220,6 +224,28 @@ class FormController {
             }
 
             return response.status(200).json({ status: true, form })
+        } catch(err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
+    async getFormByClassId(request, response) {
+        try {
+            const { class_id } = request.params
+            if (!validator.isInt(class_id + '', { min: 1 })) {
+                return response.status(422).json({ success: false, message: "Turma invalida." });
+            }
+            const classExist = await Class.classExist(class_id)
+            if(!classExist) {
+                return response.status(404).json({status: false, message: "Nenhuma turma encontrada."})
+            }
+
+            const form = await Form.getForm(class_id)
+            if(!form) {
+                return response.status(404).json({status: false, message: "Nenhum form encontrado."})
+            }
+
+            return response.status(200).json({status: true, form})
         } catch(err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }

@@ -127,7 +127,7 @@ export default function ManagementClasses() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-8 pb-20">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-8 pb-20">
       {/* Header com animação */}
       <div className="mb-8 animate-fadeIn">
         {/* Botão Voltar */}
@@ -145,13 +145,13 @@ export default function ManagementClasses() {
 
         <div className="flex items-center gap-4 mb-4">
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-2xl blur-lg opacity-50 animate-pulse"></div>
-            <div className="relative p-4 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl shadow-2xl transform hover:scale-110 transition-transform duration-300">
+            <div className="absolute inset-0 bg-linear-to-br from-blue-400 to-cyan-400 rounded-2xl blur-lg opacity-50 animate-pulse"></div>
+            <div className="relative p-4 bg-linear-to-br from-blue-500 to-cyan-500 rounded-2xl shadow-2xl transform hover:scale-110 transition-transform duration-300">
               <Users className="text-white" size={36} strokeWidth={2.5} />
             </div>
           </div>
           <div>
-            <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-900">
+            <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-gray-900 via-blue-800 to-indigo-900">
               Minhas Turmas
             </h1>
             <p className="text-gray-600 mt-2 text-lg">Gerencie suas turmas e interaja com colegas e professores</p>
@@ -170,8 +170,8 @@ export default function ManagementClasses() {
               className="bg-white rounded-3xl p-7 shadow-xl border-2 border-gray-100 hover:shadow-2xl hover:border-blue-200 transition-all duration-300 hover:-translate-y-2 cursor-pointer group animate-slideUp"
             >
               <div className="flex items-start justify-between mb-5">
-                <div className={`p-4 bg-gradient-to-br ${stat.corFundo} rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                  <Icon className={`bg-gradient-to-br ${stat.cor} bg-clip-text text-transparent`} size={28} strokeWidth={2.5} />
+                <div className={`p-4 bg-linear-to-br ${stat.corFundo} rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                  <Icon className={`bg-linear-to-br ${stat.cor} bg-clip-text text-transparent`} size={28} strokeWidth={2.5} />
                 </div>
               </div>
               <div className="text-4xl font-black text-gray-900 mb-2 group-hover:scale-105 transition-transform">{stat.valor}</div>
@@ -194,7 +194,7 @@ export default function ManagementClasses() {
               placeholder="Buscar turmas ou professores..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-14 pr-5 py-4 bg-gradient-to-r from-gray-50 to-blue-50 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-300 focus:border-blue-400 transition-all duration-300 text-gray-900 font-medium placeholder:text-gray-400"
+              className="w-full pl-14 pr-5 py-4 bg-linear-to-r from-gray-50 to-blue-50 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-300 focus:border-blue-400 transition-all duration-300 text-gray-900 font-medium placeholder:text-gray-400"
             />
           </div>
 
@@ -208,7 +208,7 @@ export default function ManagementClasses() {
                 onClick={() => setFilterActive(filtro.id)}
                 className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-300 transform hover:scale-105 ${
                   filterActive === filtro.id
-                    ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-xl shadow-blue-300"
+                    ? "bg-linear-to-r from-blue-500 to-cyan-500 text-white shadow-xl shadow-blue-300"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-lg"
                 }`}
               >
@@ -228,7 +228,7 @@ export default function ManagementClasses() {
             className="bg-white rounded-3xl shadow-2xl border-2 border-gray-100 overflow-hidden hover:shadow-3xl hover:border-blue-200 transition-all duration-500 hover:-translate-y-3 cursor-pointer group animate-slideUp"
           >
             {/* Header do Card aprimorado */}
-            <div className={`bg-gradient-to-br ${turma.cor} p-8 relative overflow-hidden`}>
+            <div className={`bg-linear-to-br ${turma.cor} p-8 relative overflow-hidden`}>
               <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 group-hover:scale-150 transition-transform duration-700"></div>
               <div className="absolute bottom-0 left-0 w-32 h-32 bg-black/10 rounded-full -ml-16 -mb-16 group-hover:scale-150 transition-transform duration-700"></div>
               <div className="absolute top-1/2 left-1/2 w-20 h-20 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 group-hover:scale-[3] transition-transform duration-700"></div>
@@ -264,19 +264,19 @@ export default function ManagementClasses() {
             <div className="p-8">
               {/* Ações Rápidas aprimoradas */}
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <button className="flex flex-col items-center gap-3 p-5 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl hover:from-blue-100 hover:to-cyan-100 transition-all duration-300 group/btn transform hover:scale-105 hover:shadow-xl border-2 border-blue-100 hover:border-blue-200">
+                <button onClick={() => navigate(`/student/activities/view/${turma.id}`)}  className="flex flex-col items-center gap-3 p-5 bg-linear-to-br from-blue-50 to-cyan-50 rounded-2xl hover:from-blue-100 hover:to-cyan-100 transition-all duration-300 group/btn transform hover:scale-105 hover:shadow-xl border-2 border-blue-100 hover:border-blue-200">
                   <MessageSquare className="text-blue-600 group-hover/btn:scale-110 transition-transform duration-300" size={26} strokeWidth={2.5} />
                   <span className="text-sm font-bold text-blue-700">Atividades</span>
                 </button>
                 
-                <button onClick={() => navigate(`/student/materials/view/${turma.id}`)} className="flex flex-col items-center gap-3 p-5 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl hover:from-green-100 hover:to-emerald-100 transition-all duration-300 group/btn transform hover:scale-105 hover:shadow-xl border-2 border-green-100 hover:border-green-200">
+                <button onClick={() => navigate(`/student/materials/view/${turma.id}`)} className="flex flex-col items-center gap-3 p-5 bg-linear-to-br from-green-50 to-emerald-50 rounded-2xl hover:from-green-100 hover:to-emerald-100 transition-all duration-300 group/btn transform hover:scale-105 hover:shadow-xl border-2 border-green-100 hover:border-green-200">
                   <FileText className="text-green-600 group-hover/btn:scale-110 transition-transform duration-300" size={26} strokeWidth={2.5} />
                   <span className="text-sm font-bold text-green-700">Material</span>
                 </button>
               </div>
 
               {/* Botão Principal aprimorado */}
-              <button className={`w-full bg-gradient-to-r ${turma.cor} text-white py-4 rounded-2xl font-black text-base hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-3 group/main shadow-xl`}>
+              <button className={`w-full bg-linear-to-r ${turma.cor} text-white py-4 rounded-2xl font-black text-base hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-3 group/main shadow-xl`}>
                 Acessar Turma
                 <ChevronRight size={20} strokeWidth={3} className="group-hover/main:translate-x-2 transition-transform duration-300" />
               </button>
@@ -288,7 +288,7 @@ export default function ManagementClasses() {
       {/* Mensagem quando não há resultados aprimorada */}
       {turmasFiltradas.length === 0 && (
         <div className="bg-white rounded-3xl p-16 shadow-2xl border-2 border-gray-100 text-center animate-fadeIn">
-          <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
+          <div className="w-24 h-24 bg-linear-to-br from-gray-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
             <Search className="text-gray-400" size={40} strokeWidth={2} />
           </div>
           <h3 className="text-2xl font-bold text-gray-900 mb-3">Nenhuma turma encontrada</h3>

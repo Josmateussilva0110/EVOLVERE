@@ -66,4 +66,6 @@ router.get("/form/view/:id", formController.view)
  */
 router.delete("/form/:id", formController.delete)
 
+router.get("/form/class/:class_id", formController.getFormByClassId)
+
 module.exports = router
