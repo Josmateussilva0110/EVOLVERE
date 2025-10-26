@@ -229,6 +229,28 @@ class FormController {
         }
     }
 
+    async getFormByClassId(request, response) {
+        try {
+            const { class_id } = request.params
+            if (!validator.isInt(class_id + '', { min: 1 })) {
+                return response.status(422).json({ success: false, message: "Turma invalida." });
+            }
+            const classExist = await Class.classExist(class_id)
+            if(!classExist) {
+                return response.status(404).json({status: false, message: "Nenhuma turma encontrada."})
+            }
+
+            const form = await Form.getForm(class_id)
+            if(!form) {
+                return response.status(404).json({status: false, message: "Nenhum form encontrado."})
+            }
+
+            return response.status(200).json({status: true, form})
+        } catch(err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
 }
 
 module.exports = new FormController()

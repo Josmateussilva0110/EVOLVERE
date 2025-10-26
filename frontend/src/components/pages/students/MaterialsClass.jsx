@@ -172,7 +172,7 @@ export default function MaterialsClass() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-8 pb-20">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-8 pb-20">
       {/* Header com animação */}
       <div className="mb-8 animate-fadeIn">
         {/* Botão Voltar */}
@@ -190,13 +190,13 @@ export default function MaterialsClass() {
 
         <div className="flex items-center gap-4 mb-4">
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-green-400 to-emerald-400 rounded-2xl blur-lg opacity-50 animate-pulse"></div>
-            <div className="relative p-4 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl shadow-2xl transform hover:scale-110 transition-transform duration-300">
+            <div className="absolute inset-0 bg-linear-to-br from-green-400 to-emerald-400 rounded-2xl blur-lg opacity-50 animate-pulse"></div>
+            <div className="relative p-4 bg-linear-to-br from-green-500 to-emerald-500 rounded-2xl shadow-2xl transform hover:scale-110 transition-transform duration-300">
               <Folder className="text-white" size={36} strokeWidth={2.5} />
             </div>
           </div>
           <div>
-            <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-green-800 to-emerald-900">
+            <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-gray-900 via-green-800 to-emerald-900">
               Turma {materials.length > 0 ? materials[0].class_name : "Carregando..."}
             </h1>
             <p className="text-gray-600 mt-2 text-lg">Acesse e baixe todos os materiais das suas disciplinas</p>
@@ -212,7 +212,7 @@ export default function MaterialsClass() {
           hover:-translate-y-2 cursor-pointer group animate-slideUp"
         >
           <div className="flex items-start justify-between mb-5">
-            <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-linear-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center">
               <Archive size={28} strokeWidth={2.5} className="text-white" />
             </div>
           </div>
@@ -260,7 +260,7 @@ export default function MaterialsClass() {
                 onClick={() => setFilterActive(filtro.id)}
                 className={`flex-1 md:flex-none px-6 py-3.5 rounded-2xl font-bold text-sm transition-all duration-300 transform hover:scale-105 whitespace-nowrap ${
                   filterActive === filtro.id
-                    ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-300/50"
+                    ? "bg-linear-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-300/50"
                     : "bg-gray-50 text-gray-700 hover:bg-gray-100 border-2 border-gray-200 hover:border-gray-300"
                 }`}
               >
@@ -281,7 +281,7 @@ export default function MaterialsClass() {
               className="bg-white rounded-3xl shadow-xl border-2 border-gray-100 overflow-hidden hover:shadow-2xl hover:border-green-200 transition-all duration-500 hover:-translate-y-2 cursor-pointer group animate-slideUp"
             >
               {/* Header do Card */}
-              <div className={`bg-gradient-to-br ${material.cor} p-6 relative overflow-hidden`}>
+              <div className={`bg-linear-to-br ${material.cor} p-6 relative overflow-hidden`}>
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700"></div>
                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full -ml-12 -mb-12 group-hover:scale-150 transition-transform duration-700"></div>
                 
@@ -318,7 +318,7 @@ export default function MaterialsClass() {
                   <a
                     href={`${import.meta.env.VITE_BASE_URL}/${material.archive}?download=true`}
                     download
-                    className={`flex-1 bg-gradient-to-r ${material.cor} text-white py-3 rounded-2xl font-bold hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 group/btn`}
+                    className={`flex-1 bg-linear-to-r ${material.cor} text-white py-3 rounded-2xl font-bold hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 group/btn`}
                   >
                     <Download size={18} strokeWidth={2.5} className="group-hover/btn:animate-bounce" />
                     Baixar
@@ -334,7 +334,7 @@ export default function MaterialsClass() {
       {/* Mensagem quando não há resultados */}
       {materiaisFiltrados.length === 0 && (
         <div className="bg-white rounded-3xl p-16 shadow-2xl border-2 border-gray-100 text-center animate-fadeIn">
-          <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-green-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
+          <div className="w-24 h-24 bg-linear-to-br from-gray-100 to-green-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
             <Search className="text-gray-400" size={40} strokeWidth={2} />
           </div>
           <h3 className="text-2xl font-bold text-gray-900 mb-3">Nenhum material encontrado</h3>

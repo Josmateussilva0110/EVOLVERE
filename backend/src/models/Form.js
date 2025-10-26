@@ -277,6 +277,29 @@ class Form {
         }
     }
 
+    async getForm(class_id) {
+        try {
+             const result = await knex.raw(`
+                select
+                    f.id, 
+                    f.title,
+                    f.class_id,
+                    f.subject_id,
+                    f.deadline,
+                    c.name
+                from form f
+                inner join classes c
+                    on c.id = f.class_id
+                where f.class_id = ?
+                `, [class_id])
+            const rows = result.rows
+            return rows.length > 0 ? rows : undefined
+        } catch(err) {
+            console.error("Erro ao buscar simulados:", err);
+            return undefined;
+        }
+    }
+
 
 }
 

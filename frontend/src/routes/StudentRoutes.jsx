@@ -8,6 +8,7 @@ import ManagementActivity from "../components/pages/students/ManagementActivity"
 import ManagementPerformace from "../components/pages/students/ManagementPerformance"
 import ManagementMedals from "../components/pages/students/ManagementMedals"
 import MaterialsClass from "../components/pages/students/MaterialsClass"
+import ActivitySimulated from "../components/pages/students/ActivitySimulated"
 
 
 /**
@@ -75,6 +76,8 @@ export default function StudentRoutes() {
        * @element ManagementActivity
        */}
       <Route path="activities/view" element={<ManagementActivity />} />
+
+      <Route path="activities/view/:class_id" element={<ActivitySimulated />} />
 
       {/**
        * Página de acompanhamento do desempenho acadêmico do aluno.
