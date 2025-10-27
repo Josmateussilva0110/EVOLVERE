@@ -168,13 +168,13 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-blue-950 via-indigo-950 to-blue-900">
+    <div className="flex h-screen bg-linear-to-br from-blue-950 via-indigo-950 to-blue-900">
       {/* Sidebar */}
       <aside className="w-64 bg-blue-950 flex flex-col shadow-2xl">
         {/* Logo */}
         <div className="flex items-center justify-center py-6 border-b border-blue-800">
           <div className="relative">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-2xl flex items-center justify-center transform rotate-12 shadow-lg shadow-blue-500/50">
+            <div className="w-16 h-16 bg-linear-to-br from-blue-400 to-cyan-400 rounded-2xl flex items-center justify-center transform rotate-12 shadow-lg shadow-blue-500/50">
 
               {requestUser?.photo ? (
                   <Image
@@ -200,7 +200,7 @@ export default function Dashboard() {
                 onClick={() => handleNavigation(item.id)} // 🔹 Chama a navegação
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${
                   activeSection === item.id
-                    ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 scale-105"
+                    ? "bg-linear-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 scale-105"
                     : "text-blue-200 hover:bg-blue-900/50 hover:text-white hover:translate-x-1"
                 }`}
               >
@@ -224,7 +224,7 @@ export default function Dashboard() {
 
         {/* Logout */}
         <div className="p-3 border-t border-blue-800">
-          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all font-medium text-sm hover:scale-105">
+          <button onClick={() => logout()} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all font-medium text-sm hover:scale-105">
             <LogOut size={20} />
             <span>Logout</span>
           </button>
@@ -232,13 +232,13 @@ export default function Dashboard() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto bg-gradient-to-br from-gray-50 to-blue-50">
+      <main className="flex-1 overflow-y-auto bg-linear-to-br from-gray-50 to-blue-50">
         {/* Header */}
         <header className="bg-white/80 backdrop-blur-xl border-b border-gray-200 px-8 py-6 shadow-sm">
             <div className="flex justify-between items-center">
               <div>
                 <h2 className="text-3xl font-bold text-gray-900 mb-1">
-                  Bem vindo, <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">{requestUser?.username}</span>
+                  Bem vindo, <span className="bg-linear-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">{requestUser?.username}</span>
                 </h2>
                 <p className="text-gray-600">Continue sua jornada de aprendizado hoje! 🚀</p>
               </div>
@@ -247,7 +247,7 @@ export default function Dashboard() {
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => { setShowClassModal(true); }}
-                  className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md hover:opacity-95 transition-all"
+                  className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-linear-to-r from-blue-600 to-cyan-600 text-white shadow-md hover:opacity-95 transition-all"
                   aria-label="Acessar Turma Atual"
                 >
                   <GraduationCap size={16} />
@@ -300,7 +300,7 @@ export default function Dashboard() {
           </button>
           <button
             onClick={handleEnterClass}
-            className="px-5 py-2.5 rounded-lg font-semibold text-sm bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md hover:opacity-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-5 py-2.5 rounded-lg font-semibold text-sm bg-linear-to-r from-blue-600 to-cyan-600 text-white shadow-md hover:opacity-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={isJoining}
           >
             {isJoining ? "Entrando..." : "Entrar"}
@@ -315,7 +315,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all hover:-translate-y-1">
               <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl">
+                <div className="p-3 bg-linear-to-br from-blue-100 to-blue-200 rounded-xl">
                   <FileText className="text-blue-600" size={24} />
                 </div>
                 <div>
@@ -335,7 +335,7 @@ export default function Dashboard() {
 
             <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all hover:-translate-y-1">
               <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl">
+                <div className="p-3 bg-linear-to-br from-orange-100 to-orange-200 rounded-xl">
                   <ClipboardList className="text-orange-600" size={24} />
                 </div>
                 <div>
@@ -362,7 +362,7 @@ export default function Dashboard() {
                 <h3 className="text-2xl font-bold text-gray-900">Atividades Pendentes</h3>
               </div>
               <div className="space-y-4">
-                <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl p-5 border-l-4 border-red-500 hover:shadow-md transition-all cursor-pointer group">
+                <div className="bg-linear-to-r from-red-50 to-orange-50 rounded-xl p-5 border-l-4 border-red-500 hover:shadow-md transition-all cursor-pointer group">
                   <div className="flex items-start justify-between">
                     <div className="flex gap-4">
                       <div className="p-3 bg-white rounded-lg shadow-sm">
@@ -386,7 +386,7 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl p-5 border-l-4 border-amber-500 hover:shadow-md transition-all cursor-pointer group">
+                <div className="bg-linear-to-r from-amber-50 to-yellow-50 rounded-xl p-5 border-l-4 border-amber-500 hover:shadow-md transition-all cursor-pointer group">
                   <div className="flex items-start justify-between">
                     <div className="flex gap-4">
                       <div className="p-3 bg-white rounded-lg shadow-sm">
@@ -418,9 +418,9 @@ export default function Dashboard() {
             <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
               <h3 className="text-2xl font-bold text-gray-900 mb-6">Atualizações Recentes</h3>
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl hover:shadow-md transition-all cursor-pointer group border border-blue-100">
+                <div className="flex items-center justify-between p-4 bg-linear-to-r from-blue-50 to-cyan-50 rounded-xl hover:shadow-md transition-all cursor-pointer group border border-blue-100">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-md">
+                    <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-md">
                       <Folder className="text-white" size={22} />
                     </div>
                     <div>
@@ -431,9 +431,9 @@ export default function Dashboard() {
                   <ChevronRight className="text-gray-400 group-hover:translate-x-2 group-hover:text-blue-600 transition-all" size={24} />
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl hover:shadow-md transition-all cursor-pointer group border border-green-100">
+                <div className="flex items-center justify-between p-4 bg-linear-to-r from-green-50 to-emerald-50 rounded-xl hover:shadow-md transition-all cursor-pointer group border border-green-100">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-md">
+                    <div className="w-12 h-12 bg-linear-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-md">
                       <BookOpen className="text-white" size={22} />
                     </div>
                     <div>
@@ -446,7 +446,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-amber-400 via-yellow-500 to-orange-500 rounded-2xl p-6 shadow-xl flex flex-col justify-between text-white relative overflow-hidden">
+            <div className="bg-linear-to-br from-amber-400 via-yellow-500 to-orange-500 rounded-2xl p-6 shadow-xl flex flex-col justify-between text-white relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-12 -mt-12"></div>
               <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-8 -mb-8"></div>
               <div className="relative">

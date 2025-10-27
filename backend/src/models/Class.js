@@ -354,7 +354,12 @@ class Class {
                     cs.student_id,
                     cs.class_id,
                     c.name as class_name,
-                    u.username as teacher_name
+                    u.username as teacher_name,
+                    (
+                        select count(*) 
+                        from class_student cs2 
+                        where cs2.class_id = cs.class_id
+                    ) as total_students
                 from class_student cs
                 inner join classes c
                     on c.id = cs.class_id
@@ -396,6 +401,28 @@ class Class {
             return false
         }
     }
+
+    async kpi(user_id) {
+        try {
+            const result = await knex.raw(`
+                select 
+                    (select count(*) 
+                    from class_student cs 
+                    where cs.student_id = ?) as total_classes,
+                    (select count(*) 
+                    from form f 
+                    inner join class_student cs2 on cs2.class_id = f.class_id
+                    where cs2.student_id = ?) as total_simulated
+            `, [user_id, user_id]);
+
+            const row = result.rows[0];
+            return row || { total_classes: 0, total_simulated: 0 };
+        } catch (err) {
+            console.error("Erro ao buscar kpi de turmas:", err);
+            return undefined;
+        }
+    }
+
 }
 
 module.exports = new Class();
