@@ -178,5 +178,7 @@ router.get('/classes/students/:class_id', classController.getStudent)
  */
 router.get('/classes/student/:student_id', classController.getClasses)
 
+
+router.get('/classes/kpi/:user_id', classController.getKpi)
 module.exports = router;
 

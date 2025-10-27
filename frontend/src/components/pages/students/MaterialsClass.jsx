@@ -82,6 +82,7 @@ export default function MaterialsClass() {
   const navigate = useNavigate()
   const { class_id } = useParams()
   const [materials, setMaterials] = useState([])
+  const [class_name, setClassName] = useState(null)
   const [total_materials, setTotalMaterials] = useState(0)
 
     const generateRandomColor = () => {
@@ -140,6 +141,7 @@ export default function MaterialsClass() {
 
         setMaterials(MaterialsWithColors);
         setTotalMaterials(total);
+        setClassName(response.data.class_name)
       }
     }
 
@@ -147,17 +149,6 @@ export default function MaterialsClass() {
   }, [class_id])
 
 
-
-  const estatisticas = [
-    {
-      label: "Total de Materiais",
-      valor: "24",
-      sublabel: "Arquivos disponíveis",
-      icon: FolderOpen,
-      cor: "from-blue-500 to-cyan-500",
-      corFundo: "from-blue-50 to-cyan-50"
-    },
-  ];
 
   const filtros = [
     { id: "todos", label: "Todos" },
@@ -197,7 +188,7 @@ export default function MaterialsClass() {
           </div>
           <div>
             <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-gray-900 via-green-800 to-emerald-900">
-              Turma {materials.length > 0 ? materials[0].class_name : "Carregando..."}
+              Turma {class_name ? class_name : "Carregando..."}
             </h1>
             <p className="text-gray-600 mt-2 text-lg">Acesse e baixe todos os materiais das suas disciplinas</p>
           </div>

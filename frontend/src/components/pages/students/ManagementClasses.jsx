@@ -57,6 +57,7 @@ export default function ManagementClasses() {
   const navigate = useNavigate();
   const { user } = useContext(Context)
   const [classes, setClasses] = useState([])
+  const [kpi, setKpi] = useState(null)
 
   const generateRandomColor = () => {
     const colors = [
@@ -82,7 +83,7 @@ export default function ManagementClasses() {
             id: turma.class_id,
             nome: turma.class_name,
             professor: turma.teacher_name,
-            alunos: 0, // caso não venha no retorno
+            alunos: turma.total_students,
             notificacoes: 0,
             cor: randomColor.cor,
             corClara: randomColor.corClara,
@@ -93,6 +94,18 @@ export default function ManagementClasses() {
     }
     if (user?.id) fetchClasses();
   }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      async function fetchKpi() {
+        const response = await requestData(`/classes/kpi/${user.id}`, "GET", {}, true)
+        console.log('kpi: ', response)
+        if (response.success) setKpi(response.data.kpi)
+        else setKpi(null)
+      }
+      fetchKpi()
+    }
+  }, [user])
 
 
   const estatisticas = [
@@ -161,26 +174,53 @@ export default function ManagementClasses() {
 
       {/* Estatísticas com efeitos melhorados */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {estatisticas.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={index}
-              style={{ animationDelay: `${index * 100}ms` }}
-              className="bg-white rounded-3xl p-7 shadow-xl border-2 border-gray-100 hover:shadow-2xl hover:border-blue-200 transition-all duration-300 hover:-translate-y-2 cursor-pointer group animate-slideUp"
-            >
-              <div className="flex items-start justify-between mb-5">
-                <div className={`p-4 bg-linear-to-br ${stat.corFundo} rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                  <Icon className={`bg-linear-to-br ${stat.cor} bg-clip-text text-transparent`} size={28} strokeWidth={2.5} />
-                </div>
-              </div>
-              <div className="text-4xl font-black text-gray-900 mb-2 group-hover:scale-105 transition-transform">{stat.valor}</div>
-              <div className="text-sm font-bold text-gray-700 mb-1">{stat.label}</div>
-              <div className="text-xs text-gray-500">{stat.sublabel}</div>
+        {/* Total de Turmas */}
+        <div
+          className="bg-white rounded-3xl p-7 shadow-xl border-2 border-gray-100 
+          hover:shadow-2xl hover:border-blue-200 transition-all duration-300 
+          hover:-translate-y-2 cursor-pointer group animate-slideUp"
+        >
+          <div className="flex items-start justify-between mb-5">
+            <div className="p-4 bg-linear-to-br from-blue-50 to-cyan-50 rounded-2xl shadow-lg">
+              <Users
+                className="text-blue-600"        // <- cor sólida
+                size={28}
+                strokeWidth={2.5}
+              />
             </div>
-          );
-        })}
+          </div>
+          <div className="text-4xl font-black text-gray-900 mb-2 group-hover:scale-105 transition-transform">
+            {kpi?.total_classes || 0}
+          </div>
+          <div className="text-sm font-bold text-gray-700 mb-1">Turmas Ativas</div>
+          <div className="text-xs text-gray-500">Este semestre</div>
+        </div>
+
+        {/* Total de Simulados */}
+        <div
+          className="bg-white rounded-3xl p-7 shadow-xl border-2 border-gray-100 
+          hover:shadow-2xl hover:border-pink-200 transition-all duration-300 
+          hover:-translate-y-2 cursor-pointer group animate-slideUp"
+          style={{ animationDelay: "100ms" }}
+        >
+          <div className="flex items-start justify-between mb-5">
+            {/* Total de Simulados */}
+            <div className="p-4 bg-linear-to-br from-purple-50 to-pink-50 rounded-2xl shadow-lg">
+              <FileText
+                className="text-pink-600"        // <- cor sólida
+                size={28}
+                strokeWidth={2.5}
+              />
+            </div>
+          </div>
+          <div className="text-4xl font-black text-gray-900 mb-2 group-hover:scale-105 transition-transform">
+            {kpi?.total_simulated || 0}
+          </div>
+          <div className="text-sm font-bold text-gray-700 mb-1">Atividades</div>
+          <div className="text-xs text-gray-500">Enviadas</div>
+        </div>
       </div>
+
 
       {/* Filtros e Busca aprimorados */}
       <div className="bg-white rounded-3xl p-7 shadow-xl border-2 border-gray-100 mb-8 hover:shadow-2xl transition-all duration-300">

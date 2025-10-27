@@ -117,7 +117,7 @@ class Form {
      * @example
      * const forms = await Form.getFormByUser(5)
      */
-    async getFormByUser(created_by) {
+    async getFormByUser(class_id) {
         try {
             const result = await knex.raw(`
                 SELECT
@@ -149,10 +149,10 @@ class Form {
                     ) AS questions
                 FROM form f
                 INNER JOIN questions q ON q.form_id = f.id
-                WHERE f.created_by = ?
+                WHERE f.class_id = ?
                 GROUP BY f.id
                 ORDER BY f.updated_at DESC;
-            `, [created_by])
+            `, [class_id])
 
             const rows = result.rows
             return rows.length > 0 ? rows : undefined

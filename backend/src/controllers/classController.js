@@ -472,6 +472,23 @@ class ClassController {
         }
     }
 
+    async getKpi(request, response) {
+        try {
+            const { user_id } = request.params
+            if (!validator.isInt(user_id + '', { min: 1 })) {
+                return res.status(422).json({ success: false, message: "Usuário invalido." });
+            }
+            const kpi = await Class.kpi(user_id)
+            if(!kpi) {
+                return response.status(404).json({ status: false, message: "Nenhum dado encontrado." })
+            }
+
+            return response.status(200).json({status: true, kpi})
+        } catch(err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
 }
 
-module.exports = new ClassController();
+module.exports = new ClassController()

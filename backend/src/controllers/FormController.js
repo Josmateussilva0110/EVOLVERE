@@ -120,12 +120,7 @@ class FormController {
                 return response.status(404).json({ status: false, message: "Nenhuma disciplina encontrada." })
             }
 
-            const class_id = await Class.getIdClassBySubject(subject_id.id)
-            if(!class_id) {
-                return response.status(404).json({ status: false, message: "Nenhuma classe encontrada." })
-            }
-
-            return response.status(200).json({ status: true, subject_id, class_id })
+            return response.status(200).json({ status: true, subject_id })
         } catch(err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
