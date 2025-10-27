@@ -5,6 +5,7 @@ import requestData from "../../../utils/requestApi"
 import { useNavigate } from "react-router-dom"
 import useFlashMessage from "../../../hooks/useFlashMessage"
 import DateTimePicker from "../../form/DatePicker";
+import { useParams } from "react-router-dom";
 
 /**
  * AutoResizeTextarea
@@ -82,7 +83,7 @@ export default function CreateQuiz() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const { user } = useContext(Context);
-  const [classId, setClassId] = useState(null);
+  const { class_id } = useParams()
   const [subjectId, setSubjectId] = useState(null);
   const { setFlashMessage } = useFlashMessage();
   const navigate = useNavigate()
@@ -104,7 +105,6 @@ export default function CreateQuiz() {
     async function fetchRelations() {
       const response = await requestData(`/form/relations/${user.id}`, "GET", {}, true);
       if (response.success) {
-        setClassId(response.data.class_id.id);
         setSubjectId(response.data.subject_id.id);
       }
     }
@@ -198,6 +198,8 @@ export default function CreateQuiz() {
     setQuestions(updated);
   };
 
+
+  console.log('subject_id: ', subjectId)
   /** Submit handler */
   async function handleSubmit(e) {
     e.preventDefault();
@@ -205,7 +207,7 @@ export default function CreateQuiz() {
     const data = {
       title,
       description,
-      class_id: classId,
+      class_id: class_id,
       subject_id: subjectId,
       created_by: user.id,
       questions,
@@ -215,7 +217,7 @@ export default function CreateQuiz() {
     const response = await requestData("/form/publish", "POST", data, true);
     if (response.success) {
       setFlashMessage(response.data.message, "success");
-      navigate(`/teacher/class/view/${classId}`)
+      navigate(`/teacher/class/view/${class_id}`)
     } else {
       setFlashMessage(response.message, "error");
     }

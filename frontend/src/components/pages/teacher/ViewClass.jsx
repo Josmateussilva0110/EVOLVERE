@@ -158,7 +158,7 @@ export default function ViewClass() {
 
     useEffect(() => {
         async function fetchForm() {
-            const response = await requestData(`/form/${user.id}`, 'GET', {}, true)
+            const response = await requestData(`/form/${id}`, 'GET', {}, true)
             console.log('form: ',response)
 
             if (response && response.success) {
@@ -289,7 +289,7 @@ export default function ViewClass() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white p-4 sm:p-6 lg:p-8">
+        <div className="min-h-screen bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 text-white p-4 sm:p-6 lg:p-8">
             <div className="w-full max-w-7xl mx-auto">
                 {/* Botão Voltar */}
                 <button
@@ -313,15 +313,15 @@ export default function ViewClass() {
                             Gerar Convite
                         </button>
                         <button
-                            className="px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 transition-colors shadow-lg shadow-yellow-400/20"
+                            className="px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 transition-colors shadow-lg shadow-yellow-400/20"
                             onClick={() => navigate(`/teacher/material/register/${id}`, { state: { origin: "class" } })}
                         >
                             <PlusCircle className="w-4 h-4 text-blue-700" />
                             Cadastrar Material
                         </button>
                         <button
-                            onClick={() => navigate('/teacher/simulated/register')}
-                            className="px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 transition-colors shadow-lg shadow-yellow-400/20"
+                            onClick={() => navigate(`/teacher/simulated/register/${id}`)}
+                            className="px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 transition-colors shadow-lg shadow-yellow-400/20"
                         >
                             <PlusCircle className="w-4 h-4 text-blue-700" />
                             Cadastrar Simulado
@@ -338,7 +338,7 @@ export default function ViewClass() {
                         icon={<Users className="w-6 h-6 text-blue-400" />}
                         delay={100}
                     >
-                        <ul className="space-y-2 flex-grow">
+                        <ul className="space-y-2 grow">
                             {students && students.length > 0 ? (
                                 getPageData(students, pageAlunos).map((aluno) => (
                                     <li
@@ -374,7 +374,7 @@ export default function ViewClass() {
                         icon={<FileText className="w-6 h-6 text-blue-400" />}
                         delay={200}
                     >
-                        <ul className="space-y-2 flex-grow">
+                        <ul className="space-y-2 grow">
                             {form.length > 0 ? (
                                 getPageData(form, pageSimulados).map((f) => (
                                     <li
@@ -420,7 +420,7 @@ export default function ViewClass() {
                         icon={<BookOpen className="w-6 h-6 text-blue-400" />}
                         delay={300}
                     >
-                        <ul className="space-y-2 flex-grow">
+                        <ul className="space-y-2 grow">
                             {materials.length > 0 && materials.some(m => m.archive) ? (
                                 getPageData(materials.filter(m => m.archive), pageMateriais).map((mat) => (
                                     <li
@@ -428,7 +428,7 @@ export default function ViewClass() {
                                         className="flex justify-between items-center p-2.5 rounded-md hover:bg-white/5 transition-colors group"
                                     >
                                         {/* Linha com título e tipo alinhados */}
-                                        <div className="flex flex-col flex-grow">
+                                        <div className="flex flex-col grow">
                                             <div className="flex items-center justify-between gap-3">
                                                 <button
                                                     onClick={() => openMaterial(mat)}

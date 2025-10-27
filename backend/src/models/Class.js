@@ -201,35 +201,6 @@ class Class {
     } 
 
 
-    /**
-     * Busca o ID da turma associada a uma determinada disciplina.
-     * 
-     * @async
-     * @function getIdClassBySubject
-     * @param {number} subject_id - ID da disciplina.
-     * @returns {Promise<Object|null>} Retorna um objeto contendo o ID da turma encontrada, 
-     * ou `null` caso não exista nenhuma turma associada.
-     * 
-     * @throws {Error} Registra no console caso ocorra erro na consulta.
-     * 
-     * @example
-     * const classData = await getIdClassBySubject(12);
-     * if (classData) console.log(classData.id);
-     */
-    async getIdClassBySubject(subject_id) {
-        try {
-            const result = await knex
-            .select("id")
-            .from("classes")
-            .where({ subject_id })
-            .first() 
-
-            return result ? result: null
-        } catch (err) {
-            console.error("Erro ao buscar id da classe:", err)
-            return null
-        }
-    }
 
 
     /**

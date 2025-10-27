@@ -172,6 +172,7 @@ class MaterialController {
             }
             
             const materials = await Material.getMaterialsByIdClass(class_id)
+            console.log(materials)
             if(!materials) {
                 return response.status(404).json({status: false, message: "Nenhum material encontrado."})
             }
