@@ -49,8 +49,6 @@ class FormController {
     async publish(request, response) {
         try {
             const {title, description, created_by, subject_id, class_id, questions, deadline} = request.body
-            console.log(subject_id)
-            console.log(class_id)
             const error = MaterialFieldValidator.validate({ title, description, created_by, subject_id, class_id })
             if (error) return response.status(422).json({ status: false, message: error })
 
