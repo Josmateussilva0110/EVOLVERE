@@ -63,7 +63,7 @@ export default function TeacherRoutes() {
        * @route /teacher/simulated/register
        * @element RegisterSimulated
        */}
-      <Route path="simulated/register" element={<RegisterSimulated />} />
+      <Route path="simulated/register/:class_id" element={<RegisterSimulated />} />
 
       {/**
        * Página de listagem dos simulados criados pelo professor.

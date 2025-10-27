@@ -4,6 +4,8 @@ import { Context } from "../../../context/UserContext"
 import requestData from "../../../utils/requestApi"
 import { useNavigate } from "react-router-dom"
 import useFlashMessage from "../../../hooks/useFlashMessage"
+import DateTimePicker from "../../form/DatePicker";
+import { useParams } from "react-router-dom";
 
 /**
  * AutoResizeTextarea
@@ -77,10 +79,11 @@ const questionTypes = [
  * @returns {JSX.Element} Formulário completo para criar e publicar um simulado.
  */
 export default function CreateQuiz() {
+  const [deadline, setDeadline] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const { user } = useContext(Context);
-  const [classId, setClassId] = useState(null);
+  const { class_id } = useParams()
   const [subjectId, setSubjectId] = useState(null);
   const { setFlashMessage } = useFlashMessage();
   const navigate = useNavigate()
@@ -102,7 +105,6 @@ export default function CreateQuiz() {
     async function fetchRelations() {
       const response = await requestData(`/form/relations/${user.id}`, "GET", {}, true);
       if (response.success) {
-        setClassId(response.data.class_id.id);
         setSubjectId(response.data.subject_id.id);
       }
     }
@@ -196,6 +198,8 @@ export default function CreateQuiz() {
     setQuestions(updated);
   };
 
+
+  console.log('subject_id: ', subjectId)
   /** Submit handler */
   async function handleSubmit(e) {
     e.preventDefault();
@@ -203,23 +207,24 @@ export default function CreateQuiz() {
     const data = {
       title,
       description,
-      class_id: classId,
+      class_id: class_id,
       subject_id: subjectId,
       created_by: user.id,
       questions,
+      deadline,
     };
 
     const response = await requestData("/form/publish", "POST", data, true);
     if (response.success) {
       setFlashMessage(response.data.message, "success");
-      navigate(`/teacher/class/view/${classId}`)
+      navigate(`/teacher/class/view/${class_id}`)
     } else {
       setFlashMessage(response.message, "error");
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white font-sans">
+    <div className="min-h-screen bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 text-white font-sans">
       <div className="max-w-4xl mx-auto py-12 px-4">
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* General Information */}
@@ -247,6 +252,9 @@ export default function CreateQuiz() {
                   onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
+
+              <DateTimePicker deadline={deadline} setDeadline={setDeadline} />
+
             </div>
           </div>
 
@@ -408,7 +416,7 @@ export default function CreateQuiz() {
               <button
                 type="button"
                 onClick={addQuestion}
-                className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-slate-900 font-bold py-3 px-6 rounded-lg transition-all shadow-lg flex items-center gap-2 border border-yellow-300/30"
+                className="bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-slate-900 font-bold py-3 px-6 rounded-lg transition-all shadow-lg flex items-center gap-2 border border-yellow-300/30"
               >
                 <Plus className="w-5 h-5 text-blue-700" /> Adicionar nova questão
               </button>
@@ -425,7 +433,7 @@ export default function CreateQuiz() {
             </button>
             <button
               type="submit"
-              className="px-8 py-3 rounded-lg text-sm font-extrabold text-slate-900 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 transition-all hover:scale-105 shadow-lg shadow-yellow-400/30 flex items-center gap-2"
+              className="px-8 py-3 rounded-lg text-sm font-extrabold text-slate-900 bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 transition-all hover:scale-105 shadow-lg shadow-yellow-400/30 flex items-center gap-2"
             >
               <Check className="w-5 h-5 text-blue-700" /> Publicar formulário
             </button>
