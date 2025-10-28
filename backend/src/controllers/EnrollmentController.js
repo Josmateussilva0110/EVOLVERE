@@ -2,6 +2,7 @@
 
 const knex = require("../database/connection");
 const Invite = require("../models/Invite");
+const Class = require("../models/Class")
 
 class EnrollmentController {
 
@@ -92,10 +93,13 @@ class EnrollmentController {
 
             // ... (busca nome da turma e retorna sucesso) ...
             const classInfo = await knex('classes').where({ id: classId }).first('name');
+            const course = await Class.getCourseByClass(classId)
             res.status(200).json({
                 success: true,
                 message: `Matrícula na turma ${classInfo?.name || ''} realizada com sucesso!`,
-                data: { classId: classId, className: classInfo?.name }
+                classId: classId, 
+                className: classInfo?.name, 
+                course
             });
 
         } catch (error) {

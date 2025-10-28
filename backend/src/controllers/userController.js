@@ -1,6 +1,8 @@
 const User = require("../models/User")
+const Course = require("../models/Course")
 const bcrypt = require("bcrypt")
 const UserFieldValidator = require("../utils/userValidator")
+const validator = require('validator')
 const path = require("path")
 const fs = require("fs")
 require('dotenv').config({ path: '../.env' })
@@ -691,6 +693,46 @@ class UserController {
             return response.status(200).json({ status: true, message: "Usuário atualizado com sucesso." })
         } catch (err) {
             console.error("Erro ao editar usuário:", err)
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
+    async joinCourse(request, response) {
+        try {
+            const {user_id, course_id} = request.body
+            if (!validator.isInt(user_id + '', { min: 1 })) {
+                return res.status(422).json({ success: false, message: "Usuário invalido." });
+            }
+
+            if (!validator.isInt(course_id + '', { min: 1 })) {
+                return res.status(422).json({ success: false, message: "Curso invalido." });
+            }
+
+
+            const user = await User.findById(user_id)
+            if(!user) {
+                return response.status(404).json({ status: false, message: "Usuário não encontrado." })
+            }
+
+            const courseExist = Course.courseExists(course_id)
+            if(!courseExist) {
+                return response.status(404).json({ status: false, message: "Curso não encontrado." })
+            }
+
+            const data = {
+                course_id
+            }
+
+            const valid = await User.updateCourse(user_id, data)
+            if(!valid) {
+                return response.status(500).json({ status: false, message: "Erro ao vincular curso ao aluno." })
+            }
+
+            return response.status(200).json({ status: true, message: "Aluno vinculado ao curso com sucesso." })
+
+
+        } catch(err) {
+            console.error("Erro ao vincular usuário ao curso:", err)
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }

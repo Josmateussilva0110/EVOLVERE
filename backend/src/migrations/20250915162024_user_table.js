@@ -25,7 +25,6 @@ const up = function (knex) {
     table.string('photo',200).nullable()
     table.integer('status').defaultTo(1)
     table.timestamps(true, true)
-    table.string('institution', 255).nullable();
     table.integer('course_id').unsigned().nullable();
   
   })

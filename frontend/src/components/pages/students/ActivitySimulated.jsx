@@ -51,6 +51,7 @@ export default function ActivitySimulated() {
   const [filterActive, setFilterActive] = useState("todas");
   const [form, setForm] = useState([]);
   const { class_id } = useParams();
+  const [class_name, setClassName] = useState(null)
 
   // 🔹 Função para definir cor e ícone baseados no tipo/nome
   function getVisualAttributes(title) {
@@ -89,9 +90,10 @@ export default function ActivitySimulated() {
     async function fetchForm() {
       const response = await requestData(`/form/class/${class_id}`, "GET", {}, true);
       console.log(response);
+      setClassName(response.data.class_name)
 
-      if (response.success && response.data?.form) {
-        const data = response.data.form.map((item) => {
+      if (response.success && response.data?.forms) {
+        const data = response.data.forms.map((item) => {
           const { cor, corClara, icon } = getVisualAttributes(item.title);
 
           // Calcular dias restantes
@@ -159,6 +161,8 @@ export default function ActivitySimulated() {
     { id: "simulados", label: "Simulados" },
   ];
 
+  console.log(class_name)
+
   return (
   <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-8 pb-20">
     {/* Header */}
@@ -184,7 +188,7 @@ export default function ActivitySimulated() {
         </div>
         <div>
           <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-linear-to-br from-gray-900 via-blue-800 to-indigo-900">
-            Simulados Turma {form.length > 0 ? form[0].disciplina : "Carregando..."}
+            Simulados Turma {class_name ? class_name : "Carregando..."}
           </h1>
           <p className="text-gray-600 mt-2 text-lg">
             Acompanhe suas tarefas e prazos de entrega

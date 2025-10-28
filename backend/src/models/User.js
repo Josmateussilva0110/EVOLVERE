@@ -414,6 +414,20 @@ class User {
         }
     }
 
+
+    async updateCourse(id, data) {
+        try {
+            data.updated_at = knex.fn.now()
+            const result = await knex("users")
+                .where({ id })
+                .update({ ...data })
+            return result > 0
+        } catch (err) {
+            console.error("Erro ao atualizar curso do usuário:", err)
+            return false
+        }
+    }
+
     
 }
 
