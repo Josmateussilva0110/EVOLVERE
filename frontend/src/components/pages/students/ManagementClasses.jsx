@@ -314,12 +314,6 @@ export default function ManagementClasses() {
                   <span className="text-sm font-bold text-green-700">Material</span>
                 </button>
               </div>
-
-              {/* Botão Principal aprimorado */}
-              <button className={`w-full bg-linear-to-r ${turma.cor} text-white py-4 rounded-2xl font-black text-base hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-3 group/main shadow-xl`}>
-                Acessar Turma
-                <ChevronRight size={20} strokeWidth={3} className="group-hover/main:translate-x-2 transition-transform duration-300" />
-              </button>
             </div>
           </div>
         ))}

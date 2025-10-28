@@ -207,5 +207,7 @@ router.get("/user/expire/session/:id", userController.findSessionById)
  */
 router.patch("/user/edit/:id", userController.edit)
 
+router.patch("/user/join/course", userController.joinCourse)
+
 
 module.exports = router

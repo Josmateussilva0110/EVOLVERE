@@ -143,6 +143,16 @@ class Course {
             return undefined
         }
     }
+
+    async courseExists(id) {
+        try {
+            const result = await knex.select("*").where({id}).table("course_valid")
+            return result.length > 0
+        } catch(err) {
+            console.error('Erro ao verificar curso:', err)
+            return false
+        }
+    }
 }
 
 module.exports = new Course()

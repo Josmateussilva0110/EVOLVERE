@@ -394,6 +394,25 @@ class Class {
         }
     }
 
+    async getCourseByClass(class_id) {
+        try {
+            const result = await knex.raw(`
+                select 
+                   cv.id,
+                   cv.name
+                from classes c
+                inner join course_valid cv
+                    on cv.id = c.course_id
+                where c.id = ?
+            `, [class_id])
+            const rows = result.rows
+            return rows.length > 0 ? rows[0] : undefined
+        } catch(err) {
+            console.error("Erro ao buscar curso da turma: ", err);
+            return undefined
+        }
+    } 
+
 }
 
 module.exports = new Class();
