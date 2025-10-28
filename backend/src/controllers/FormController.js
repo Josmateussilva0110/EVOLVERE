@@ -240,7 +240,7 @@ class FormController {
                 return response.status(404).json({status: false, message: "Nenhum form encontrado."})
             }
 
-            return response.status(200).json({status: true, form})
+            return response.status(200).json({status: true, ...form})
         } catch(err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
