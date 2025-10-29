@@ -48,7 +48,7 @@ class FormController {
      */
     async publish(request, response) {
         try {
-            const {title, description, created_by, subject_id, class_id, questions, deadline} = request.body
+            const {title, description, created_by, subject_id, class_id, questions, totalDuration, deadline} = request.body
             const error = MaterialFieldValidator.validate({ title, description, created_by, subject_id, class_id })
             if (error) return response.status(422).json({ status: false, message: error })
 
@@ -61,7 +61,7 @@ class FormController {
                 return response.status(422).json({ status: false, message: "Título de formulário já existe." })
             }
 
-            const data = { title, description, created_by, subject_id, class_id, deadline }
+            const data = { title, description, created_by, subject_id, class_id, totalDuration, deadline }
             const savedForm = await Form.save(data)
 
             if(!savedForm.success) {

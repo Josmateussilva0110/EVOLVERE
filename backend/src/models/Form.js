@@ -127,6 +127,7 @@ class Form {
                     f.subject_id,
                     f.class_id,
                     SUM(COALESCE(q.points, 0)) AS total_points,
+                    f."totalDuration",
                     f.updated_at,
                     json_agg(
                         json_build_object(
@@ -192,6 +193,7 @@ class Form {
                     f.subject_id,
                     f.class_id,
                     SUM(COALESCE(q.points, 0)) AS total_points,
+                    f."totalDuration",
                     f.updated_at,
                     json_agg(
                     json_build_object(
