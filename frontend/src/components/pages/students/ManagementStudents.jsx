@@ -161,27 +161,6 @@ export default function Dashboard() {
     }
   };
 
-  async function handleJoinCourse() {
-    try {
-      const data = {
-        user_id: user.id,
-        course_id,
-      }
-      const response = await requestData("/user/join/course", "PATCH", data, true);
-      if (response.success) {
-        setFlashMessage(response.data.message, "success");
-      } else {
-        setFlashMessage(response.message || "Erro ao vincular ao curso.", "error");
-      }
-    } catch (err) {
-      console.error(err);
-      setFlashMessage("Erro ao se vincular ao curso.", "error");
-    } finally {
-      setShowConfirmModal(false);
-      navigate("/student/classes/view");
-    }              
-  }
-
 
   const menuItems = [
     { icon: BookOpen, label: "Meu curso", id: "curso" },
@@ -333,36 +312,6 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-
-
-        {showConfirmModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="relative w-full max-w-md bg-white rounded-2xl p-6 shadow-xl z-10 animate-fade-in-up">
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Vincular ao Curso?</h3>
-              <p className="text-gray-600 mb-6">
-                Deseja se vincular ao curso completo para ter acesso a todas as matérias relacionadas?
-              </p>
-
-              <div className="flex justify-end gap-3">
-                <button
-                  onClick={() => {
-                    setShowConfirmModal(false);
-                    navigate("/student/classes/view");
-                  }}
-                  className="px-5 py-2.5 rounded-lg font-semibold text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all"
-                >
-                  Apenas esta turma
-                </button>
-                <button onClick={handleJoinCourse}
-                  className="px-5 py-2.5 rounded-lg font-semibold text-sm bg-linear-to-r from-blue-600 to-cyan-600 text-white hover:opacity-95 transition-all"
-                >
-                  Sim, vincular ao curso
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
 
         <div className="p-8">
           {/* Stats Cards */}
