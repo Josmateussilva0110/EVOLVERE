@@ -63,6 +63,7 @@ export default function Dashboard() {
   const inputRef = useRef(null);
   const { setFlashMessage } = useFlashMessage();
   const [requestUser, setRequestUser] = useState(null)
+  const [course_id, setCourse] = useState(null)
 
   useEffect(() => {
     if (showClassModal) {
