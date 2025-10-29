@@ -1,10 +1,10 @@
 /**
- * @file ViewForm.jsx
+ * @file ResponseForm.jsx
  * @description Página de visualização de um formulário/simulado específico.
  * Exibe título, descrição, data de atualização, pontuação total,
  * perguntas e alternativas (destacando as corretas).
  * 
- * @module pages/Form/ViewForm
+ * @module pages/Form/ResponseForm
  */
 
 import { useEffect, useState } from "react";
@@ -14,14 +14,14 @@ import requestData from "../../../utils/requestApi";
 import formatDateRequests from "../../../utils/formatDateRequests";
 
 /**
- * @component ViewForm
+ * @component ResponseForm
  * @description Exibe os detalhes completos de um formulário específico, incluindo
  * suas perguntas, opções e informações gerais. 
  * 
  * O componente busca os dados do formulário com base no ID passado pela URL
  * e renderiza as informações com destaque visual para as alternativas corretas.
  */
-export default function ViewForm() {
+export default function ResponseForm() {
   /** 
    * @constant {string} id - ID do formulário obtido dos parâmetros da URL.
    */
@@ -97,41 +97,28 @@ export default function ViewForm() {
    * @description Renderiza o conteúdo principal do formulário:
    * título, descrição, data, pontuação e lista de perguntas com alternativas.
    */
-  return (
-    <div className="min-h-screen bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 px-4 sm:px-6 py-10">
+    return (
+    <div className="min-h-screen bg-linear-to-br from-white via-blue-50 to-cyan-50 px-6 py-10">
       <div className="max-w-5xl mx-auto">
         {/* Cabeçalho */}
-        <div className="flex items-center gap-3 mb-8">
+        <div className="flex items-center gap-4 mb-10">
           <button
             onClick={() => navigate(-1)}
-            className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition"
+            className="p-2.5 rounded-2xl bg-linear-to-r from-blue-500 to-cyan-400 text-white shadow-md hover:shadow-lg hover:from-blue-600 hover:to-cyan-500 transition-all"
           >
-            <ArrowLeft className="w-5 h-5 text-white" />
+            <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white">
-              {form.title}
-            </h1>
-            <p className="text-slate-300 text-sm mt-1">
+            <h1 className="text-3xl font-bold text-gray-800">{form.title}</h1>
+            <p className="text-gray-500 mt-1">
               {form.description || "Sem descrição"}
             </p>
           </div>
         </div>
 
         {/* Informações gerais */}
-        <div className="flex flex-wrap items-center gap-3 text-slate-400 text-sm mb-6">
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4" />
-            <span>
-              Última atualização:{" "}
-              <span className="text-slate-200 font-medium">
-                {formatDateRequests(form.updated_at)}
-              </span>
-            </span>
-          </div>
-
-          {/* Pontuação total */}
-          <div className="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-sm font-semibold">
+        <div className="flex flex-wrap items-center gap-3 mb-6 text-gray-600 text-sm">
+          <div className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 font-semibold border border-emerald-300">
             Total: {form.total_points ?? 0}{" "}
             {form.total_points === 1 ? "ponto" : "pontos"}
           </div>
@@ -142,21 +129,21 @@ export default function ViewForm() {
           {form.questions?.map((q, idx) => (
             <div
               key={q.id}
-              className="bg-white/5 border border-white/10 rounded-2xl p-5 shadow-lg"
+              className="bg-white border border-gray-200 rounded-3xl p-6 shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-4">
                 {/* Número da pergunta */}
-                <div className="bg-indigo-500/20 text-indigo-300 w-8 h-8 flex items-center justify-center rounded-full font-semibold">
+                <div className="bg-linear-to-r from-blue-500 to-cyan-400 text-white w-9 h-9 flex items-center justify-center rounded-full font-semibold shadow-md">
                   {idx + 1}
                 </div>
 
                 <div className="flex-1">
-                  {/* Texto da pergunta e pontos */}
+                  {/* Título e pontuação */}
                   <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
-                    <h3 className="text-white font-medium text-lg flex-1 wrap-break-word">
+                    <h3 className="text-gray-800 font-semibold text-lg leading-snug">
                       {q.text}
                     </h3>
-                    <div className="self-start px-3 py-1 rounded-full bg-yellow-400/20 text-yellow-300 text-sm font-semibold border border-yellow-300/40 whitespace-nowrap">
+                    <div className="self-start px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 font-semibold text-sm border border-yellow-300 whitespace-nowrap">
                       {q.points ?? 0} {q.points === 1 ? "ponto" : "pontos"}
                     </div>
                   </div>
@@ -166,18 +153,24 @@ export default function ViewForm() {
                     {q.options?.map((opt) => (
                       <li
                         key={opt.id}
-                        className={`flex items-center gap-3 px-3 py-2 rounded-lg border ${
+                        className={`flex items-center gap-3 px-3 py-2 rounded-xl border transition-all ${
                           opt.correct
-                            ? "border-emerald-500/40 bg-emerald-500/10"
-                            : "border-white/10 bg-white/5"
+                            ? "border-emerald-400 bg-emerald-50"
+                            : "border-gray-200 bg-gray-50 hover:bg-gray-100"
                         }`}
                       >
                         {opt.correct ? (
-                          <CheckCircle className="w-4 h-4 text-emerald-400" />
+                          <CheckCircle className="w-4 h-4 text-emerald-500" />
                         ) : (
-                          <XCircle className="w-4 h-4 text-slate-400" />
+                          <XCircle className="w-4 h-4 text-gray-400" />
                         )}
-                        <span className="text-slate-200 text-sm">
+                        <span
+                          className={`text-sm ${
+                            opt.correct
+                              ? "text-emerald-800 font-medium"
+                              : "text-gray-700"
+                          }`}
+                        >
                           {opt.text}
                         </span>
                       </li>
@@ -190,10 +183,10 @@ export default function ViewForm() {
         </div>
 
         {/* Botão Voltar */}
-        <div className="flex justify-end mt-8">
+        <div className="flex justify-end mt-10">
           <button
             onClick={() => navigate(-1)}
-            className="px-5 py-2.5 bg-indigo-600 rounded-xl text-white hover:bg-indigo-500 transition"
+            className="px-6 py-2.5 bg-linear-to-r from-blue-500 to-cyan-400 text-white font-medium rounded-2xl hover:from-blue-600 hover:to-cyan-500 shadow-md hover:shadow-lg transition-all"
           >
             Voltar
           </button>

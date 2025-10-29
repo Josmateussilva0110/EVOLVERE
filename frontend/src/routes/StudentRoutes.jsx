@@ -9,6 +9,7 @@ import ManagementPerformace from "../components/pages/students/ManagementPerform
 import ManagementMedals from "../components/pages/students/ManagementMedals"
 import MaterialsClass from "../components/pages/students/MaterialsClass"
 import ActivitySimulated from "../components/pages/students/ActivitySimulated"
+import ResponseForm from "../components/pages/students/ResponseForm"
 
 
 /**
@@ -85,6 +86,8 @@ export default function StudentRoutes() {
        * @element ManagementPerformace
        */}
       <Route path="performance/view" element={<ManagementPerformace />} />
+
+      <Route path="simulated/view/:id" element={<ResponseForm />} />
 
       {/**
        * Página de visualização das medalhas e conquistas do aluno.
