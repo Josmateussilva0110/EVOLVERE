@@ -58,7 +58,6 @@ async accountExists(id, role) {
             const user = await knex('users')
                 .select('id')
                 .where({ id: id })
-                .whereNotNull('institution')   
                 .whereNotNull('course_id')    
                 .first();
 
