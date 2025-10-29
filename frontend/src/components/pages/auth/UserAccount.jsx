@@ -163,7 +163,6 @@ function UserAccount() {
           navigate('/');
         } else {
           navigate('/await/approval');
-          await logout();
         }
       }
     } else {

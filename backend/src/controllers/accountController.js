@@ -74,7 +74,6 @@ class AccountController {
 
                 
                 const updated = await User.updateUser(id, { 
-                    institution: institution,
                     course_id: course_valid.id 
                 });
 
