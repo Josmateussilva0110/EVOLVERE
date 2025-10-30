@@ -52,6 +52,7 @@ export default function ActivitySimulated() {
   const [form, setForm] = useState([]);
   const { class_id } = useParams();
   const [class_name, setClassName] = useState(null)
+  const navigate = useNavigate()
 
   // 🔹 Função para definir cor e ícone baseados no tipo/nome
   function getVisualAttributes(title) {
@@ -161,7 +162,6 @@ export default function ActivitySimulated() {
     { id: "simulados", label: "Simulados" },
   ];
 
-  console.log(class_name)
 
   return (
   <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-8 pb-20">
@@ -340,11 +340,13 @@ export default function ActivitySimulated() {
 
                   <div className="flex flex-col gap-3 lg:w-48">
                     <button
-                      className={`w-full bg-linear-to-br ${atividade.cor} text-white py-4 rounded-2xl font-black hover:scale-105 transition-all flex items-center justify-center gap-3`}
-                    >
-                      <Play size={20} strokeWidth={3} />
-                      Iniciar
-                    </button>
+                        onClick={() => navigate(`/student/simulated/view/${atividade.id}`)}
+                        className="w-full bg-linear-to-br from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white py-4 rounded-2xl font-black hover:scale-105 hover:shadow-2xl transition-all flex items-center justify-center gap-3"
+                      >
+                        <Play size={20} strokeWidth={3} />
+                        Iniciar
+                      </button>
+
 
                     <button className="w-full bg-gray-50 text-gray-700 py-3 rounded-2xl font-bold hover:bg-gray-100 border-2 border-gray-200 flex items-center justify-center gap-2">
                       <BookOpen size={18} strokeWidth={2.5} />

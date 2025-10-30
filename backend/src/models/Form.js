@@ -127,6 +127,7 @@ class Form {
                     f.subject_id,
                     f.class_id,
                     SUM(COALESCE(q.points, 0)) AS total_points,
+                    f."totalDuration",
                     f.updated_at,
                     json_agg(
                         json_build_object(
@@ -192,6 +193,7 @@ class Form {
                     f.subject_id,
                     f.class_id,
                     SUM(COALESCE(q.points, 0)) AS total_points,
+                    f."totalDuration",
                     f.updated_at,
                     json_agg(
                     json_build_object(
@@ -311,6 +313,31 @@ class Form {
         } catch(err) {
             console.error("Erro ao buscar simulados:", err);
             return undefined;
+        }
+    }
+
+    async saveAnswers(data) {
+        try {
+            const ids = await knex("answers_form").insert(data)
+            return { success: true, ids }
+        } catch (err) {
+            console.error("Erro ao cadastrar respostas de formulário:", err)
+            return { success: false }
+        }
+    }
+
+    async getClassIdByForm(id) {
+        try {
+            const result = await knex.select(["class_id"]).where({id}).table("form")
+            if(result.length > 0) {
+                return result[0]
+            }
+            else {
+                return undefined
+            }
+        } catch (err) {
+            console.error("Erro ao buscar id da turma: ", err)
+            return undefined
         }
     }
 

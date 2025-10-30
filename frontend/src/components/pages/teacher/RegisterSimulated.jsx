@@ -80,6 +80,8 @@ const questionTypes = [
  */
 export default function CreateQuiz() {
   const [deadline, setDeadline] = useState("");
+  const [hours, setHours] = useState('');
+  const [minutes, setMinutes] = useState('');
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const { user } = useContext(Context);
@@ -199,10 +201,10 @@ export default function CreateQuiz() {
   };
 
 
-  console.log('subject_id: ', subjectId)
   /** Submit handler */
   async function handleSubmit(e) {
     e.preventDefault();
+    const totalDuration = (parseInt(hours || 0) * 60) + parseInt(minutes || 0)
 
     const data = {
       title,
@@ -212,6 +214,7 @@ export default function CreateQuiz() {
       created_by: user.id,
       questions,
       deadline,
+      totalDuration
     };
 
     const response = await requestData("/form/publish", "POST", data, true);
@@ -251,6 +254,38 @@ export default function CreateQuiz() {
                   rows={3}
                   onChange={(e) => setDescription(e.target.value)}
                 />
+              </div>
+
+              {/* Tempo de simulado */}
+              <div>
+                <label className="block font-semibold text-slate-200 mb-2">Tempo de Simulado *</label>
+                <div className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <input
+                      type="number"
+                      min="0"
+                      className="w-full bg-transparent border border-white/10 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-400 outline-none transition text-white placeholder:text-slate-400"
+                      placeholder="Horas"
+                      value={hours}
+                      onChange={(e) => setHours(e.target.value)}
+                    />
+                  </div>
+                  <span className="text-slate-300 font-medium">:</span>
+                  <div className="flex-1">
+                    <input
+                      type="number"
+                      min="0"
+                      max="59"
+                      className="w-full bg-transparent border border-white/10 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-400 outline-none transition text-white placeholder:text-slate-400"
+                      placeholder="Minutos"
+                      value={minutes}
+                      onChange={(e) => setMinutes(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <p className="text-sm text-slate-400 mt-2">
+                  Defina quanto tempo o aluno terá para concluir o simulado.
+                </p>
               </div>
 
               <DateTimePicker deadline={deadline} setDeadline={setDeadline} />

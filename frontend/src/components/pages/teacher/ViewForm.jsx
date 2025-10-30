@@ -55,7 +55,6 @@ export default function ViewForm() {
      */
     async function fetchForm() {
       const response = await requestData(`/form/view/${id}`, "GET", {}, true);
-      console.log(response);
 
       if (response.success) {
         setForm(response.data.form[0]);
@@ -99,7 +98,7 @@ export default function ViewForm() {
    * título, descrição, data, pontuação e lista de perguntas com alternativas.
    */
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-4 sm:px-6 py-10">
+    <div className="min-h-screen bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 px-4 sm:px-6 py-10">
       <div className="max-w-5xl mx-auto">
         {/* Cabeçalho */}
         <div className="flex items-center gap-3 mb-8">
@@ -154,7 +153,7 @@ export default function ViewForm() {
                 <div className="flex-1">
                   {/* Texto da pergunta e pontos */}
                   <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
-                    <h3 className="text-white font-medium text-lg flex-1 break-words">
+                    <h3 className="text-white font-medium text-lg flex-1 wrap-break-word">
                       {q.text}
                     </h3>
                     <div className="self-start px-3 py-1 rounded-full bg-yellow-400/20 text-yellow-300 text-sm font-semibold border border-yellow-300/40 whitespace-nowrap">
