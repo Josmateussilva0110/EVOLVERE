@@ -130,5 +130,18 @@ router.get('/material/class/:class_id', materialController.getMaterialsClass)
 
 
 
+/**
+ * @route GET /materials/student
+ * @group Materials - Operações relacionadas a materiais didáticos
+ * @summary Retorna todos os materiais de todas as turmas do aluno logado (sessão).
+ * @returns {Object} 200 - Sucesso: Retorna estatísticas e lista de materiais.
+ * @returns {boolean} 200.status - Indica se a requisição foi bem-sucedida.
+ * @returns {Array} 200.stats - Lista de estatísticas (ex: total de materiais).
+ * @returns {Array} 200.materials - Lista de materiais de todas as turmas do aluno.
+ * @returns {Object} 401 - Não autorizado (aluno não logado).
+ * @returns {Object} 500 - Erro interno do servidor.
+ */
+router.get('/materials/student', materialController.getStudentMaterials);
+
 
 module.exports = router

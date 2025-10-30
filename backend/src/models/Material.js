@@ -99,56 +99,118 @@ class Material {
      * }
      */
     async getMaterialsByIdClass(class_id) {
-    try {
-        const classInfo = await knex
-        .select("id", "name")
-        .from("classes")
-        .where({ id: class_id })
-        .first();
+        try {
+            const classInfo = await knex
+            .select("id", "name")
+            .from("classes")
+            .where({ id: class_id })
+            .first();
 
-        if (!classInfo) {
-        return null;
+            if (!classInfo) {
+            return null;
+            }
+
+            // 2️⃣ Busca os materiais da turma
+            const materialsResult = await knex.raw(`
+            select 
+                m.id,
+                m.title,
+                case 
+                    when m.type = 1 then 'PDF'
+                    when m.type = 2 then 'DOC'
+                    when m.type = 3 then 'PPT'
+                    else 'Desconhecido'
+                end as type_file,
+                m.archive,
+                m.updated_at
+            from materials m
+            where m.class_id = ? and m.origin = 2
+            order by m.updated_at desc
+            `, [class_id]);
+
+            const materials = materialsResult.rows;
+
+            const countResult = await knex.raw(`
+            select count(*) as total_materials
+            from materials
+            where class_id = ? and origin = 2
+            `, [class_id]);
+
+            const total = Number(countResult.rows[0]?.total_materials || 0);
+
+            return {
+            class_name: classInfo.name,
+            total_materials: total,
+            materials
+            };
+
+        } catch (err) {
+            console.error("Erro ao buscar materiais da turma:", err);
+            return false;
         }
-
-        // 2️⃣ Busca os materiais da turma
-        const materialsResult = await knex.raw(`
-        select 
-            m.id,
-            m.title,
-            case 
-                when m.type = 1 then 'PDF'
-                when m.type = 2 then 'DOC'
-                when m.type = 3 then 'PPT'
-                else 'Desconhecido'
-            end as type_file,
-            m.archive,
-            m.updated_at
-        from materials m
-        where m.class_id = ? and m.origin = 2
-        order by m.updated_at desc
-        `, [class_id]);
-
-        const materials = materialsResult.rows;
-
-        const countResult = await knex.raw(`
-        select count(*) as total_materials
-        from materials
-        where class_id = ? and origin = 2
-        `, [class_id]);
-
-        const total = Number(countResult.rows[0]?.total_materials || 0);
-
-        return {
-        class_name: classInfo.name,
-        total_materials: total,
-        materials
-        };
-
-    } catch (err) {
-        console.error("Erro ao buscar materiais da turma:", err);
-        return false;
     }
+
+/**
+     * Retorna todos os materiais de todas as turmas em que um aluno está matriculado.
+     * * @async
+     * @function getAllMaterialsForStudent
+     * @param {number} student_id - ID do aluno.
+     * @returns {Promise<Array<Object>|undefined>} Lista de materiais formatada.
+     */
+    async getAllMaterialsForStudent(student_id) {
+        try {
+            const query = knex('materials as m')
+                // Junta com 'subjects' para pegar o nome da disciplina
+                .join('subjects as s', 's.id', 'm.subject_id')
+                .select(
+                    'm.id',
+                    'm.title',
+                    // Usa a mesma lógica CASE do seu getMaterialsByIdClass
+                    knex.raw(`
+                        CASE 
+                            WHEN m.type = 1 THEN 'PDF'
+                            WHEN m.type = 2 THEN 'DOC'
+                            WHEN m.type = 3 THEN 'PPT'
+                            ELSE 'Outro'
+                        END as type_file
+                    `),
+                    'm.archive', // O caminho do arquivo para download
+                    'm.updated_at',
+                    's.name as discipline_name'
+                )
+                // Filtra materiais que são da origem "turma"
+                .where('m.origin', 2)
+                // Onde o 'class_id' do material está na lista de turmas 
+                // em que o aluno (student_id) está matriculado
+                .whereIn('m.class_id', function() {
+                    this.select('cs.class_id')
+                        .from('class_student as cs')
+                        .where('cs.student_id', student_id);
+                })
+                .orderBy('m.updated_at', 'desc');
+
+            const result = await query;
+            
+            // Mapeia os dados para o formato que o frontend espera
+            const formattedResult = result.map(material => ({
+                id: material.id,
+                titulo: material.title,
+                tipo: material.type_file, // 'PDF', 'DOC', 'PPT', etc.
+                tamanho: "N/D", // A tabela 'materials' não tem tamanho.
+                data: material.updated_at,
+                disciplina: material.discipline_name,
+                archive: material.archive,
+                categoria: material.type_file.toLowerCase() // 'pdf', 'doc', etc.
+            }));
+
+            return formattedResult;
+
+        } catch (err) {
+            console.error("Erro ao buscar todos os materiais do aluno:", err);
+            return undefined;
+        }
     }
+
 
 
     
