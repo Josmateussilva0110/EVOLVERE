@@ -18,14 +18,10 @@ import {
   Clock,
   HardDrive
 } from "lucide-react";
-// 1. Importar hooks e utils
 import { useState, useEffect } from "react";
-// (Ajuste os caminhos se forem diferentes)
 import requestData from "../../../utils/requestApi"; 
 import formatDateRequests from "../../../utils/formatDateRequests"; 
 
-// 2. Função de ícone (movida para fora do componente)
-// (Baseada no seu mock data e no seu exemplo 'MaterialsClass.jsx')
 const getFileIcon = (type) => {
   const tipoLower = type?.toLowerCase();
   switch (tipoLower) {
@@ -86,14 +82,7 @@ useEffect(() => {
       setIsLoading(true);
 
       try {
-        const response = await requestData(
-          '/materials/student', 
-          "GET",   
-          {},      
-          true     
-        );
-        
-
+        const response = await requestData('/materials/student','GET',{},true);
         if (response.success === true && response.data && response.data.status === true && response.data.data) {
           
           // Acessamos o 'data' aninhado
@@ -134,9 +123,7 @@ useEffect(() => {
     };
 
     fetchData();
-  }, []); // <-- Dependência vazia, pois os filtros são feitos no frontend
-
-  // 10. Filtros (O array de filtros permanece estático)
+  }, []); 
   const filtros = [
     { id: "todos", label: "Todos" },
     { id: "pdf", label: "PDFs" },

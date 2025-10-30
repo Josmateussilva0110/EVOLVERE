@@ -58,13 +58,7 @@ useEffect(() => {
       });
 
       try {
-        const response = await requestData(
-          `/dashboard/student?${queryParams}`, 
-          "GET",   
-          {},      
-          true     
-        );
-
+        const response = await requestData(`/dashboard/student?${queryParams}`,"GET",{},true);
         if (response.success === true && response.data) {
           console.log("Dados recebidos e formatados com sucesso.");
               
