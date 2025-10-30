@@ -489,6 +489,70 @@ class ClassController {
         }
     }
 
+    /**
+     * @summary Obtém os dados consolidados para o dashboard do ALUNO LOGADO.
+     * @description Pega o ID do aluno da SESSÃO e combina a lista de
+     * turmas (com filtros) e os KPIs.
+     * @param {import("express").Request} req - O objeto da requisição Express.
+     * @param {import("express").Response} res - O objeto da resposta Express.
+     * @returns {Promise<void>}
+     * @example
+     * // GET /api/dashboard/student?search=ED1&semestre=3º%20Semestre
+     * // (O backend pega o ID do aluno da sessão)
+     */
+    async getStudentDashboard(req, res) {
+        try {
+            // === MUDANÇA PRINCIPAL ===
+            // Pega o ID do usuário diretamente da sessão.
+            const student_id = req.session.user.id;
+
+            // 1. Validar se o usuário está logado
+            if (!student_id) {
+                return res.status(401).json({ 
+                    status: false, 
+                    message: "Acesso não autorizado. Faça login novamente." 
+                });
+            }
+            // === FIM DA MUDANÇA ===
+
+            const { search, semestre } = req.query; // Filtros
+
+            // 2. Buscar as turmas filtradas (o model não muda)
+            const classes = await Class.getClassesForDashboard(Number(student_id), search, semestre);
+
+            // 3. Buscar os KPIs (o model não muda)
+            const kpi = await Class.kpi(Number(student_id));
+            
+            if (classes === undefined || !kpi) {
+                return res.status(500).json({ status: false, message: "Erro ao consultar dados do dashboard." });
+            }
+
+            // 4. Formatar os KPIs para o frontend
+            const stats = {
+                totalDisciplinas: kpi.total_classes || 0,
+                // TODO: O backend precisa calcular o progresso e a média real.
+                progresso: "76%", 
+                media: "8.0"
+            };
+
+            // 5. Enviar a resposta combinada
+            res.status(200).json({
+                status: true,
+                data: {
+                    stats: stats,
+                    disciplinas: classes 
+                }
+            });
+
+        } catch (error) {
+            console.error('Erro ao buscar dados do dashboard do aluno:', error);
+            res.status(500).json({ 
+                status: false, 
+                message: 'Erro interno do servidor.' 
+            });
+        }
+    }
+
 }
 
 module.exports = new ClassController()

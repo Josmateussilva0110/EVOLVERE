@@ -125,4 +125,7 @@ router.get('/user/coordinator/:id', accountController.getCoordinatorData)
  */
 router.get('/user/coordinator/kpi/:id', accountController.getKpis)
 
+
+
+
 module.exports = router
