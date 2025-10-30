@@ -7,11 +7,13 @@
  * @module pages/Form/ResponseForm
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle, XCircle, Clock } from "lucide-react";
 import requestData from "../../../utils/requestApi";
 import formatDateRequests from "../../../utils/formatDateRequests";
+import { Context } from "../../../context/UserContext"
+import useFlashMessage from "../../../hooks/useFlashMessage"
 
 /**
  * @component ResponseForm
@@ -28,6 +30,8 @@ export default function ResponseForm() {
     const { id } = useParams();
 
     const [timeLeft, setTimeLeft] = useState(0);
+
+    const { user } = useContext(Context)
 
 
     /**
@@ -46,24 +50,18 @@ export default function ResponseForm() {
     const [loading, setLoading] = useState(true);
 
 
+    const [answers, setAnswers] = useState({})
+
+    const { setFlashMessage } = useFlashMessage()
+
     function formatTime(seconds) {
         const h = Math.floor(seconds / 3600);
         const m = Math.floor((seconds % 3600) / 60);
         const s = seconds % 60;
-
-        const hh = String(h).padStart(2, "0");
-        const mm = String(m).padStart(2, "0");
-        const ss = String(s).padStart(2, "0");
-
-        return `${hh}:${mm}:${ss}`;
+        return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
     }
 
-
-    /**
-     * @function useEffect
-     * @description Efeito responsável por buscar os dados do formulário assim que
-     * o componente é montado ou o ID muda.
-     */
+    // Busca os dados do formulário
     useEffect(() => {
         async function fetchForm() {
             try {
@@ -71,10 +69,7 @@ export default function ResponseForm() {
                 if (response.success && response.data.form?.length) {
                     const formData = response.data.form[0];
                     setForm(formData);
-
-                    // totalDuration vem em minutos
-                    const totalSeconds = formData.totalDuration * 60;
-                    setTimeLeft(totalSeconds);
+                    setTimeLeft(formData.totalDuration * 60);
                 }
             } catch (err) {
                 console.error(err);
@@ -82,23 +77,45 @@ export default function ResponseForm() {
                 setLoading(false);
             }
         }
-
         fetchForm();
     }, [id]);
 
+    // Contagem regressiva do tempo
     useEffect(() => {
         if (timeLeft <= 0) return;
-
-        const timer = setInterval(() => {
-            setTimeLeft((prev) => Math.max(prev - 1, 0));
-        }, 1000);
-
+        const timer = setInterval(() => setTimeLeft((prev) => Math.max(prev - 1, 0)), 1000);
         return () => clearInterval(timer);
     }, [timeLeft]);
 
-    /**
-     * @description Renderiza uma tela de carregamento enquanto os dados são buscados.
-     */
+    // Atualiza a resposta do usuário
+    const handleSelect = (questionId, optionId) => {
+        setAnswers((prev) => ({
+            ...prev,
+            [questionId]: optionId,
+        }));
+    };
+
+    // Envia as respostas
+    async function handleSubmit() {
+        const payload = {
+            form_id: id,
+            user_id: user.id,
+            answers: Object.entries(answers).map(([question_id, option_id]) => ({
+                question_id: parseInt(question_id),
+                option_id,
+            })),
+        };
+
+        const response = await requestData('/form/answers', "POST", payload, true)
+        if(response.success) {
+            setFlashMessage(response.data.message, 'success')
+            navigate(`/student/activities/view/${response.data.class_id}`)
+        }
+        else {
+            setFlashMessage(response.message, 'error')
+        }
+    }
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
@@ -107,9 +124,6 @@ export default function ResponseForm() {
         );
     }
 
-    /**
-     * @description Renderiza uma tela de erro quando nenhum formulário é encontrado.
-     */
     if (!form) {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
@@ -124,10 +138,6 @@ export default function ResponseForm() {
         );
     }
 
-    /**
-     * @description Renderiza o conteúdo principal do formulário:
-     * título, descrição, data, pontuação e lista de perguntas com alternativas.
-     */
     return (
         <div className="min-h-screen bg-linear-to-br from-white via-blue-50 to-cyan-50 px-6 py-10">
             <div className="max-w-5xl mx-auto">
@@ -135,15 +145,13 @@ export default function ResponseForm() {
                 <div className="flex items-center gap-4 mb-10">
                     <button
                         onClick={() => navigate(-1)}
-                        className="p-2.5 rounded-2xl bg-linear-to-r from-blue-500 to-cyan-400 text-white shadow-md hover:shadow-lg hover:from-blue-600 hover:to-cyan-500 transition-all"
+                        className="p-2.5 rounded-2xl bg-linear-to-r from-blue-500 to-cyan-400 text-white shadow-md hover:shadow-lg transition-all"
                     >
                         <ArrowLeft className="w-5 h-5" />
                     </button>
                     <div>
                         <h1 className="text-3xl font-bold text-gray-800">{form.title}</h1>
-                        <p className="text-gray-500 mt-1">
-                            {form.description || "Sem descrição"}
-                        </p>
+                        <p className="text-gray-500 mt-1">{form.description || "Sem descrição"}</p>
                     </div>
                 </div>
 
@@ -160,7 +168,7 @@ export default function ResponseForm() {
                     </div>
                 </div>
 
-                {/* Lista de perguntas */}
+                {/* Perguntas */}
                 <div className="space-y-6">
                     {form.questions?.map((q, idx) => (
                         <div
@@ -183,43 +191,42 @@ export default function ResponseForm() {
                                     </div>
 
                                     <ul className="space-y-2">
-                                        {q.options?.map((opt) => (
-                                            <li
-                                                key={opt.id}
-                                                className={`flex items-center gap-3 px-3 py-2 rounded-xl border transition-all ${opt.correct
-                                                        ? "border-emerald-400 bg-emerald-50"
-                                                        : "border-gray-200 bg-gray-50 hover:bg-gray-100"
-                                                    }`}
-                                            >
-                                                {opt.correct ? (
-                                                    <CheckCircle className="w-4 h-4 text-emerald-500" />
-                                                ) : (
-                                                    <XCircle className="w-4 h-4 text-gray-400" />
-                                                )}
-                                                <span
-                                                    className={`text-sm ${opt.correct
-                                                            ? "text-emerald-800 font-medium"
-                                                            : "text-gray-700"
-                                                        }`}
+                                        {q.options?.map((opt) => {
+                                            const selected = answers[q.id] === opt.id;
+                                            return (
+                                                <li
+                                                    key={opt.id}
+                                                    onClick={() => handleSelect(q.id, opt.id)}
+                                                    className={`flex items-center gap-3 px-3 py-2 rounded-xl border cursor-pointer transition-all duration-200
+  hover:scale-[1.01] active:scale-[1.00]
+  ${selected ? "border-emerald-400 bg-emerald-50 text-emerald-800"
+                                                            : "border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-800"}`}
+
                                                 >
-                                                    {opt.text}
-                                                </span>
-                                            </li>
-                                        ))}
+                                                    {selected ? (
+                                                        <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0" />
+                                                    ) : (
+                                                        <div className="w-5 h-5 rounded-full border-2 border-gray-400 shrink-0" />
+                                                    )}
+                                                    <span className="text-sm font-medium">{opt.text}</span>
+                                                </li>
+                                            );
+                                        })}
                                     </ul>
+
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
 
-                {/* Botão Voltar */}
+                {/* Botão de envio */}
                 <div className="flex justify-end mt-10">
                     <button
-                        onClick={() => navigate(-1)}
+                        onClick={handleSubmit}
                         className="px-6 py-2.5 bg-linear-to-r from-blue-500 to-cyan-400 text-white font-medium rounded-2xl hover:from-blue-600 hover:to-cyan-500 shadow-md hover:shadow-lg transition-all"
                     >
-                        Voltar
+                        Enviar
                     </button>
                 </div>
             </div>

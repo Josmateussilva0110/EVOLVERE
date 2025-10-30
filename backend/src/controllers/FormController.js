@@ -246,6 +246,45 @@ class FormController {
         }
     }
 
+    async saveAnswers(request, response) {
+        try {
+            const {form_id, user_id, answers} = request.body
+            if (!validator.isInt(form_id + '', { min: 1 })) {
+                return response.status(422).json({ success: false, message: "Formulário invalido." });
+            }
+
+            if (!validator.isInt(user_id + '', { min: 1 })) {
+                return response.status(422).json({ success: false, message: "Usuário invalido." });
+            }
+
+            if (!Array.isArray(answers) || answers.length === 0) {
+                return response.status(422).json({ success: false, message: "Nenhuma resposta enviada." });
+            }
+
+            const formattedAnswers = answers.map(({ question_id, option_id }) => ({
+                form_id,
+                user_id,
+                question_id,
+                option_id,
+            }));
+
+            const classData = await Form.getClassIdByForm(form_id)
+            if(!classData) {
+                return response.status(404).json({ status: false, message: "Nenhuma turma encontrada." })
+            }
+
+            const { class_id } = classData
+
+            const valid = await Form.saveAnswers(formattedAnswers)
+            if(!valid) {
+                return response.status(500).json({ status: false, message: "Erro ao salvar respostas." })
+            }
+            return response.status(200).json({ status: true, message: "Respostas salvas com sucesso.", class_id })
+        } catch(err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
 }
 
 module.exports = new FormController()

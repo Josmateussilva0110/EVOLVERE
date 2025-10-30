@@ -68,4 +68,6 @@ router.delete("/form/:id", formController.delete)
 
 router.get("/form/class/:class_id", formController.getFormByClassId)
 
+router.post("/form/answers", formController.saveAnswers)
+
 module.exports = router

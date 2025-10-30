@@ -316,6 +316,31 @@ class Form {
         }
     }
 
+    async saveAnswers(data) {
+        try {
+            const ids = await knex("answers_form").insert(data)
+            return { success: true, ids }
+        } catch (err) {
+            console.error("Erro ao cadastrar respostas de formulário:", err)
+            return { success: false }
+        }
+    }
+
+    async getClassIdByForm(id) {
+        try {
+            const result = await knex.select(["class_id"]).where({id}).table("form")
+            if(result.length > 0) {
+                return result[0]
+            }
+            else {
+                return undefined
+            }
+        } catch (err) {
+            console.error("Erro ao buscar id da turma: ", err)
+            return undefined
+        }
+    }
+
 
 }
 
