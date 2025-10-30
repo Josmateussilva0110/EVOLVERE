@@ -9,6 +9,7 @@ const up = function (knex) {
     table.foreign('subject_id').references('id').inTable('subjects').onDelete('CASCADE').onUpdate('CASCADE')
     table.integer('class_id').notNullable()
     table.foreign('class_id').references('id').inTable('classes').onDelete('CASCADE').onUpdate('CASCADE')
+    table.integer('totalDuration').notNullable().defaultTo(0)
     table.datetime('deadline').notNullable()
     table.integer('status').defaultTo(1)
     table.timestamps(true, true)

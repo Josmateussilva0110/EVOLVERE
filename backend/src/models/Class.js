@@ -488,8 +488,6 @@ class Class {
         }
     }
 
-    
-
 
 }
 

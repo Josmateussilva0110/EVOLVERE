@@ -48,7 +48,7 @@ class FormController {
      */
     async publish(request, response) {
         try {
-            const {title, description, created_by, subject_id, class_id, questions, deadline} = request.body
+            const {title, description, created_by, subject_id, class_id, questions, totalDuration, deadline} = request.body
             const error = MaterialFieldValidator.validate({ title, description, created_by, subject_id, class_id })
             if (error) return response.status(422).json({ status: false, message: error })
 
@@ -61,7 +61,7 @@ class FormController {
                 return response.status(422).json({ status: false, message: "Título de formulário já existe." })
             }
 
-            const data = { title, description, created_by, subject_id, class_id, deadline }
+            const data = { title, description, created_by, subject_id, class_id, totalDuration, deadline }
             const savedForm = await Form.save(data)
 
             if(!savedForm.success) {
@@ -241,6 +241,45 @@ class FormController {
             }
 
             return response.status(200).json({status: true, ...form})
+        } catch(err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
+    async saveAnswers(request, response) {
+        try {
+            const {form_id, user_id, answers} = request.body
+            if (!validator.isInt(form_id + '', { min: 1 })) {
+                return response.status(422).json({ success: false, message: "Formulário invalido." });
+            }
+
+            if (!validator.isInt(user_id + '', { min: 1 })) {
+                return response.status(422).json({ success: false, message: "Usuário invalido." });
+            }
+
+            if (!Array.isArray(answers) || answers.length === 0) {
+                return response.status(422).json({ success: false, message: "Nenhuma resposta enviada." });
+            }
+
+            const formattedAnswers = answers.map(({ question_id, option_id }) => ({
+                form_id,
+                user_id,
+                question_id,
+                option_id,
+            }));
+
+            const classData = await Form.getClassIdByForm(form_id)
+            if(!classData) {
+                return response.status(404).json({ status: false, message: "Nenhuma turma encontrada." })
+            }
+
+            const { class_id } = classData
+
+            const valid = await Form.saveAnswers(formattedAnswers)
+            if(!valid) {
+                return response.status(500).json({ status: false, message: "Erro ao salvar respostas." })
+            }
+            return response.status(200).json({ status: true, message: "Respostas salvas com sucesso.", class_id })
         } catch(err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
