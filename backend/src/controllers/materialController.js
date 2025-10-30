@@ -184,6 +184,60 @@ class MaterialController {
         }
     }
 
+/**
+     * @summary Obtém todos os materiais de todas as turmas do aluno logado.
+     * @param {import("express").Request} req - O objeto da requisição Express.
+     * @param {import("express").Response} res - O objeto da resposta Express.
+     * @returns {Promise<void>}
+     * @example
+     * // GET /api/materials/student
+     */
+    async getStudentMaterials(req, res) {
+        try {
+            // Pega o ID do usuário diretamente da sessão.
+            const student_id = req.session.user.id;
+            if (!student_id) {
+                return res.status(401).json({ 
+                    status: false, 
+                    message: "Acesso não autorizado." 
+                });
+            }
+
+            // 1. Buscar os materiais usando o novo método do Model
+            const materials = await Material.getAllMaterialsForStudent(Number(student_id));
+            if (materials === undefined) {
+                return res.status(500).json({ status: false, message: "Erro ao consultar materiais." });
+            }
+
+            // 2. Formatar os KPIs (Estatísticas)
+            // (O frontend 'ManagementMaterials' só tem um card de estatística)
+            const stats = [{
+                label: "Total de Materiais",
+                valor: materials.length.toString(), // Conta o total de materiais
+                sublabel: "Arquivos disponíveis",
+                icon: "FolderOpen", // O frontend vai mapear isso para o ícone
+                cor: "from-blue-500 to-cyan-500",
+                corFundo: "from-blue-50 to-cyan-50"
+            }];
+
+            // 3. Enviar a resposta (no formato que o 'requestData' espera)
+            // (Note que este formato é diferente do que fizemos para o dashboard)
+            // (Este formato bate com o que o seu 'getMaterialsClass' retorna)
+            res.status(200).json({
+                status: true,
+                stats: stats,
+                materials: materials 
+            });
+
+        } catch (error) {
+            console.error('Erro ao buscar materiais do aluno:', error);
+            res.status(500).json({ 
+                status: false, 
+                message: 'Erro interno do servidor.' 
+            });
+        }
+    }
+
 }
 
 module.exports = new MaterialController()
