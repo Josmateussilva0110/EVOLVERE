@@ -413,6 +413,82 @@ class Class {
         }
     } 
 
+    /**
+     * Retorna todas as turmas de um aluno para o dashboard, com filtros.
+     * * @async
+     * @function getClassesForDashboard
+     * @param {number} student_id - ID do aluno.
+     * @param {string} [search] - Termo para buscar pelo NOME da disciplina (ex: "Estrutura de Dados").
+     * @param {string} [semestre] - Semestre para filtrar (ex: "3º Semestre").
+     * @returns {Promise<Array<Object>|undefined>} Lista de turmas formatada para o dashboard.
+     */
+    async getClassesForDashboard(student_id, search, semestre) {
+        try {
+            // Usando o Query Builder do Knex para facilitar os filtros
+            let query = knex('class_student as cs')
+                .join('classes as c', 'c.id', 'cs.class_id')
+                .join('subjects as s', 's.id', 'c.subject_id')
+                .join('users as u', 'u.id', 's.professional_id') // Pega o professor da disciplina
+                .where('cs.student_id', student_id)
+                .select(
+                    'cs.class_id',
+                    'c.name as class_name',
+                    'c.period as semestre', 
+                    
+                    // === CORREÇÃO 1 ===
+                    // Trocamos 's.code' por 's.name'.
+                    // O frontend usará o NOME da disciplina como o código/título.
+                    's.name as subject_code', 
+                    
+                    'u.username as teacher_name', 
+                    knex.raw('(select count(*) from class_student cs2 where cs2.class_id = cs.class_id) as total_students')
+                )
+                
+                // === CORREÇÃO 2 ===
+                // Trocamos 's.code' por 's.name'
+                .orderBy('s.name', 'asc'); 
+
+            // Aplica o filtro de busca (pelo NOME da disciplina)
+            if (search) {
+                // 'ilike' ignora maiúsculas/minúsculas
+                
+                // === CORREÇÃO 3 ===
+                // Trocamos 's.code' por 's.name'
+                query = query.where('s.name', 'ilike', `%${search}%`);
+            }
+
+            // Aplica o filtro de semestre
+            if (semestre && semestre !== "Semestre" && semestre !== "Todos") {
+                query = query.where('c.period', semestre);
+            }
+
+            const result = await query;
+            
+            // Mapeia os dados para o formato exato que o frontend espera
+            const formattedResult = result.map(cls => ({
+                // 'codigo' para o frontend (agora é o nome da disciplina)
+                codigo: cls.subject_code, 
+                
+                nome: `Professor(es): ${cls.teacher_name}`, 
+                alunos: `Qnt. alunos matriculados: ${cls.total_students}`, 
+                semestre: cls.semestre, 
+                
+                // TODO: Adicionar lógica de status (Concluída/Em processo)
+                status: "Em processo", 
+                statusColor: "text-red-600",
+                bgColor: "bg-red-50",
+                borderColor: "border-red-200",
+            }));
+
+            return formattedResult.length > 0 ? formattedResult : [];
+
+        } catch (err) {
+            console.error("Erro ao buscar turmas para o dashboard:", err);
+            return undefined;
+        }
+    }
+
+
 }
 
 module.exports = new Class();
