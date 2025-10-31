@@ -301,12 +301,15 @@ class FormController {
                 return response.status(422).json({ success: false, message: "Nenhuma resposta enviada." })
             }
 
-            const formattedAnswers = answers.map(({ question_id, option_id }) => ({
+
+            const formattedAnswers = answers.map(({ question_id, option_id, open_answer }) => ({
                 form_id,
                 user_id,
                 question_id,
-                option_id,
+                option_id: option_id || null,
+                open_answer: open_answer || null,
             }))
+
 
             const classData = await Form.getClassIdByForm(form_id)
             if (!classData) {

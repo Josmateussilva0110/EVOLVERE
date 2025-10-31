@@ -7,7 +7,7 @@ const up = function (knex) {
     table.foreign('form_id').references('id').inTable('form').onDelete('CASCADE').onUpdate('CASCADE')
     table.integer('question_id').notNullable()
     table.foreign('question_id').references('id').inTable('questions').onDelete('CASCADE').onUpdate('CASCADE')
-    table.integer('option_id').notNullable()
+    table.integer('option_id').nullable()
     table.foreign('option_id').references('id').inTable('options').onDelete('CASCADE').onUpdate('CASCADE')
     table.timestamps(true, true)
   })

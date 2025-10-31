@@ -100,21 +100,26 @@ export default function ResponseForm() {
         const payload = {
             form_id: id,
             user_id: user.id,
-            answers: Object.entries(answers).map(([question_id, option_id]) => ({
-                question_id: parseInt(question_id),
-                option_id,
-            })),
+            answers: Object.entries(answers).map(([question_id, value]) => {
+            // Se o valor for número => é uma opção
+            if (typeof value === "number" || /^\d+$/.test(value)) {
+                return { question_id: parseInt(question_id), option_id: value };
+            }
+            // Caso contrário => é uma resposta aberta
+            return { question_id: parseInt(question_id), open_answer: value };
+            }),
         };
 
-        const response = await requestData('/form/answers', "POST", payload, true)
-        if(response.success) {
-            setFlashMessage(response.data.message, 'success')
-            navigate(`/student/activities/view/${response.data.class_id}`)
-        }
-        else {
-            setFlashMessage(response.message, 'error')
+
+        const response = await requestData('/form/answers', "POST", payload, true);
+        if (response.success) {
+            setFlashMessage(response.data.message, 'success');
+            navigate(`/student/activities/view/${response.data.class_id}`);
+        } else {
+            setFlashMessage(response.message, 'error');
         }
     }
+
 
     if (loading) {
         return (
@@ -190,6 +195,22 @@ export default function ResponseForm() {
                                         </div>
                                     </div>
 
+                                    {q.type === "aberta" ? (
+                                    <div className="mt-3">
+                                    <label className="text-slate-300 text-sm mb-2 block">
+                                        Resposta:
+                                    </label>
+                                    <textarea
+                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-gray-800 text-sm resize-none 
+                                                    focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 transition-all"
+                                        rows={4}
+                                        placeholder="Digite sua resposta aqui..."
+                                        value={answers[q.id] || ""}
+                                        onChange={(e) => handleSelect(q.id, e.target.value)} 
+                                        />
+                                    </div>
+                                    ) : (
+
                                     <ul className="space-y-2">
                                         {q.options?.map((opt) => {
                                             const selected = answers[q.id] === opt.id;
@@ -213,6 +234,7 @@ export default function ResponseForm() {
                                             );
                                         })}
                                     </ul>
+                                    )}
 
                                 </div>
                             </div>

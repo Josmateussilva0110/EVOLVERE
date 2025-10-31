@@ -54,7 +54,8 @@ export default function ViewForm() {
      * @description Realiza uma requisição à API para buscar os dados do formulário.
      */
     async function fetchForm() {
-      const response = await requestData(`/form/view/${id}`, "GET", {}, true);
+      const response = await requestData(`/form/view/${id}`, "GET", {}, true)
+      console.log(response)
 
       if (response.success) {
         setForm(response.data.form[0]);
@@ -161,28 +162,42 @@ export default function ViewForm() {
                     </div>
                   </div>
 
-                  {/* Opções */}
-                  <ul className="space-y-2">
-                    {q.options?.map((opt) => (
-                      <li
-                        key={opt.id}
-                        className={`flex items-center gap-3 px-3 py-2 rounded-lg border ${
-                          opt.correct
-                            ? "border-emerald-500/40 bg-emerald-500/10"
-                            : "border-white/10 bg-white/5"
-                        }`}
-                      >
-                        {opt.correct ? (
-                          <CheckCircle className="w-4 h-4 text-emerald-400" />
-                        ) : (
-                          <XCircle className="w-4 h-4 text-slate-400" />
-                        )}
-                        <span className="text-slate-200 text-sm">
-                          {opt.text}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                  {/* Opções ou campo aberto */}
+                  {q.type === "aberta" ? (
+                    <div className="mt-3">
+                      <label className="text-slate-300 text-sm mb-2 block">
+                        Resposta:
+                      </label>
+                      <textarea
+                        className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-slate-200 text-sm resize-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/40 transition"
+                        rows={4}
+                        placeholder="Digite sua resposta aqui..."
+                        disabled
+                      />
+                    </div>
+                  ) : (
+                    <ul className="space-y-2">
+                      {q.options?.map((opt) => (
+                        <li
+                          key={opt.id}
+                          className={`flex items-center gap-3 px-3 py-2 rounded-lg border ${
+                            opt.correct
+                              ? "border-emerald-500/40 bg-emerald-500/10"
+                              : "border-white/10 bg-white/5"
+                          }`}
+                        >
+                          {opt.correct ? (
+                            <CheckCircle className="w-4 h-4 text-emerald-400" />
+                          ) : (
+                            <XCircle className="w-4 h-4 text-slate-400" />
+                          )}
+                          <span className="text-slate-200 text-sm">
+                            {opt.text}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
             </div>
