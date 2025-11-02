@@ -140,7 +140,7 @@ export default function SimuladosList() {
 
   // Lógica de filtro e paginação
   const simuladosFiltrados = form.filter(s =>
-    (!filtroDisciplina || s.disciplina.toLowerCase().includes(filtroDisciplina.toLowerCase())) &&
+    (!filtroDisciplina || s.title.toLowerCase().includes(filtroDisciplina.toLowerCase())) &&
     (!filtroStatus || s.status === filtroStatus)
   );
 
