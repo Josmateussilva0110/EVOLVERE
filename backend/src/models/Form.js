@@ -367,6 +367,29 @@ class Form {
         }
     }
 
+    async mockCorrection(user_id) {
+        try {
+             const result = await knex.raw(`
+                select 
+                    af.id as form_id,
+                    f.title,
+                    af.corrected as status,
+                    f.subject_id,
+                    s.name
+                from answers_form af
+                inner join form f
+                    on f.id = af.form_id
+                inner join subjects s
+                    on s.id = f.subject_id
+                where f.created_by = ?
+            `, [user_id])
+            const rows = result.rows
+            return rows.length > 0 ? rows : undefined
+        } catch (err) {
+            console.error("Erro ao buscar formulários para correção: ", err)
+            return undefined
+        }
+    }
 }
 
 module.exports = new Form()

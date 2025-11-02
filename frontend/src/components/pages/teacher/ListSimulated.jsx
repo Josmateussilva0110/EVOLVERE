@@ -1,6 +1,9 @@
-import { Eye, ChevronLeft, ChevronRight, BookOpen, Search, XCircle, FilePlus } from "lucide-react";
-import { useState } from "react";
+import { Eye, ChevronLeft, ChevronRight, BookOpen, Search, XCircle, FilePlus } from "lucide-react"
+import { useState, useEffect, useContext } from "react"
 import { useNavigate } from "react-router-dom"
+import { Context } from "../../../context/UserContext"
+import useFlashMessage from "../../../hooks/useFlashMessage"
+import requestData from "../../../utils/requestApi"
 
 /**
  * SimuladosList
@@ -58,43 +61,6 @@ import { useNavigate } from "react-router-dom"
  * - Paginação desativa botões quando não há mais páginas
  */
 
-const simuladosMock = [
-  {
-    nome: "Prova Final de Estrutura de Dados",
-    disciplina: "Estrutura de dados",
-    status: "Corrigido"
-  },
-  {
-    nome: "Introdução a Laços de Repetição",
-    disciplina: "Algoritmos 1",
-    status: "Pendente"
-  },
-  {
-    nome: "Conceitos Avançados de Funções",
-    disciplina: "Algoritmos 1",
-    status: "Corrigido"
-  },
-  {
-    nome: "Manipulação de Vetores e Matrizes",
-    disciplina: "Estrutura de dados",
-    status: "Pendente"
-  },
-  {
-    nome: "Análise de Complexidade e Recursividade",
-    disciplina: "Algoritmos 2",
-    status: "Corrigido"
-  },
-  {
-    nome: "Listas Encadeadas e Pilhas",
-    disciplina: "Estrutura de dados",
-    status: "Pendente"
-  },
-  {
-    nome: "Ordenação: Quicksort e Mergesort",
-    disciplina: "Algoritmos 2",
-    status: "Corrigido"
-  }
-];
 
 
 /**
@@ -146,15 +112,34 @@ const StatusBadge = ({ status }) => {
  * @feature Mensagem de "nenhum resultado" quando os filtros não retornam dados.
  */
 export default function SimuladosList() {
-  const [simulados] = useState(simuladosMock);
   const [filtroDisciplina, setFiltroDisciplina] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("");
   const [page, setPage] = useState(1);
   const ITEMS_PER_PAGE = 5;
   const navigate = useNavigate()
+  const { user } = useContext(Context)
+  const [form, setForm] = useState([])
+
+
+  useEffect(() => {
+    async function fetchForm() {
+      const response = await requestData(`/form/correction/${user.id}`, 'GET', {}, true)
+      console.log(response)
+
+      if (response && response.success) {
+        const rawData = response.data;
+        const data = Array.isArray(rawData) ? rawData : Object.values(rawData).filter(item => typeof item === "object")
+        setForm(data)
+      } else {
+        setForm([])
+      }
+    }
+    fetchForm()
+  }, [user])
+
 
   // Lógica de filtro e paginação
-  const simuladosFiltrados = simulados.filter(s =>
+  const simuladosFiltrados = form.filter(s =>
     (!filtroDisciplina || s.disciplina.toLowerCase().includes(filtroDisciplina.toLowerCase())) &&
     (!filtroStatus || s.status === filtroStatus)
   );
@@ -227,7 +212,7 @@ export default function SimuladosList() {
               <XCircle className="w-4 h-4 text-blue-400" />
               Limpar Filtros
             </button>
-          </div>
+          </div>  
 
           {/* Tabela de Dados */}
           <div className="overflow-x-auto">
@@ -245,9 +230,9 @@ export default function SimuladosList() {
                   pageSimulados.map((sim, idx) => (
                     <tr key={idx} className="hover:bg-slate-700/50 transition-colors border-b border-slate-800 last:border-b-0">
                       <td className="px-5 py-4">
-                        <div onClick={() => navigate('/teacher/simulated/response/list')} className="font-medium text-white">{sim.nome}</div>
+                        <div onClick={() => navigate('/teacher/simulated/response/list')} className="font-medium text-white">{sim.title}</div>
                       </td>
-                      <td className="px-5 py-4 text-slate-400">{sim.disciplina}</td>
+                      <td className="px-5 py-4 text-slate-400">{sim.name}</td>
                       <td className="px-5 py-4">
                         <StatusBadge status={sim.status} />
                       </td>

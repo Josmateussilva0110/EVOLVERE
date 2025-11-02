@@ -70,4 +70,6 @@ router.get("/form/class/:class_id", formController.getFormByClassId)
 
 router.post("/form/answers", formController.saveAnswers)
 
+router.get("/form/correction/:user_id", formController.formCorrection)
+
 module.exports = router

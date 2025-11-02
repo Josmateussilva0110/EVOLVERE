@@ -197,7 +197,7 @@ export default function ResponseForm() {
 
                                     {q.type === "aberta" ? (
                                     <div className="mt-3">
-                                    <label className="text-slate-300 text-sm mb-2 block">
+                                    <label className="text-gray-800 text-sm mb-2 block">
                                         Resposta:
                                     </label>
                                     <textarea
