@@ -370,8 +370,8 @@ class Form {
     async mockCorrection(user_id) {
         try {
              const result = await knex.raw(`
-                select 
-                    af.id as form_id,
+                select distinct on (af.form_id)
+                    af.form_id,
                     f.title,
                     af.corrected as status,
                     f.subject_id,
@@ -387,6 +387,33 @@ class Form {
             return rows.length > 0 ? rows : undefined
         } catch (err) {
             console.error("Erro ao buscar formulários para correção: ", err)
+            return undefined
+        }
+    }
+
+    async responsesStudents(form_id) {
+        try {
+             const result = await knex.raw(`
+                SELECT
+                    af.id AS answer_id,
+                    af.form_id,
+                    af.user_id,
+                    u.username,
+                    q.id AS question_id,
+                    q.text AS question_text,
+                    af.open_answer
+                    FROM answers_form af
+                    INNER JOIN users u ON u.id = af.user_id
+                    INNER JOIN questions q ON q.form_id = af.form_id
+                    WHERE af.form_id = ?
+                    AND af.open_answer IS NOT NULL
+                    ORDER BY u.username, q.id
+                `, [form_id])
+
+            const rows = result.rows
+            return rows.length > 0 ? rows : undefined
+        } catch (err) {
+            console.error("Erro ao buscar respostas para correção: ", err)
             return undefined
         }
     }

@@ -77,7 +77,7 @@ export default function TeacherRoutes() {
        * @route /teacher/simulated/response/list
        * @element ResponseList
        */}
-      <Route path="simulated/response/list" element={<ResponseList />} />
+      <Route path="simulated/response/list/:form_id" element={<ResponseList />} />
       <Route path="simulated/view/:id" element={<ViewForm />} />
     </Routes>
   )
