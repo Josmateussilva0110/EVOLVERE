@@ -396,15 +396,16 @@ class Form {
              const result = await knex.raw(`
                 SELECT
                     af.id AS answer_id,
-                    af.form_id,
                     af.user_id,
                     u.username,
                     q.id AS question_id,
                     q.text AS question_text,
-                    af.open_answer
+                    af.open_answer,
+                    f.title as form_name
                     FROM answers_form af
                     INNER JOIN users u ON u.id = af.user_id
-                    INNER JOIN questions q ON q.form_id = af.form_id
+                    INNER JOIN questions q ON q.id = af.question_id
+                    INNER JOIN form f ON f.id = af.form_id
                     WHERE af.form_id = ?
                     AND af.open_answer IS NOT NULL
                     ORDER BY u.username, q.id

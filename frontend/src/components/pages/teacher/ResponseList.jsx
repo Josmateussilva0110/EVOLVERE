@@ -2,11 +2,8 @@ import { useState, useEffect } from "react";
 import {
   Check,
   X,
-  MessageSquare,
   Circle,
-  CheckCircle,
-  XCircle,
-  Trash2,     // Ícone melhorado para limpar
+  CheckCircle,     // Ícone melhorado para limpar
   Loader2,    // Ícone para o estado "salvando"
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -80,17 +77,20 @@ export default function CorrigirSimulado() {
 
   const alunoSelecionado = form.find((r) => r.user_id === alunoSelecionadoId);
 
-  const marcarCorrecao = (questionId, valor) => {
-    setCorrecao((prev) => {
-      const novo = { ...prev };
-      novo[questionId] = valor;
-      return novo;
-    });
+  const marcarCorrecao = (userId, questionId, valor) => {
+    setCorrecao((prev) => ({
+      ...prev,
+      [`${userId}-${questionId}`]: valor, 
+    }));
   };
 
-  const salvarComentario = (questionId, texto) => {
-    setComentarios((prev) => ({ ...prev, [questionId]: texto }));
+  const salvarComentario = (userId, questionId, texto) => {
+    setComentarios((prev) => ({
+      ...prev,
+      [`${userId}-${questionId}`]: texto,
+    }));
   };
+
 
   const total = Object.keys(
     Object.fromEntries(form.map((r) => [r.question_id, true]))
@@ -131,7 +131,7 @@ export default function CorrigirSimulado() {
         {/* Cabeçalho */}
         <header className="flex flex-col sm:flex-row justify-between sm:items-center mb-8 gap-4">
           <h1 className="text-3xl font-bold text-white">
-            Correção de Simulado "{form[0]?.form_name}"
+            Correção do Simulado "{form[0]?.form_name}"
           </h1>
 
           <div className="flex items-center gap-3">
@@ -218,9 +218,6 @@ export default function CorrigirSimulado() {
                         className="bg-slate-900/50 p-5 rounded-lg border border-slate-700"
                       >
                         <p className="text-yellow-400 font-semibold mb-1">
-                          Pergunta {i + 1}:
-                        </p>
-                        <p className="text-slate-200 mb-2">
                           {resp.question_text}
                         </p>
                         <p className="text-slate-400 italic mb-4">
@@ -231,10 +228,10 @@ export default function CorrigirSimulado() {
                         <div className="flex gap-4 mb-4">
                           <button
                             onClick={() =>
-                              marcarCorrecao(resp.question_id, "correto")
+                              marcarCorrecao(alunoSelecionadoId, resp.question_id, "correto")
                             }
                             className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg font-bold transition-all border-2 ${
-                              correcao[resp.question_id] === "correto"
+                              correcao[`${alunoSelecionadoId}-${resp.question_id}`] === "correto"
                                 ? "bg-green-500/10 border-green-500 text-green-400"
                                 : "bg-slate-700/50 border-slate-700 text-slate-300 hover:border-green-500"
                             }`}
@@ -244,10 +241,10 @@ export default function CorrigirSimulado() {
 
                           <button
                             onClick={() =>
-                              marcarCorrecao(resp.question_id, "incorreto")
+                              marcarCorrecao(alunoSelecionadoId, resp.question_id, "incorreto")
                             }
                             className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg font-bold transition-all border-2 ${
-                              correcao[resp.question_id] === "incorreto"
+                              correcao[`${alunoSelecionadoId}-${resp.question_id}`] === "incorreto"
                                 ? "bg-red-500/10 border-red-500 text-red-400"
                                 : "bg-slate-700/50 border-slate-700 text-slate-300 hover:border-red-500"
                             }`}
@@ -258,9 +255,9 @@ export default function CorrigirSimulado() {
 
                         {/* Comentário individual */}
                         <textarea
-                          value={comentarios[resp.question_id] || ""}
+                          value={comentarios[`${alunoSelecionadoId}-${resp.question_id}`] || ""}
                           onChange={(e) =>
-                            salvarComentario(resp.question_id, e.target.value)
+                            salvarComentario(alunoSelecionadoId, resp.question_id, e.target.value)
                           }
                           className="w-full p-3 bg-slate-900/60 border border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition text-slate-100 placeholder:text-slate-400"
                           placeholder="Adicione um comentário..."

@@ -356,6 +356,7 @@ class FormController {
             }
 
             const form = await Form.responsesStudents(form_id)
+            console.log(form)
             if (!form) {
                 return response.status(404).json({ status: false, message: "Nenhum formulário encontrado." })
             }
