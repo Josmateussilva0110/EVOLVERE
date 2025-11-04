@@ -77,50 +77,65 @@ export default function ManagementMaterials() {
   // 6. REMOVER os arrays estáticos 'materiais' e 'estatisticas'
 
   // 7. useEffect para buscar dados da API
-useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
+  useEffect(() => {
+      const fetchData = async () => {
+        setIsLoading(true);
 
-      try {
-        const response = await requestData('/materials/student','GET',{},true);
-        if (response.success === true && response.data && response.data.status === true && response.data.data) {
+        try {
+          // 1. Chamando a rota correta (sem /api, como você descobriu)
+          const response = await requestData(
+            '/material/student', // Rota no singular
+            "GET",   
+            {},      
+            true     
+          );
           
-          // Acessamos o 'data' aninhado
-          const backendData = response.data.data;
+          // Log da API que vimos: 
+          // response = { success: true, data: {status: true, stats: [...], materials: [...] } }
 
-          const formattedMaterials = backendData.materials.map((mat) => {
-            const Icon = getFileIcon(mat.tipo);
-            const randomColor = generateRandomColor();
-            return {
-              ...mat,
-              icon: Icon,
-              cor: randomColor.cor,
-              corClara: randomColor.corClara,
-            };
-          });
-          
-          const formattedStats = backendData.stats.map((stat) => ({
-              ...stat,
-              icon: FolderOpen, 
-          }));
+          // === A CORREÇÃO (REMOVENDO O "JOGUINHO" .data.data) ===
+          // 1. Checamos 'response.success' (do requestData)
+          // 2. Checamos 'response.data.status' (do nosso backend)
+          // 3. Acessamos 'response.data' (NÃO response.data.data)
+          console.log("Resposta da API de materiais do aluno:", response);
+          if (response.success === true && response.data && response.data.status === true) {
+            
+            // Acessamos o 'data' de primeiro NÍVEL
+            const backendData = response.data; // <-- CORRIGIDO
 
-          setMaterials(formattedMaterials);
-          setEstatisticas(formattedStats);
+            const formattedMaterials = backendData.materials.map((mat) => {
+              const Icon = getFileIcon(mat.tipo);
+              const randomColor = generateRandomColor();
+              return {
+                ...mat,
+                icon: Icon,
+                cor: randomColor.cor,
+                corClara: randomColor.corClara,
+              };
+            });
+            
+            const formattedStats = backendData.stats.map((stat) => ({
+                ...stat,
+                icon: FolderOpen, 
+            }));
 
-        } else {
-          const errorMessage = response.message || (response.data && response.data.message) || "Erro ao formatar dados";
-          throw new Error(errorMessage);
+            setMaterials(formattedMaterials);
+            setEstatisticas(formattedStats);
+
+          } else {
+            // Se falhar (ex: response.data.status === false)
+            const errorMessage = response.message || (response.data && response.data.message) || "Erro ao formatar dados";
+            throw new Error(errorMessage);
+          }
+
+        } catch (error) {
+          console.error("Erro no bloco try/catch do fetchData:", error.message);
+          setMaterials([]); 
+          setEstatisticas([]); 
+        } finally {
+          setIsLoading(false); 
         }
-
-      } catch (error) {
-        console.error("Erro no bloco try/catch do fetchData:", error.message);
-        setMaterials([]); 
-        // Definir como array vazio para evitar crash no .map()
-        setEstatisticas([]); 
-      } finally {
-        setIsLoading(false); 
-      }
-    };
+      };
 
     fetchData();
   }, []); 
