@@ -72,4 +72,6 @@ router.post("/form/answers", formController.saveAnswers)
 
 router.get("/form/correction/:user_id", formController.formCorrection)
 
+router.get("/form/answers/:form_id", formController.answersStudents)
+
 module.exports = router

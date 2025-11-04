@@ -159,7 +159,7 @@ export default function SimuladosList() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-slate-200 font-sans p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 text-slate-200 font-sans p-4 sm:p-6 lg:p-8">
       <div className="max-w-6xl mx-auto">
 
         {/* Cabeçalho */}
@@ -170,7 +170,7 @@ export default function SimuladosList() {
           </div>
           <div className="flex items-center gap-3">
             <button
-              className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 shadow-lg shadow-yellow-400/20 transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 shadow-lg shadow-yellow-400/20 transition-colors"
               onClick={() => navigate('/teacher/simulated/register')}
             >
               <FilePlus className="w-4 h-4 text-blue-700" />
@@ -230,7 +230,7 @@ export default function SimuladosList() {
                   pageSimulados.map((sim, idx) => (
                     <tr key={idx} className="hover:bg-slate-700/50 transition-colors border-b border-slate-800 last:border-b-0">
                       <td className="px-5 py-4">
-                        <div onClick={() => navigate('/teacher/simulated/response/list')} className="font-medium text-white">{sim.title}</div>
+                        <div onClick={() => navigate(`/teacher/simulated/response/list/${sim.form_id}`)} className="font-medium text-white">{sim.title}</div>
                       </td>
                       <td className="px-5 py-4 text-slate-400">{sim.name}</td>
                       <td className="px-5 py-4">

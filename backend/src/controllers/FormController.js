@@ -348,6 +348,25 @@ class FormController {
         }
     }
 
+    async answersStudents(request, response) {
+        try {
+            const { form_id } = request.params
+            if (!validator.isInt(form_id + '', { min: 1 })) {
+                return response.status(422).json({ success: false, message: "Formulário invalido." })
+            }
+
+            const form = await Form.responsesStudents(form_id)
+            console.log(form)
+            if (!form) {
+                return response.status(404).json({ status: false, message: "Nenhum formulário encontrado." })
+            }
+
+            return response.status(200).json({ status: true, form })
+        } catch (err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
 }
 
 module.exports = new FormController()
