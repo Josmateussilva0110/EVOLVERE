@@ -134,6 +134,7 @@ class Form {
                     f.class_id,
                     SUM(COALESCE(q.points, 0)) AS total_points,
                     f."totalDuration",
+                    f.deadline,
                     f.updated_at,
                     json_agg(
                         json_build_object(
@@ -191,6 +192,7 @@ class Form {
                     f.class_id,
                     SUM(COALESCE(q.points, 0)) AS total_points,
                     f."totalDuration",
+                    f.deadline,
                     f.updated_at,
                     json_agg(
                         json_build_object(
@@ -293,7 +295,7 @@ class Form {
 
             const result = await knex.raw(`
                 SELECT
-                    f.id, 
+                    f.id,
                     f.title,
                     f.class_id,
                     f.subject_id,
@@ -302,6 +304,11 @@ class Form {
                 INNER JOIN classes c
                     ON c.id = f.class_id
                 WHERE f.class_id = ?
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM answers_form af
+                    WHERE af.form_id = f.id
+                )
             `, [class_id])
 
             const forms = result.rows
