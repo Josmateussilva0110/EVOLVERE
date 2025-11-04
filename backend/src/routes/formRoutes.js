@@ -17,7 +17,7 @@ const formController = require("../controllers/FormController")
  * @example
  * GET /form/relations/5
  */
-router.get("/form/relations/:id", formController.getRelations)
+router.get("/form/relations/:class_id", formController.getRelations)
 
 /**
  * @route POST /form/publish
@@ -66,6 +66,12 @@ router.get("/form/view/:id", formController.view)
  */
 router.delete("/form/:id", formController.delete)
 
-router.get("/form/class/:class_id", formController.getFormByClassId)
+router.post("/form/class/:class_id", formController.getFormByClassId)
+
+router.post("/form/answers", formController.saveAnswers)
+
+router.get("/form/correction/:class_id", formController.formCorrection)
+
+router.get("/form/answers/:form_id", formController.answersStudents)
 
 module.exports = router

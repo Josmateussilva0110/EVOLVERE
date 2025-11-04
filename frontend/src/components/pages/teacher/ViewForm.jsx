@@ -54,8 +54,8 @@ export default function ViewForm() {
      * @description Realiza uma requisição à API para buscar os dados do formulário.
      */
     async function fetchForm() {
-      const response = await requestData(`/form/view/${id}`, "GET", {}, true);
-      console.log(response);
+      const response = await requestData(`/form/view/${id}`, "GET", {}, true)
+      console.log(response)
 
       if (response.success) {
         setForm(response.data.form[0]);
@@ -99,7 +99,7 @@ export default function ViewForm() {
    * título, descrição, data, pontuação e lista de perguntas com alternativas.
    */
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-4 sm:px-6 py-10">
+    <div className="min-h-screen bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 px-4 sm:px-6 py-10">
       <div className="max-w-5xl mx-auto">
         {/* Cabeçalho */}
         <div className="flex items-center gap-3 mb-8">
@@ -154,7 +154,7 @@ export default function ViewForm() {
                 <div className="flex-1">
                   {/* Texto da pergunta e pontos */}
                   <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
-                    <h3 className="text-white font-medium text-lg flex-1 break-words">
+                    <h3 className="text-white font-medium text-lg flex-1 wrap-break-word">
                       {q.text}
                     </h3>
                     <div className="self-start px-3 py-1 rounded-full bg-yellow-400/20 text-yellow-300 text-sm font-semibold border border-yellow-300/40 whitespace-nowrap">
@@ -162,28 +162,42 @@ export default function ViewForm() {
                     </div>
                   </div>
 
-                  {/* Opções */}
-                  <ul className="space-y-2">
-                    {q.options?.map((opt) => (
-                      <li
-                        key={opt.id}
-                        className={`flex items-center gap-3 px-3 py-2 rounded-lg border ${
-                          opt.correct
-                            ? "border-emerald-500/40 bg-emerald-500/10"
-                            : "border-white/10 bg-white/5"
-                        }`}
-                      >
-                        {opt.correct ? (
-                          <CheckCircle className="w-4 h-4 text-emerald-400" />
-                        ) : (
-                          <XCircle className="w-4 h-4 text-slate-400" />
-                        )}
-                        <span className="text-slate-200 text-sm">
-                          {opt.text}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                  {/* Opções ou campo aberto */}
+                  {q.type === "aberta" ? (
+                    <div className="mt-3">
+                      <label className="text-slate-300 text-sm mb-2 block">
+                        Resposta:
+                      </label>
+                      <textarea
+                        className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-slate-200 text-sm resize-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/40 transition"
+                        rows={4}
+                        placeholder="Digite sua resposta aqui..."
+                        disabled
+                      />
+                    </div>
+                  ) : (
+                    <ul className="space-y-2">
+                      {q.options?.map((opt) => (
+                        <li
+                          key={opt.id}
+                          className={`flex items-center gap-3 px-3 py-2 rounded-lg border ${
+                            opt.correct
+                              ? "border-emerald-500/40 bg-emerald-500/10"
+                              : "border-white/10 bg-white/5"
+                          }`}
+                        >
+                          {opt.correct ? (
+                            <CheckCircle className="w-4 h-4 text-emerald-400" />
+                          ) : (
+                            <XCircle className="w-4 h-4 text-slate-400" />
+                          )}
+                          <span className="text-slate-200 text-sm">
+                            {opt.text}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
             </div>

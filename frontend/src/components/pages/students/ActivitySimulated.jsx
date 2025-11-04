@@ -10,10 +10,11 @@ import {
   Play,
   BookOpen
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import requestData from "../../../utils/requestApi";
 import formatDateRequests from "../../../utils/formatDateRequests";
+import { Context } from "../../../context/UserContext"
 
 
 /**
@@ -49,9 +50,11 @@ import formatDateRequests from "../../../utils/formatDateRequests";
 export default function ActivitySimulated() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterActive, setFilterActive] = useState("todas");
+  const { user } = useContext(Context)
   const [form, setForm] = useState([]);
   const { class_id } = useParams();
   const [class_name, setClassName] = useState(null)
+  const navigate = useNavigate()
 
   // 🔹 Função para definir cor e ícone baseados no tipo/nome
   function getVisualAttributes(title) {
@@ -87,10 +90,12 @@ export default function ActivitySimulated() {
 
   // 🔹 Buscar formulários da turma
   useEffect(() => {
+    const data = {
+      user_id: user.id
+    }
     async function fetchForm() {
-      const response = await requestData(`/form/class/${class_id}`, "GET", {}, true);
-      console.log(response);
-      setClassName(response.data.class_name)
+      const response = await requestData(`/form/class/${class_id}`, "POST", data, true);
+      setClassName(response.data?.class_name)
 
       if (response.success && response.data?.forms) {
         const data = response.data.forms.map((item) => {
@@ -118,7 +123,7 @@ export default function ActivitySimulated() {
       }
     }
     fetchForm();
-  }, [class_id]);
+  }, [class_id, user]);
 
   // 🔹 Filtragem dinâmica
   const atividadesFiltradas = form.filter((atividade) => {
@@ -161,7 +166,6 @@ export default function ActivitySimulated() {
     { id: "simulados", label: "Simulados" },
   ];
 
-  console.log(class_name)
 
   return (
   <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-8 pb-20">
@@ -340,11 +344,13 @@ export default function ActivitySimulated() {
 
                   <div className="flex flex-col gap-3 lg:w-48">
                     <button
-                      className={`w-full bg-linear-to-br ${atividade.cor} text-white py-4 rounded-2xl font-black hover:scale-105 transition-all flex items-center justify-center gap-3`}
-                    >
-                      <Play size={20} strokeWidth={3} />
-                      Iniciar
-                    </button>
+                        onClick={() => navigate(`/student/simulated/view/${atividade.id}`)}
+                        className="w-full bg-linear-to-br from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white py-4 rounded-2xl font-black hover:scale-105 hover:shadow-2xl transition-all flex items-center justify-center gap-3"
+                      >
+                        <Play size={20} strokeWidth={3} />
+                        Iniciar
+                      </button>
+
 
                     <button className="w-full bg-gray-50 text-gray-700 py-3 rounded-2xl font-bold hover:bg-gray-100 border-2 border-gray-200 flex items-center justify-center gap-2">
                       <BookOpen size={18} strokeWidth={2.5} />
@@ -365,7 +371,7 @@ export default function ActivitySimulated() {
           <Search className="text-gray-400" size={40} strokeWidth={2} />
         </div>
         <h3 className="text-2xl font-bold text-gray-900 mb-3">
-          Nenhuma atividade encontrada
+          Nenhum simulado encontrado
         </h3>
         <p className="text-gray-600 text-lg">Tente ajustar sua busca ou filtros</p>
       </div>

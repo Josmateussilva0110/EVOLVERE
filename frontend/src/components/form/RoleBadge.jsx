@@ -1,18 +1,40 @@
+/**
+ * Componente RoleBadge
+ *
+ * Este componente exibe um selo (badge) indicando o papel (role) de um usuário
+ * com base nas informações fornecidas pelo objeto `profile`.
+ *
+ * O selo é estilizado de acordo com a função do usuário (Admin, Coordenador, Professor, Aluno ou Desconhecido),
+ * aplicando cores e estilos diferentes para cada papel.
+ *
+ * @component
+ * @example
+ * // Exemplo de uso:
+ * const profile = { role: 'Professor', registration: '12345' };
+ * return <RoleBadge profile={profile} />;
+ *
+ * @param {Object} props - Propriedades do componente.
+ * @param {Object} props.profile - Objeto contendo as informações do perfil do usuário.
+ * @param {string} [props.profile.role] - Papel do usuário (Admin, Coordenador, Professor, Aluno ou Desconhecido).
+ * @param {string} [props.profile.registration] - Registro do usuário; se for 'admin', define automaticamente o papel como Admin.
+ *
+ * @returns {JSX.Element} Um elemento <span> estilizado representando o papel do usuário.
+ */
 function RoleBadge({ profile }) {
   let role = 'Desconhecido';
 
+  // Define o papel com base nas informações do perfil.
   if (profile.role && profile.role !== 'Desconhecido') {
     role = profile.role;
   } 
-  
   else if (profile.registration === 'admin') {
     role = 'Admin';
   } 
-  
   else if (profile.registration) {
     role = 'Aluno';
   }
 
+  // Mapeamento dos papéis para seus respectivos rótulos e estilos.
   const roleMap = {
     Admin: {
       label: 'Admin',
@@ -36,6 +58,7 @@ function RoleBadge({ profile }) {
     },
   };
 
+  // Seleciona o estilo correspondente ao papel atual, ou usa "Desconhecido" por padrão.
   const current = roleMap[role] || roleMap.Desconhecido;
 
   return (
