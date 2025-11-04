@@ -1,6 +1,8 @@
-import { Eye, ChevronLeft, ChevronRight, BookOpen, Search, XCircle, FilePlus } from "lucide-react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom"
+import { Eye, ChevronLeft, ChevronRight, BookOpen, Search, XCircle } from "lucide-react"
+import { useState, useEffect, useContext } from "react"
+import { useNavigate, useParams } from "react-router-dom"
+import { Context } from "../../../context/UserContext"
+import requestData from "../../../utils/requestApi"
 
 /**
  * SimuladosList
@@ -58,43 +60,6 @@ import { useNavigate } from "react-router-dom"
  * - Paginação desativa botões quando não há mais páginas
  */
 
-const simuladosMock = [
-  {
-    nome: "Prova Final de Estrutura de Dados",
-    disciplina: "Estrutura de dados",
-    status: "Corrigido"
-  },
-  {
-    nome: "Introdução a Laços de Repetição",
-    disciplina: "Algoritmos 1",
-    status: "Pendente"
-  },
-  {
-    nome: "Conceitos Avançados de Funções",
-    disciplina: "Algoritmos 1",
-    status: "Corrigido"
-  },
-  {
-    nome: "Manipulação de Vetores e Matrizes",
-    disciplina: "Estrutura de dados",
-    status: "Pendente"
-  },
-  {
-    nome: "Análise de Complexidade e Recursividade",
-    disciplina: "Algoritmos 2",
-    status: "Corrigido"
-  },
-  {
-    nome: "Listas Encadeadas e Pilhas",
-    disciplina: "Estrutura de dados",
-    status: "Pendente"
-  },
-  {
-    nome: "Ordenação: Quicksort e Mergesort",
-    disciplina: "Algoritmos 2",
-    status: "Corrigido"
-  }
-];
 
 
 /**
@@ -146,16 +111,35 @@ const StatusBadge = ({ status }) => {
  * @feature Mensagem de "nenhum resultado" quando os filtros não retornam dados.
  */
 export default function SimuladosList() {
-  const [simulados] = useState(simuladosMock);
   const [filtroDisciplina, setFiltroDisciplina] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("");
   const [page, setPage] = useState(1);
   const ITEMS_PER_PAGE = 5;
   const navigate = useNavigate()
+  const { user } = useContext(Context)
+  const [form, setForm] = useState([])
+  const { class_id } = useParams()
+
+
+  useEffect(() => {
+    async function fetchForm() {
+      const response = await requestData(`/form/correction/${class_id}`, 'GET', {}, true)
+
+      if (response && response.success) {
+        const rawData = response.data;
+        const data = Array.isArray(rawData) ? rawData : Object.values(rawData).filter(item => typeof item === "object")
+        setForm(data)
+      } else {
+        setForm([])
+      }
+    }
+    fetchForm()
+  }, [user])
+
 
   // Lógica de filtro e paginação
-  const simuladosFiltrados = simulados.filter(s =>
-    (!filtroDisciplina || s.disciplina.toLowerCase().includes(filtroDisciplina.toLowerCase())) &&
+  const simuladosFiltrados = form.filter(s =>
+    (!filtroDisciplina || s.title.toLowerCase().includes(filtroDisciplina.toLowerCase())) &&
     (!filtroStatus || s.status === filtroStatus)
   );
 
@@ -174,7 +158,7 @@ export default function SimuladosList() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-slate-200 font-sans p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 text-slate-200 font-sans p-4 sm:p-6 lg:p-8">
       <div className="max-w-6xl mx-auto">
 
         {/* Cabeçalho */}
@@ -182,15 +166,6 @@ export default function SimuladosList() {
           <div>
             <h1 className="text-3xl font-bold text-white">Meus Simulados</h1>
             <p className="text-slate-400 mt-1">Visualize, filtre e gerencie suas avaliações.</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 shadow-lg shadow-yellow-400/20 transition-colors"
-              onClick={() => navigate('/teacher/simulated/register')}
-            >
-              <FilePlus className="w-4 h-4 text-blue-700" />
-              Criar Novo Simulado
-            </button>
           </div>
         </header>
 
@@ -227,7 +202,7 @@ export default function SimuladosList() {
               <XCircle className="w-4 h-4 text-blue-400" />
               Limpar Filtros
             </button>
-          </div>
+          </div>  
 
           {/* Tabela de Dados */}
           <div className="overflow-x-auto">
@@ -245,9 +220,9 @@ export default function SimuladosList() {
                   pageSimulados.map((sim, idx) => (
                     <tr key={idx} className="hover:bg-slate-700/50 transition-colors border-b border-slate-800 last:border-b-0">
                       <td className="px-5 py-4">
-                        <div onClick={() => navigate('/teacher/simulated/response/list')} className="font-medium text-white">{sim.nome}</div>
+                        <div onClick={() => navigate(`/teacher/simulated/response/list/${sim.form_id}`)} className="font-medium text-white">{sim.title}</div>
                       </td>
-                      <td className="px-5 py-4 text-slate-400">{sim.disciplina}</td>
+                      <td className="px-5 py-4 text-slate-400">{sim.name}</td>
                       <td className="px-5 py-4">
                         <StatusBadge status={sim.status} />
                       </td>

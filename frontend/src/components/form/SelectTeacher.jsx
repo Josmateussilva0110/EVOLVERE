@@ -1,6 +1,5 @@
 import { useRef, useState, useEffect } from "react";
 
-/* ---------------------- CustomSelect (estilizado, acessível) ---------------------- */
 
 /**
  * CustomSelect

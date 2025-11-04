@@ -14,7 +14,6 @@ import useFlashMessage from "../../../hooks/useFlashMessage"
 import { useNavigate, useParams, useLocation } from "react-router-dom"
 import { Context } from "../../../context/UserContext"
 
-/* ---------------------- Componente Principal ---------------------- */
 
 /**
  * CadastrarMaterial

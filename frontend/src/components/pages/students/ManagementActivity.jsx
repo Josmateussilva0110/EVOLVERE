@@ -164,7 +164,7 @@ export default function ManagementActivity() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-8 pb-20">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-8 pb-20">
       {/* Header com animação */}
       <div className="mb-8 animate-fadeIn">
         {/* Botão Voltar */}
@@ -182,13 +182,13 @@ export default function ManagementActivity() {
 
         <div className="flex items-center gap-4 mb-4">
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-indigo-400 rounded-2xl blur-lg opacity-50 animate-pulse"></div>
-            <div className="relative p-4 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-2xl shadow-2xl transform hover:scale-110 transition-transform duration-300">
+            <div className="absolute inset-0 bg-linear-to-br from-blue-400 to-indigo-400 rounded-2xl blur-lg opacity-50 animate-pulse"></div>
+            <div className="relative p-4 bg-linear-to-br from-blue-500 to-indigo-500 rounded-2xl shadow-2xl transform hover:scale-110 transition-transform duration-300">
               <ClipboardList className="text-white" size={36} strokeWidth={2.5} />
             </div>
           </div>
           <div>
-            <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-900">
+            <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-gray-900 via-blue-800 to-indigo-900">
               Atividades e Simulados
             </h1>
             <p className="text-gray-600 mt-2 text-lg">Acompanhe suas tarefas e prazos de entrega</p>
@@ -207,8 +207,8 @@ export default function ManagementActivity() {
               className="bg-white rounded-3xl p-7 shadow-xl border-2 border-gray-100 hover:shadow-2xl hover:border-blue-200 transition-all duration-300 hover:-translate-y-2 cursor-pointer group animate-slideUp"
             >
               <div className="flex items-start justify-between mb-5">
-                <div className={`p-4 bg-gradient-to-br ${stat.corFundo} rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                  <Icon className={`bg-gradient-to-br ${stat.cor} bg-clip-text text-transparent`} size={28} strokeWidth={2.5} />
+                <div className={`p-4 bg-linear-to-br ${stat.corFundo} rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                  <Icon className={`bg-linear-to-br ${stat.cor} bg-clip-text text-transparent`} size={28} strokeWidth={2.5} />
                 </div>
               </div>
               <div className="text-4xl font-black text-gray-900 mb-2 group-hover:scale-105 transition-transform">{stat.valor}</div>
@@ -252,7 +252,7 @@ export default function ManagementActivity() {
                 onClick={() => setFilterActive(filtro.id)}
                 className={`flex-1 md:flex-none px-6 py-3.5 rounded-2xl font-bold text-sm transition-all duration-300 transform hover:scale-105 whitespace-nowrap ${
                   filterActive === filtro.id
-                    ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-300/50"
+                    ? "bg-linear-to-r from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-300/50"
                     : "bg-gray-50 text-gray-700 hover:bg-gray-100 border-2 border-gray-200 hover:border-gray-300"
                 }`}
               >
@@ -275,7 +275,7 @@ export default function ManagementActivity() {
             >
               <div className="flex flex-col lg:flex-row">
                 {/* Header Lateral Colorido */}
-                <div className={`bg-gradient-to-br ${atividade.cor} lg:w-2 w-full h-2 lg:h-auto relative overflow-hidden`}>
+                <div className={`bg-linear-to-br ${atividade.cor} lg:w-2 w-full h-2 lg:h-auto relative overflow-hidden`}>
                   <div className="absolute inset-0 bg-white/10 group-hover:scale-150 transition-transform duration-700"></div>
                 </div>
 
@@ -285,8 +285,8 @@ export default function ManagementActivity() {
                     {/* Informações da Atividade */}
                     <div className="flex items-start gap-4 flex-1">
                       {/* Ícone */}
-                      <div className={`p-4 bg-gradient-to-br ${atividade.corClara} rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-lg border-2 ${atividade.urgente ? 'border-red-200' : 'border-gray-100'}`}>
-                        <Icon className={`bg-gradient-to-br ${atividade.cor} bg-clip-text text-transparent`} size={28} strokeWidth={2.5} />
+                      <div className={`p-4 bg-linear-to-br ${atividade.corClara} rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-lg border-2 ${atividade.urgente ? 'border-red-200' : 'border-gray-100'}`}>
+                        <Icon className={`bg-linear-to-br ${atividade.cor} bg-clip-text text-transparent`} size={28} strokeWidth={2.5} />
                       </div>
 
                       {/* Detalhes */}
@@ -297,7 +297,7 @@ export default function ManagementActivity() {
                               Urgente
                             </span>
                           )}
-                          <span className={`px-3 py-1 bg-gradient-to-r ${atividade.corClara} rounded-lg text-xs font-bold`}>
+                          <span className={`px-3 py-1 bg-linear-to-r ${atividade.corClara} rounded-lg text-xs font-bold`}>
                             {atividade.tipo}
                           </span>
                         </div>
@@ -324,7 +324,7 @@ export default function ManagementActivity() {
 
                     {/* Botão de Ação */}
                     <div className="flex flex-col gap-3 lg:w-48">
-                      <button className={`w-full bg-gradient-to-r ${atividade.cor} text-white py-4 rounded-2xl font-black text-base hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-3 group/btn shadow-xl`}>
+                      <button className={`w-full bg-linear-to-r ${atividade.cor} text-white py-4 rounded-2xl font-black text-base hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-3 group/btn shadow-xl`}>
                         <Play size={20} strokeWidth={3} className="group-hover/btn:scale-110 transition-transform" />
                         Iniciar
                       </button>
@@ -345,7 +345,7 @@ export default function ManagementActivity() {
       {/* Mensagem quando não há resultados */}
       {atividadesFiltradas.length === 0 && (
         <div className="bg-white rounded-3xl p-16 shadow-2xl border-2 border-gray-100 text-center animate-fadeIn">
-          <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
+          <div className="w-24 h-24 bg-linear-to-br from-gray-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
             <Search className="text-gray-400" size={40} strokeWidth={2} />
           </div>
           <h3 className="text-2xl font-bold text-gray-900 mb-3">Nenhuma atividade encontrada</h3>
