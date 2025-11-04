@@ -90,17 +90,9 @@ export default function ManagementMaterials() {
             true     
           );
           
-          // Log da API que vimos: 
-          // response = { success: true, data: {status: true, stats: [...], materials: [...] } }
-
-          // === A CORREÇÃO (REMOVENDO O "JOGUINHO" .data.data) ===
-          // 1. Checamos 'response.success' (do requestData)
-          // 2. Checamos 'response.data.status' (do nosso backend)
-          // 3. Acessamos 'response.data' (NÃO response.data.data)
           console.log("Resposta da API de materiais do aluno:", response);
           if (response.success === true && response.data && response.data.status === true) {
             
-            // Acessamos o 'data' de primeiro NÍVEL
             const backendData = response.data; // <-- CORRIGIDO
 
             const formattedMaterials = backendData.materials.map((mat) => {
