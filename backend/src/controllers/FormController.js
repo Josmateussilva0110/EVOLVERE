@@ -110,15 +110,18 @@ class FormController {
      */
     async getRelations(request, response) {
         try {
-            const { id } = request.params
-            if (!validator.isInt(id + '', { min: 1 })) {
+            const { class_id } = request.params
+
+            if (!validator.isInt(class_id + '', { min: 1 })) {
                 return response.status(422).json({ success: false, message: "ID inválido." })
             }
 
-            const subject_id = await Subject.subjectUser(id)
-            if (!subject_id) {
+            const subjectData = await Subject.subjectUser(class_id)
+            if (!subjectData) {
                 return response.status(404).json({ status: false, message: "Nenhuma disciplina encontrada." })
             }
+
+            const { subject_id } = subjectData
 
             return response.status(200).json({ status: true, subject_id })
         } catch (err) {
@@ -242,6 +245,7 @@ class FormController {
     async getFormByClassId(request, response) {
         try {
             const { class_id } = request.params
+            const { user_id } = request.body
             if (!validator.isInt(class_id + '', { min: 1 })) {
                 return response.status(422).json({ success: false, message: "Turma inválida." })
             }
@@ -251,7 +255,7 @@ class FormController {
                 return response.status(404).json({ status: false, message: "Nenhuma turma encontrada." })
             }
 
-            const form = await Form.getForm(class_id)
+            const form = await Form.getForm(class_id, user_id)
             if (!form) {
                 return response.status(404).json({ status: false, message: "Nenhum formulário encontrado." })
             }
@@ -348,12 +352,12 @@ class FormController {
 
     async formCorrection(request, response) {
         try {
-            const { user_id } = request.params
-            if (!validator.isInt(user_id + '', { min: 1 })) {
+            const { class_id } = request.params
+            if (!validator.isInt(class_id + '', { min: 1 })) {
                 return response.status(422).json({ success: false, message: "Professor invalido." })
             }
 
-            const form = await Form.mockCorrection(user_id)
+            const form = await Form.mockCorrection(class_id)
             if (!form) {
                 return response.status(404).json({ status: false, message: "Nenhum formulário encontrado." })
             }
