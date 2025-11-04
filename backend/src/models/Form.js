@@ -426,6 +426,44 @@ class Form {
             return undefined
         }
     }
+
+    async answerExist(answer_id) {
+        try {
+            const result = await knex.select("*").where({id: answer_id}).table("answers_form")
+            return result.length > 0
+        } catch(err) {
+            console.error('Erro ao verificar resposta:', err)
+            return false
+        }
+    }
+
+    async getClassIdByAnswerId(answer_id) {
+        try {
+             const result = await knex.raw(`
+                select
+                    f.class_id
+                from form f
+                inner join answers_form af
+                    on af.form_id = f.id
+                where af.id = ?
+                `, [answer_id])
+            const rows = result.rows
+            return rows.length > 0 ? rows[0] : undefined
+        } catch (err) {
+            console.error("Erro ao buscar id da turma pela resposta: ", err)
+            return undefined
+        }
+    }
+
+    async saveCorrection(data) {
+        try {
+            const ids = await knex("comment_answers").insert(data)
+            return { success: true, ids }
+        } catch (err) {
+            console.error("Erro ao cadastrar correção de formulário:", err)
+            return { success: false }
+        }
+    }
 }
 
 module.exports = new Form()

@@ -376,7 +376,6 @@ class FormController {
             }
 
             const form = await Form.responsesStudents(form_id)
-            console.log(form)
             if (!form) {
                 return response.status(404).json({ status: false, message: "Nenhum formulário encontrado." })
             }
@@ -386,6 +385,47 @@ class FormController {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
+
+    
+    async saveCorrection(request, response) {
+        try {
+            const corrections = request.body; 
+
+            if (!Array.isArray(corrections) || corrections.length === 0) {
+            return response.status(400).json({ status: false, message: "Nenhuma correção enviada." });
+            }
+
+            for (const { answer_id, teacher_id, comment } of corrections) {
+            if (!validator.isInt(answer_id + '', { min: 1 })) {
+                return response.status(422).json({ status: false, message: "Resposta inválida." });
+            }
+
+            if (!validator.isInt(teacher_id + '', { min: 1 })) {
+                return response.status(422).json({ status: false, message: "Professor inválido." });
+            }
+
+            const ansData = await Form.answerExist(answer_id);
+            if (!ansData) {
+                return response.status(404).json({ status: false, message: `Resposta ${answer_id} não encontrada.` });
+            }
+
+            const classData = await Form.getClassIdByAnswerId(answer_id);
+            if (!classData) {
+                return response.status(404).json({ status: false, message: "Nenhuma turma encontrada." });
+            }
+
+            const { class_id } = classData;
+            const data = { answer_id, teacher_id, comment };
+            await Form.saveCorrection(data);
+            }
+
+            return response.status(200).json({ status: true, message: "Correções salvas com sucesso." });
+        } catch (err) {
+            console.error(err);
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." });
+        }
+    }
+
 
 }
 
