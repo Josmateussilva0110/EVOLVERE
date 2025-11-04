@@ -8,54 +8,12 @@ import useFlashMessage from "../../../hooks/useFlashMessage";
 import { Context } from "../../../context/UserContext";
 import Image from "../../form/Image";
 
-
-/**
- * ManagementStudents / Dashboard (componente)
- *
- * Painel principal do estudante que agrega:
- *  - Sidebar de navegação (Meu curso, Turmas, Materiais, Atividades/Simulados, Desempenho, Medalhas);
- *  - Header com informações do usuário e acesso rápido à turma atual;
- *  - Cards de estatísticas, lista de atividades pendentes e área de atualizações/simulados.
- *
- * Comportamento / efeitos colaterais:
- *  - Mantém estado local `activeSection` via useState para controlar a seção ativa;
- *  - Usa `useNavigate` do React Router para roteamento ao alterar a seção;
- *  - Não faz fetchs por conta própria (dados atualmente mockados); pode ser adaptado para consumir
- *    dados de contexto, hooks ou props para uso em produção.
- *
- * Tipos e formato esperados:
- * @typedef {Object} MenuItem
- * @property {string} id - Identificador único da opção (ex: 'curso', 'turmas')
- * @property {string} label - Texto exibido no menu
- * @property {React.ComponentType} icon - Componente de ícone (lucide-react)
- *
- * Estado local relevante:
- * @property {string} activeSection - seção atualmente selecionada no menu
- *
- * Acessibilidade / notas de implementação:
- *  - Recomenda-se adicionar aria-current="true" no item ativo do menu para melhorar a experiência de leitores de tela;
- *  - Ao navegar via `navigate()`, garantir gerenciamento de foco (ex.: foco no título da nova rota) se necessário;
- *  - Componentes interativos são botões; verifique contraste de cores em variações de tema.
- *
- * Exemplo de uso:
- * <ManagementStudents /> // componente autônomo que pode ser usado em uma rota de estudante
- *
- * Observações para desenvolvedores:
- *  - Para testes unitários, simular `useNavigate` e verificar mudanças no `activeSection` ao clicar nos itens do menu;
- *  - Para integração/prod, extraia dados mockados para props ou para um provider/context para facilitar testes e SSR.
- *
- * @component
- * @returns {JSX.Element} Painel do estudante com navegação e widgets informativos.
- */
-
 export default function Dashboard() {
   const [activeSection, setActiveSection] = useState("dashboard");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const navigate = useNavigate(); 
   const { logout, user } = useContext(Context)
 
-
-  // Modal para acessar turma por código
   const [showClassModal, setShowClassModal] = useState(false);
   const [classCode, setClassCode] = useState("");
   const [classError, setClassError] = useState("");
@@ -64,6 +22,10 @@ export default function Dashboard() {
   const { setFlashMessage } = useFlashMessage();
   const [requestUser, setRequestUser] = useState(null)
   const [course_id, setCourse] = useState(null)
+  
+  const [pendingCount, setPendingCount] = useState(0);
+  const [upcomingActivities, setUpcomingActivities] = useState([]);
+  const [isLoadingActivities, setIsLoadingActivities] = useState(true);
 
   useEffect(() => {
     if (showClassModal) {
@@ -73,7 +35,6 @@ export default function Dashboard() {
       setClassCode("");
     }
   }, [showClassModal]);
-
 
   useEffect(() => {
     if (user) {
@@ -87,6 +48,37 @@ export default function Dashboard() {
   }, [user])
 
   useEffect(() => {
+    async function fetchPendingActivities() {
+      setIsLoadingActivities(true);
+      try {
+        const response = await requestData(
+          '/form/student/pending', 
+          "GET",
+          {},
+          true
+        );
+
+        if (response.success === true && response.data && response.data.status === true && response.data.data) {
+          setPendingCount(response.data.data.pendingCount);
+          setUpcomingActivities(response.data.data.upcomingActivities);
+        } else {
+          throw new Error(response.message || "Erro ao buscar atividades");
+        }
+      } catch (error) {
+        console.error("Erro ao buscar atividades pendentes:", error.message);
+        setPendingCount(0);
+        setUpcomingActivities([]);
+      } finally {
+        setIsLoadingActivities(false);
+      }
+    }
+
+    if (user) {
+      fetchPendingActivities();
+    }
+  }, [user]); 
+
+  useEffect(() => {
     const onKey = (e) => {
       if (!showClassModal || isJoining) return;
       if (e.key === "Escape") setShowClassModal(false);
@@ -96,7 +88,6 @@ export default function Dashboard() {
     return () => window.removeEventListener("keydown", onKey);
   }, [showClassModal, classCode, isJoining]);
 
-  // 🔹 Função que define rota de cada item
   const handleNavigation = (id) => {
     setActiveSection(id);
 
@@ -139,15 +130,11 @@ export default function Dashboard() {
       const response = await requestData("/enrollments/join-with-code", "POST", { code }, true);
 
       if (response.success) {
-        // Guarda o resultado da matrícula
         setFlashMessage(response.message || "Matrícula realizada com sucesso!", "success");
         setShowClassModal(false);
         setClassCode("");
         setCourse(response.data?.course?.id)
-
-        // Mostra o novo modal de decisão
         setShowConfirmModal(true);
-
       } else {
         setClassError(response.message || "Código inválido ou erro ao processar.");
         inputRef.current?.focus();
@@ -161,7 +148,6 @@ export default function Dashboard() {
     }
   };
 
-
   const menuItems = [
     { icon: BookOpen, label: "Meu curso", id: "curso" },
     { icon: Users, label: "Turmas", id: "turmas" },
@@ -171,15 +157,41 @@ export default function Dashboard() {
     { icon: Award, label: "Medalhas", id: "medalhas" },
   ];
 
+  const getUrgencyClasses = (color) => {
+    switch (color) {
+      case "red":
+        return {
+          bg: "bg-linear-to-r from-red-50 to-orange-50",
+          border: "border-red-500",
+          iconBg: "text-red-600",
+          badge: "bg-red-500",
+          groupHover: "group-hover:text-red-600"
+        };
+      case "amber":
+        return {
+          bg: "bg-linear-to-r from-amber-50 to-yellow-50",
+          border: "border-amber-500",
+          iconBg: "text-amber-600",
+          badge: "bg-amber-500",
+          groupHover: "group-hover:text-amber-600"
+        };
+      default: 
+        return {
+          bg: "bg-linear-to-r from-blue-50 to-cyan-50",
+          border: "border-blue-500",
+          iconBg: "text-blue-600",
+          badge: "bg-blue-500",
+          groupHover: "group-hover:text-blue-600"
+        };
+    }
+  };
+
   return (
     <div className="flex h-screen bg-linear-to-br from-blue-950 via-indigo-950 to-blue-900">
-      {/* Sidebar */}
       <aside className="w-64 bg-blue-950 flex flex-col shadow-2xl">
-        {/* Logo */}
         <div className="flex items-center justify-center py-6 border-b border-blue-800">
           <div className="relative">
             <div className="w-16 h-16 bg-linear-to-br from-blue-400 to-cyan-400 rounded-2xl flex items-center justify-center transform rotate-12 shadow-lg shadow-blue-500/50">
-
               {requestUser?.photo ? (
                 <Image
                   src={`${import.meta.env.VITE_BASE_URL}/${requestUser.photo}`}
@@ -194,14 +206,13 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Menu */}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {menuItems.map((item) => {
             const Icon = item.icon;
             return (
               <button
                 key={item.id}
-                onClick={() => handleNavigation(item.id)} // 🔹 Chama a navegação
+                onClick={() => handleNavigation(item.id)} 
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${activeSection === item.id
                     ? "bg-linear-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 scale-105"
                     : "text-blue-200 hover:bg-blue-900/50 hover:text-white hover:translate-x-1"
@@ -225,7 +236,6 @@ export default function Dashboard() {
           </div>
         </nav>
 
-        {/* Logout */}
         <div className="p-3 border-t border-blue-800">
           <button onClick={() => logout()} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all font-medium text-sm hover:scale-105">
             <LogOut size={20} />
@@ -234,9 +244,7 @@ export default function Dashboard() {
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 overflow-y-auto bg-linear-to-br from-gray-50 to-blue-50">
-        {/* Header */}
         <header className="bg-white/80 backdrop-blur-xl border-b border-gray-200 px-8 py-6 shadow-sm">
           <div className="flex justify-between items-center">
             <div>
@@ -245,8 +253,6 @@ export default function Dashboard() {
               </h2>
               <p className="text-gray-600">Continue sua jornada de aprendizado hoje! 🚀</p>
             </div>
-
-            {/* Right controls: Access current class button */}
             <div className="flex items-center gap-4">
               <button
                 onClick={() => { setShowClassModal(true); }}
@@ -260,17 +266,13 @@ export default function Dashboard() {
           </div>
         </header>
 
-        {/* Modal: Inserir código da turma (com ajustes no botão)*/}
         {showClassModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6"> {/* <--- VERIFIQUE ESTAS CLASSES */}
-            {/* Overlay de fundo */}
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
             <div
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm" // <--- E ESTAS CLASSES PARA O OVERLAY
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm"
               onClick={() => setShowClassModal(false)}
             ></div>
-
-            {/* Conteúdo do Modal */}
-            <div className="relative w-full max-w-md bg-white rounded-2xl p-6 shadow-xl z-10 animate-fade-in-up"> {/* <--- Conteúdo do Modal */}
+            <div className="relative w-full max-w-md bg-white rounded-2xl p-6 shadow-xl z-10 animate-fade-in-up">
               <h3 className="text-2xl font-bold text-gray-900 mb-3">Acessar Turma</h3>
               <p className="text-gray-600 mb-5">
                 Digite o código da turma que deseja acessar.
@@ -293,7 +295,7 @@ export default function Dashboard() {
                 <p className="mt-2 text-sm text-red-600">{classError}</p>
               )}
 
-              <div className="mt-6 flex justify-end gap-3"> {/* <--- E TAMBÉM ESTAS CLASSES PARA OS BOTÕES */}
+              <div className="mt-6 flex justify-end gap-3">
                 <button
                   onClick={() => setShowClassModal(false)}
                   className="px-5 py-2.5 rounded-lg font-semibold text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
@@ -314,7 +316,6 @@ export default function Dashboard() {
         )}
 
         <div className="p-8">
-          {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all hover:-translate-y-1">
               <div className="flex items-center gap-4 mb-4">
@@ -348,75 +349,105 @@ export default function Dashboard() {
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-bold text-orange-600">2</span>
-                  <span className="text-gray-500 text-sm">urgentes</span>
+                  <span className="text-4xl font-bold text-orange-600">
+                    {isLoadingActivities ? "..." : pendingCount}
+                  </span>
+                  <span className="text-gray-500 text-sm">
+                    {pendingCount === 1 ? "atividade" : "atividades"}
+                  </span>
                 </div>
                 <div className="p-2 bg-red-100 rounded-lg">
                   <Clock className="text-red-600" size={20} />
                 </div>
               </div>
             </div>
+            
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all hover:-translate-y-1">
+               <div className="flex items-center gap-4 mb-4">
+                 <div className="p-3 bg-linear-to-br from-green-100 to-green-200 rounded-xl">
+                   <Users className="text-green-600" size={24} />
+                 </div>
+                 <div>
+                   <h3 className="font-bold text-gray-900 text-lg">Minhas Turmas</h3>
+                   <p className="text-sm text-gray-500">Ver progresso</p>
+                 </div>
+               </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex -space-x-2">
+                    <img className="w-8 h-8 rounded-full border-2 border-white" src="https://via.placeholder.com/50" alt="user" />
+                    <img className="w-8 h-8 rounded-full border-2 border-white" src="https://via.placeholder.com/50" alt="user" />
+                    <span className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600">+3</span>
+                  </div>
+                 <ChevronRight className="text-gray-400" size={20} />
+               </div>
+            </div>
+
           </div>
 
           <div className="mb-8">
-            {/* Atividades Pendentes */}
             <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-bold text-gray-900">Atividades Pendentes</h3>
               </div>
-              <div className="space-y-4">
-                <div className="bg-linear-to-r from-red-50 to-orange-50 rounded-xl p-5 border-l-4 border-red-500 hover:shadow-md transition-all cursor-pointer group">
-                  <div className="flex items-start justify-between">
-                    <div className="flex gap-4">
-                      <div className="p-3 bg-white rounded-lg shadow-sm">
-                        <FileText className="text-red-600" size={24} />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="px-3 py-1 bg-red-500 text-white rounded-lg text-xs font-bold uppercase tracking-wide">Urgente</span>
-                        </div>
-                        <h4 className="text-gray-900 font-bold text-lg mb-2">Prova</h4>
-                        <p className="text-gray-600 text-sm mb-3">Deve ser feita até dia 20 de maio</p>
-                        <div className="flex items-center gap-4">
-                          <span className="flex items-center gap-1.5 text-sm text-gray-500">
-                            <Clock size={16} />
-                            5 dias restantes
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <ChevronRight className="text-gray-400 group-hover:translate-x-2 group-hover:text-red-600 transition-all" size={24} />
-                  </div>
+              
+              {isLoadingActivities ? (
+                <div className="text-center py-8 text-gray-600">
+                  <Clock className="mx-auto animate-spin" size={24} />
+                  <p className="mt-2">Buscando atividades...</p>
                 </div>
-
-                <div className="bg-linear-to-r from-amber-50 to-yellow-50 rounded-xl p-5 border-l-4 border-amber-500 hover:shadow-md transition-all cursor-pointer group">
-                  <div className="flex items-start justify-between">
-                    <div className="flex gap-4">
-                      <div className="p-3 bg-white rounded-lg shadow-sm">
-                        <ClipboardList className="text-amber-600" size={24} />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="px-3 py-1 bg-amber-500 text-white rounded-lg text-xs font-bold uppercase tracking-wide">Importante</span>
-                        </div>
-                        <h4 className="text-gray-900 font-bold text-lg mb-2">Entrega de trabalho</h4>
-                        <p className="text-gray-600 text-sm mb-3">Deve ser feita até dia 22 de maio</p>
-                        <div className="flex items-center gap-4">
-                          <span className="flex items-center gap-1.5 text-sm text-gray-500">
-                            <Clock size={16} />
-                            7 dias restantes
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <ChevronRight className="text-gray-400 group-hover:translate-x-2 group-hover:text-amber-600 transition-all" size={24} />
-                  </div>
+              ) : upcomingActivities.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <Zap size={24} className="mx-auto mb-2 text-green-500" />
+                  <h4 className="font-bold text-lg text-gray-800">Tudo em dia!</h4>
+                  <p>Você não possui nenhuma atividade pendente no momento.</p>
                 </div>
-              </div>
+              ) : (
+                <div className="space-y-4">
+                  {upcomingActivities.map(activity => {
+                    const colors = getUrgencyClasses(activity.urgencyColor);
+                    return (
+                      <div 
+                        key={activity.id}
+                        className={`${colors.bg} rounded-xl p-5 border-l-4 ${colors.border} hover:shadow-md transition-all cursor-pointer group`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex gap-4">
+                            <div className="p-3 bg-white rounded-lg shadow-sm">
+                              <FileText className={colors.iconBg} size={24} />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className={`${colors.badge} text-white rounded-lg text-xs font-bold uppercase tracking-wide px-3 py-1`}>
+                                  {activity.urgencyLabel}
+                                </span>
+                              </div>
+                              <h4 className="text-gray-900 font-bold text-lg mb-2">
+                                {activity.title}
+                              </h4>
+                              <p className="text-gray-600 text-sm mb-3">
+                                {activity.description}
+                              </p>
+                              <div className="flex items-center gap-4">
+                                <span className="flex items-center gap-1.5 text-sm text-gray-500">
+                                  <Clock size={16} />
+                                  {activity.daysRemaining <= 0 ? "Entrega hoje" : `${activity.daysRemaining} dias restantes`}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <ChevronRight 
+                            className={`text-gray-400 group-hover:translate-x-2 ${colors.groupHover} transition-all`} 
+                            size={24} 
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Atualizações e Simulado */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
               <h3 className="text-2xl font-bold text-gray-900 mb-6">Atualizações Recentes</h3>

@@ -5,6 +5,35 @@ const Class = require("../models/Class")
 const validator = require('validator')
 
 /**
+ * Calcula a diferença de dias entre duas datas.
+ */
+function getDaysRemaining(deadline) {
+    const deadLineDate = new Date(deadline);
+    const today = new Date();
+    
+    // Zera as horas para comparar apenas os dias
+    deadLineDate.setHours(23, 59, 59, 999);
+    today.setHours(0, 0, 0, 0);
+
+    const diffTime = deadLineDate.getTime() - today.getTime();
+    if (diffTime < 0) return -1; // Já venceu
+
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+}
+
+/**
+ * Define a urgência baseada nos dias restantes.
+ */
+function getUrgency(days) {
+    if (days <= 0) return { label: "Vencido", color: "red" };
+    if (days <= 5) return { label: "Urgente", color: "red" };
+    if (days <= 10) return { label: "Importante", color: "amber" };
+    return { label: "Normal", color: "blue" };
+}
+
+
+/**
  * @class FormController
  * @classdesc Controlador responsável pelas operações relacionadas aos formulários,
  * incluindo criação, listagem, visualização e exclusão, bem como o relacionamento
@@ -386,6 +415,61 @@ class FormController {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
+
+    /**
+     * @summary Obtém as atividades pendentes para o dashboard do aluno logado.
+     * @param {import("express").Request} req - O objeto da requisição Express.
+     * @param {import("express").Response} res - O objeto da resposta Express.
+     * @returns {Promise<void>}
+     */
+    async getStudentPendingForms(req, res) {
+        try {
+            const student_id = req.session.user.id;
+            if (!student_id) {
+                return res.status(401).json({ status: false, message: "Acesso não autorizado." });
+            }
+
+            const forms = await Form.getPendingForStudent(Number(student_id));
+            if (forms === undefined) {
+                return res.status(500).json({ status: false, message: "Erro ao consultar atividades." });
+            }
+
+            // Formata os dados para o frontend
+            const upcomingActivities = forms.map(form => {
+                const daysRemaining = getDaysRemaining(form.deadline);
+                const urgency = getUrgency(daysRemaining);
+                
+                return {
+                    id: form.id,
+                    title: form.title,
+                    description: form.discipline_name || form.description, // Mostra nome da disciplina
+                    daysRemaining: daysRemaining,
+                    urgencyLabel: urgency.label,
+                    urgencyColor: urgency.color
+                };
+            }).slice(0, 3); // Pega apenas as 3 mais próximas
+
+            // Dados para os cards de estatística
+            const pendingCount = forms.length;
+            
+            // Retorna no formato "joguinho" .data.data que já conhecemos
+            res.status(200).json({
+                status: true,
+                data: {
+                    pendingCount: pendingCount,
+                    upcomingActivities: upcomingActivities
+                }
+            });
+
+        } catch (error) {
+            console.error('Erro ao buscar atividades pendentes:', error);
+            res.status(500).json({ 
+                status: false, 
+                message: 'Erro interno do servidor.' 
+            });
+        }
+    }
+
 
 }
 
