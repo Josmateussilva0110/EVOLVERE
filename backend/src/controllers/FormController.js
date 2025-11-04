@@ -290,15 +290,31 @@ class FormController {
         try {
             const { form_id, user_id, answers } = request.body
             if (!validator.isInt(form_id + '', { min: 1 })) {
-                return response.status(422).json({ success: false, message: "Formulário inválido." })
+                return response.status(422).json({ status: false, message: "Formulário inválido." })
             }
 
             if (!validator.isInt(user_id + '', { min: 1 })) {
-                return response.status(422).json({ success: false, message: "Usuário inválido." })
+                return response.status(422).json({ status: false, message: "Usuário inválido." })
             }
 
             if (!Array.isArray(answers) || answers.length === 0) {
-                return response.status(422).json({ success: false, message: "Nenhuma resposta enviada." })
+                return response.status(422).json({ status: false, message: "Nenhuma resposta enviada." })
+            }
+
+            const formData = await Form.getFormById(form_id)
+            if (!formData) {
+                return response.status(404).json({ status: false, message: "Formulário não encontrado." });
+            }
+
+            const deadline = new Date(formData.deadline)
+            const now = new Date()
+
+
+            if (now > deadline) {
+                return response.status(403).json({
+                    status: false,
+                    message: "O tempo para envio deste simulado já expirou."
+                })
             }
 
 

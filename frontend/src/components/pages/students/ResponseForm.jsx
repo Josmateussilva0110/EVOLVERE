@@ -242,14 +242,27 @@ export default function ResponseForm() {
                     ))}
                 </div>
 
+                {/* Aviso de tempo esgotado */}
+                {timeLeft === 0 && (
+                <div className="text-center mt-10 text-red-600 font-semibold">
+                    Tempo esgotado! Você não pode mais enviar respostas.
+                </div>
+                )}
+
+
                 {/* Botão de envio */}
                 <div className="flex justify-end mt-10">
                     <button
                         onClick={handleSubmit}
-                        className="px-6 py-2.5 bg-linear-to-r from-blue-500 to-cyan-400 text-white font-medium rounded-2xl hover:from-blue-600 hover:to-cyan-500 shadow-md hover:shadow-lg transition-all"
-                    >
+                        disabled={timeLeft === 0}
+                        className={`px-6 py-2.5 rounded-2xl font-medium shadow-md transition-all 
+                            ${timeLeft === 0 
+                            ? "bg-gray-300 text-gray-500 cursor-not-allowed" 
+                            : "bg-linear-to-r from-blue-500 to-cyan-400 text-white hover:from-blue-600 hover:to-cyan-500"}`}
+                        >
                         Enviar
                     </button>
+
                 </div>
             </div>
         </div>

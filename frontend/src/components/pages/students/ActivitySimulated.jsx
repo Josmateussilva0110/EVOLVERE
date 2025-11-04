@@ -367,7 +367,7 @@ export default function ActivitySimulated() {
           <Search className="text-gray-400" size={40} strokeWidth={2} />
         </div>
         <h3 className="text-2xl font-bold text-gray-900 mb-3">
-          Nenhuma atividade encontrada
+          Nenhum simulado encontrado
         </h3>
         <p className="text-gray-600 text-lg">Tente ajustar sua busca ou filtros</p>
       </div>
