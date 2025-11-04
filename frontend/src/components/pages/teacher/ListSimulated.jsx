@@ -1,8 +1,7 @@
-import { Eye, ChevronLeft, ChevronRight, BookOpen, Search, XCircle, FilePlus } from "lucide-react"
+import { Eye, ChevronLeft, ChevronRight, BookOpen, Search, XCircle } from "lucide-react"
 import { useState, useEffect, useContext } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { Context } from "../../../context/UserContext"
-import useFlashMessage from "../../../hooks/useFlashMessage"
 import requestData from "../../../utils/requestApi"
 
 /**
@@ -119,12 +118,12 @@ export default function SimuladosList() {
   const navigate = useNavigate()
   const { user } = useContext(Context)
   const [form, setForm] = useState([])
+  const { class_id } = useParams()
 
 
   useEffect(() => {
     async function fetchForm() {
-      const response = await requestData(`/form/correction/${user.id}`, 'GET', {}, true)
-      console.log(response)
+      const response = await requestData(`/form/correction/${class_id}`, 'GET', {}, true)
 
       if (response && response.success) {
         const rawData = response.data;

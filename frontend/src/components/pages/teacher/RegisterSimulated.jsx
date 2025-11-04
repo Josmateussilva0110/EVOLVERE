@@ -105,13 +105,13 @@ export default function CreateQuiz() {
 
   useEffect(() => {
     async function fetchRelations() {
-      const response = await requestData(`/form/relations/${user.id}`, "GET", {}, true);
+      const response = await requestData(`/form/relations/${class_id}`, "GET", {}, true);
       if (response.success) {
-        setSubjectId(response.data.subject_id.id);
+        setSubjectId(response.data.subject_id);
       }
     }
     fetchRelations();
-  }, [user]);
+  }, [class_id]);
 
   /** Add a new question */
   const addQuestion = () => {

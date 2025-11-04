@@ -408,12 +408,12 @@ class Subject {
      * // Caso o usuário não possua disciplina:
      * // null
      */
-    async subjectUser(id) {
+    async subjectUser(class_id) {
         try {
             const result = await knex
-            .select("id")
-            .from("subjects")
-            .where({ professional_id: id })
+            .select("subject_id")
+            .from("classes")
+            .where({ id: class_id })
             .first() // pega apenas o primeiro registro
 
             return result ? result: null

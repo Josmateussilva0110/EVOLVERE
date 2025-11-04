@@ -281,7 +281,7 @@ class Form {
      * const data = await Form.getForm(2)
      * console.log(data.class_name) // "Turma A"
      */
-    async getForm(class_id) {
+    async getForm(class_id, user_id) {
         try {
             const classInfo = await knex
                 .select("id", "name")
@@ -308,8 +308,9 @@ class Form {
                     SELECT 1
                     FROM answers_form af
                     WHERE af.form_id = f.id
+                    AND af.user_id = ?
                 )
-            `, [class_id])
+                `, [class_id, user_id])
 
             const forms = result.rows
             return {
@@ -374,7 +375,7 @@ class Form {
         }
     }
 
-    async mockCorrection(user_id) {
+    async mockCorrection(class_id) {
         try {
              const result = await knex.raw(`
                 select distinct on (af.form_id)
@@ -388,8 +389,8 @@ class Form {
                     on f.id = af.form_id
                 inner join subjects s
                     on s.id = f.subject_id
-                where f.created_by = ?
-            `, [user_id])
+                where f.class_id = ? and af.open_answer is not null
+            `, [class_id])
             const rows = result.rows
             return rows.length > 0 ? rows : undefined
         } catch (err) {

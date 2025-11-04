@@ -10,10 +10,11 @@ import {
   Play,
   BookOpen
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import requestData from "../../../utils/requestApi";
 import formatDateRequests from "../../../utils/formatDateRequests";
+import { Context } from "../../../context/UserContext"
 
 
 /**
@@ -49,6 +50,7 @@ import formatDateRequests from "../../../utils/formatDateRequests";
 export default function ActivitySimulated() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterActive, setFilterActive] = useState("todas");
+  const { user } = useContext(Context)
   const [form, setForm] = useState([]);
   const { class_id } = useParams();
   const [class_name, setClassName] = useState(null)
@@ -88,10 +90,12 @@ export default function ActivitySimulated() {
 
   // 🔹 Buscar formulários da turma
   useEffect(() => {
+    const data = {
+      user_id: user.id
+    }
     async function fetchForm() {
-      const response = await requestData(`/form/class/${class_id}`, "GET", {}, true);
-      console.log(response);
-      setClassName(response.data.class_name)
+      const response = await requestData(`/form/class/${class_id}`, "POST", data, true);
+      setClassName(response.data?.class_name)
 
       if (response.success && response.data?.forms) {
         const data = response.data.forms.map((item) => {
@@ -119,7 +123,7 @@ export default function ActivitySimulated() {
       }
     }
     fetchForm();
-  }, [class_id]);
+  }, [class_id, user]);
 
   // 🔹 Filtragem dinâmica
   const atividadesFiltradas = form.filter((atividade) => {
