@@ -44,7 +44,7 @@ function RegisterClasses({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md px-4">
       <div className="bg-gray-800/95 backdrop-blur-sm rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-700/50">
         {/* Cabeçalho */}
-        <div className="bg-gradient-to-r from-gray-700 to-gray-600 px-6 py-5 flex items-center justify-between border-b border-gray-700/50">
+        <div className="bg-linear-to-r from-gray-700 to-gray-600 px-6 py-5 flex items-center justify-between border-b border-gray-700/50">
           <div>
             <h3 className="text-white font-bold text-xl">Adicionar Turma</h3>
             <p className="text-gray-300 text-sm mt-0.5">Crie uma nova turma para a disciplina</p>

@@ -168,15 +168,6 @@ export default function SimuladosList() {
             <h1 className="text-3xl font-bold text-white">Meus Simulados</h1>
             <p className="text-slate-400 mt-1">Visualize, filtre e gerencie suas avaliações.</p>
           </div>
-          <div className="flex items-center gap-3">
-            <button
-              className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 shadow-lg shadow-yellow-400/20 transition-colors"
-              onClick={() => navigate('/teacher/simulated/register')}
-            >
-              <FilePlus className="w-4 h-4 text-blue-700" />
-              Criar Novo Simulado
-            </button>
-          </div>
         </header>
 
         {/* Container da Tabela e Filtros */}
