@@ -157,7 +157,7 @@ class Material {
      * @param {number} student_id - ID do aluno.
      * @returns {Promise<Array<Object>|undefined>} Lista de materiais formatada.
      */
-    async getAllMaterialsForStudent(student_id) {
+ async getAllMaterialsForStudent(student_id) {
         try {
             const query = knex('materials as m')
                 // Junta com 'subjects' para pegar o nome da disciplina
@@ -165,7 +165,6 @@ class Material {
                 .select(
                     'm.id',
                     'm.title',
-                    // Usa a mesma lógica CASE do seu getMaterialsByIdClass
                     knex.raw(`
                         CASE 
                             WHEN m.type = 1 THEN 'PDF'
@@ -174,39 +173,44 @@ class Material {
                             ELSE 'Outro'
                         END as type_file
                     `),
-                    'm.archive', // O caminho do arquivo para download
+                    'm.archive',
                     'm.updated_at',
                     's.name as discipline_name'
                 )
-                // Filtra materiais que são da origem "turma"
-                .where('m.origin', 2)
-                // Onde o 'class_id' do material está na lista de turmas 
-                // em que o aluno (student_id) está matriculado
-                .whereIn('m.class_id', function() {
-                    this.select('cs.class_id')
+                
+                // 1. Filtra APENAS materiais globais (origin = 1)
+                .where('m.origin', 1) 
+                
+                // 2. CORREÇÃO AQUI:
+                // Filtra APENAS materiais cujo 'subject_id'
+                // esteja na lista de disciplinas que o aluno cursa.
+                .whereIn('m.subject_id', function() { 
+                    this.select('c.subject_id') // <-- Mudamos de class_id para subject_id
+                        .distinct() 
                         .from('class_student as cs')
+                        .join('classes as c', 'c.id', 'cs.class_id') // <-- Precisamos do JOIN com 'classes'
                         .where('cs.student_id', student_id);
                 })
                 .orderBy('m.updated_at', 'desc');
 
             const result = await query;
             
-            // Mapeia os dados para o formato que o frontend espera
+            // 3. Formatação (sem mudanças)
             const formattedResult = result.map(material => ({
                 id: material.id,
                 titulo: material.title,
-                tipo: material.type_file, // 'PDF', 'DOC', 'PPT', etc.
-                tamanho: "N/D", // A tabela 'materials' não tem tamanho.
+                tipo: material.type_file, 
+                tamanho: "N/D",
                 data: material.updated_at,
                 disciplina: material.discipline_name,
                 archive: material.archive,
-                categoria: material.type_file.toLowerCase() // 'pdf', 'doc', etc.
+                categoria: material.type_file.toLowerCase()
             }));
 
             return formattedResult;
 
         } catch (err) {
-            console.error("Erro ao buscar todos os materiais do aluno:", err);
+            console.error("Erro ao buscar materiais globais do aluno:", err);
             return undefined;
         }
     }
