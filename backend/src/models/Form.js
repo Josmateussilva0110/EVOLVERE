@@ -446,7 +446,7 @@ class Form {
                 select distinct on (af.form_id)
                     af.form_id,
                     f.title,
-                    af.corrected as status,
+                    f.status,
                     f.subject_id,
                     s.name
                 from answers_form af
@@ -489,6 +489,71 @@ class Form {
         } catch (err) {
             console.error("Erro ao buscar respostas para correção: ", err)
             return undefined
+        }
+    }
+
+    async answerExist(answer_id) {
+        try {
+            const result = await knex.select("*").where({id: answer_id}).table("answers_form")
+            return result.length > 0
+        } catch(err) {
+            console.error('Erro ao verificar resposta:', err)
+            return false
+        }
+    }
+
+    async getClassIdByAnswerId(answer_id) {
+        try {
+             const result = await knex.raw(`
+                select
+                    f.class_id,
+                    f.id as form_id
+                from form f
+                inner join answers_form af
+                    on af.form_id = f.id
+                where af.id = ?
+                `, [answer_id])
+            const rows = result.rows
+            return rows.length > 0 ? rows[0] : undefined
+        } catch (err) {
+            console.error("Erro ao buscar id da turma pela resposta: ", err)
+            return undefined
+        }
+    }
+
+    async saveCorrection(data) {
+        try {
+            const ids = await knex("comment_answers").insert(data)
+            return { success: true, ids }
+        } catch (err) {
+            console.error("Erro ao cadastrar correção de formulário:", err)
+            return { success: false }
+        }
+    }
+
+    async updateCorrection(answer_id, status) {
+        try {
+            const updated_at = knex.fn.now()
+            const result = await knex("answers_form")
+                .where({ id: answer_id })
+                .update({ corrected: status, updated_at})
+            return result > 0
+        } catch (err) {
+            console.error("Erro ao atualizar resposta: ", err)
+            return false
+        }
+    }
+
+    async updateStatusForm(form_id) {
+        try {
+            const updated_at = knex.fn.now()
+            const result = await knex("form")
+                .where({ id: form_id })
+                .update({ status: 2, updated_at})
+            return result > 0
+        } catch (err) {
+            console.error("Erro ao atualizar resposta: ", err)
+            return false
         }
     }
 }

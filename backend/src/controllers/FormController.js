@@ -405,7 +405,6 @@ class FormController {
             }
 
             const form = await Form.responsesStudents(form_id)
-            console.log(form)
             if (!form) {
                 return response.status(404).json({ status: false, message: "Nenhum formulário encontrado." })
             }
@@ -416,6 +415,50 @@ class FormController {
         }
     }
 
+    
+    async saveCorrection(request, response) {
+        try {
+            const corrections = request.body
+            let id_class = null
+
+            for (const { answer_id, teacher_id, comment, status } of corrections) {
+                if (!validator.isInt(answer_id + '', { min: 1 })) {
+                    return response.status(422).json({ status: false, message: "Resposta inválida." })
+                }
+
+                if (!validator.isInt(teacher_id + '', { min: 1 })) {
+                    return response.status(422).json({ status: false, message: "Professor inválido." })
+                }
+
+                const ansData = await Form.answerExist(answer_id)
+                if (!ansData) {
+                    return response.status(404).json({ status: false, message: `Resposta ${answer_id} não encontrada.` })
+                }
+
+                const classData = await Form.getClassIdByAnswerId(answer_id)
+                if (!classData) {
+                    return response.status(404).json({ status: false, message: "Nenhuma turma encontrada." })
+                }
+
+                const { class_id, form_id } = classData
+                id_class = class_id
+
+                if(!comment) {
+                    await Form.updateCorrection(answer_id, status)
+                    await Form.updateStatusForm(form_id)
+                }
+                else {
+                    const data = { answer_id, teacher_id, comment }
+                    await Form.saveCorrection(data)
+                    await Form.updateCorrection(answer_id, status)
+                    await Form.updateStatusForm(form_id)
+                }
+            }
+
+            return response.status(200).json({ status: true, message: "Correções salvas com sucesso.", id_class })
+        } catch (err) {
+            console.error(err);
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
     /**
      * @summary Obtém as atividades pendentes para o dashboard do aluno logado.
      * @param {import("express").Request} req - O objeto da requisição Express.

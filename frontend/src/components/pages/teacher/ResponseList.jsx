@@ -1,15 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react"
 import {
   Check,
   X,
   Circle,
   CheckCircle,     // Ícone melhorado para limpar
   Loader2,    // Ícone para o estado "salvando"
-} from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+} from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 import requestData from "../../../utils/requestApi"
-import { useParams } from "react-router-dom"
-
+import { useParams, useNavigate } from "react-router-dom"
+import { Context } from "../../../context/UserContext"
+import useFlashMessage from "../../../hooks/useFlashMessage"
 
 /**
  * CorrigirSimulado
@@ -37,13 +38,16 @@ import { useParams } from "react-router-dom"
  * @returns {JSX.Element} Interface completa de correção do simulado.
  */
 export default function CorrigirSimulado() {
-    const [correcao, setCorrecao] = useState({});
+  const [correcao, setCorrecao] = useState({});
   const [comentarios, setComentarios] = useState({});
   const [alunoSelecionadoId, setAlunoSelecionadoId] = useState(null);
   const [mostrarResultado, setMostrarResultado] = useState(false);
   const { form_id } = useParams();
   const [form, setForm] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useContext(Context)
+  const { setFlashMessage } = useFlashMessage()
+  const navigate = useNavigate()
 
   useEffect(() => {
     async function fetchForm() {
@@ -99,14 +103,61 @@ export default function CorrigirSimulado() {
   const progresso = total > 0 ? Math.round((corrigidas / total) * 100) : 0;
 
   const resultadoFinal = Object.values(alunosAgrupados).flatMap((aluno) =>
-    aluno.respostas.map((resp) => ({
-      aluno: aluno.username,
-      pergunta: resp.question_text,
-      resposta: resp.open_answer,
-      status: correcao[resp.question_id] || "Pendente",
-      comentario: comentarios[resp.question_id] || "—",
-    }))
+    aluno.respostas.map((resp) => {
+      const key = `${Object.keys(alunosAgrupados).find(
+        (id) => alunosAgrupados[id].username === aluno.username
+      )}-${resp.question_id}`;
+      return {
+        aluno: aluno.username,
+        pergunta: resp.question_text,
+        resposta: resp.open_answer,
+        status: correcao[key] || "Pendente",
+        comentario: comentarios[key] || "—",
+      };
+    })
   );
+
+
+
+  async function handleSubmit() {
+    try {
+      const payload = form.map((resposta) => {
+      const key = `${resposta.user_id}-${resposta.question_id}`
+      const status = correcao[key] === "correto" ? true
+                   : correcao[key] === "incorreto" ? false
+                   : null
+
+      return {
+        answer_id: resposta.answer_id,
+        teacher_id: user.id,
+        comment: comentarios[key] || "",
+        status, 
+      };
+    });
+
+
+      console.log(payload)
+
+      const response = await requestData(
+        "/form/save/correction",
+        "POST",
+        payload,
+        true
+      );
+
+      if (response.success) {
+        setFlashMessage(response.data.message, 'success')
+        navigate(`/teacher/simulated/list/${response.data.id_class}`)
+        setMostrarResultado(false);
+      } else {
+        setFlashMessage(response.message, 'error')
+      }
+    } catch (error) {
+      console.error("Erro ao enviar correção:", error);
+      alert("Erro interno ao enviar correção.");
+    }
+  };
+
 
   if (loading) {
     return (
@@ -360,13 +411,10 @@ export default function CorrigirSimulado() {
                   Voltar
                 </button>
                 <button
-                  onClick={() => {
-                    alert("Correção salva com sucesso! ✅");
-                    setMostrarResultado(false);
-                  }}
+                  onClick={handleSubmit}
                   className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-linear-to-r from-yellow-400 to-yellow-500 text-slate-900 hover:from-yellow-500 hover:to-yellow-600 transition shadow"
                 >
-                  Salvar e Notificar Alunos
+                  Salvar
                 </button>
               </div>
             </motion.div>

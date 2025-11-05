@@ -79,7 +79,7 @@ import requestData from "../../../utils/requestApi"
  */
 const StatusBadge = ({ status }) => {
   const baseClasses = "px-3 py-1 text-xs font-bold rounded-full inline-flex items-center gap-1.5";
-  if (status === "Corrigido") {
+  if (status === 2) {
     return (
       <span className={`${baseClasses} bg-green-500/10 text-green-400`}>
         <span className="w-2 h-2 rounded-full bg-green-400"></span>
@@ -124,6 +124,7 @@ export default function SimuladosList() {
   useEffect(() => {
     async function fetchForm() {
       const response = await requestData(`/form/correction/${class_id}`, 'GET', {}, true)
+      console.log(response)
 
       if (response && response.success) {
         const rawData = response.data;
