@@ -459,6 +459,9 @@ class FormController {
         } catch (err) {
             console.error(err);
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
     /**
      * @summary Obtém as atividades pendentes para o dashboard do aluno logado.
      * @param {import("express").Request} req - O objeto da requisição Express.
