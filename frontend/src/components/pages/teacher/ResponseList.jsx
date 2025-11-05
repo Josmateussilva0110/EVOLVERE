@@ -8,9 +8,9 @@ import {
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import requestData from "../../../utils/requestApi"
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import { Context } from "../../../context/UserContext"
-
+import useFlashMessage from "../../../hooks/useFlashMessage"
 
 /**
  * CorrigirSimulado
@@ -46,6 +46,8 @@ export default function CorrigirSimulado() {
   const [form, setForm] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useContext(Context)
+  const { setFlashMessage } = useFlashMessage()
+  const navigate = useNavigate()
 
   useEffect(() => {
     async function fetchForm() {
@@ -101,34 +103,40 @@ export default function CorrigirSimulado() {
   const progresso = total > 0 ? Math.round((corrigidas / total) * 100) : 0;
 
   const resultadoFinal = Object.values(alunosAgrupados).flatMap((aluno) =>
-    aluno.respostas.map((resp) => ({
-      aluno: aluno.username,
-      pergunta: resp.question_text,
-      resposta: resp.open_answer,
-      status: correcao[resp.question_id] || "Pendente",
-      comentario: comentarios[resp.question_id] || "—",
-    }))
+    aluno.respostas.map((resp) => {
+      const key = `${Object.keys(alunosAgrupados).find(
+        (id) => alunosAgrupados[id].username === aluno.username
+      )}-${resp.question_id}`;
+      return {
+        aluno: aluno.username,
+        pergunta: resp.question_text,
+        resposta: resp.open_answer,
+        status: correcao[key] || "Pendente",
+        comentario: comentarios[key] || "—",
+      };
+    })
   );
+
 
 
   async function handleSubmit() {
     try {
-      // Monta lista de correções com base nos comentários existentes
-      const payload = Object.entries(comentarios).map(([key, comentario]) => {
-        const [userId, questionId] = key.split("-");
-        const resposta = form.find(
-          (r) =>
-            r.user_id === parseInt(userId) && r.question_id === parseInt(questionId)
-        );
+      const payload = form.map((resposta) => {
+      const key = `${resposta.user_id}-${resposta.question_id}`
+      const status = correcao[key] === "correto" ? true
+                   : correcao[key] === "incorreto" ? false
+                   : null
 
-        return {
-          answer_id: resposta?.answer_id, 
-          teacher_id: user.id,
-          comment: comentario,
-        };
-      });
+      return {
+        answer_id: resposta.answer_id,
+        teacher_id: user.id,
+        comment: comentarios[key] || "",
+        status, 
+      };
+    });
 
-      console.log("Enviando correções:", payload);
+
+      console.log(payload)
 
       const response = await requestData(
         "/form/save/correction",
@@ -138,10 +146,11 @@ export default function CorrigirSimulado() {
       );
 
       if (response.success) {
-        alert("Correção salva com sucesso! ✅");
+        setFlashMessage(response.data.message, 'success')
+        navigate(`/teacher/simulated/list/${response.data.id_class}`)
         setMostrarResultado(false);
       } else {
-        alert("Erro ao salvar correção: " + response.message);
+        setFlashMessage(response.message, 'error')
       }
     } catch (error) {
       console.error("Erro ao enviar correção:", error);
@@ -405,7 +414,7 @@ export default function CorrigirSimulado() {
                   onClick={handleSubmit}
                   className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-linear-to-r from-yellow-400 to-yellow-500 text-slate-900 hover:from-yellow-500 hover:to-yellow-600 transition shadow"
                 >
-                  Salvar e Notificar Alunos
+                  Salvar
                 </button>
               </div>
             </motion.div>

@@ -381,7 +381,7 @@ class Form {
                 select distinct on (af.form_id)
                     af.form_id,
                     f.title,
-                    af.corrected as status,
+                    f.status,
                     f.subject_id,
                     s.name
                 from answers_form af
@@ -441,7 +441,8 @@ class Form {
         try {
              const result = await knex.raw(`
                 select
-                    f.class_id
+                    f.class_id,
+                    f.id as form_id
                 from form f
                 inner join answers_form af
                     on af.form_id = f.id
@@ -462,6 +463,32 @@ class Form {
         } catch (err) {
             console.error("Erro ao cadastrar correção de formulário:", err)
             return { success: false }
+        }
+    }
+
+    async updateCorrection(answer_id, status) {
+        try {
+            const updated_at = knex.fn.now()
+            const result = await knex("answers_form")
+                .where({ id: answer_id })
+                .update({ corrected: status, updated_at})
+            return result > 0
+        } catch (err) {
+            console.error("Erro ao atualizar resposta: ", err)
+            return false
+        }
+    }
+
+    async updateStatusForm(form_id) {
+        try {
+            const updated_at = knex.fn.now()
+            const result = await knex("form")
+                .where({ id: form_id })
+                .update({ status: 2, updated_at})
+            return result > 0
+        } catch (err) {
+            console.error("Erro ao atualizar resposta: ", err)
+            return false
         }
     }
 }
