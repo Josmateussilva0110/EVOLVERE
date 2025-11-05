@@ -76,4 +76,6 @@ router.get("/form/answers/:form_id", formController.answersStudents)
 
 router.post("/form/save/correction", formController.saveCorrection)
 
+router.get('/form/student/pending', formController.getStudentPendingForms);
+
 module.exports = router
