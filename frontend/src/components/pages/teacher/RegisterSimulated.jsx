@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useContext } from "react";
-import { Plus, X, Trash2, Check, FileText } from "lucide-react";
+import { Plus, X, Trash2, Check, FileText, ArrowLeft } from "lucide-react";
 import { Context } from "../../../context/UserContext"
 import requestData from "../../../utils/requestApi"
 import { useNavigate } from "react-router-dom"
@@ -226,9 +226,20 @@ export default function CreateQuiz() {
     }
   }
 
+  function handleVoltar() {
+      navigate(`/teacher/class/view/${class_id}`)
+  }
+
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 text-white font-sans">
       <div className="max-w-4xl mx-auto py-12 px-4">
+        {/* Botão Voltar */}
+        <button
+            onClick={handleVoltar}
+            className="p-3 mb-1.5  rounded-xl text-gray-300 hover:text-white hover:bg-gray-700/50 transition-all duration-200 border border-gray-600/30 hover:border-gray-500/50"
+        >
+            <ArrowLeft className="w-6 h-6" />
+        </button>
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* General Information */}
           <div className="bg-slate-800/60 p-8 rounded-2xl shadow-lg border border-white/10">

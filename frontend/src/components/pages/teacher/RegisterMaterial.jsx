@@ -126,7 +126,14 @@ function CadastrarMaterial() {
   }
 
 
-  const handleVoltar = () => window.history.back();
+  function handleVoltar() {
+      if(origin === 'class') {
+        navigate(`/teacher/class/view/${id}`)
+      }
+      else {
+        window.history.back()
+      }
+  }
 
   /**
    * validateFile
@@ -241,7 +248,7 @@ function CadastrarMaterial() {
 
   return (
     // AJUSTE 1: Padding lateral responsivo
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-4 sm:px-6 py-12 flex items-center justify-center">
+    <div className="min-h-screen bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 px-4 sm:px-6 py-12 flex items-center justify-center">
       <div className="w-full max-w-4xl">
         {/* AJUSTE 2: Layout do cabeçalho responsivo */}
         <div className="flex flex-col items-start sm:flex-row sm:items-center gap-4 mb-6">
@@ -319,16 +326,16 @@ function CadastrarMaterial() {
                     onKeyDown={(e) => { if (e.key === 'Enter') inputRef.current?.click(); }}
                   >
                     <div className="flex items-center gap-3 overflow-hidden"> {/* Adicionado overflow-hidden para garantir o truncate */}
-                      <div className="p-3 rounded-lg bg-white/6 flex-shrink-0"> {/* Adicionado flex-shrink-0 para o ícone não encolher */}
+                      <div className="p-3 rounded-lg bg-white/6 shrink-0"> {/* Adicionado flex-shrink-0 para o ícone não encolher */}
                         <UploadCloud className="w-6 h-6 text-white" />
                       </div>
                       <div className="overflow-hidden"> {/* Adicionado overflow-hidden para garantir o truncate */}
                         <div className="text-sm text-slate-200">
                           {archive ? (
                             <span className="flex items-center gap-2">
-                              <File className="w-4 h-4 flex-shrink-0" />
+                              <File className="w-4 h-4 shrink-0" />
                               {/* AJUSTE 3: Largura máxima do nome do archive responsiva */}
-                              <strong className="truncate max-w-[12rem] sm:max-w-[18rem]">{archive.name}</strong>
+                              <strong className="truncate max-w-48 sm:max-w-[18rem]">{archive.name}</strong>
                             </span>
                           ) : (
                             <span>Arraste ou clique para selecionar</span>
@@ -374,7 +381,7 @@ function CadastrarMaterial() {
                   disabled={!isValid}
                   className={`flex-1 inline-flex items-center justify-center gap-3 rounded-xl py-3 font-semibold text-sm transition shadow ${
                     isValid
-                      ? "bg-gradient-to-r from-yellow-400 to-yellow-500 text-slate-900 hover:scale-[1.02]"
+                      ? "bg-linear-to-r from-yellow-400 to-yellow-500 text-slate-900 hover:scale-[1.02]"
                       : "bg-white/6 text-slate-400 cursor-not-allowed"
                   }`}
                 >
@@ -394,7 +401,7 @@ function CadastrarMaterial() {
           </div>
 
           {/* Painel lateral */}
-          <aside className="lg:col-span-1 bg-gradient-to-b from-[#08112a] to-[#071033] border border-white/6 rounded-2xl p-5 text-slate-200 shadow-lg">
+          <aside className="lg:col-span-1 bg-linear-to-b from-[#08112a] to-[#071033] border border-white/6 rounded-2xl p-5 text-slate-200 shadow-lg">
             <h3 className="flex items-center gap-2 font-semibold mb-3 text-white">
               <FileText className="w-5 h-5" /> Informações
             </h3>
@@ -424,11 +431,11 @@ function CadastrarMaterial() {
               <div className="mt-5 bg-white/4 p-3 rounded-lg">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 overflow-hidden">
-                    <div className="p-2 bg-white/6 rounded-md flex-shrink-0">
+                    <div className="p-2 bg-white/6 rounded-md shrink-0">
                       <File className="w-5 h-5" />
                     </div>
                     <div className="text-sm overflow-hidden">
-                      <div className="font-medium text-white truncate max-w-[12rem]">{archive.name}</div>
+                      <div className="font-medium text-white truncate max-w-48">{archive.name}</div>
                       <div className="text-xs text-slate-300">{fileExt.toUpperCase()}</div>
                     </div>
                   </div>

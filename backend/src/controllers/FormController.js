@@ -445,13 +445,13 @@ class FormController {
 
                 if(!comment) {
                     await Form.updateCorrection(answer_id, status)
-                    await Form.updateStatusForm(form_id)
+                    //await Form.updateStatusForm(form_id)
                 }
                 else {
                     const data = { answer_id, teacher_id, comment }
                     await Form.saveCorrection(data)
                     await Form.updateCorrection(answer_id, status)
-                    await Form.updateStatusForm(form_id)
+                    //await Form.updateStatusForm(form_id)
                 }
             }
 
@@ -489,6 +489,7 @@ class FormController {
                     id: form.id,
                     title: form.title,
                     description: form.discipline_name || form.description, // Mostra nome da disciplina
+                    class_id: form.class_id,
                     daysRemaining: daysRemaining,
                     urgencyLabel: urgency.label,
                     urgencyColor: urgency.color

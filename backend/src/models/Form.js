@@ -332,59 +332,58 @@ class Form {
      * @returns {Promise<Array<Object>|undefined>} Lista de atividades pendentes.
      */
     async getPendingForStudent(student_id) {
-        try {
-            // 1. Descobre quais turmas e disciplinas o aluno cursa
-            const studentClasses = await knex('class_student as cs')
-                .join('classes as c', 'c.id', 'cs.class_id')
-                .where('cs.student_id', student_id)
-                .select('c.id as class_id', 'c.subject_id');
+    try {
+        // 1. Descobre quais turmas e disciplinas o aluno cursa
+        const studentClasses = await knex('class_student as cs')
+        .join('classes as c', 'c.id', 'cs.class_id')
+        .where('cs.student_id', student_id)
+        .select('c.id as class_id', 'c.subject_id');
 
-            if (studentClasses.length === 0) {
-                return []; // Aluno não está em nenhuma turma
-            }
-
-            // Cria listas de IDs
-            const classIds = studentClasses.map(c => c.class_id);
-            // Pega IDs únicos de disciplinas
-            const subjectIds = [...new Set(studentClasses.map(c => c.subject_id))];
-
-            // 2. Busca os forms
-            const query = knex('form as f')
-                .select(
-                    'f.id', 
-                    'f.title', 
-                    'f.description', 
-                    'f.deadline',
-                    's.name as discipline_name' // Nome da disciplina para contexto
-                )
-                .leftJoin('subjects as s', 's.id', 'f.subject_id')
-                
-                // 3. Condição 1: A atividade ainda não venceu
-                .where('f.deadline', '>', knex.fn.now())
-
-                // 4. Condição 2: A atividade é para este aluno
-                .where(function() {
-                    this.where(function() {
-                        // Atividade específica da TURMA (ex: class_id = 1)
-                        this.whereNotNull('f.class_id')
-                            .whereIn('f.class_id', classIds);
-                    })
-                    .orWhere(function() {
-                        // Atividade global da DISCIPLINA (ex: class_id = NULL)
-                        this.whereNull('f.class_id')
-                            .whereIn('f.subject_id', subjectIds);
-                    });
-                })
-                
-                // 5. Ordena pela data de entrega mais próxima
-                .orderBy('f.deadline', 'asc');
-
-            return await query;
-
-        } catch (err) {
-            console.error("Erro ao buscar atividades pendentes do aluno:", err);
-            return undefined;
+        if (studentClasses.length === 0) {
+        return []; // Aluno não está em nenhuma turma
         }
+
+        // Cria listas de IDs
+        const classIds = studentClasses.map(c => c.class_id);
+        const subjectIds = [...new Set(studentClasses.map(c => c.subject_id))];
+
+        // 2. Busca formulários pendentes
+        const query = knex('form as f')
+        .select(
+            'f.id',
+            'f.title',
+            'f.description',
+            'f.deadline',
+            'f.class_id',
+            's.name as discipline_name'
+        )
+        .leftJoin('subjects as s', 's.id', 'f.subject_id')
+        // 🔹 Junta com answers_form para verificar se o aluno respondeu
+        .leftJoin('answers_form as af', function() {
+            this.on('af.form_id', '=', 'f.id')
+                .andOn('af.user_id', '=', knex.raw('?', [student_id]));
+        })
+        // 🔹 Só retorna formulários SEM resposta do aluno
+        .whereNull('af.id')
+        // 🔹 Atividade ainda não venceu
+        .andWhere('f.deadline', '>', knex.fn.now())
+        // 🔹 Atividade pertence à turma ou disciplina do aluno
+        .andWhere(function() {
+            this.where(function() {
+            this.whereNotNull('f.class_id').whereIn('f.class_id', classIds);
+            })
+            .orWhere(function() {
+            this.whereNull('f.class_id').whereIn('f.subject_id', subjectIds);
+            });
+        })
+        // 🔹 Ordena pela data de entrega
+        .orderBy('f.deadline', 'asc');
+
+        return await query;
+    } catch (err) {
+        console.error("Erro ao buscar atividades pendentes do aluno:", err);
+        return undefined;
+    }
     }
 
 

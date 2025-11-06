@@ -22,6 +22,7 @@ export default function Dashboard() {
   const { setFlashMessage } = useFlashMessage();
   const [requestUser, setRequestUser] = useState(null)
   const [course_id, setCourse] = useState(null)
+  const [class_id, setClassId] = useState(null)
   
   const [pendingCount, setPendingCount] = useState(0);
   const [upcomingActivities, setUpcomingActivities] = useState([]);
@@ -58,9 +59,16 @@ export default function Dashboard() {
           true
         );
 
+        console.log(response)
+
         if (response.success === true && response.data && response.data.status === true && response.data.data) {
+          const activities = response.data.data.upcomingActivities;
           setPendingCount(response.data.data.pendingCount);
-          setUpcomingActivities(response.data.data.upcomingActivities);
+          setUpcomingActivities(activities);
+
+          if (activities.length > 0) {
+            setClassId(activities[0].class_id);
+          }
         } else {
           throw new Error(response.message || "Erro ao buscar atividades");
         }
@@ -409,6 +417,7 @@ export default function Dashboard() {
                       <div 
                         key={activity.id}
                         className={`${colors.bg} rounded-xl p-5 border-l-4 ${colors.border} hover:shadow-md transition-all cursor-pointer group`}
+                        onClick={() => navigate(`/student/simulated/view/${activity.id}`)}
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex gap-4">
@@ -480,7 +489,9 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-linear-to-br from-amber-400 via-yellow-500 to-orange-500 rounded-2xl p-6 shadow-xl flex flex-col justify-between text-white relative overflow-hidden">
+
+            {upcomingActivities.length > 0 && (
+              <div className="bg-linear-to-br from-amber-400 via-yellow-500 to-orange-500 rounded-2xl p-6 shadow-xl flex flex-col justify-between text-white relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-12 -mt-12"></div>
               <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-8 -mb-8"></div>
               <div className="relative">
@@ -490,13 +501,15 @@ export default function Dashboard() {
                 <h3 className="text-2xl font-bold mb-2">Simulado Disponível!</h3>
                 <p className="text-amber-50 mb-6">Teste seus conhecimentos 🎯</p>
               </div>
-              <button className="relative w-full bg-white hover:bg-gray-50 text-amber-600 font-bold py-4 rounded-xl shadow-lg transition-all transform hover:scale-105 hover:-translate-y-1">
+              <button  onClick={() => navigate(`/student/activities/view/${class_id}`)} className="relative w-full bg-white hover:bg-gray-50 text-amber-600 font-bold py-4 rounded-xl shadow-lg transition-all transform hover:scale-105 hover:-translate-y-1">
                 <span className="flex items-center justify-center gap-2">
                   Realizar Simulado
                   <ChevronRight size={20} />
                 </span>
               </button>
             </div>
+            )}
+
           </div>
         </div>
       </main>
