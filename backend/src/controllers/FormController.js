@@ -6,6 +6,8 @@ const validator = require('validator')
 
 /**
  * Calcula a diferença de dias entre duas datas.
+ * @param {string|Date} deadline - Data limite no formato ISO (YYYY-MM-DD) ou objeto Date.
+ * @returns {number} Retorna o número de dias restantes até o prazo. Retorna -1 se o prazo já expirou.
  */
 function getDaysRemaining(deadline) {
     const deadLineDate = new Date(deadline);
@@ -24,6 +26,8 @@ function getDaysRemaining(deadline) {
 
 /**
  * Define a urgência baseada nos dias restantes.
+ * @param {number} days - Quantidade de dias restantes até o prazo.
+ * @returns {{label: string, color: string}} Objeto contendo o rótulo e a cor correspondente à urgência.
  */
 function getUrgency(days) {
     if (days <= 0) return { label: "Vencido", color: "red" };
@@ -36,7 +40,7 @@ function getUrgency(days) {
 /**
  * @class FormController
  * @classdesc Controlador responsável pelas operações relacionadas aos formulários,
- * incluindo criação, listagem, visualização e exclusão, bem como o relacionamento
+ * incluindo criação, listagem, visualização, exclusão e correção, bem como o relacionamento
  * com disciplinas, turmas e respostas associadas.
  */
 class FormController {
@@ -54,26 +58,7 @@ class FormController {
      * @returns {Promise<import("express").Response>} Retorna um JSON com o status da operação.
      *
      * @example
-     * // Exemplo de uso:
      * POST /forms
-     * Body: {
-     *   "title": "Prova 1 - Estrutura de Dados",
-     *   "description": "Avaliação sobre listas, pilhas e filas",
-     *   "created_by": 4,
-     *   "subject_id": 2,
-     *   "class_id": 1,
-     *   "questions": [
-     *     {
-     *       "text": "Qual é a complexidade de busca em uma lista encadeada?",
-     *       "points": 2,
-     *       "type": "multiple_choice",
-     *       "options": [
-     *         {"text": "O(1)", "correct": false},
-     *         {"text": "O(n)", "correct": true}
-     *       ]
-     *     }
-     *   ]
-     * }
      */
     async publish(request, response) {
         try {
@@ -123,18 +108,16 @@ class FormController {
     }
 
     /**
-     * Recupera os relacionamentos entre usuário, disciplina e turma com base no ID do usuário.
+     * Recupera os relacionamentos entre usuário, disciplina e turma com base no ID da turma.
      *
-     * - Retorna o `subject_id` associado ao usuário.
-     * - Retorna o `class_id` associado à disciplina.
+     * - Retorna o `subject_id` associado à turma.
      *
      * @async
-     * @param {import("express").Request} request - Objeto da requisição HTTP contendo o parâmetro `id` do usuário.
+     * @param {import("express").Request} request - Objeto da requisição HTTP contendo o parâmetro `class_id`.
      * @param {import("express").Response} response - Objeto da resposta HTTP.
-     * @returns {Promise<import("express").Response>} Retorna um JSON com os IDs relacionados.
+     * @returns {Promise<import("express").Response>} Retorna um JSON com o `subject_id` relacionado.
      *
      * @example
-     * // Exemplo de uso:
      * GET /forms/relations/3
      */
     async getRelations(request, response) {
@@ -167,7 +150,6 @@ class FormController {
      * @returns {Promise<import("express").Response>} Retorna um JSON com os formulários encontrados.
      *
      * @example
-     * // Exemplo de uso:
      * GET /forms/user/4
      */
     async findFormByUser(request, response) {
@@ -197,7 +179,6 @@ class FormController {
      * @returns {Promise<import("express").Response>} Retorna um JSON com o status da exclusão.
      *
      * @example
-     * // Exemplo de uso:
      * DELETE /forms/10
      */
     async delete(request, response) {
@@ -235,7 +216,6 @@ class FormController {
      * @returns {Promise<import("express").Response>} Retorna um JSON com os dados do formulário.
      *
      * @example
-     * // Exemplo de uso:
      * GET /forms/5
      */
     async view(request, response) {
@@ -263,12 +243,11 @@ class FormController {
      * - Retorna os formulários vinculados à turma informada.
      *
      * @async
-     * @param {import("express").Request} request - Objeto da requisição HTTP contendo o parâmetro `class_id` da turma.
+     * @param {import("express").Request} request - Objeto da requisição HTTP contendo o parâmetro `class_id` e o `user_id` no corpo.
      * @param {import("express").Response} response - Objeto da resposta HTTP.
      * @returns {Promise<import("express").Response>} Retorna um JSON com os formulários associados à turma.
      *
      * @example
-     * // Exemplo de uso:
      * GET /forms/class/2
      */
     async getFormByClassId(request, response) {
@@ -301,23 +280,15 @@ class FormController {
      * - Valida IDs de formulário e usuário.
      * - Garante que ao menos uma resposta foi enviada.
      * - Armazena as respostas no banco de dados.
+     * - Impede envio após o prazo (deadline).
      *
      * @async
-     * @param {import("express").Request} request - Objeto da requisição HTTP contendo `form_id`, `user_id` e `answers`.
+     * @param {import("express").Request} request - Objeto contendo `form_id`, `user_id` e `answers`.
      * @param {import("express").Response} response - Objeto da resposta HTTP.
      * @returns {Promise<import("express").Response>} Retorna o status da operação e o `class_id` vinculado ao formulário.
      *
      * @example
-     * // Exemplo de uso:
      * POST /forms/answers
-     * Body: {
-     *   "form_id": 1,
-     *   "user_id": 7,
-     *   "answers": [
-     *     { "question_id": 3, "option_id": 8 },
-     *     { "question_id": 4, "option_id": 10 }
-     *   ]
-     * }
      */
     async saveAnswers(request, response) {
         try {
@@ -342,14 +313,12 @@ class FormController {
             const deadline = new Date(formData.deadline)
             const now = new Date()
 
-
             if (now > deadline) {
                 return response.status(403).json({
                     status: false,
                     message: "O tempo para envio deste simulado já expirou."
                 })
             }
-
 
             const formattedAnswers = answers.map(({ question_id, option_id, open_answer }) => ({
                 form_id,
@@ -358,7 +327,6 @@ class FormController {
                 option_id: option_id || null,
                 open_answer: open_answer || null,
             }))
-
 
             const classData = await Form.getClassIdByForm(form_id)
             if (!classData) {
@@ -382,7 +350,20 @@ class FormController {
         }
     }
 
-
+    /**
+     * Retorna os formulários prontos para correção de uma turma específica.
+     *
+     * - Utilizado por professores para acessar simulados enviados pelos alunos.
+     * - Retorna os formulários que precisam ser corrigidos.
+     *
+     * @async
+     * @param {import("express").Request} request - Objeto da requisição contendo o parâmetro `class_id`.
+     * @param {import("express").Response} response - Objeto da resposta HTTP.
+     * @returns {Promise<import("express").Response>} Retorna um JSON com os formulários prontos para correção.
+     *
+     * @example
+     * GET /forms/correction/1
+     */
     async formCorrection(request, response) {
         try {
             const { subject_id } = request.params
@@ -401,11 +382,24 @@ class FormController {
         }
     }
 
+    /**
+     * Retorna todas as respostas enviadas pelos alunos para um formulário específico.
+     *
+     * - Usado por professores para visualizar as respostas antes da correção.
+     *
+     * @async
+     * @param {import("express").Request} request - Objeto contendo o parâmetro `form_id`.
+     * @param {import("express").Response} response - Objeto da resposta HTTP.
+     * @returns {Promise<import("express").Response>} Retorna um JSON com as respostas dos alunos.
+     *
+     * @example
+     * GET /forms/answers/students/2
+     */
     async answersStudents(request, response) {
         try {
             const { form_id } = request.params
             if (!validator.isInt(form_id + '', { min: 1 })) {
-                return response.status(422).json({ success: false, message: "Formulário invalido." })
+                return response.status(422).json({ success: false, message: "Formulário inválido." })
             }
 
             const form = await Form.responsesStudents(form_id)
@@ -419,7 +413,24 @@ class FormController {
         }
     }
 
-    
+    /**
+     * Salva as correções feitas pelo professor nas respostas dos alunos.
+     *
+     * - Valida se as respostas e professores são válidos.
+     * - Atualiza o status das respostas (corrigidas, pendentes, etc.).
+     * - Registra comentários do professor, se existirem.
+     *
+     * @async
+     * @param {import("express").Request} request - Objeto da requisição HTTP contendo uma lista de correções no corpo.
+     * @param {import("express").Response} response - Objeto da resposta HTTP.
+     * @returns {Promise<import("express").Response>} Retorna um JSON com o status e o `class_id` da turma corrigida.
+     *
+     * @example
+     * POST /forms/corrections
+     * Body: [
+     *   { "answer_id": 5, "teacher_id": 2, "comment": "Boa resposta!", "status": "correto" }
+     * ]
+     */
     async saveCorrection(request, response) {
         try {
             const corrections = request.body
@@ -467,10 +478,19 @@ class FormController {
     }
 
     /**
-     * @summary Obtém as atividades pendentes para o dashboard do aluno logado.
-     * @param {import("express").Request} req - O objeto da requisição Express.
-     * @param {import("express").Response} res - O objeto da resposta Express.
-     * @returns {Promise<void>}
+     * Obtém as atividades pendentes para o dashboard do aluno logado.
+     *
+     * - Retorna o número total de atividades pendentes.
+     * - Lista até 3 atividades mais próximas do prazo, com prioridade visual (urgência).
+     * - Inclui cálculo de dias restantes e cor da urgência.
+     *
+     * @async
+     * @param {import("express").Request} req - Objeto da requisição Express contendo a sessão do usuário.
+     * @param {import("express").Response} res - Objeto da resposta Express.
+     * @returns {Promise<void>} Retorna JSON contendo o total de atividades pendentes e uma lista resumida das mais próximas.
+     *
+     * @example
+     * GET /dashboard/student/pending
      */
     async getStudentPendingForms(req, res) {
         try {
@@ -484,7 +504,6 @@ class FormController {
                 return res.status(500).json({ status: false, message: "Erro ao consultar atividades." });
             }
 
-            // Formata os dados para o frontend
             const upcomingActivities = forms.map(form => {
                 const daysRemaining = getDaysRemaining(form.deadline);
                 const urgency = getUrgency(daysRemaining);
@@ -498,12 +517,10 @@ class FormController {
                     urgencyLabel: urgency.label,
                     urgencyColor: urgency.color
                 };
-            }).slice(0, 3); // Pega apenas as 3 mais próximas
+            }).slice(0, 3);
 
-            // Dados para os cards de estatística
             const pendingCount = forms.length;
             
-            // Retorna no formato "joguinho" .data.data que já conhecemos
             res.status(200).json({
                 status: true,
                 data: {
@@ -520,7 +537,6 @@ class FormController {
             });
         }
     }
-
 
 }
 
