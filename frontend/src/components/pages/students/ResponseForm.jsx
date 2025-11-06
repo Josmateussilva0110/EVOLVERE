@@ -7,7 +7,7 @@
  * @module pages/Form/ResponseForm
  */
 
-import { useEffect, useState, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle, XCircle, Clock } from "lucide-react";
 import requestData from "../../../utils/requestApi";
@@ -29,8 +29,14 @@ export default function ResponseForm() {
      */
     const { id } = useParams();
 
+    /**
+     * @constant {number} timeLeft - Tempo restante em segundos para completar o simulado
+     */
     const [timeLeft, setTimeLeft] = useState(0);
 
+    /**
+     * @constant {Object} user - Dados do usuário atual obtidos do contexto
+     */
     const { user } = useContext(Context)
 
 
@@ -50,10 +56,35 @@ export default function ResponseForm() {
     const [loading, setLoading] = useState(true);
 
 
-    const [answers, setAnswers] = useState({})
+    /**
+     * @constant {Object} answers - Objeto contendo as respostas do usuário
+     * @property {number|string} [questionId] - ID da opção selecionada ou texto da resposta aberta
+     */
+    const [answers, setAnswers] = useState({});
 
+    /**
+     * @constant {boolean} showResults - Controla a visibilidade do modal de resultados
+     */
+    const [showResults, setShowResults] = useState(false);
+
+    /**
+     * @constant {Object|null} results - Dados do resultado do simulado
+     * @property {string} id - ID único do resultado
+     * @property {number} correctAnswers - Número de respostas corretas
+     * @property {number} wrongAnswers - Número de respostas incorretas
+     * @property {number} percentage - Porcentagem de aproveitamento
+     * @property {string} timeSpent - Tempo gasto no simulado
+     */
+    const [results, setResults] = useState(null);
     const { setFlashMessage } = useFlashMessage()
 
+    /**
+     * @function formatTime
+     * @description Converte segundos em uma string formatada no padrão HH:MM:SS
+     * 
+     * @param {number} seconds - Total de segundos a ser convertido
+     * @returns {string} Tempo formatado (ex: "01:30:45")
+     */
     function formatTime(seconds) {
         const h = Math.floor(seconds / 3600);
         const m = Math.floor((seconds % 3600) / 60);
@@ -87,7 +118,14 @@ export default function ResponseForm() {
         return () => clearInterval(timer);
     }, [timeLeft]);
 
-    // Atualiza a resposta do usuário
+    /**
+     * @function handleSelect
+     * @description Atualiza o estado das respostas quando o usuário seleciona uma opção
+     * ou digita uma resposta aberta. Mantém um objeto com todas as respostas do usuário.
+     * 
+     * @param {number} questionId - ID da questão sendo respondida
+     * @param {number|string} optionId - ID da opção selecionada ou texto da resposta aberta
+     */
     const handleSelect = (questionId, optionId) => {
         setAnswers((prev) => ({
             ...prev,
@@ -95,7 +133,82 @@ export default function ResponseForm() {
         }));
     };
 
-    // Envia as respostas
+    /**
+     * @component ResultModal
+     * @description Modal que exibe o resultado do simulado após a submissão.
+     * Mostra estatísticas como número de acertos, erros e porcentagem de aproveitamento.
+     * Oferece opções para fechar o modal ou ver detalhes completos do resultado.
+     * 
+     * @param {Object} props - Propriedades do componente
+     * @param {boolean} props.isOpen - Controla a visibilidade do modal
+     * @param {Function} props.onClose - Função para fechar o modal
+     * @param {Object} props.results - Dados do resultado do simulado
+     * @param {string} props.results.id - ID único do resultado
+     * @param {number} props.results.correctAnswers - Número de respostas corretas
+     * @param {number} props.results.wrongAnswers - Número de respostas incorretas
+     * @param {number} props.results.percentage - Porcentagem de aproveitamento
+     * @param {string} props.results.timeSpent - Tempo gasto no simulado
+     * 
+     * @returns {React.ReactElement|null} Retorna o modal ou null quando fechado
+     */
+    const ResultModal = ({ isOpen, onClose, results }) => {
+        if (!isOpen) return null;
+
+        return (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                <div className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                        Resultado do Simulado
+                    </h2>
+                    
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div className="bg-green-50 p-4 rounded-2xl border border-green-200">
+                            <div className="text-2xl font-bold text-green-600">{results.correctAnswers}</div>
+                            <div className="text-sm text-green-700">Acertos</div>
+                        </div>
+                        
+                        <div className="bg-red-50 p-4 rounded-2xl border border-red-200">
+                            <div className="text-2xl font-bold text-red-600">{results.wrongAnswers}</div>
+                            <div className="text-sm text-red-700">Erros</div>
+                        </div>
+                    </div>
+
+                    <div className="bg-blue-50 p-4 rounded-2xl border border-blue-200 mb-6">
+                        <div className="text-2xl font-bold text-blue-600">{results.percentage}%</div>
+                        <div className="text-sm text-blue-700">Aproveitamento</div>
+                    </div>
+
+                    <div className="flex gap-3 justify-end">
+                        <button
+                            onClick={onClose}
+                            className="px-6 py-2.5 rounded-xl bg-gray-100 text-gray-700 font-medium hover:bg-gray-200"
+                        >
+                            Fechar
+                        </button>
+                        <button
+                            onClick={() => {
+                                onClose();
+                                navigate(`/student/simulated/result/${results.id}`);
+                            }}
+                            className="px-6 py-2.5 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700"
+                        >
+                            Ver Detalhes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    /**
+     * @function handleSubmit
+     * @description Envia as respostas do simulado para o servidor e processa o resultado.
+     * Em caso de sucesso, exibe o modal com as estatísticas do resultado.
+     * Em caso de erro, exibe uma mensagem de erro.
+     * 
+     * @async
+     * @throws {Error} Erro ao enviar respostas para o servidor
+     */
     async function handleSubmit() {
         const payload = {
             form_id: id,
@@ -113,8 +226,15 @@ export default function ResponseForm() {
 
         const response = await requestData('/form/answers', "POST", payload, true);
         if (response.success) {
-            setFlashMessage(response.data.message, 'success');
-            navigate(`/student/activities/view/${response.data.class_id}`);
+            // Em vez de redirecionar imediatamente, mostre o modal
+            setResults({
+                id: response.data.id,
+                correctAnswers: response.data.correctAnswers,
+                wrongAnswers: response.data.wrongAnswers,
+                percentage: response.data.percentage,
+                timeSpent: formatTime(form.totalDuration * 60 - timeLeft)
+            });
+            setShowResults(true);
         } else {
             setFlashMessage(response.message, 'error');
         }
@@ -265,6 +385,13 @@ export default function ResponseForm() {
 
                 </div>
             </div>
+
+            {/* Adicione o modal antes do fechamento da div principal */}
+            <ResultModal 
+                isOpen={showResults}
+                onClose={() => setShowResults(false)}
+                results={results}
+            />
         </div>
     );
 }
