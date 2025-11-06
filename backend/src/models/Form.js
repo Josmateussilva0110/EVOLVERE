@@ -414,6 +414,16 @@ class Form {
         }
     }
 
+    async saveCorrection(data) {
+        try {
+            const ids = await knex("answers_form").insert(data)
+            return { success: true, ids }
+        } catch (err) {
+            console.error("Erro ao cadastrar respostas de formulário:", err)
+            return { success: false }
+        }
+    }
+
     /**
      * Busca o ID da turma associada a um formulário específico.
      *
@@ -439,29 +449,35 @@ class Form {
         }
     }
 
-    async mockCorrection(class_id) {
+    async mockCorrection(subject_id) {
         try {
-             const result = await knex.raw(`
-                select distinct on (af.form_id)
-                    af.form_id,
-                    f.title,
-                    f.status,
-                    f.subject_id,
-                    s.name
-                from answers_form af
-                inner join form f
-                    on f.id = af.form_id
-                inner join subjects s
-                    on s.id = f.subject_id
-                where f.class_id = ? and af.open_answer is not null
-            `, [class_id])
+            const result = await knex.raw(`
+            SELECT DISTINCT ON (af.form_id)
+                af.form_id,
+                f.title,
+                f.subject_id,
+                c.name,
+                BOOL_AND(fc.corrected) AS status
+            FROM answers_form af
+            INNER JOIN form f
+                ON f.id = af.form_id
+            INNER JOIN classes c
+                ON c.id = f.class_id
+            INNER JOIN form_corrections fc
+                ON fc.form_id = f.id
+            WHERE f.subject_id = ?
+                AND af.open_answer IS NOT NULL
+            GROUP BY af.form_id, f.title, f.subject_id, c.name
+            `, [subject_id])
+
             const rows = result.rows
             return rows.length > 0 ? rows : undefined
         } catch (err) {
-            console.error("Erro ao buscar formulários para correção: ", err)
+            console.error("Erro ao buscar formulários para correção:", err)
             return undefined
         }
     }
+
 
     async responsesStudents(form_id) {
         try {
@@ -506,7 +522,8 @@ class Form {
              const result = await knex.raw(`
                 select
                     f.class_id,
-                    f.id as form_id
+                    f.id as form_id,
+                    af.user_id as student_id
                 from form f
                 inner join answers_form af
                     on af.form_id = f.id
@@ -520,12 +537,12 @@ class Form {
         }
     }
 
-    async saveCorrection(data) {
+    async saveFormAndUserCorrection(data) {
         try {
-            const ids = await knex("comment_answers").insert(data)
+            const ids = await knex("form_corrections").insert(data)
             return { success: true, ids }
         } catch (err) {
-            console.error("Erro ao cadastrar correção de formulário:", err)
+            console.error("Erro cadastro de correção de formulário:", err)
             return { success: false }
         }
     }
@@ -543,15 +560,16 @@ class Form {
         }
     }
 
-    async updateStatusForm(form_id) {
+
+    async updateStatusForm(form_id, student_id) {
         try {
             const updated_at = knex.fn.now()
-            const result = await knex("form")
-                .where({ id: form_id })
-                .update({ status: 2, updated_at})
+            const result = await knex("form_corrections")
+                .where({ form_id }).andWhere({ student_id })
+                .update({ corrected: true, updated_at})
             return result > 0
         } catch (err) {
-            console.error("Erro ao atualizar resposta: ", err)
+            console.error("Erro ao atualizar status de formulário: ", err)
             return false
         }
     }

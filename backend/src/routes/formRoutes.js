@@ -70,7 +70,7 @@ router.post("/form/class/:class_id", formController.getFormByClassId)
 
 router.post("/form/answers", formController.saveAnswers)
 
-router.get("/form/correction/:class_id", formController.formCorrection)
+router.get("/form/correction/:subject_id", formController.formCorrection)
 
 router.get("/form/answers/:form_id", formController.answersStudents)
 

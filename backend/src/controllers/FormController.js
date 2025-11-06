@@ -372,6 +372,10 @@ class FormController {
                 return response.status(500).json({ status: false, message: "Erro ao salvar respostas." })
             }
 
+            const data = {form_id, student_id: user_id}
+
+            await Form.saveFormAndUserCorrection(data)
+
             return response.status(200).json({ status: true, message: "Respostas salvas com sucesso.", class_id })
         } catch (err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
@@ -381,12 +385,12 @@ class FormController {
 
     async formCorrection(request, response) {
         try {
-            const { class_id } = request.params
-            if (!validator.isInt(class_id + '', { min: 1 })) {
+            const { subject_id } = request.params
+            if (!validator.isInt(subject_id + '', { min: 1 })) {
                 return response.status(422).json({ success: false, message: "Professor invalido." })
             }
 
-            const form = await Form.mockCorrection(class_id)
+            const form = await Form.mockCorrection(subject_id)
             if (!form) {
                 return response.status(404).json({ status: false, message: "Nenhum formulário encontrado." })
             }
@@ -440,19 +444,19 @@ class FormController {
                     return response.status(404).json({ status: false, message: "Nenhuma turma encontrada." })
                 }
 
-                const { class_id, form_id } = classData
+                const { class_id, form_id, student_id } = classData
                 id_class = class_id
 
                 if(!comment) {
                     await Form.updateCorrection(answer_id, status)
-                    //await Form.updateStatusForm(form_id)
                 }
                 else {
                     const data = { answer_id, teacher_id, comment }
                     await Form.saveCorrection(data)
                     await Form.updateCorrection(answer_id, status)
-                    //await Form.updateStatusForm(form_id)
                 }
+
+                await Form.updateStatusForm(form_id, student_id)
             }
 
             return response.status(200).json({ status: true, message: "Correções salvas com sucesso.", id_class })
