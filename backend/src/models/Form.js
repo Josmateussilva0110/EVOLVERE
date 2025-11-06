@@ -2,11 +2,15 @@ const knex = require("../database/connection")
 
 /**
  * @class Form
- * @classdesc Classe responsável por interagir com a tabela `form` e suas tabelas relacionadas
- * (`questions`, `options`, `answers_form` e `classes`) no banco de dados. 
+ * @classdesc
+ * Classe responsável por realizar operações relacionadas aos formulários (`form`)
+ * e suas tabelas associadas (`questions`, `options`, `answers_form`, `classes`, `comment_answers`).
  * 
- * Inclui métodos para criação, consulta e exclusão de formulários, além de operações
- * auxiliares para cadastrar questões, opções e respostas associadas.
+ * Esta classe encapsula toda a lógica de persistência no banco de dados referente
+ * à criação, leitura, atualização e exclusão de formulários e suas relações.
+ * 
+ * É utilizada tanto por professores (para criação e correção de formulários) quanto por alunos
+ * (para listagem e submissão de respostas).
  */
 class Form {
 
@@ -14,12 +18,13 @@ class Form {
      * Verifica se já existe um formulário com o mesmo título para uma determinada turma.
      *
      * @async
-     * @param {string} title - Título do formulário.
+     * @param {string} title - Título do formulário a ser verificado.
      * @param {number} class_id - ID da turma associada ao formulário.
-     * @returns {Promise<boolean>} Retorna `true` se o formulário existir, caso contrário `false`.
+     * @returns {Promise<boolean>} Retorna `true` se o formulário já existir, caso contrário `false`.
      *
      * @example
      * const exists = await Form.formExists("Prova 1", 2)
+     * if (exists) console.log("Já existe um formulário com este título nesta turma.")
      */
     async formExists(title, class_id) {
         try {
@@ -35,7 +40,7 @@ class Form {
     }
 
     /**
-     * Salva um novo formulário no banco de dados.
+     * Insere um novo registro na tabela `form`.
      *
      * @async
      * @param {Object} data - Dados do formulário a ser inserido.
@@ -44,10 +49,19 @@ class Form {
      * @param {number} data.created_by - ID do usuário criador.
      * @param {number} data.subject_id - ID da disciplina associada.
      * @param {number} data.class_id - ID da turma associada.
-     * @returns {Promise<{success: boolean, insertId?: number}>} Retorna objeto com status da operação e ID inserido.
+     * @param {Date} [data.deadline] - Prazo de entrega da atividade.
+     * @param {number} [data.totalDuration] - Duração total (em minutos).
+     * @returns {Promise<{success: boolean, insertId?: number}>} Retorna `success` e o ID inserido.
      *
      * @example
-     * await Form.save({ title: "Prova 2", description: "Avaliação final", created_by: 3, subject_id: 1, class_id: 2 })
+     * await Form.save({
+     *   title: "Simulado 3",
+     *   description: "Avaliação final do semestre",
+     *   created_by: 1,
+     *   subject_id: 4,
+     *   class_id: 2,
+     *   deadline: new Date("2025-12-10")
+     * })
      */
     async save(data) {
         try {
@@ -62,18 +76,23 @@ class Form {
     }
 
     /**
-     * Salva uma nova questão vinculada a um formulário.
+     * Cadastra uma nova questão vinculada a um formulário específico.
      *
      * @async
      * @param {Object} data - Dados da questão.
      * @param {number} data.form_id - ID do formulário associado.
-     * @param {string} data.text - Texto da questão.
-     * @param {number} data.points - Pontuação da questão.
-     * @param {string} data.type - Tipo da questão (ex: "multiple_choice", "true_false").
-     * @returns {Promise<{success: boolean, insertId?: number}>} Retorna status e ID da questão criada.
+     * @param {string} data.text - Enunciado da questão.
+     * @param {number} data.points - Valor (pontuação) da questão.
+     * @param {string} data.type - Tipo da questão (ex: "multiple_choice", "true_false", "open_answer").
+     * @returns {Promise<{success: boolean, insertId?: number}>} Retorna status e ID inserido.
      *
      * @example
-     * await Form.saveQuestion({ form_id: 1, text: "Qual é a capital da França?", points: 2, type: "multiple_choice" })
+     * await Form.saveQuestion({
+     *   form_id: 2,
+     *   text: "Qual é o maior planeta do sistema solar?",
+     *   points: 2,
+     *   type: "multiple_choice"
+     * })
      */
     async saveQuestion(data) {
         try {
@@ -88,7 +107,7 @@ class Form {
     }
 
     /**
-     * Salva uma nova opção vinculada a uma questão.
+     * Cadastra uma opção vinculada a uma questão de múltipla escolha.
      *
      * @async
      * @param {Object} data - Dados da opção.
@@ -98,7 +117,11 @@ class Form {
      * @returns {Promise<{success: boolean, insertId?: number}>} Retorna status e ID da opção criada.
      *
      * @example
-     * await Form.saveOption({ question_id: 10, text: "Paris", correct: true })
+     * await Form.saveOption({
+     *   question_id: 3,
+     *   text: "Júpiter",
+     *   correct: true
+     * })
      */
     async saveOption(data) {
         try {
@@ -114,14 +137,15 @@ class Form {
 
     /**
      * Retorna todos os formulários de uma determinada turma,
-     * incluindo suas questões e opções em formato JSON.
+     * incluindo questões e opções aninhadas no formato JSON.
      *
      * @async
-     * @param {number} class_id - ID da turma associada aos formulários.
-     * @returns {Promise<Object[]|undefined>} Retorna lista de formulários com suas questões e opções, ou `undefined` se não houver resultados.
+     * @param {number} class_id - ID da turma.
+     * @returns {Promise<Object[]|undefined>} Retorna uma lista de formulários com suas questões e opções.
      *
      * @example
      * const forms = await Form.getFormByUser(5)
+     * console.log(forms[0].questions)
      */
     async getFormByUser(class_id) {
         try {
@@ -171,15 +195,16 @@ class Form {
     }
 
     /**
-     * Busca um formulário pelo ID, incluindo suas perguntas e opções.
+     * Busca um formulário específico pelo ID, incluindo suas questões e opções.
      *
      * @async
-     * @param {number|string} id - ID do formulário a ser buscado.
-     * @returns {Promise<Object[]|undefined>} Retorna um array com os dados do formulário e suas perguntas, 
-     * ou `undefined` se o formulário não for encontrado.
+     * @param {number|string} id - ID do formulário.
+     * @returns {Promise<Object[]|undefined>} Retorna o formulário com suas questões e opções,
+     * ou `undefined` se não encontrado.
      *
      * @example
-     * const form = await Form.getFormById(3)
+     * const form = await Form.getFormById(2)
+     * console.log(form[0].questions)
      */
     async getFormById(id) {
         try {
@@ -218,17 +243,17 @@ class Form {
                 WHERE f.id = ?
                 GROUP BY f.id
                 ORDER BY f.updated_at DESC;
-            `, [id]);
+            `, [id])
             const rows = result.rows
             return rows.length > 0 ? rows : undefined
         } catch(err) {
-            console.error("Erro ao buscar formulários:", err);
+            console.error("Erro ao buscar formulários:", err)
             return undefined
         }
     }
 
     /**
-     * Verifica se um formulário existe pelo ID.
+     * Verifica se um formulário existe pelo seu ID.
      *
      * @async
      * @param {number|string} id - ID do formulário a ser verificado.
@@ -248,38 +273,37 @@ class Form {
     }
 
     /**
-     * Deleta um formulário com base no ID informado.
+     * Deleta um formulário existente com base em seu ID.
      *
      * @async
      * @param {number|string} id - ID do formulário a ser deletado.
-     * @returns {Promise<boolean>} Retorna `true` se o formulário foi deletado com sucesso, 
-     * ou `false` caso contrário.
+     * @returns {Promise<boolean>} Retorna `true` se o formulário foi deletado, `false` caso contrário.
      *
      * @example
-     * const deleted = await Form.deleteById(5)
+     * const deleted = await Form.deleteById(4)
+     * if (deleted) console.log("Formulário removido com sucesso.")
      */
     async deleteById(id) {
         try {
-            const deleted = await knex('form').where({ id }).delete();
-            return deleted > 0;
+            const deleted = await knex('form').where({ id }).delete()
+            return deleted > 0
         } catch (err) {
-            console.error("Erro ao deletar formulário:", err);
-            return false;
+            console.error("Erro ao deletar formulário:", err)
+            return false
         }
     }
 
     /**
-     * Busca todos os formulários associados a uma turma específica,
-     * retornando também o nome da turma.
+     * Retorna os formulários disponíveis para uma turma,
+     * excluindo os que o aluno já respondeu.
      *
      * @async
      * @param {number} class_id - ID da turma.
-     * @returns {Promise<{class_name: string, forms: Object[]}|undefined>} Retorna nome da turma e lista de formulários,
-     * ou `undefined` se ocorrer erro.
+     * @param {number} user_id - ID do aluno logado.
+     * @returns {Promise<{class_name: string, forms: Object[]}|undefined>} Nome da turma e lista de formulários disponíveis.
      *
      * @example
-     * const data = await Form.getForm(2)
-     * console.log(data.class_name) // "Turma A"
+     * const { class_name, forms } = await Form.getForm(3, 12)
      */
     async getForm(class_id, user_id) {
         try {
@@ -287,11 +311,9 @@ class Form {
                 .select("id", "name")
                 .from("classes")
                 .where({ id: class_id })
-                .first();
+                .first()
 
-            if (!classInfo) {
-                return null;
-            }
+            if (!classInfo) return null
 
             const result = await knex.raw(`
                 SELECT
@@ -301,35 +323,32 @@ class Form {
                     f.subject_id,
                     f.deadline
                 FROM form f
-                INNER JOIN classes c
-                    ON c.id = f.class_id
+                INNER JOIN classes c ON c.id = f.class_id
                 WHERE f.class_id = ?
                 AND NOT EXISTS (
-                    SELECT 1
-                    FROM answers_form af
+                    SELECT 1 FROM answers_form af
                     WHERE af.form_id = f.id
                     AND af.user_id = ?
                 )
-                `, [class_id, user_id])
+            `, [class_id, user_id])
 
-            const forms = result.rows
-            return {
-                class_name: classInfo.name,
-                forms
-            }
-        } catch(err) {
-            console.error("Erro ao buscar simulados:", err);
-            return undefined;
+            return { class_name: classInfo.name, forms: result.rows }
+        } catch (err) {
+            console.error("Erro ao buscar simulados:", err)
+            return undefined
         }
     }
 
-/**
-     * Retorna todas as atividades (forms) pendentes para um aluno específico.
-     * Busca tanto atividades da disciplina (globais) quanto da turma (específicas).
-     * * @async
-     * @function getPendingForStudent
+    /**
+     * Retorna todas as atividades pendentes (ainda não entregues e não respondidas)
+     * para um aluno específico.
+     *
+     * @async
      * @param {number} student_id - ID do aluno.
-     * @returns {Promise<Array<Object>|undefined>} Lista de atividades pendentes.
+     * @returns {Promise<Array<Object>|undefined>} Lista de formulários pendentes.
+     *
+     * @example
+     * const pendentes = await Form.getPendingForStudent(8)
      */
     async getPendingForStudent(student_id) {
     try {
@@ -386,22 +405,22 @@ class Form {
     }
     }
 
-
     /**
-     * Salva as respostas de um formulário enviadas por um aluno.
+     * Salva as respostas de um formulário submetidas por um aluno.
      *
      * @async
-     * @param {Object[]} data - Lista de respostas a serem registradas.
+     * @param {Object[]} data - Array de respostas.
      * @param {number} data[].form_id - ID do formulário respondido.
-     * @param {number} data[].question_id - ID da questão respondida.
-     * @param {number} data[].option_id - ID da opção escolhida.
-     * @param {number} data[].user_id - ID do aluno que respondeu.
-     * @returns {Promise<{success: boolean, ids?: number[]}>} Retorna status da operação e IDs inseridos.
+     * @param {number} data[].question_id - ID da questão.
+     * @param {number} data[].option_id - ID da opção selecionada.
+     * @param {number} data[].user_id - ID do aluno.
+     * @param {string} [data[].open_answer] - Resposta dissertativa (se aplicável).
+     * @returns {Promise<{success: boolean, ids?: number[]}>} Retorna o status da operação e os IDs inseridos.
      *
      * @example
      * await Form.saveAnswers([
-     *   { form_id: 1, question_id: 10, option_id: 3, user_id: 5 },
-     *   { form_id: 1, question_id: 11, option_id: 7, user_id: 5 }
+     *   { form_id: 2, question_id: 5, option_id: 12, user_id: 3 },
+     *   { form_id: 2, question_id: 6, open_answer: "Minha explicação", user_id: 3 }
      * ])
      */
     async saveAnswers(data) {
@@ -425,24 +444,21 @@ class Form {
     }
 
     /**
-     * Busca o ID da turma associada a um formulário específico.
+     * Retorna o ID da turma associada a um formulário específico.
      *
      * @async
      * @param {number|string} id - ID do formulário.
-     * @returns {Promise<{class_id: number}|undefined>} Retorna o ID da turma ou `undefined` se não encontrado.
+     * @returns {Promise<{class_id: number}|undefined>} Retorna o objeto com class_id ou `undefined`.
      *
      * @example
-     * const classData = await Form.getClassIdByForm(4)
-     * console.log(classData.class_id) // 2
+     * const classData = await Form.getClassIdByForm(2)
+     * console.log(classData.class_id)
      */
     async getClassIdByForm(id) {
         try {
             const result = await knex.select(["class_id"]).where({id}).table("form")
-            if(result.length > 0) {
-                return result[0]
-            } else {
-                return undefined
-            }
+            if(result.length > 0) return result[0]
+            else return undefined
         } catch (err) {
             console.error("Erro ao buscar id da turma: ", err)
             return undefined
@@ -478,10 +494,21 @@ class Form {
         }
     }
 
-
+    /**
+     * Retorna todas as respostas dissertativas submetidas por alunos
+     * para um determinado formulário.
+     *
+     * @async
+     * @param {number} form_id - ID do formulário.
+     * @returns {Promise<Object[]|undefined>} Lista contendo aluno, questão e resposta.
+     *
+     * @example
+     * const respostas = await Form.responsesStudents(1)
+     * console.log(respostas[0].open_answer)
+     */
     async responsesStudents(form_id) {
         try {
-             const result = await knex.raw(`
+            const result = await knex.raw(`
                 SELECT
                     af.id AS answer_id,
                     af.user_id,
@@ -490,14 +517,14 @@ class Form {
                     q.text AS question_text,
                     af.open_answer,
                     f.title as form_name
-                    FROM answers_form af
-                    INNER JOIN users u ON u.id = af.user_id
-                    INNER JOIN questions q ON q.id = af.question_id
-                    INNER JOIN form f ON f.id = af.form_id
-                    WHERE af.form_id = ?
-                    AND af.open_answer IS NOT NULL
-                    ORDER BY u.username, q.id
-                `, [form_id])
+                FROM answers_form af
+                INNER JOIN users u ON u.id = af.user_id
+                INNER JOIN questions q ON q.id = af.question_id
+                INNER JOIN form f ON f.id = af.form_id
+                WHERE af.form_id = ?
+                AND af.open_answer IS NOT NULL
+                ORDER BY u.username, q.id
+            `, [form_id])
 
             const rows = result.rows
             return rows.length > 0 ? rows : undefined
@@ -507,16 +534,40 @@ class Form {
         }
     }
 
+    /**
+     * Verifica se uma resposta existe pelo ID.
+     *
+     * @async
+     * @param {number} answer_id - ID da resposta.
+     * @returns {Promise<boolean>} Retorna `true` se a resposta existir.
+     *
+     * @example
+     * const exists = await Form.answerExist(10)
+     */
     async answerExist(answer_id) {
         try {
-            const result = await knex.select("*").where({id: answer_id}).table("answers_form")
-            return result.length > 0
-        } catch(err) {
-            console.error('Erro ao verificar resposta:', err)
+            const result = await knex("answers_form")
+                .select("id")
+                .where({ id: answer_id })
+                .first()
+            return !!result
+        } catch (err) {
+            console.error("Erro ao verificar resposta:", err)
             return false
         }
     }
 
+    /**
+     * Retorna o ID da turma e do formulário associados a uma resposta.
+     *
+     * @async
+     * @param {number} answer_id - ID da resposta.
+     * @returns {Promise<{class_id: number, form_id: number}|undefined>}
+     *
+     * @example
+     * const data = await Form.getClassIdByAnswerId(4)
+     * console.log(data.class_id)
+     */
     async getClassIdByAnswerId(answer_id) {
         try {
              const result = await knex.raw(`
@@ -532,7 +583,7 @@ class Form {
             const rows = result.rows
             return rows.length > 0 ? rows[0] : undefined
         } catch (err) {
-            console.error("Erro ao buscar id da turma pela resposta: ", err)
+            console.error("Erro ao buscar turma da resposta:", err)
             return undefined
         }
     }

@@ -10,6 +10,7 @@ import ManagementMedals from "../components/pages/students/ManagementMedals"
 import MaterialsClass from "../components/pages/students/MaterialsClass"
 import ActivitySimulated from "../components/pages/students/ActivitySimulated"
 import ResponseForm from "../components/pages/students/ResponseForm"
+import SimulatedResult from "../components/pages/students/SimulatedResult"
 
 
 /**
@@ -95,6 +96,13 @@ export default function StudentRoutes() {
        * @element ManagementMedals
        */}
       <Route path="medals/view" element={<ManagementMedals />} />
+
+      {/**
+       * Página de resultados do simulado realizado pelo aluno.
+       * @route /student/simulated/result/:id
+       * @element SimulatedResult
+       */}
+      <Route path="simulated/result/:id" element={<SimulatedResult />} />
     </Routes>
   )
 }
