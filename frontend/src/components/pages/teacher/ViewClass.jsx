@@ -139,16 +139,21 @@ export default function ViewClass() {
     const [form, setForm] = useState([])
     const [students, setStudents] = useState([])
     const { setFlashMessage } = useFlashMessage()
+    const [subject_id, setSubjectId] = useState(null)
+
 
     useEffect(() => {
         async function fetchSubject() {
             if (!id) return
             const response = await requestData(`/classes/materials/${id}`, 'GET', {}, true)
-            console.log(response)
+            console.log('sub: ', response)
 
             if (response && response.success) {
                 const mats = response.data?.materials || []
                 setMaterials(mats)
+                if (mats.length > 0) {
+                    setSubjectId(mats[0].subject_id)
+                }
             } else {
                 setMaterials([])
             }
@@ -223,6 +228,16 @@ export default function ViewClass() {
         }
     }
 
+    function handleVoltar() {
+      if(materials[0].subject_id === null) {
+        window.history.back()
+      }
+      else {
+        navigate(`/teacher/discipline/view/${subject_id}`)
+      }
+    }
+
+
 
     // Paginação
     const ITEMS_PER_PAGE = 5;
@@ -293,7 +308,7 @@ export default function ViewClass() {
             <div className="w-full max-w-7xl mx-auto">
                 {/* Botão Voltar */}
                 <button
-                    onClick={() => navigate(-1)}
+                    onClick={handleVoltar}
                     className="p-3 rounded-xl text-gray-300 hover:text-white hover:bg-gray-700/50 transition-all duration-200 border border-gray-600/30 hover:border-gray-500/50"
                 >
                     <ArrowLeft className="w-6 h-6" />
