@@ -328,6 +328,19 @@ class FormController {
                 open_answer: open_answer || null,
             }))
 
+            const stats = await Form.calculateResults(formattedAnswers)
+
+            const results = {
+                form_id,
+                student_id: user_id,
+                points: stats.total_points,
+                correct: stats.correct,
+                wrong: stats.wrong,
+            }
+            
+            await Form.saveFormResults(results)
+
+
             const classData = await Form.getClassIdByForm(form_id)
             if (!classData) {
                 return response.status(404).json({ status: false, message: "Nenhuma turma encontrada." })
