@@ -109,9 +109,6 @@ export default function Dashboard() {
       case "materiais":
         navigate("/student/materials/view");
         break;
-      case "atividades":
-        navigate("/student/activities/view");
-        break;
       case "desempenho":
         navigate("/student/performance/view");
         break;
@@ -160,7 +157,6 @@ export default function Dashboard() {
     { icon: BookOpen, label: "Meu curso", id: "curso" },
     { icon: Users, label: "Turmas", id: "turmas" },
     { icon: Folder, label: "Materiais", id: "materiais" },
-    { icon: ClipboardList, label: "Atividades/Simulados", id: "atividades" },
     { icon: BarChart3, label: "Desempenho", id: "desempenho" },
     { icon: Award, label: "Medalhas", id: "medalhas" },
   ];

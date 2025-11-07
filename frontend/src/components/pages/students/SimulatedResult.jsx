@@ -163,7 +163,7 @@ const PageWrapper = ({ children }) => (
       {/* Ajustado o padding vertical (py) para ser menor em telas pequenas
         Adicionado w-full para garantir que o main ocupe toda a largura
       */}
-      <main className="flex-grow max-w-4xl mx-auto px-4 py-6 sm:py-10 w-full">
+      <main className="grow max-w-4xl mx-auto px-4 py-6 sm:py-10 w-full">
         {children}
       </main>
       <footer className="py-6 text-center text-sm text-gray-500 border-t border-gray-200">

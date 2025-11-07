@@ -433,15 +433,6 @@ class Form {
         }
     }
 
-    async saveCorrection(data) {
-        try {
-            const ids = await knex("answers_form").insert(data)
-            return { success: true, ids }
-        } catch (err) {
-            console.error("Erro ao cadastrar respostas de formulário:", err)
-            return { success: false }
-        }
-    }
 
     /**
      * Retorna o ID da turma associada a um formulário específico.
@@ -465,6 +456,17 @@ class Form {
         }
     }
 
+    /**
+     * Retorna todos os formulários que possuem respostas dissertativas pendentes de correção
+     * em uma determinada turma.
+     *
+     * @async
+     * @param {number} class_id - ID da turma.
+     * @returns {Promise<Object[]|undefined>} Lista de formulários com status de correção pendente.
+     *
+     * @example
+     * const toCorrect = await Form.mockCorrection(5)
+     */
     async mockCorrection(subject_id) {
         try {
             const result = await knex.raw(`
@@ -521,8 +523,10 @@ class Form {
                 INNER JOIN users u ON u.id = af.user_id
                 INNER JOIN questions q ON q.id = af.question_id
                 INNER JOIN form f ON f.id = af.form_id
+                INNER JOIN form_corrections fc ON fc.student_id = u.id
                 WHERE af.form_id = ?
-                AND af.open_answer IS NOT NULL
+                AND af.open_answer IS NOT NULL 
+                AND fc.corrected = false
                 ORDER BY u.username, q.id
             `, [form_id])
 
@@ -588,6 +592,51 @@ class Form {
         }
     }
 
+    /**
+     * Salva um comentário de correção realizado pelo professor.
+     *
+     * @async
+     * @param {Object} data - Dados do comentário.
+     * @param {number} data.answer_id - ID da resposta corrigida.
+     * @param {number} data.teacher_id - ID do professor que realizou a correção.
+     * @param {string} data.comment - Comentário textual do professor.
+     * @returns {Promise<boolean>} Retorna `true` se o comentário foi salvo.
+     *
+     * @example
+     * await Form.saveCorrection({
+     *   answer_id: 4,
+     *   teacher_id: 1,
+     *   comment: "Ótima resposta!"
+     * })
+     */
+    async saveCorrection(data) {
+        try {
+            await knex("comment_answers").insert(data)
+            return true
+        } catch (err) {
+            console.error("Erro ao salvar comentário:", err)
+            return false
+        }
+    }
+
+    /**
+     * Salva as correções de um formulário no banco de dados.
+     *
+     * @async
+     * @function saveFormAndUserCorrection
+     * @param {Object|Object[]} data - Dados a serem inseridos na tabela `form_corrections`.
+     * Pode ser um objeto único ou um array de objetos contendo as informações da correção.
+     * @param {number} data.form_id - ID do formulário corrigido.
+     * @param {number} data.user_id - ID do usuário (aluno) relacionado à correção.
+     * @param {number} data.teacher_id - ID do professor que realizou a correção.
+     * @param {string} [data.comment] - Comentário opcional da correção.
+     * @param {boolean} [data.corrected] - Indica se o formulário foi totalmente corrigido.
+     *
+     * @returns {Promise<{success: boolean, ids?: number[]}>} Retorna um objeto com `success = true`
+     * e os IDs das inserções realizadas se bem-sucedido, ou `success = false` em caso de erro.
+     *
+     * @throws {Error} Lança erro interno caso a operação no banco de dados falhe.
+     */
     async saveFormAndUserCorrection(data) {
         try {
             const ids = await knex("form_corrections").insert(data)
@@ -598,6 +647,18 @@ class Form {
         }
     }
 
+
+    /**
+     * Atualiza o status de correção de uma resposta.
+     *
+     * @async
+     * @param {number} answer_id - ID da resposta.
+     * @param {string} status - Status atualizado (ex: "correto", "incorreto", "parcial").
+     * @returns {Promise<boolean>} Retorna `true` se a atualização foi bem-sucedida.
+     *
+     * @example
+     * await Form.updateCorrection(12, "correto")
+     */
     async updateCorrection(answer_id, status) {
         try {
             const updated_at = knex.fn.now()
@@ -612,6 +673,16 @@ class Form {
     }
 
 
+    /**
+     * Atualiza o status geral de um formulário após uma correção.
+     *
+     * @async
+     * @param {number} form_id - ID do formulário.
+     * @returns {Promise<boolean>} Retorna `true` se a atualização foi concluída.
+     *
+     * @example
+     * await Form.updateStatusForm(3)
+     */
     async updateStatusForm(form_id, student_id) {
         try {
             const updated_at = knex.fn.now()
