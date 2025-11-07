@@ -592,30 +592,13 @@ class Form {
         }
     }
 
-    /**
-     * Salva um comentário de correção realizado pelo professor.
-     *
-     * @async
-     * @param {Object} data - Dados do comentário.
-     * @param {number} data.answer_id - ID da resposta corrigida.
-     * @param {number} data.teacher_id - ID do professor que realizou a correção.
-     * @param {string} data.comment - Comentário textual do professor.
-     * @returns {Promise<boolean>} Retorna `true` se o comentário foi salvo.
-     *
-     * @example
-     * await Form.saveCorrection({
-     *   answer_id: 4,
-     *   teacher_id: 1,
-     *   comment: "Ótima resposta!"
-     * })
-     */
-    async saveCorrection(data) {
+    async saveFormAndUserCorrection(data) {
         try {
-            await knex("comment_answers").insert(data)
-            return true
+            const ids = await knex("form_corrections").insert(data)
+            return { success: true, ids }
         } catch (err) {
-            console.error("Erro ao salvar comentário:", err)
-            return false
+            console.error("Erro cadastro de correção de formulário:", err)
+            return { success: false }
         }
     }
 
