@@ -351,38 +351,58 @@ class Form {
      * const pendentes = await Form.getPendingForStudent(8)
      */
     async getPendingForStudent(student_id) {
-        try {
-            const studentClasses = await knex('class_student as cs')
-                .join('classes as c', 'c.id', 'cs.class_id')
-                .where('cs.student_id', student_id)
-                .select('c.id as class_id', 'c.subject_id')
+    try {
+        // 1. Descobre quais turmas e disciplinas o aluno cursa
+        const studentClasses = await knex('class_student as cs')
+        .join('classes as c', 'c.id', 'cs.class_id')
+        .where('cs.student_id', student_id)
+        .select('c.id as class_id', 'c.subject_id');
 
-            if (studentClasses.length === 0) return []
-
-            const classIds = studentClasses.map(c => c.class_id)
-            const subjectIds = [...new Set(studentClasses.map(c => c.subject_id))]
-
-            const query = knex('form as f')
-                .select('f.id', 'f.title', 'f.description', 'f.deadline', 's.name as discipline_name')
-                .leftJoin('subjects as s', 's.id', 'f.subject_id')
-                .where('f.deadline', '>', knex.fn.now())
-                .where(function() {
-                    this.where(function() {
-                        this.whereNotNull('f.class_id')
-                            .whereIn('f.class_id', classIds)
-                    })
-                    .orWhere(function() {
-                        this.whereNull('f.class_id')
-                            .whereIn('f.subject_id', subjectIds)
-                    })
-                })
-                .orderBy('f.deadline', 'asc')
-
-            return await query
-        } catch (err) {
-            console.error("Erro ao buscar atividades pendentes do aluno:", err)
-            return undefined
+        if (studentClasses.length === 0) {
+        return []; // Aluno não está em nenhuma turma
         }
+
+        // Cria listas de IDs
+        const classIds = studentClasses.map(c => c.class_id);
+        const subjectIds = [...new Set(studentClasses.map(c => c.subject_id))];
+
+        // 2. Busca formulários pendentes
+        const query = knex('form as f')
+        .select(
+            'f.id',
+            'f.title',
+            'f.description',
+            'f.deadline',
+            'f.class_id',
+            's.name as discipline_name'
+        )
+        .leftJoin('subjects as s', 's.id', 'f.subject_id')
+        // 🔹 Junta com answers_form para verificar se o aluno respondeu
+        .leftJoin('answers_form as af', function() {
+            this.on('af.form_id', '=', 'f.id')
+                .andOn('af.user_id', '=', knex.raw('?', [student_id]));
+        })
+        // 🔹 Só retorna formulários SEM resposta do aluno
+        .whereNull('af.id')
+        // 🔹 Atividade ainda não venceu
+        .andWhere('f.deadline', '>', knex.fn.now())
+        // 🔹 Atividade pertence à turma ou disciplina do aluno
+        .andWhere(function() {
+            this.where(function() {
+            this.whereNotNull('f.class_id').whereIn('f.class_id', classIds);
+            })
+            .orWhere(function() {
+            this.whereNull('f.class_id').whereIn('f.subject_id', subjectIds);
+            });
+        })
+        // 🔹 Ordena pela data de entrega
+        .orderBy('f.deadline', 'asc');
+
+        return await query;
+    } catch (err) {
+        console.error("Erro ao buscar atividades pendentes do aluno:", err);
+        return undefined;
+    }
     }
 
     /**
@@ -412,6 +432,7 @@ class Form {
             return { success: false }
         }
     }
+
 
     /**
      * Retorna o ID da turma associada a um formulário específico.
@@ -446,24 +467,31 @@ class Form {
      * @example
      * const toCorrect = await Form.mockCorrection(5)
      */
-    async mockCorrection(class_id) {
+    async mockCorrection(subject_id) {
         try {
             const result = await knex.raw(`
-                SELECT DISTINCT ON (af.form_id)
-                    af.form_id,
-                    f.title,
-                    f.status,
-                    f.subject_id,
-                    s.name
-                FROM answers_form af
-                INNER JOIN form f ON f.id = af.form_id
-                INNER JOIN subjects s ON s.id = f.subject_id
-                WHERE f.class_id = ? AND af.open_answer IS NOT NULL
-            `, [class_id])
+            SELECT DISTINCT ON (af.form_id)
+                af.form_id,
+                f.title,
+                f.subject_id,
+                c.name,
+                BOOL_AND(fc.corrected) AS status
+            FROM answers_form af
+            INNER JOIN form f
+                ON f.id = af.form_id
+            INNER JOIN classes c
+                ON c.id = f.class_id
+            INNER JOIN form_corrections fc
+                ON fc.form_id = f.id
+            WHERE f.subject_id = ?
+                AND af.open_answer IS NOT NULL
+            GROUP BY af.form_id, f.title, f.subject_id, c.name
+            `, [subject_id])
+
             const rows = result.rows
             return rows.length > 0 ? rows : undefined
         } catch (err) {
-            console.error("Erro ao buscar formulários para correção: ", err)
+            console.error("Erro ao buscar formulários para correção:", err)
             return undefined
         }
     }
@@ -495,8 +523,10 @@ class Form {
                 INNER JOIN users u ON u.id = af.user_id
                 INNER JOIN questions q ON q.id = af.question_id
                 INNER JOIN form f ON f.id = af.form_id
+                INNER JOIN form_corrections fc ON fc.student_id = u.id
                 WHERE af.form_id = ?
-                AND af.open_answer IS NOT NULL
+                AND af.open_answer IS NOT NULL 
+                AND fc.corrected = false
                 ORDER BY u.username, q.id
             `, [form_id])
 
@@ -544,44 +574,62 @@ class Form {
      */
     async getClassIdByAnswerId(answer_id) {
         try {
-            const result = await knex("answers_form as af")
-                .join("form as f", "f.id", "af.form_id")
-                .select("f.class_id", "af.form_id")
-                .where("af.id", answer_id)
-                .first()
-            return result
+             const result = await knex.raw(`
+                select
+                    f.class_id,
+                    f.id as form_id,
+                    af.user_id as student_id
+                from form f
+                inner join answers_form af
+                    on af.form_id = f.id
+                where af.id = ?
+                `, [answer_id])
+            const rows = result.rows
+            return rows.length > 0 ? rows[0] : undefined
         } catch (err) {
             console.error("Erro ao buscar turma da resposta:", err)
             return undefined
         }
     }
 
-    /**
-     * Salva um comentário de correção realizado pelo professor.
-     *
-     * @async
-     * @param {Object} data - Dados do comentário.
-     * @param {number} data.answer_id - ID da resposta corrigida.
-     * @param {number} data.teacher_id - ID do professor que realizou a correção.
-     * @param {string} data.comment - Comentário textual do professor.
-     * @returns {Promise<boolean>} Retorna `true` se o comentário foi salvo.
-     *
-     * @example
-     * await Form.saveCorrection({
-     *   answer_id: 4,
-     *   teacher_id: 1,
-     *   comment: "Ótima resposta!"
-     * })
-     */
-    async saveCorrection(data) {
+    async saveFormAndUserCorrection(data) {
         try {
-            await knex("comment_answers").insert(data)
-            return true
+            const ids = await knex("form_corrections").insert(data)
+            return { success: true, ids }
         } catch (err) {
-            console.error("Erro ao salvar comentário:", err)
-            return false
+            console.error("Erro cadastro de correção de formulário:", err)
+            return { success: false }
         }
     }
+
+    /**
+     * Salva as correções de um formulário no banco de dados.
+     *
+     * @async
+     * @function saveFormAndUserCorrection
+     * @param {Object|Object[]} data - Dados a serem inseridos na tabela `form_corrections`.
+     * Pode ser um objeto único ou um array de objetos contendo as informações da correção.
+     * @param {number} data.form_id - ID do formulário corrigido.
+     * @param {number} data.user_id - ID do usuário (aluno) relacionado à correção.
+     * @param {number} data.teacher_id - ID do professor que realizou a correção.
+     * @param {string} [data.comment] - Comentário opcional da correção.
+     * @param {boolean} [data.corrected] - Indica se o formulário foi totalmente corrigido.
+     *
+     * @returns {Promise<{success: boolean, ids?: number[]}>} Retorna um objeto com `success = true`
+     * e os IDs das inserções realizadas se bem-sucedido, ou `success = false` em caso de erro.
+     *
+     * @throws {Error} Lança erro interno caso a operação no banco de dados falhe.
+     */
+    async saveFormAndUserCorrection(data) {
+        try {
+            const ids = await knex("form_corrections").insert(data)
+            return { success: true, ids }
+        } catch (err) {
+            console.error("Erro cadastro de correção de formulário:", err)
+            return { success: false }
+        }
+    }
+
 
     /**
      * Atualiza o status de correção de uma resposta.
@@ -596,13 +644,17 @@ class Form {
      */
     async updateCorrection(answer_id, status) {
         try {
-            await knex("answers_form").where({ id: answer_id }).update({ status })
-            return true
+            const updated_at = knex.fn.now()
+            const result = await knex("answers_form")
+                .where({ id: answer_id })
+                .update({ corrected: status, updated_at})
+            return result > 0
         } catch (err) {
-            console.error("Erro ao atualizar correção:", err)
+            console.error("Erro ao atualizar resposta: ", err)
             return false
         }
     }
+
 
     /**
      * Atualiza o status geral de um formulário após uma correção.
@@ -614,12 +666,15 @@ class Form {
      * @example
      * await Form.updateStatusForm(3)
      */
-    async updateStatusForm(form_id) {
+    async updateStatusForm(form_id, student_id) {
         try {
-            await knex("form").where({ id: form_id }).update({ status: "corrigido" })
-            return true
+            const updated_at = knex.fn.now()
+            const result = await knex("form_corrections")
+                .where({ form_id }).andWhere({ student_id })
+                .update({ corrected: true, updated_at})
+            return result > 0
         } catch (err) {
-            console.error("Erro ao atualizar status do formulário:", err)
+            console.error("Erro ao atualizar status de formulário: ", err)
             return false
         }
     }

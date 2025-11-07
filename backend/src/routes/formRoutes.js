@@ -193,7 +193,9 @@ router.post("/form/answers", formController.saveAnswers)
  * @example
  * GET /form/correction/4
  */
-router.get("/form/correction/:class_id", formController.formCorrection)
+router.get("/form/correction/:subject_id", formController.formCorrection)
+
+
 
 /**
  * @route GET /form/answers/:form_id

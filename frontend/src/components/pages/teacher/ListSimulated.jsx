@@ -79,7 +79,7 @@ import requestData from "../../../utils/requestApi"
  */
 const StatusBadge = ({ status }) => {
   const baseClasses = "px-3 py-1 text-xs font-bold rounded-full inline-flex items-center gap-1.5";
-  if (status === 2) {
+  if (status === true) {
     return (
       <span className={`${baseClasses} bg-green-500/10 text-green-400`}>
         <span className="w-2 h-2 rounded-full bg-green-400"></span>
@@ -118,12 +118,13 @@ export default function SimuladosList() {
   const navigate = useNavigate()
   const { user } = useContext(Context)
   const [form, setForm] = useState([])
-  const { class_id } = useParams()
+  const { subject_id } = useParams()
+
 
 
   useEffect(() => {
     async function fetchForm() {
-      const response = await requestData(`/form/correction/${class_id}`, 'GET', {}, true)
+      const response = await requestData(`/form/correction/${subject_id}`, 'GET', {}, true)
       console.log(response)
 
       if (response && response.success) {
@@ -211,7 +212,7 @@ export default function SimuladosList() {
               <thead className="border-b border-slate-700/50">
                 <tr>
                   <th className="px-5 py-4 text-sm font-semibold text-slate-300">Nome do Simulado</th>
-                  <th className="px-5 py-4 text-sm font-semibold text-slate-300">Disciplina</th>
+                  <th className="px-5 py-4 text-sm font-semibold text-slate-300">Turma</th>
                   <th className="px-5 py-4 text-sm font-semibold text-slate-300">Status</th>
                   <th className="px-5 py-4 text-sm font-semibold text-slate-300 text-right">Ações</th>
                 </tr>
