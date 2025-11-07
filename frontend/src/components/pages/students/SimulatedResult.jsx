@@ -1,388 +1,487 @@
-/**
- * @file SimulatedResult.jsx
- * @description Componente que exibe o resultado detalhado de um simulado realizado pelo estudante.
- * Apresenta estatísticas de desempenho, gabarito e opções de revisão.
- * 
- * @module pages/students/SimulatedResult
- * @requires react
- * @requires react-router-dom
- * @requires react-icons/fi
- */
-
-import React, { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import api from '../../../utils/api';
+import { useState, useEffect } from 'react';
 import { 
-    FiCheckCircle, 
-    FiXCircle, 
-    FiClock, 
-    FiPrinter, 
-    FiEye, 
-    FiList, 
-    FiInfo,
-    FiRefreshCw 
-} from 'react-icons/fi';
+    CheckCircle, 
+    XCircle, 
+    Clock, 
+    Printer, 
+    Eye, 
+    Info,
+    RefreshCw,
+    Trophy,
+    TrendingUp,
+    AlertCircle,
+    BookOpen,
+    Target,
+    Award,
+    BarChart3,
+    ChevronRight,
+    Home,
+    FileText
+} from 'lucide-react';
 
-/**
- * @typedef {Object} SimulatedResultData
- * @property {string} studentName - Nome do estudante
- * @property {number} percentage - Porcentagem de acertos (0-100)
- * @property {number} correctAnswers - Número de respostas corretas
- * @property {number} wrongAnswers - Número de respostas erradas
- * @property {string} timeSpent - Tempo gasto no formato "HH:MM"
- */
-
-// Dados mockados para teste
+// Dados mockados expandidos
 const mockResult = {
-  studentName: "Guilherme",
-  percentage: 5.5,
-  correctAnswers: 1,
-  wrongAnswers: 14,
-  timeSpent: "02:14"
+    id: "sim_123",
+    studentName: "Gabriel Silva",
+    examTitle: "Simulado - Circuitos Digitais Avançados",
+    percentage: 75.5,
+    correctAnswers: 34,
+    wrongAnswers: 11,
+    unanswered: 0,
+    totalQuestions: 45,
+    timeSpent: "02:14:35",
+    timeLimit: "03:00:00",
+    completedAt: "2024-11-06T14:30:00",
+    subjects: [
+        { name: "Matemática", correct: 18, total: 25, percentage: 72 },
+        { name: "Física", correct: 8, total: 10, percentage: 80 },
+        { name: "Química", correct: 5, total: 6, percentage: 83.3 },
+        { name: "Biologia", correct: 3, total: 4, percentage: 75 }
+    ],
+    questions: [
+        { 
+            id: 1, 
+            subject: "Matemática", 
+            topic: "Álgebra Linear",
+            correct: true, 
+            userAnswer: "B", 
+            correctAnswer: "B",
+            difficulty: "Médio",
+            successRate: 89.2,
+            text: "Qual o valor de x na equação 2x + 5 = 15?"
+        },
+        { 
+            id: 2, 
+            subject: "Matemática", 
+            topic: "Geometria",
+            correct: false, 
+            userAnswer: "C", 
+            correctAnswer: "A",
+            difficulty: "Difícil",
+            successRate: 45.8,
+            text: "Calcule a área do triângulo..."
+        },
+        { 
+            id: 3, 
+            subject: "Física", 
+            topic: "Cinemática",
+            correct: true, 
+            userAnswer: "D", 
+            correctAnswer: "D",
+            difficulty: "Fácil",
+            successRate: 92.5,
+            text: "Um corpo em movimento retilíneo..."
+        },
+        { 
+            id: 4, 
+            subject: "Química", 
+            topic: "Química Orgânica",
+            correct: false, 
+            userAnswer: "A", 
+            correctAnswer: "B",
+            difficulty: "Médio",
+            successRate: 67.3,
+            text: "Qual a nomenclatura correta..."
+        },
+        { 
+            id: 5, 
+            subject: "Biologia", 
+            topic: "Genética",
+            correct: true, 
+            userAnswer: "C", 
+            correctAnswer: "C",
+            difficulty: "Difícil",
+            successRate: 52.1,
+            text: "Sobre a segunda lei de Mendel..."
+        }
+    ],
 };
 
-/**
- * @component
- * @description Componente de modal reutilizável com fundo escuro e animação suave
- * 
- * @param {Object} props - Propriedades do componente
- * @param {boolean} props.isOpen - Controla a visibilidade do modal
- * @param {Function} props.onClose - Função chamada ao fechar o modal
- * @param {React.ReactNode} props.children - Conteúdo a ser renderizado dentro do modal
- * 
- * @returns {React.ReactElement|null} Retorna o modal quando aberto ou null quando fechado
- */
 const Modal = ({ isOpen, onClose, children }) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          {children}
+    if (!isOpen) return null;
+    
+    return (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto animate-scale-in">
+                <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center rounded-t-3xl">
+                    <h3 className="text-xl font-bold text-gray-800">Detalhes das Questões</h3>
+                    <button
+                        onClick={onClose}
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                        <XCircle className="w-6 h-6 text-gray-500" />
+                    </button>
+                </div>
+                <div className="p-6">
+                    {children}
+                </div>
+            </div>
         </div>
-        <div className="border-t px-6 py-4 flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
-          >
-            Fechar
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+    );
 };
 
-/**
- * @component SimulatedResult
- * @description Página principal que exibe o resultado detalhado de um simulado.
- * Mostra estatísticas de desempenho como porcentagem de acertos, número de questões
- * corretas/incorretas e tempo gasto. Também fornece opções para revisar respostas,
- * imprimir resultados e acessar a lista de revisão.
- *
- * @example
- * // Uso na rota
- * <Route path="/student/simulated/result/:id" component={SimulatedResult} />
- *
- * Estados:
- * - result: Dados do resultado do simulado
- * - loading: Indica se os dados estão sendo carregados
- * - error: Mensagem de erro, se houver
- * - isModalOpen: Controla a visibilidade do modal
- *
- * Funcionalidades:
- * - Exibe gráfico circular de progresso
- * - Mostra estatísticas detalhadas
- * - Permite revisar respostas
- * - Oferece opção de impressão
- * - Integra com sistema de revisão
- *
- * @returns {React.ReactElement} Página completa de resultado do simulado
- */
-const SimulatedResult = () => {
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false); // Estado para o modal
-  const { id } = useParams();
+export default function SimulatedResult() {
+    const [result, setResult] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedFilter, setSelectedFilter] = useState('all'); // all, correct, wrong
 
-  /**
-   * @function
-   * @description Busca os resultados do simulado da API quando o componente é montado
-   * @async
-   */
-  useEffect(() => {
-    /**
-     * @function
-     * @async
-     * @description Função interna que realiza a busca dos dados do simulado
-     * @throws {Error} Erro ao buscar dados do simulado
-     */
-    const fetchResult = async () => {
-      try {
-        setLoading(true);
+    useEffect(() => {
         setTimeout(() => {
-          setResult(mockResult);
-          setLoading(false);
+            setResult(mockResult);
+            setLoading(false);
         }, 1000);
-      } catch (error) {
-        setError('Erro ao carregar o resultado do simulado');
-        console.error('Erro:', error);
-        setLoading(false);
-      }
+    }, []);
+
+    const getPercentageColor = (percentage) => {
+        if (percentage < 60) return {
+            text: 'text-red-600',
+            bg: 'bg-red-500',
+            light: 'bg-red-50',
+            border: 'border-red-200'
+        };
+        if (percentage < 80) return {
+            text: 'text-yellow-600',
+            bg: 'bg-yellow-500',
+            light: 'bg-yellow-50',
+            border: 'border-yellow-200'
+        };
+        return {
+            text: 'text-green-600',
+            bg: 'bg-green-500',
+            light: 'bg-green-50',
+            border: 'border-green-200'
+        };
     };
-    fetchResult();
-  }, [id]);
 
-  /**
- * @function
- * @description Determina as classes de cor do Tailwind com base na porcentagem de acertos
- * 
- * @param {number} percentage - Porcentagem de acertos (0-100)
- * @returns {string} Classes CSS do Tailwind para cor do texto e stroke
- */
-const getPercentageColorClass = (percentage) => {
-    if (percentage < 60) return 'text-red-500 stroke-red-500';
-    if (percentage < 80) return 'text-yellow-500 stroke-yellow-500';
-    return 'text-green-500 stroke-green-500';
-  };
+    const getDifficultyColor = (difficulty) => {
+        switch(difficulty) {
+            case 'Fácil': return 'bg-green-100 text-green-700 border-green-200';
+            case 'Médio': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+            case 'Difícil': return 'bg-red-100 text-red-700 border-red-200';
+            default: return 'bg-gray-100 text-gray-700 border-gray-200';
+        }
+    };
 
-  // Wrapper da Página (Layout Principal)
-  /**
- * @component
- * @description Componente wrapper que provê o layout padrão da página com cabeçalho e rodapé
- * 
- * @param {Object} props - Propriedades do componente
- * @param {React.ReactNode} props.children - Conteúdo a ser renderizado dentro do wrapper
- * 
- * @returns {React.ReactElement} Layout estruturado da página
- */
-const PageWrapper = ({ children }) => (
-    <div className="min-h-screen flex flex-col">
-      {/* Ajustado o padding vertical (py) para ser menor em telas pequenas
-        Adicionado w-full para garantir que o main ocupe toda a largura
-      */}
-      <main className="flex-grow max-w-4xl mx-auto px-4 py-6 sm:py-10 w-full">
-        {children}
-      </main>
-      <footer className="py-6 text-center text-sm text-gray-500 border-t border-gray-200">
-        © EVOLVERE {new Date().getFullYear()} — Todos os direitos reservados.
-      </footer>
-    </div>
-  );
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-cyan-50 flex items-center justify-center">
+                <div className="bg-white p-12 rounded-3xl shadow-xl flex flex-col items-center gap-4">
+                    <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-gray-600 font-medium">Carregando resultados...</p>
+                </div>
+            </div>
+        );
+    }
 
-  // Telas de Loading e Erro (com padding responsivo)
-  if (loading) {
+    const { 
+        studentName, 
+        examTitle,
+        percentage, 
+        correctAnswers, 
+        wrongAnswers, 
+        unanswered,
+        totalQuestions,
+        timeSpent,
+        subjects,
+        questions,
+        recommendations
+    } = result;
+
+    const colors = getPercentageColor(percentage);
+    const strokeDasharray = ((percentage || 0) / 100) * 251.2;
+
+    const filteredQuestions = questions.filter(q => {
+        if (selectedFilter === 'correct') return q.correct;
+        if (selectedFilter === 'wrong') return !q.correct;
+        return true;
+    });
+
     return (
-      <PageWrapper>
-        {/* Padding responsivo: p-6 em telas pequenas, p-12 em maiores */}
-        <div className="bg-white p-6 sm:p-12 rounded-xl shadow-lg flex justify-center items-center h-72">
-          <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-4 border-blue-600"></div>
-        </div>
-      </PageWrapper>
-    );
-  }
+        <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-cyan-50">
+            {/* Header */}
+            <header className="bg-white/80 backdrop-blur-xl border-b border-gray-200 px-6 py-4 sticky top-0 z-40 shadow-sm">
+                <div className="max-w-7xl mx-auto flex items-center justify-between">
+                    <button 
+                        onClick={() => window.history.back()}
+                        className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors"
+                    >
+                        <Home className="w-5 h-5" />
+                        <span className="font-medium">Voltar ao Dashboard</span>
+                    </button>
+                </div>
+            </header>
 
-  if (error) {
-    return (
-      <PageWrapper>
-        <div className="bg-white p-6 sm:p-12 rounded-xl shadow-lg flex flex-col items-center justify-center h-72 text-red-600 text-center">
-          <FiInfo className="text-4xl sm:text-5xl mb-4" />
-          <h3 className="text-xl sm:text-2xl font-semibold">Erro ao carregar</h3>
-          <p>{error}</p>
-        </div>
-      </PageWrapper>
-    );
-  }
+            <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+                {/* Título do Simulado */}
+                <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-200">
+                    <div className="flex items-start gap-4">
+                        <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-2xl">
+                            <FileText className="w-8 h-8 text-white" />
+                        </div>
+                        <div className="flex-1">
+                            <h1 className="text-2xl font-bold text-gray-900 mb-2">{examTitle}</h1>
+                            <p className="text-gray-600">Concluído em {new Date(result.completedAt).toLocaleString('pt-BR')}</p>
+                        </div>
+                    </div>
+                </div>
 
-  const { studentName, percentage, correctAnswers, wrongAnswers, timeSpent } = result;
-  const percentageColorClass = getPercentageColorClass(percentage);
-  const strokeDasharrayValue = ((percentage || 0) / 100) * 251.2;
+                {/* Card Principal de Resultados */}
+                <div className="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden">
+                    <div className="bg-gradient-to-r from-blue-600 to-cyan-500 px-8 py-6">
+                        <h2 className="text-2xl font-bold text-white mb-1">
+                            {percentage >= 70 ? `Excelente trabalho, ${studentName}! 🎉` : 
+                             percentage >= 60 ? `Bom desempenho, ${studentName}! 👏` :
+                             `Continue praticando, ${studentName}! 💪`}
+                        </h2>
+                        <p className="text-blue-100">Veja abaixo sua análise detalhada de desempenho</p>
+                    </div>
 
-  return (
-    <PageWrapper>
-      {/* Espaçamento entre os cards: 
-        space-y-6 em telas pequenas, space-y-8 em maiores
-      */}
-      <div className="space-y-6 sm:space-y-8">
-        
-        {/* Card Principal de Resultados */}
-        {/* Padding responsivo: p-5 em telas pequenas, p-8 em maiores */}
-        <div className="bg-white p-5 sm:p-8 rounded-xl shadow-lg">
-          {/* Layout do card: 
-            - flex-col (padrão mobile)
-            - md:flex-row (layout lado a lado em telas médias/grandes)
-            - Gap responsivo: gap-6 (mobile) e gap-10 (desktop)
-          */}
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6 md:gap-10">
-            
-            {/* Saudação e Mensagem */}
-            {/* - text-center (padrão mobile)
-              - md:text-left (alinhado à esquerda em desktop)
-            */}
-            <div className="text-center md:text-left flex-grow">
-              {/* Tipografia responsiva: text-2xl (mobile), sm:text-3xl (desktop) */}
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mb-2">
-                {percentage < 60 
-                  ? `Treine um pouco mais, ${studentName}!`
-                  : `Parabéns, ${studentName}!`
+                    <div className="p-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            {/* Círculo de Performance */}
+                            <div className="flex flex-col items-center justify-center">
+                                <div className="relative w-56 h-56">
+                                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                                        <circle
+                                            className="text-gray-200 stroke-current"
+                                            strokeWidth="8" cx="50" cy="50" r="40" fill="transparent"
+                                        />
+                                        <circle
+                                            className={`${colors.text} stroke-current`}
+                                            strokeWidth="8" strokeLinecap="round" cx="50" cy="50" r="40"
+                                            fill="transparent"
+                                            strokeDasharray={`${strokeDasharray} 251.2`}
+                                            style={{ transition: 'stroke-dasharray 1s ease-out' }}
+                                        />
+                                    </svg>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                        <Trophy className={`w-8 h-8 ${colors.text} mb-2`} />
+                                        <span className={`text-4xl font-bold ${colors.text}`}>
+                                            {percentage.toFixed(1)}%
+                                        </span>
+                                        <span className="text-sm text-gray-500 mt-1">Aproveitamento</span>
+                                    </div>
+                                </div>
+
+                                <div className={`mt-6 px-6 py-3 rounded-full ${colors.light} border-2 ${colors.border}`}>
+                                    <span className={`font-bold ${colors.text}`}>
+                                        {percentage >= 70 ? "Aprovado ✓" : 
+                                         percentage >= 60 ? "Aproveitamento Regular" :
+                                         "Precisa Melhorar"}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Estatísticas Detalhadas */}
+                            <div className="space-y-4">
+                                <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-5 rounded-2xl border-2 border-green-200">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-3">
+                                            <CheckCircle className="w-6 h-6 text-green-600" />
+                                            <span className="font-semibold text-gray-700">Questões Corretas</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-3xl font-bold text-green-600">{correctAnswers}</div>
+                                            <div className="text-sm font-medium text-green-700">
+                                                {((correctAnswers / totalQuestions) * 100).toFixed(1)}%
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="bg-green-200 rounded-full h-2">
+                                        <div 
+                                            className="bg-green-600 h-2 rounded-full transition-all duration-1000"
+                                            style={{ width: `${(correctAnswers / totalQuestions) * 100}%` }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="bg-gradient-to-br from-red-50 to-rose-50 p-5 rounded-2xl border-2 border-red-200">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-3">
+                                            <XCircle className="w-6 h-6 text-red-600" />
+                                            <span className="font-semibold text-gray-700">Questões Incorretas</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-3xl font-bold text-red-600">{wrongAnswers}</div>
+                                            <div className="text-sm font-medium text-red-700">
+                                                {((wrongAnswers / totalQuestions) * 100).toFixed(1)}%
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="bg-red-200 rounded-full h-2">
+                                        <div 
+                                            className="bg-red-600 h-2 rounded-full transition-all duration-1000"
+                                            style={{ width: `${(wrongAnswers / totalQuestions) * 100}%` }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-5 rounded-2xl border-2 border-blue-200">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <Clock className="w-6 h-6 text-blue-600" />
+                                            <div>
+                                                <div className="font-semibold text-gray-700">Tempo Utilizado</div>
+                                                <div className="text-sm text-gray-500">de 03:00:00 disponíveis</div>
+                                            </div>
+                                        </div>
+                                        <span className="text-2xl font-bold text-blue-600">{timeSpent}</span>
+                                    </div>
+                                </div>
+
+                                <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-5 rounded-2xl border-2 border-purple-200">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <Target className="w-6 h-6 text-purple-600" />
+                                            <div>
+                                                <div className="font-semibold text-gray-700">Total de Questões</div>
+                                                <div className="text-sm text-gray-500">Simulado completo</div>
+                                            </div>
+                                        </div>
+                                        <span className="text-2xl font-bold text-purple-600">{totalQuestions}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                {/* Ações Rápidas */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button 
+                        onClick={() => setIsModalOpen(true)}
+                        className="bg-white p-6 rounded-2xl shadow-lg border-2 border-gray-200 hover:border-blue-400 hover:shadow-xl transition-all group"
+                    >
+                        <Eye className="w-8 h-8 text-blue-600 mb-3 group-hover:scale-110 transition-transform" />
+                        <h4 className="font-bold text-gray-800 mb-1">Ver Gabarito Detalhado</h4>
+                        <p className="text-sm text-gray-600">Confira todas as questões e respostas</p>
+                    </button>
+
+                    <button 
+                        onClick={() => window.print()}
+                        className="bg-white p-6 rounded-2xl shadow-lg border-2 border-gray-200 hover:border-green-400 hover:shadow-xl transition-all group"
+                    >
+                        <Printer className="w-8 h-8 text-green-600 mb-3 group-hover:scale-110 transition-transform" />
+                        <h4 className="font-bold text-gray-800 mb-1">Imprimir Resultados</h4>
+                        <p className="text-sm text-gray-600">Salve uma cópia física</p>
+                    </button>
+                </div>
+
+
+            </main>
+
+            {/* Modal de Gabarito Detalhado */}
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+                <div className="mb-6">
+                    <div className="flex gap-2 mb-6">
+                        <button
+                            onClick={() => setSelectedFilter('all')}
+                            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                                selectedFilter === 'all' 
+                                    ? 'bg-blue-600 text-white' 
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            Todas ({questions.length})
+                        </button>
+                        <button
+                            onClick={() => setSelectedFilter('correct')}
+                            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                                selectedFilter === 'correct' 
+                                    ? 'bg-green-600 text-white' 
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            Acertos ({correctAnswers})
+                        </button>
+                        <button
+                            onClick={() => setSelectedFilter('wrong')}
+                            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                                selectedFilter === 'wrong' 
+                                    ? 'bg-red-600 text-white' 
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            Erros ({wrongAnswers})
+                        </button>
+                    </div>
+
+                    <div className="space-y-4">
+                        {filteredQuestions.map((q) => (
+                            <div 
+                                key={q.id} 
+                                className={`p-5 rounded-2xl border-2 ${
+                                    q.correct 
+                                        ? 'bg-green-50 border-green-200' 
+                                        : 'bg-red-50 border-red-200'
+                                }`}
+                            >
+                                <div className="flex items-start justify-between mb-3">
+                                    <div className="flex items-center gap-3">
+                                        <span className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
+                                            {q.id}
+                                        </span>
+                                        <div>
+                                            <span className="font-bold text-gray-800">{q.subject}</span>
+                                            <span className="text-gray-500 text-sm ml-2">• {q.topic}</span>
+                                        </div>
+                                    </div>
+                                    {q.correct ? (
+                                        <CheckCircle className="w-6 h-6 text-green-600" />
+                                    ) : (
+                                        <XCircle className="w-6 h-6 text-red-600" />
+                                    )}
+                                </div>
+
+                                <p className="text-gray-700 mb-4">{q.text}</p>
+
+                                <div className="grid grid-cols-2 gap-3 mb-3">
+                                    <div>
+                                        <span className="text-sm text-gray-600">Sua resposta:</span>
+                                        <div className={`font-bold text-lg ${q.correct ? 'text-green-600' : 'text-red-600'}`}>
+                                            Alternativa {q.userAnswer}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span className="text-sm text-gray-600">Resposta correta:</span>
+                                        <div className="font-bold text-lg text-green-600">
+                                            Alternativa {q.correctAnswer}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-3 text-sm">
+                                    <span className={`px-3 py-1 rounded-full border ${getDifficultyColor(q.difficulty)}`}>
+                                        {q.difficulty}
+                                    </span>
+                                    <span className="text-gray-600">
+                                        {q.successRate}% dos alunos acertaram
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </Modal>
+
+            <style>{`
+                @keyframes fade-in {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
                 }
-              </h2>
-              {/* Tipografia responsiva: text-sm (mobile), sm:text-base (desktop) */}
-              <p className="text-sm sm:text-base text-gray-500">
-                Mantenha a consistência nos estudos que os resultados começarão a aparecer!
-              </p>
-            </div>
-
-            {/* Círculo de Progresso e Estatísticas */}
-            {/* Layout do bloco:
-              - flex-col (padrão mobile, empilha o círculo e as estatísticas)
-              - sm:flex-row (lado a lado em telas pequenas/tablets)
-              - gap-6 (mobile) e sm:gap-8 (maiores)
-            */}
-            <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8 w-full sm:w-auto">
-              
-              {/* Círculo de Progresso */}
-              {/* - Tamanho responsivo: w-28 h-28 (mobile), sm:w-32 sm:h-32 (desktop)
-              */}
-              <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0">
-                <svg 
-                  className="w-full h-full transform -rotate-90" 
-                  viewBox="0 0 100 100"
-                  preserveAspectRatio="xMidYMid meet"
-                >
-                  <circle
-                    className="text-gray-200 stroke-current"
-                    strokeWidth="10" cx="50" cy="50" r="40" fill="transparent"
-                  />
-                  <circle
-                    className={`${percentageColorClass} stroke-current`}
-                    strokeWidth="10" strokeLinecap="round" cx="50" cy="50" r="40"
-                    fill="transparent"
-                    strokeDasharray={`${strokeDasharrayValue} 251.2`}
-                    style={{ transition: 'stroke-dasharray 0.5s ease-in-out' }}
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className={`text-2xl sm:text-3xl font-bold ${percentageColorClass.split(' ')[0]}`}>
-                    {(percentage || 0).toFixed(1)}%
-                  </span>
-                  <span className="text-xs sm:text-sm text-gray-500 text-center">de aproveitamento</span>
-                </div>
-              </div>
-
-              {/* Estatísticas */}
-              {/* - w-full (mobile, para ocupar a largura)
-                - sm:w-auto (desktop)
-                - gap-3 (entre os itens)
-              */}
-              <div className="flex flex-col gap-3 w-full sm:w-auto">
-                <div className="flex items-center gap-3">
-                  <FiCheckCircle className="text-green-500 text-xl sm:text-2xl" />
-                  <div>
-                    <span className="text-lg sm:text-xl font-bold text-gray-900">{correctAnswers}</span>
-                    <span className="text-sm text-gray-500 ml-1.5">acerto{correctAnswers !== 1 ? 's' : ''}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <FiXCircle className="text-red-500 text-xl sm:text-2xl" />
-                  <div>
-                    <span className="text-lg sm:text-xl font-bold text-gray-900">{wrongAnswers}</span>
-                    <span className="text-sm text-gray-500 ml-1.5">erro{wrongAnswers !== 1 ? 's' : ''}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <FiClock className="text-blue-500 text-xl sm:text-2xl" />
-                  <div>
-                    <span className="text-lg sm:text-xl font-bold text-gray-900">{timeSpent}</span>
-                    <span className="text-sm text-gray-500 ml-1.5">tempo</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+                @keyframes scale-in {
+                    from { transform: scale(0.95); opacity: 0; }
+                    to { transform: scale(1); opacity: 1; }
+                }
+                .animate-fade-in { animation: fade-in 0.3s ease-out; }
+                .animate-scale-in { animation: scale-in 0.3s ease-out; }
+                @media print {
+                    header, button, .no-print { display: none !important; }
+                }
+            `}</style>
         </div>
-
-        {/* Seção de Ações */}
-        {/* Layout dos botões:
-          - flex-col (padrão mobile, empilhados)
-          - sm:flex-row (lado a lado em telas maiores)
-          - items-center (para centralizar em coluna no mobile)
-          - gap-4 (mobile) e sm:gap-6 (desktop)
-        */}
-        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6">
-          <button 
-            onClick={() => alert('...')}
-            className="flex items-center justify-center gap-2 text-base text-gray-600 hover:text-blue-600 font-medium transition-colors w-full sm:w-auto"
-          >
-            <FiRefreshCw size={18} />
-            <span>Refazer simulado</span>
-          </button>
-          <Link 
-            to={`/student/simulated/review/${id}`}
-            className="flex items-center justify-center gap-2 text-base text-gray-600 hover:text-blue-600 font-medium transition-colors w-full sm:w-auto"
-          >
-            <FiEye size={18} />
-            <span>Ver cartão resposta</span>
-          </Link>
-          <button 
-            onClick={() => window.print()}
-            className="flex items-center justify-center gap-2 text-base text-gray-600 hover:text-blue-600 font-medium transition-colors w-full sm:w-auto"
-          >
-            <FiPrinter size={18} />
-            <span>Imprimir simulado</span>
-          </button>
-        </div>
-
-        {/* Seção Gabarito */}
-        {/* Padding responsivo: p-5 (mobile), sm:p-8 (desktop) */}
-        <div className="bg-white p-5 sm:p-8 rounded-xl shadow-lg">
-          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight mb-4">Gabarito</h3>
-          <p className="text-sm sm:text-base text-gray-500 mb-6">
-            Se encontrar algum problema na correção deste simulado, salve o link ou tire um printscreen e nos envie. 
-            Verificaremos as questões respondidas e efetuaremos as devidas correções.
-          </p>
-          
-          {/* Item de gabarito */}
-          <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg mb-2">
-              <span className="bg-blue-600 text-white text-sm font-semibold px-2.5 py-1 rounded-full flex-shrink-0">01</span>
-              <div className="flex-grow">
-                  <p className="text-base font-semibold text-gray-800">Matemática</p>
-                  <p className="text-sm text-gray-500">89,2% de acerto na questão</p>
-              </div>
-          </div>
-          {/* ... outros itens ... */}
-        </div>
-
-        {/* Seção de Revisão */}
-        <div className="bg-blue-50 border-l-4 border-blue-500 p-5 sm:p-6 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <FiInfo className="text-2xl sm:text-3xl text-blue-600 flex-shrink-0" />
-            <p className="text-sm sm:text-base text-blue-800">
-              Os assuntos que você errou já entraram na sua lista de revisão. Confira!
-            </p>
-          </div>
-          <Link 
-            to="/student/revision-list"
-            className="px-6 py-2.5 bg-blue-700 text-white text-sm sm:text-base font-semibold rounded-lg hover:bg-blue-800 transition flex-shrink-0 w-full sm:w-auto text-center"
-          >
-            Acessar lista de revisões
-          </Link>
-        </div>
-        
-      </div>
-
-      {/* Modal (exemplo de uso) */}
-      <Modal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)}
-      >
-        <h3 className="text-lg font-semibold mb-2">Título do Modal</h3>
-        <p>Conteúdo do modal aqui...</p>
-      </Modal>
-    </PageWrapper>
-  );
-};
-
-export default SimulatedResult;
+    );
+}
