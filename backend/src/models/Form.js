@@ -715,6 +715,39 @@ class Form {
         }
     }
 
+    async resultForm(form_id, student_id) {
+        try {
+            const result = await knex.raw(`
+                SELECT
+                    f.title as form_name,
+                    u.username,
+                    SUM(rf.correct) AS total_correct,
+                    SUM(rf.wrong) AS total_wrong,
+                    SUM(rf.points) AS total_points,
+                    (SUM(rf.correct) + SUM(rf.wrong)) AS total_questions,
+                    CASE 
+                        WHEN (SUM(rf.correct) + SUM(rf.wrong)) > 0 
+                        THEN ROUND((SUM(rf.correct)::decimal / (SUM(rf.correct) + SUM(rf.wrong))) * 100, 2)
+                        ELSE 0
+                    END AS percent_correct,
+                    MAX(rf.updated_at) AS updated_at
+                FROM results_form rf
+                inner join form f
+                    on f.id = rf.form_id
+                inner join users u
+                    on u.id = rf.student_id
+                WHERE rf.form_id = ? AND rf.student_id = ?
+                GROUP BY f.title, u.username;
+            `, [form_id, student_id]);
+
+            return result.rows[0];
+        } catch (err) {
+            console.error("Erro ao buscar resultados do formulário: ", err);
+            return undefined;
+        }
+    }
+
+
 }
 
 module.exports = new Form()

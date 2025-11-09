@@ -357,7 +357,7 @@ class FormController {
 
             await Form.saveFormAndUserCorrection(data)
 
-            return response.status(200).json({ status: true, message: "Respostas salvas com sucesso.", class_id })
+            return response.status(200).json({ status: true, message: "Respostas salvas com sucesso.", class_id, form_id })
         } catch (err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
@@ -545,6 +545,40 @@ class FormController {
         } catch (error) {
             console.error('Erro ao buscar atividades pendentes:', error);
             res.status(500).json({ 
+                status: false, 
+                message: 'Erro interno do servidor.' 
+            });
+        }
+    }
+
+    async getResultForm(request, response) {
+        try {
+            const { form_id } = request.params
+            const student_id = request.session.user?.id // buscar usuário logado
+            if (!student_id) {
+                return response.status(401).json({ status: false, message: "Acesso não autorizado." });
+            }
+
+            if (!validator.isInt(form_id + '', { min: 1 })) {
+                return response.status(422).json({ status: false, message: "Formulário invalido." })
+            }
+
+            const formExist = await Form.formExist(form_id)
+            if(!formExist) {
+                return response.status(404).json({ status: false, message: "Simulado não encontrado." })
+            }
+
+            const results = await Form.resultForm(form_id, student_id)
+            if(!results) {
+                return response.status(500).json({ status: false, message: "Erro ao buscar resultados." })
+            }
+
+            return response.status(200).json({ status: true, results })
+            
+
+        } catch (error) {
+            console.error("Erro interno em getResultForm:", error)
+            response.status(500).json({ 
                 status: false, 
                 message: 'Erro interno do servidor.' 
             });
