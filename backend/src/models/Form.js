@@ -678,6 +678,76 @@ class Form {
             return false
         }
     }
+
+    async calculateResults(formattedAnswers) {
+        try {
+            const rowsToInsert = formattedAnswers.map(a => `(${a.question_id}, ${a.option_id})`).join(",")
+
+            const result = await knex.raw(`
+            WITH user_answers(question_id, option_id) AS (
+                VALUES ${rowsToInsert}
+            )
+            SELECT
+                COUNT(*) FILTER (WHERE o.correct = true) AS correct,
+                COUNT(*) FILTER (WHERE o.correct = false) AS wrong,
+                COALESCE(SUM(q.points) FILTER (WHERE o.correct = true), 0) AS total_points
+            FROM user_answers ua
+            INNER JOIN options o ON o.id = ua.option_id
+            INNER JOIN questions q ON q.id = ua.question_id
+            `)
+
+            const rows = result.rows
+            return rows.length > 0 ? rows[0] : { correct: 0, wrong: 0, total_points: 0 }
+        } catch (err) {
+            console.error("Erro ao calcular resultados:", err)
+            return { correct: 0, wrong: 0, total_points: 0 }
+        }
+    }
+
+
+    async saveFormResults(data) {
+        try {
+            const ids = await knex("results_form").insert(data)
+            return { success: true, ids }
+        } catch (err) {
+            console.error("Erro cadastro de resultados: ", err)
+            return { success: false }
+        }
+    }
+
+    async resultForm(form_id, student_id) {
+        try {
+            const result = await knex.raw(`
+                SELECT
+                    f.title as form_name,
+                    u.username,
+                    SUM(rf.correct) AS total_correct,
+                    SUM(rf.wrong) AS total_wrong,
+                    SUM(rf.points) AS total_points,
+                    (SUM(rf.correct) + SUM(rf.wrong)) AS total_questions,
+                    CASE 
+                        WHEN (SUM(rf.correct) + SUM(rf.wrong)) > 0 
+                        THEN ROUND((SUM(rf.correct)::decimal / (SUM(rf.correct) + SUM(rf.wrong))) * 100, 2)
+                        ELSE 0
+                    END AS percent_correct,
+                    MAX(rf.updated_at) AS updated_at
+                FROM results_form rf
+                inner join form f
+                    on f.id = rf.form_id
+                inner join users u
+                    on u.id = rf.student_id
+                WHERE rf.form_id = ? AND rf.student_id = ?
+                GROUP BY f.title, u.username;
+            `, [form_id, student_id]);
+
+            return result.rows[0];
+        } catch (err) {
+            console.error("Erro ao buscar resultados do formulário: ", err);
+            return undefined;
+        }
+    }
+
+
 }
 
 module.exports = new Form()

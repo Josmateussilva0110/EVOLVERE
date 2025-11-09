@@ -251,4 +251,6 @@ router.post("/form/save/correction", formController.saveCorrection)
  */
 router.get("/form/student/pending", formController.getStudentPendingForms)
 
+router.get("/form/results/:form_id", formController.getResultForm)
+
 module.exports = router

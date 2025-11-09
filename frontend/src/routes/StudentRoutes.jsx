@@ -102,7 +102,7 @@ export default function StudentRoutes() {
        * @route /student/simulated/result/:id
        * @element SimulatedResult
        */}
-      <Route path="simulated/result/:id" element={<SimulatedResult />} />
+      <Route path="simulated/result/:form_id" element={<SimulatedResult />} />
     </Routes>
   )
 }
