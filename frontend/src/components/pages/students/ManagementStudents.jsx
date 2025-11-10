@@ -23,6 +23,7 @@ export default function Dashboard() {
   const [requestUser, setRequestUser] = useState(null)
   const [course_id, setCourse] = useState(null)
   const [class_id, setClassId] = useState(null)
+  const [countClass, setCountClass] = useState(0)
   
   const [pendingCount, setPendingCount] = useState(0);
   const [upcomingActivities, setUpcomingActivities] = useState([]);
@@ -65,6 +66,7 @@ export default function Dashboard() {
           const activities = response.data.data.upcomingActivities;
           setPendingCount(response.data.data.pendingCount);
           setUpcomingActivities(activities);
+          setCountClass(response.data.data.countClass)
 
           if (activities.length > 0) {
             setClassId(activities[0].class_id);
@@ -366,7 +368,7 @@ export default function Dashboard() {
               </div>
             </div>
             
-            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all hover:-translate-y-1">
+            <div onClick={() => navigate("/student/courses/list")}  className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all hover:-translate-y-1">
                <div className="flex items-center gap-4 mb-4">
                  <div className="p-3 bg-linear-to-br from-green-100 to-green-200 rounded-xl">
                    <Users className="text-green-600" size={24} />
@@ -377,11 +379,7 @@ export default function Dashboard() {
                  </div>
                </div>
                 <div className="flex items-center justify-between">
-                  <div className="flex -space-x-2">
-                    <img className="w-8 h-8 rounded-full border-2 border-white" src="https://via.placeholder.com/50" alt="user" />
-                    <img className="w-8 h-8 rounded-full border-2 border-white" src="https://via.placeholder.com/50" alt="user" />
-                    <span className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600">+3</span>
-                  </div>
+                  <span className="text-4xl font-bold text-green-600">{countClass}</span>
                  <ChevronRight className="text-gray-400" size={20} />
                </div>
             </div>

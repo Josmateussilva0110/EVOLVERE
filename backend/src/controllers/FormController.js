@@ -517,6 +517,8 @@ class FormController {
                 return res.status(500).json({ status: false, message: "Erro ao consultar atividades." });
             }
 
+            const countClass = await Class.countClassByUser(student_id)
+
             const upcomingActivities = forms.map(form => {
                 const daysRemaining = getDaysRemaining(form.deadline);
                 const urgency = getUrgency(daysRemaining);
@@ -538,7 +540,8 @@ class FormController {
                 status: true,
                 data: {
                     pendingCount: pendingCount,
-                    upcomingActivities: upcomingActivities
+                    upcomingActivities: upcomingActivities,
+                    countClass,
                 }
             });
 
