@@ -219,8 +219,9 @@ class Form {
                     f."totalDuration",
                     f.deadline,
                     f.updated_at,
+                    af.created_at AS send_response,
                     json_agg(
-                        json_build_object(
+                        DISTINCT jsonb_build_object(   -- evita duplicação
                             'id', q.id,
                             'text', q.text,
                             'points', q.points,
@@ -240,17 +241,27 @@ class Form {
                     ) AS questions
                 FROM form f
                 INNER JOIN questions q ON q.form_id = f.id
+
+                LEFT JOIN (
+                    SELECT form_id, MAX(created_at) AS created_at
+                    FROM answers_form
+                    GROUP BY form_id
+                ) af ON af.form_id = f.id
+
                 WHERE f.id = ?
-                GROUP BY f.id
+                GROUP BY f.id, af.created_at
                 ORDER BY f.updated_at DESC;
             `, [id])
+
             const rows = result.rows
             return rows.length > 0 ? rows : undefined
-        } catch(err) {
+
+        } catch (err) {
             console.error("Erro ao buscar formulários:", err)
             return undefined
         }
     }
+
 
     /**
      * Verifica se um formulário existe pelo seu ID.

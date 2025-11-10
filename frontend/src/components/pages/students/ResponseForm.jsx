@@ -143,13 +143,21 @@ export default function ResponseForm() {
             }),
         };
 
+        console.log('respostas: ', answers)
+
 
         const response = await requestData('/form/answers', "POST", payload, true);
         console.log('form: ', response)
         if (response.success) {
-            navigate(`/student/simulated/result/${response.data.form_id}`, {
-                state: { showResultModal: true }
-            });
+            const hasOpenQuestions = form?.questions?.some(q => q.type === "aberta");
+
+            if (hasOpenQuestions) {
+                navigate(`/student/simulated/pending/correction/${response.data.form_id}`);
+            } else {
+                navigate(`/student/simulated/result/${response.data.form_id}`, {
+                    state: { showResultModal: true }
+                });
+            }
         } else {
             setFlashMessage(response.message, 'error');
         }

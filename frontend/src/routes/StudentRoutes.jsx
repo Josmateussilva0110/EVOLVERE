@@ -11,6 +11,7 @@ import MaterialsClass from "../components/pages/students/MaterialsClass"
 import ActivitySimulated from "../components/pages/students/ActivitySimulated"
 import ResponseForm from "../components/pages/students/ResponseForm"
 import SimulatedResult from "../components/pages/students/SimulatedResult"
+import SimulatedPendingCorrection from "../components/pages/students/PendingCorrection"
 
 
 /**
@@ -96,6 +97,9 @@ export default function StudentRoutes() {
        * @element ManagementMedals
        */}
       <Route path="medals/view" element={<ManagementMedals />} />
+
+
+      <Route path="simulated/pending/correction/:form_id" element={<SimulatedPendingCorrection />} />
 
       {/**
        * Página de resultados do simulado realizado pelo aluno.
