@@ -468,7 +468,7 @@ class FormController {
                     return response.status(404).json({ status: false, message: "Nenhuma turma encontrada." })
                 }
 
-                const { class_id, form_id, student_id } = classData
+                const { class_id, form_id, student_id, question_id} = classData
                 id_class = class_id
 
                 if(!comment) {
@@ -476,9 +476,11 @@ class FormController {
                 }
                 else {
                     const data = { answer_id, teacher_id, comment }
-                    await Form.saveCorrection(data)
+                    await Form.saveComment(data)
                     await Form.updateCorrection(answer_id, status)
                 }
+
+                await Form.updatePoints(question_id, form_id, student_id)
 
                 await Form.updateStatusForm(form_id, student_id)
             }

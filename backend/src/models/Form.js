@@ -534,7 +534,8 @@ class Form {
                 INNER JOIN users u ON u.id = af.user_id
                 INNER JOIN questions q ON q.id = af.question_id
                 INNER JOIN form f ON f.id = af.form_id
-                INNER JOIN form_corrections fc ON fc.student_id = u.id
+                INNER JOIN form_corrections fc ON fc.student_id = u.id 
+                and fc.form_id = af.form_id
                 WHERE af.form_id = ?
                 AND af.open_answer IS NOT NULL 
                 AND fc.corrected = false
@@ -589,7 +590,8 @@ class Form {
                 select
                     f.class_id,
                     f.id as form_id,
-                    af.user_id as student_id
+                    af.user_id as student_id,
+                    af.question_id
                 from form f
                 inner join answers_form af
                     on af.form_id = f.id
@@ -690,6 +692,16 @@ class Form {
         }
     }
 
+    async saveComment(data) {
+        try {
+            const ids = await knex("comment_answers").insert(data)
+            return { success: true, ids }
+        } catch (err) {
+            console.error("Erro ao cadastrar correção de formulário:", err)
+            return { success: false }
+        }
+    }
+
     async calculateResults(formattedAnswers) {
         try {
             const rowsToInsert = formattedAnswers.map(a => `(${a.question_id}, ${a.option_id})`).join(",")
@@ -757,6 +769,25 @@ class Form {
             return undefined;
         }
     }
+
+    async updatePoints(question_id, form_id, student_id) {
+        try {
+            const result = await knex.raw(`
+                UPDATE results_form AS rf
+                    SET points = rf.points + q.points
+                FROM questions AS q
+                WHERE rf.form_id = q.form_id
+                    AND rf.student_id = ?
+                        AND q.id = ?
+                            AND q.form_id = ?;
+            `, [student_id, question_id, form_id])
+            return result.rowCount > 0
+        } catch (err) {
+            console.error("Erro ao atualizar pontuação:", err)
+            return false
+        }
+    }
+
 
 
 }
