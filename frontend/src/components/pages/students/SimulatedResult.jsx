@@ -22,10 +22,8 @@ export default function SimulatedResult() {
     const { form_id } = useParams();
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [result, setResult] = useState(null);
     const [loading, setLoading] = useState(true);
     const [results, setResults] = useState({})
-    const [selectedFilter, setSelectedFilter] = useState('all'); // all, correct, wrong
 
     useEffect(() => {
         async function fetchResults() {
@@ -85,7 +83,7 @@ export default function SimulatedResult() {
             <header className="bg-white/80 backdrop-blur-xl border-b border-gray-200 px-6 py-4 sticky top-0 z-40 shadow-sm">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
                     <button 
-                        onClick={() => window.history.back()}
+                        onClick={() => navigate("/student/home")}
                         className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors"
                     >
                         <Home className="w-5 h-5" />
@@ -196,19 +194,6 @@ export default function SimulatedResult() {
                                             className="bg-red-600 h-2 rounded-full transition-all duration-1000"
                                             style={{ width: `${(results.total_wrong / results.total_questions) * 100}%` }}
                                         />
-                                    </div>
-                                </div>
-
-                                <div className="bg-linear-to-br from-blue-50 to-cyan-50 p-5 rounded-2xl border-2 border-blue-200">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <Clock className="w-6 h-6 text-blue-600" />
-                                            <div>
-                                                <div className="font-semibold text-gray-700">Tempo Utilizado</div>
-                                                <div className="text-sm text-gray-500">de 03:00:00 disponíveis</div>
-                                            </div>
-                                        </div>
-                                        <span className="text-2xl font-bold text-blue-600">00:10:00</span>
                                     </div>
                                 </div>
 
