@@ -691,6 +691,16 @@ class Form {
         }
     }
 
+    async saveComment(data) {
+        try {
+            const ids = await knex("comment_answers").insert(data)
+            return { success: true, ids }
+        } catch (err) {
+            console.error("Erro ao cadastrar correção de formulário:", err)
+            return { success: false }
+        }
+    }
+
     async calculateResults(formattedAnswers) {
         try {
             const rowsToInsert = formattedAnswers.map(a => `(${a.question_id}, ${a.option_id})`).join(",")

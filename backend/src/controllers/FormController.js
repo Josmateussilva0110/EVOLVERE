@@ -476,7 +476,7 @@ class FormController {
                 }
                 else {
                     const data = { answer_id, teacher_id, comment }
-                    await Form.saveAnswers(data)
+                    await Form.saveComment(data)
                     await Form.updateCorrection(answer_id, status)
                 }
 
