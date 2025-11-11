@@ -328,6 +328,19 @@ class FormController {
                 open_answer: open_answer || null,
             }))
 
+            const stats = await Form.calculateResults(formattedAnswers)
+
+            const results = {
+                form_id,
+                student_id: user_id,
+                points: stats.total_points,
+                correct: stats.correct,
+                wrong: stats.wrong,
+            }
+            
+            await Form.saveFormResults(results)
+
+
             const classData = await Form.getClassIdByForm(form_id)
             if (!classData) {
                 return response.status(404).json({ status: false, message: "Nenhuma turma encontrada." })
@@ -344,7 +357,7 @@ class FormController {
 
             await Form.saveFormAndUserCorrection(data)
 
-            return response.status(200).json({ status: true, message: "Respostas salvas com sucesso.", class_id })
+            return response.status(200).json({ status: true, message: "Respostas salvas com sucesso.", class_id, form_id })
         } catch (err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
@@ -504,6 +517,8 @@ class FormController {
                 return res.status(500).json({ status: false, message: "Erro ao consultar atividades." });
             }
 
+            const countClass = await Class.countClassByUser(student_id)
+
             const upcomingActivities = forms.map(form => {
                 const daysRemaining = getDaysRemaining(form.deadline);
                 const urgency = getUrgency(daysRemaining);
@@ -525,13 +540,48 @@ class FormController {
                 status: true,
                 data: {
                     pendingCount: pendingCount,
-                    upcomingActivities: upcomingActivities
+                    upcomingActivities: upcomingActivities,
+                    countClass,
                 }
             });
 
         } catch (error) {
             console.error('Erro ao buscar atividades pendentes:', error);
             res.status(500).json({ 
+                status: false, 
+                message: 'Erro interno do servidor.' 
+            });
+        }
+    }
+
+    async getResultForm(request, response) {
+        try {
+            const { form_id } = request.params
+            const student_id = request.session.user?.id // buscar usuário logado
+            if (!student_id) {
+                return response.status(401).json({ status: false, message: "Acesso não autorizado." });
+            }
+
+            if (!validator.isInt(form_id + '', { min: 1 })) {
+                return response.status(422).json({ status: false, message: "Formulário invalido." })
+            }
+
+            const formExist = await Form.formExist(form_id)
+            if(!formExist) {
+                return response.status(404).json({ status: false, message: "Simulado não encontrado." })
+            }
+
+            const results = await Form.resultForm(form_id, student_id)
+            if(!results) {
+                return response.status(500).json({ status: false, message: "Erro ao buscar resultados." })
+            }
+
+            return response.status(200).json({ status: true, results })
+            
+
+        } catch (error) {
+            console.error("Erro interno em getResultForm:", error)
+            response.status(500).json({ 
                 status: false, 
                 message: 'Erro interno do servidor.' 
             });

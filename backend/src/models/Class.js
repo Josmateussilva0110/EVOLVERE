@@ -488,9 +488,23 @@ class Class {
         }
     }
 
-    
 
+    async countClassByUser(student_id) {
+        try {
+            const result = await knex.raw(`
+                SELECT 
+                    COUNT(DISTINCT class_id) AS total_classes
+                FROM class_student
+                WHERE student_id = ?
+            `, [student_id])
 
+            const rows = result.rows
+            return rows.length > 0 ? rows[0].total_classes : 0
+        } catch (err) {
+            console.error("Erro ao buscar quantidade de turmas: ", err)
+            return 0
+        }
+    }
 }
 
 module.exports = new Class();
