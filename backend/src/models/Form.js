@@ -534,7 +534,8 @@ class Form {
                 INNER JOIN users u ON u.id = af.user_id
                 INNER JOIN questions q ON q.id = af.question_id
                 INNER JOIN form f ON f.id = af.form_id
-                INNER JOIN form_corrections fc ON fc.student_id = u.id
+                INNER JOIN form_corrections fc ON fc.student_id = u.id 
+                and fc.form_id = af.form_id
                 WHERE af.form_id = ?
                 AND af.open_answer IS NOT NULL 
                 AND fc.corrected = false
