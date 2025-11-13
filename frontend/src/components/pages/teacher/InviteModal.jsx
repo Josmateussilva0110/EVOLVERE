@@ -361,7 +361,7 @@ export default function InviteModal({ open, onClose, classId }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative z-10 bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 rounded-2xl p-6 w-full max-w-lg shadow-2xl">
+      <div className="relative z-10 bg-linear-to-br from-slate-900 to-slate-800 border border-slate-700 rounded-2xl p-6 w-full max-w-lg shadow-2xl">
         {/* Cabeçalho */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">

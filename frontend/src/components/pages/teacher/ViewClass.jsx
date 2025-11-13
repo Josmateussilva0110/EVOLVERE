@@ -138,6 +138,8 @@ export default function ViewClass() {
     const { user } = useContext(Context)
     const [form, setForm] = useState([])
     const [students, setStudents] = useState([])
+    const [capacity, setCapacity] = useState(null)
+    const [countStudents, setCountStudents] = useState(null)
     const { setFlashMessage } = useFlashMessage()
     const [subject_id, setSubjectId] = useState(null)
 
@@ -153,6 +155,7 @@ export default function ViewClass() {
                 setMaterials(mats)
                 if (mats.length > 0) {
                     setSubjectId(mats[0].subject_id)
+                    setCapacity(mats[0].capacity)
                 }
             } else {
                 setMaterials([])
@@ -183,7 +186,8 @@ export default function ViewClass() {
             console.log('students: ', response)
 
             if (response && response.success) {
-                setStudents(response.data.students)
+                setStudents(response.data.students.students)
+                setCountStudents(response.data.students.total)
             } else {
                 setStudents([])
             }
@@ -321,12 +325,19 @@ export default function ViewClass() {
                     </h1>
                     <div className="flex flex-wrap gap-3">
                         <button
-                            onClick={() => setInviteOpen(true)}
+                            onClick={() => {
+                                if (capacity !== null && countStudents !== null && countStudents >= capacity) {
+                                    setFlashMessage("A capacidade máxima da turma foi atingida.", "error");
+                                    return;
+                                }
+                                setInviteOpen(true);
+                            }}
                             className="px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 bg-white/5 hover:bg-white/10 transition-colors"
                         >
                             <Link className="w-4 h-4 text-blue-400" />
                             Gerar Convite
                         </button>
+
                         <button
                             className="px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 transition-colors shadow-lg shadow-yellow-400/20"
                             onClick={() => navigate(`/teacher/material/register/${id}`, { state: { origin: "class" } })}

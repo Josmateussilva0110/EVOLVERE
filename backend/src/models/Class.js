@@ -177,6 +177,7 @@ class Class {
                     c.id,
                     c.subject_id,
                     c.name as class_name,
+                    c.capacity,
                     cv.id as course_id,
                     cv.name as course_name,
                     case 
@@ -226,22 +227,32 @@ class Class {
      */
     async Students(class_id) {
         try {
-            const result = await knex.raw(`
-                select 
+            const studentsResult = await knex.raw(`
+                SELECT 
                     cs.student_id,
                     u.username
-                from class_student cs
-                inner join users u 
-                    on u.id = cs.student_id
-                where cs.class_id = ?
+                FROM class_student cs
+                INNER JOIN users u 
+                    ON u.id = cs.student_id
+                WHERE cs.class_id = ?
             `, [class_id])
-            const rows = result.rows
-            return rows.length > 0 ? rows : undefined
-        } catch(err) {
-            console.error("Erro ao buscar alunos da turma: ", err);
+
+            const countResult = await knex.raw(`
+                SELECT COUNT(*) AS total_students
+                FROM class_student
+                WHERE class_id = ?
+            `, [class_id])
+
+            return {
+                students: studentsResult.rows,
+                total: countResult.rows[0]?.total_students || 0
+            }
+        } catch (err) {
+            console.error("Erro ao buscar alunos da turma: ", err)
             return undefined
         }
-    } 
+    }
+
 
 
     /**
