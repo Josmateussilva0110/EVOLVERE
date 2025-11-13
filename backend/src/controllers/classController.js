@@ -38,10 +38,10 @@ class ClassController {
     async create(req, res) {
         try {
             // Agora incluindo 'capacity'
-            const { name, period, subject_id, course_id, capacity } = req.body;
+            const { name, period, subject_id, course_id, capacity, expired } = req.body;
 
             // Adicionando 'capacity' na validação
-            if (!name || !period || !subject_id || !course_id || !capacity) {
+            if (!name || !period || !subject_id || !course_id || !capacity || !expired) {
                 return res.status(400).json({ 
                     status: false, 
                     // Mensagem de erro atualizada
@@ -54,7 +54,8 @@ class ClassController {
                 period,
                 subject_id: parseInt(subject_id),
                 course_id: parseInt(course_id),
-                capacity: parseInt(capacity)
+                capacity: parseInt(capacity),
+                expired: expired
             });
 
             if (!newClass) {

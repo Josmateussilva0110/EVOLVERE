@@ -34,6 +34,7 @@ function ViewSubjectDetails() {
   const [showAddTurmaPopup, setShowAddTurmaPopup] = useState(false)
   const [nomeTurma, setNomeTurma] = useState("")
   const [capacidade, setCapacidade] = useState("")
+  const [dataFinalizacao, setDataFinalizacao] = useState("")
   const navigate = useNavigate()
   const { id } = useParams()
   const [course_id, setCourseId] = useState(null)
@@ -114,7 +115,8 @@ function ViewSubjectDetails() {
       capacity: capacidade,
       period: materials[0].period,
       course_id,
-      subject_id: id
+      subject_id: id,
+      expired: dataFinalizacao
     }
 
     const response = await requestData('/classes', 'POST', body, true)
@@ -123,6 +125,7 @@ function ViewSubjectDetails() {
       setShowAddTurmaPopup(false)
       setNomeTurma("")
       setCapacidade("")
+      setDataFinalizacao("")
 
       setClasses(prev => [...prev, response.data.classes])
     }
@@ -226,7 +229,7 @@ function ViewSubjectDetails() {
         <div className="grid lg:grid-cols-2 gap-5">
           {/* Materiais Globais */}
           <div className="bg-gray-800/60 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700/50 overflow-hidden">
-            <div className="bg-gradient-to-r from-gray-700 to-gray-600 px-6 py-5 border-b border-gray-700/50">
+            <div className="bg-linear-to-r from-gray-700 to-gray-600 px-6 py-5 border-b border-gray-700/50">
               <h2 className="text-lg font-bold text-white flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
                   <FileText className="w-5 h-5 text-blue-400" />
@@ -305,7 +308,7 @@ function ViewSubjectDetails() {
 
           {/* Turmas */}
           <div className="bg-gray-800/60 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700/50 overflow-hidden">
-            <div className="bg-gradient-to-r from-gray-700 to-gray-600 px-6 py-5 border-b border-gray-700/50">
+            <div className="bg-linear-to-r from-gray-700 to-gray-600 px-6 py-5 border-b border-gray-700/50">
               <h2 className="text-lg font-bold text-white flex items-center gap-3">
                 <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center">
                   <Users className="w-5 h-5 text-emerald-400" />
@@ -319,7 +322,7 @@ function ViewSubjectDetails() {
                 classes.map((classe) => (
                   <div
                     key={classe.id}
-                    className={`group relative bg-gradient-to-br from-gray-700 to-gray-600 rounded-xl p-5 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] overflow-hidden block border border-gray-600/30 hover:border-gray-500/50`}
+                    className={`group relative bg-linear-to-br from-gray-700 to-gray-600 rounded-xl p-5 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] overflow-hidden block border border-gray-600/30 hover:border-gray-500/50`}
                     onClick={() => navigate(`/teacher/class/view/${classe.id}`)}
                   >
                     <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -334,6 +337,9 @@ function ViewSubjectDetails() {
                         </p>
                         <p className="text-gray-400 text-xs mt-1">
                           Capacidade: {classe.capacity} alunos
+                        </p>
+                        <p className="text-gray-400 text-xs mt-1">
+                          Expira em: {formatDateRequests(classe.expired)}
                         </p>
                       </div>
                     </div>
@@ -365,7 +371,10 @@ function ViewSubjectDetails() {
         setNomeTurma={setNomeTurma}
         capacidade={capacidade}
         setCapacidade={setCapacidade}
+        dataFinalizacao={dataFinalizacao}
+        setDataFinalizacao={setDataFinalizacao}
       />
+
     </div>
   )
 }
