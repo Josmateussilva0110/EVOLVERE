@@ -14,6 +14,7 @@ const classRoutes = require("./classRoutes")
 const formRoutes = require("./formRoutes")
 const enrollmentRoutes = require("./enrollmentRoutes")
 const dashboardRoutes = require("./dashboardRoutes") 
+const performanceRoutes = require("./performanceRoutes")
 
 //Usar a rota
 router.use(dashboardRoutes)
@@ -25,6 +26,7 @@ router.use(materialRoutes)
 router.use(classRoutes)
 router.use(formRoutes)
 router.use(enrollmentRoutes)
+router.use(performanceRoutes)
 
 
 

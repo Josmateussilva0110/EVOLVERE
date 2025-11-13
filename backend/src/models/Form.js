@@ -589,7 +589,8 @@ class Form {
                 select
                     f.class_id,
                     f.id as form_id,
-                    af.user_id as student_id
+                    af.user_id as student_id,
+                    af.question_id
                 from form f
                 inner join answers_form af
                     on af.form_id = f.id
@@ -690,6 +691,16 @@ class Form {
         }
     }
 
+    async saveComment(data) {
+        try {
+            const ids = await knex("comment_answers").insert(data)
+            return { success: true, ids }
+        } catch (err) {
+            console.error("Erro ao cadastrar correção de formulário:", err)
+            return { success: false }
+        }
+    }
+
     async calculateResults(formattedAnswers) {
         try {
             const rowsToInsert = formattedAnswers.map(a => `(${a.question_id}, ${a.option_id})`).join(",")
@@ -757,6 +768,25 @@ class Form {
             return undefined;
         }
     }
+
+    async updatePoints(question_id, form_id, student_id) {
+        try {
+            const result = await knex.raw(`
+                UPDATE results_form AS rf
+                    SET points = rf.points + q.points
+                FROM questions AS q
+                WHERE rf.form_id = q.form_id
+                    AND rf.student_id = ?
+                        AND q.id = ?
+                            AND q.form_id = ?;
+            `, [student_id, question_id, form_id])
+            return result.rowCount > 0
+        } catch (err) {
+            console.error("Erro ao atualizar pontuação:", err)
+            return false
+        }
+    }
+
 
 
 }
