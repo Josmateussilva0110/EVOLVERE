@@ -4,30 +4,7 @@ import { X, Plus } from "lucide-react"
  * @component RegisterClasses
  * @description
  * Modal responsável por exibir o formulário de criação de uma nova turma.
- * Permite ao usuário inserir o nome da turma e sua capacidade (número de alunos).
- * Inclui botões para confirmar ou cancelar a operação.
- *
- * @param {Object} props - Propriedades do componente.
- * @param {boolean} props.show - Define se o modal deve ser exibido ou não.
- * @param {Function} props.onCancel - Função chamada ao clicar no botão de cancelamento.
- * @param {Function} props.onConfirm - Função chamada ao confirmar o registro da turma.
- * @param {string} props.nomeTurma - Valor atual do campo "Nome da Turma".
- * @param {Function} props.setNomeTurma - Função para atualizar o valor de `nomeTurma`.
- * @param {string|number} props.capacidade - Valor atual do campo "Capacidade".
- * @param {Function} props.setCapacidade - Função para atualizar o valor de `capacidade`.
- *
- * @example
- * <RegisterClasses
- *   show={modalAberto}
- *   onCancel={() => setModalAberto(false)}
- *   onConfirm={salvarTurma}
- *   nomeTurma={nomeTurma}
- *   setNomeTurma={setNomeTurma}
- *   capacidade={capacidade}
- *   setCapacidade={setCapacidade}
- * />
- *
- * @returns {JSX.Element|null} Retorna o modal de registro de turma quando `show` for verdadeiro, caso contrário retorna `null`.
+ * Agora inclui um campo de data e hora para finalização da disciplina, aceitando apenas datas futuras.
  */
 function RegisterClasses({
   show,
@@ -37,8 +14,16 @@ function RegisterClasses({
   setNomeTurma,
   capacidade,
   setCapacidade,
+  dataFinalizacao,
+  setDataFinalizacao,
 }) {
   if (!show) return null
+
+  // Gera a data/hora atual formatada para o input datetime-local
+  const now = new Date()
+  const nowFormatted = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 16)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md px-4">
@@ -97,6 +82,23 @@ function RegisterClasses({
                 <Plus className="w-4 h-4 text-white" />
               </button>
             </div>
+          </div>
+
+          {/* 🗓️ Campo: Data e hora de finalização */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-300 mb-2">
+              Data e hora de finalização
+            </label>
+            <input
+              type="datetime-local"
+              value={dataFinalizacao}
+              onChange={(e) => setDataFinalizacao(e.target.value)}
+              min={nowFormatted} // 🔒 só aceita datas futuras
+              className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600/50 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 placeholder-gray-400 transition-all duration-200"
+            />
+            <p className="text-xs text-gray-400 mt-1">
+              Somente datas futuras são permitidas
+            </p>
           </div>
 
           {/* Botões de ação */}

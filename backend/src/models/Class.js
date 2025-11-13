@@ -53,6 +53,7 @@ class Class {
      */
     async findBySubjectId(subjectId) {
         try {
+            const now = new Date()
             // CORREÇÃO: Nomes da tabela e colunas ajustados
             const classes = await knex('classes')
                 .select(
@@ -60,10 +61,12 @@ class Class {
                     'classes.name',
                     'classes.period',
                     'classes.capacity',
+                    'classes.expired',
                     knex.raw('count("class_student".student_id) as student_count')
                 )
                 .leftJoin('class_student', 'classes.id', '=', 'class_student.class_id')
                 .where('classes.subject_id', subjectId)
+                .andWhere('classes.expired', '>', now)
                 .groupBy('classes.id')
                 .orderBy(knex.raw('LOWER(classes.name)'), 'asc')
 
