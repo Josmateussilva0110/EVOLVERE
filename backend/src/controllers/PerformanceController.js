@@ -24,6 +24,28 @@ class PerformanceController {
             res.status(500).json({ success: false, message: "Erro interno do servidor." });
         }
     }
+
+    async recentNotes(request, response) {
+        try {
+            // Pega o ID do aluno da sessão (mais seguro)
+            const studentId = request.session.user?.id; // Ajuste se 'req.user.id' for o correto
+
+            if (!studentId) {
+                return response.status(401).json({ success: false, message: "Usuário não autenticado." });
+            }
+            
+            const notes = await Performance.recent(studentId)
+            if(!notes) {
+                return response.status(404).json({ success: false, message: "Nenhuma nota recente encontrada." });
+            }
+
+            response.status(200).json({ success: true, notes });
+
+        } catch (error) {
+            console.error(error.message);
+            response.status(500).json({ success: false, message: "Erro interno do servidor." });
+        }
+    }
 }
 
 module.exports = new PerformanceController();

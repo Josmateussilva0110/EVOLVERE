@@ -3,6 +3,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect, useRef, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import requestData from "../../../utils/requestApi";
 import useFlashMessage from "../../../hooks/useFlashMessage";
 import { Context } from "../../../context/UserContext";
@@ -24,6 +25,7 @@ export default function Dashboard() {
   const [course_id, setCourse] = useState(null)
   const [class_id, setClassId] = useState(null)
   const [countClass, setCountClass] = useState(0)
+  const [recentNotes, setRecentNotes] = useState([])
   
   const [pendingCount, setPendingCount] = useState(0);
   const [upcomingActivities, setUpcomingActivities] = useState([]);
@@ -48,6 +50,16 @@ export default function Dashboard() {
       fetchUser()
     }
   }, [user])
+
+  useEffect(() => {
+    async function fetchRecentNotes() {
+      const response = await requestData("/performance/recent", "GET", {}, true)
+      console.log('recent: ', response)
+      if (response.success) setRecentNotes(response.data.notes)
+      else setRecentNotes([])
+    }
+    fetchRecentNotes()
+  }, [])
 
   useEffect(() => {
     async function fetchPendingActivities() {
@@ -114,9 +126,6 @@ export default function Dashboard() {
       case "desempenho":
         navigate("/student/performance/view");
         break;
-      case "medalhas":
-        navigate("/student/medals/view");
-        break;
       default:
         break;
     }
@@ -159,8 +168,7 @@ export default function Dashboard() {
     { icon: BookOpen, label: "Meu curso", id: "curso" },
     { icon: Users, label: "Turmas", id: "turmas" },
     { icon: Folder, label: "Materiais", id: "materiais" },
-    { icon: BarChart3, label: "Desempenho", id: "desempenho" },
-    { icon: Award, label: "Medalhas", id: "medalhas" },
+    { icon: BarChart3, label: "Desempenho", id: "desempenho" }
   ];
 
   const getUrgencyClasses = (color) => {
@@ -335,9 +343,43 @@ export default function Dashboard() {
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex gap-2">
-                  <span className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm font-semibold">9.5</span>
-                  <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-semibold">8.7</span>
-                  <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-semibold">9.0</span>
+                  <AnimatePresence>
+                    {recentNotes.length > 0 ? (
+                      recentNotes.map((note, index) => {
+                        const value = parseFloat(note.points);
+
+                        // cores dinâmicas
+                        const color =
+                          value >= 8
+                            ? "bg-green-100 text-green-700"
+                            : value >= 6
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-red-100 text-red-700";
+
+                        return (
+                          <motion.span
+                            key={index}
+                            className={`px-3 py-1 rounded-lg text-sm font-semibold ${color}`}
+                            initial={{ opacity: 0, y: -6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 6 }}
+                            transition={{ duration: 0.25, delay: index * 0.05 }}
+                          >
+                            {value.toFixed(1)}
+                          </motion.span>
+                        );
+                      })
+                    ) : (
+                      <motion.span
+                        key="no-notes"
+                        className="text-gray-500 text-sm"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                      >
+                        Nenhuma nota recente
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
                 </div>
                 <ChevronRight className="text-gray-400" size={20} />
               </div>
