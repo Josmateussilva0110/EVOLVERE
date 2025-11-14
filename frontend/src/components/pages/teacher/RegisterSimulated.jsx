@@ -80,15 +80,18 @@ const questionTypes = [
  */
 export default function CreateQuiz() {
   const [deadline, setDeadline] = useState("");
-  const [hours, setHours] = useState('');
-  const [minutes, setMinutes] = useState('');
+  const [hours, setHours] = useState("");
+  const [minutes, setMinutes] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const { user } = useContext(Context);
-  const { class_id } = useParams()
+  const { class_id } = useParams();
   const [subjectId, setSubjectId] = useState(null);
   const { setFlashMessage } = useFlashMessage();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  const [errors, setErrors] = useState({});
+  const [shake, setShake] = useState(false);
 
   const [questions, setQuestions] = useState([
     {
@@ -102,10 +105,14 @@ export default function CreateQuiz() {
     },
   ]);
 
-
   useEffect(() => {
     async function fetchRelations() {
-      const response = await requestData(`/form/relations/${class_id}`, "GET", {}, true);
+      const response = await requestData(
+        `/form/relations/${class_id}`,
+        "GET",
+        {},
+        true
+      );
       if (response.success) {
         setSubjectId(response.data.subject_id);
       }
@@ -113,7 +120,7 @@ export default function CreateQuiz() {
     fetchRelations();
   }, [class_id]);
 
-  /** Add a new question */
+  /** Add question */
   const addQuestion = () => {
     setQuestions([
       ...questions,
@@ -129,12 +136,12 @@ export default function CreateQuiz() {
     ]);
   };
 
-  /** Remove a question */
+  /** Remove question */
   const removeQuestion = (index) => {
     setQuestions(questions.filter((_, i) => i !== index));
   };
 
-  /** Update question field */
+  /** Update question */
   const updateQuestion = (index, field, value) => {
     const updated = [...questions];
     updated[index][field] = value;
@@ -147,8 +154,8 @@ export default function CreateQuiz() {
         ];
       } else if (value === "verdadeiro/falso") {
         updated[index].options = [
-          { text: "True", correct: true },
-          { text: "False", correct: false },
+          { text: "Verdadeiro", correct: true },
+          { text: "Falso", correct: false },
         ];
       } else {
         updated[index].options = [];
@@ -158,17 +165,13 @@ export default function CreateQuiz() {
     setQuestions(updated);
   };
 
-  /** Update specific option inside a question */
+  /** Update option */
   const updateOption = (qIndex, optIndex, field, value) => {
     const updated = [...questions];
     const question = updated[qIndex];
 
     if (field === "correct") {
-      if (question.type === "multipla_escolha") {
-        question.options.forEach((op, i) => (op.correct = i === optIndex));
-      } else {
-        question.options[optIndex].correct = value;
-      }
+      question.options.forEach((op, i) => (op.correct = i === optIndex));
     } else {
       question.options[optIndex][field] = value;
     }
@@ -176,21 +179,20 @@ export default function CreateQuiz() {
     setQuestions(updated);
   };
 
-  /** Add new option to a multiple choice question */
   const addOption = (qIndex) => {
     const updated = [...questions];
     updated[qIndex].options.push({ text: "", correct: false });
     setQuestions(updated);
   };
 
-  /** Remove specific option */
   const removeOption = (qIndex, optIndex) => {
     const updated = [...questions];
-    updated[qIndex].options = updated[qIndex].options.filter((_, i) => i !== optIndex);
+    updated[qIndex].options = updated[qIndex].options.filter(
+      (_, i) => i !== optIndex
+    );
     setQuestions(updated);
   };
 
-  /** Select verdadeiro/Falso option */
   const handleTrueFalseSelect = (qIndex, correctOption) => {
     const updated = [...questions];
     updated[qIndex].options = [
@@ -200,11 +202,73 @@ export default function CreateQuiz() {
     setQuestions(updated);
   };
 
+  // -----------------------------
+  // VALIDAÇÕES
+  // -----------------------------
+  const validateForm = () => {
+    let newErrors = {};
 
-  /** Submit handler */
+    if (!title.trim()) newErrors.title = "O título é obrigatório.";
+
+    const hasTime = (hours && hours !== "0") || (minutes && minutes !== "0");
+    if (!hasTime)
+      newErrors.duration = "Defina o tempo do simulado.";
+
+    if (!deadline) {
+      newErrors.deadline = "Selecione uma data e hora limite";
+    }
+
+    questions.forEach((q, index) => {
+      if (!q.text.trim()) {
+        newErrors[`question_${index}`] = "A questão não pode estar vazia.";
+      }
+
+      if (q.points <= 0) {
+        newErrors[`points_${index}`] = "Os pontos devem ser maiores que 0.";
+      }
+
+      // opções
+      if (q.type === "multipla_escolha") {
+        if (q.options.some((op) => !op.text.trim())) {
+          newErrors[`options_${index}`] =
+            "Todas as opções devem estar preenchidas.";
+        }
+
+        if (!q.options.some((op) => op.correct)) {
+          newErrors[`correct_${index}`] =
+            "Selecione uma opção correta.";
+        }
+      }
+
+      if (q.type === "verdadeiro/falso") {
+        if (!q.options.some((op) => op.correct)) {
+          newErrors[`correct_${index}`] =
+            "Escolha entre Verdadeiro ou Falso.";
+        }
+      }
+    });
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+      return false;
+    }
+
+    return true;
+  };
+
+  // -----------------------------
+  // SUBMIT
+  // -----------------------------
   async function handleSubmit(e) {
     e.preventDefault();
-    const totalDuration = (parseInt(hours || 0) * 60) + parseInt(minutes || 0)
+
+    if (!validateForm()) return;
+
+    const totalDuration =
+      (parseInt(hours || 0) * 60) + parseInt(minutes || 0);
 
     const data = {
       title,
@@ -214,99 +278,153 @@ export default function CreateQuiz() {
       created_by: user.id,
       questions,
       deadline,
-      totalDuration
+      totalDuration,
     };
 
     const response = await requestData("/form/publish", "POST", data, true);
     if (response.success) {
       setFlashMessage(response.data.message, "success");
-      navigate(`/teacher/class/view/${class_id}`)
+      navigate(`/teacher/class/view/${class_id}`);
     } else {
       setFlashMessage(response.message, "error");
     }
   }
 
   function handleVoltar() {
-      navigate(`/teacher/class/view/${class_id}`)
+    navigate(`/teacher/class/view/${class_id}`);
   }
 
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 text-white font-sans">
       <div className="max-w-4xl mx-auto py-12 px-4">
+
         {/* Botão Voltar */}
         <button
-            onClick={handleVoltar}
-            className="p-3 mb-1.5  rounded-xl text-gray-300 hover:text-white hover:bg-gray-700/50 transition-all duration-200 border border-gray-600/30 hover:border-gray-500/50"
+          onClick={handleVoltar}
+          className="p-3 mb-1.5 rounded-xl text-gray-300 hover:text-white hover:bg-gray-700/50 transition-all duration-200 border border-gray-600/30 hover:border-gray-500/50"
         >
-            <ArrowLeft className="w-6 h-6" />
+          <ArrowLeft className="w-6 h-6" />
         </button>
+
+        {/* Mensagens de Erro */}
+        {Object.keys(errors).length > 0 && (
+          <div
+            className={`p-4 mb-6 rounded-xl bg-red-500/20 border border-red-400/40 text-red-300 font-semibold transition-all ${
+              shake ? "animate-shake" : ""
+            }`}
+          >
+            Existem erros no formulário. Revise os campos destacados.
+          </div>
+        )}
+
+        {/* FORM */}
         <form onSubmit={handleSubmit} className="space-y-8">
-          {/* General Information */}
+
+          {/* Info gerais */}
           <div className="bg-slate-800/60 p-8 rounded-2xl shadow-lg border border-white/10">
-            <h2 className="text-xl font-bold text-white mb-6">Informações Gerais</h2>
-            <div className="space-y-6">
-              <div>
-                <label className="block font-semibold text-slate-200 mb-2">Titulo *</label>
-                <input
-                  type="text"
-                  className="w-full bg-transparent border border-white/10 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-400 outline-none transition text-white placeholder:text-slate-400"
-                  placeholder="Ex: Algorithms Exam I"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block font-semibold text-slate-200 mb-2">Descrição</label>
-                <textarea
-                  className="w-full bg-transparent border border-white/10 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-400 outline-none transition text-white placeholder:text-slate-400"
-                  placeholder="Instructions or topics covered..."
-                  value={description}
-                  rows={3}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </div>
+            <h2 className="text-xl font-bold text-white mb-6">
+              Informações Gerais
+            </h2>
 
-              {/* Tempo de simulado */}
-              <div>
-                <label className="block font-semibold text-slate-200 mb-2">Tempo de Simulado *</label>
-                <div className="flex items-center gap-4">
-                  <div className="flex-1">
-                    <input
-                      type="number"
-                      min="0"
-                      className="w-full bg-transparent border border-white/10 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-400 outline-none transition text-white placeholder:text-slate-400"
-                      placeholder="Horas"
-                      value={hours}
-                      onChange={(e) => setHours(e.target.value)}
-                    />
-                  </div>
-                  <span className="text-slate-300 font-medium">:</span>
-                  <div className="flex-1">
-                    <input
-                      type="number"
-                      min="0"
-                      max="59"
-                      className="w-full bg-transparent border border-white/10 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-400 outline-none transition text-white placeholder:text-slate-400"
-                      placeholder="Minutos"
-                      value={minutes}
-                      onChange={(e) => setMinutes(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <p className="text-sm text-slate-400 mt-2">
-                  Defina quanto tempo o aluno terá para concluir o simulado.
-                </p>
-              </div>
-
-              <DateTimePicker deadline={deadline} setDeadline={setDeadline} />
-
+            {/* Título */}
+            <div>
+              <label className="block font-semibold text-slate-200 mb-2">
+                Título *
+              </label>
+              <input
+                type="text"
+                className={`w-full bg-transparent border rounded-lg px-4 py-2.5 focus:ring-2 transition text-white
+                  ${
+                    errors.title
+                      ? "border-red-500 focus:ring-red-500/50"
+                      : "border-white/10 focus:ring-indigo-400"
+                  }
+                `}
+                placeholder="Ex: Prova de Lógica"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+              {errors.title && (
+                <p className="text-red-400 text-sm mt-1">{errors.title}</p>
+              )}
             </div>
+
+            {/* Descrição (opcional) */}
+            <div>
+              <label className="block font-semibold text-slate-200 mb-2">
+                Descrição
+              </label>
+              <textarea
+                className="w-full bg-transparent border border-white/10 rounded-lg px-4 py-2.5 text-white"
+                rows={3}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+
+            {/* Duração */}
+            <div>
+              <label className="block font-semibold text-slate-200 mb-2">
+                Tempo de Simulado *
+              </label>
+
+              <div className="flex items-center gap-4">
+                <input
+                  type="number"
+                  min="0"
+                  className={`w-full bg-transparent border px-4 py-2.5 rounded-lg text-white
+                    ${
+                      errors.duration
+                        ? "border-red-500"
+                        : "border-white/10"
+                    }`}
+                  placeholder="Horas"
+                  value={hours}
+                  onChange={(e) => setHours(e.target.value)}
+                />
+
+                <input
+                  type="number"
+                  min="0"
+                  max="59"
+                  className={`w-full bg-transparent border px-4 py-2.5 rounded-lg text-white
+                    ${
+                      errors.duration
+                        ? "border-red-500"
+                        : "border-white/10"
+                    }`}
+                  placeholder="Minutos"
+                  value={minutes}
+                  onChange={(e) => setMinutes(e.target.value)}
+                />
+              </div>
+
+              {errors.duration && (
+                <p className="text-red-400 text-sm mt-1">{errors.duration}</p>
+              )}
+            </div>
+
+            {/* Deadline */}
+            <div className="mt-3">
+              <DateTimePicker
+                deadline={deadline}
+                setDeadline={setDeadline}
+                error={errors.deadline} // ← aqui
+              />
+
+
+              {errors.deadline && (
+                <p className="text-red-400 text-sm mt-1">{errors.deadline}</p>
+              )}
+            </div>
+
           </div>
 
-          {/* Questions Section */}
+          {/* QUESTÕES */}
           <div className="space-y-6">
-            <h2 className="text-xl font-bold text-white ml-2">Questões</h2>
+            <h2 className="text-xl font-bold text-white ml-2">
+              Questões
+            </h2>
 
             {questions.map((question, qIndex) => (
               <div
@@ -314,55 +432,96 @@ export default function CreateQuiz() {
                 className="bg-slate-800/60 p-8 rounded-2xl shadow-lg border border-white/10"
               >
                 <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-lg font-bold text-white">Questão {qIndex + 1}</h3>
+                  <h3 className="text-lg font-bold text-white">
+                    Questão {qIndex + 1}
+                  </h3>
+
                   {questions.length > 1 && (
                     <button
                       type="button"
-                      className="flex items-center gap-2 text-sm text-slate-300 hover:text-red-400 font-semibold"
                       onClick={() => removeQuestion(qIndex)}
+                      className="text-slate-300 hover:text-red-400"
                     >
-                      <Trash2 className="w-4 h-4 text-blue-400" /> Remove
+                      <Trash2 className="w-5 h-5" />
                     </button>
                   )}
                 </div>
 
+                {/* Enunciado da questão */}
                 <AutoResizeTextarea
-                  className="w-full bg-transparent border border-white/10 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-400 outline-none transition text-lg text-white placeholder:text-slate-400"
-                  placeholder="Type the question here..."
+                  className={`w-full bg-transparent border rounded-lg px-4 py-2.5 text-white
+                    ${
+                      errors[`question_${qIndex}`]
+                        ? "border-red-500"
+                        : "border-white/10"
+                    }`}
+                  placeholder="Digite a questão aqui..."
                   value={question.text}
-                  onChange={(e) => updateQuestion(qIndex, "text", e.target.value)}
+                  onChange={(e) =>
+                    updateQuestion(qIndex, "text", e.target.value)
+                  }
                   required
-                  rows={2}
                 />
 
-                <div className="mt-4 flex items-center gap-3">
-                  <label className="font-semibold text-slate-200">Pontos:</label>
+                {errors[`question_${qIndex}`] && (
+                  <p className="text-red-400 text-sm mt-1">
+                    {errors[`question_${qIndex}`]}
+                  </p>
+                )}
+
+                {/* Pontos */}
+                <div className="mt-4 flex items-center gap-2">
+                  <label className="font-semibold text-slate-200">
+                    Pontos:
+                  </label>
                   <input
                     type="number"
-                    min="0.0"
+                    min="0.1"
                     step="0.1"
-                    className="w-24 bg-transparent border border-white/10 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400 outline-none text-white"
+                    className={`w-24 bg-transparent border px-3 py-2 rounded-lg text-white
+                      ${
+                        errors[`points_${qIndex}`]
+                          ? "border-red-500"
+                          : "border-white/10"
+                      }`}
                     value={question.points}
-                    onChange={(e) => updateQuestion(qIndex, "points", parseFloat(e.target.value))}
-                    placeholder="ex: 0.5"
+                    onChange={(e) =>
+                      updateQuestion(
+                        qIndex,
+                        "points",
+                        parseFloat(e.target.value)
+                      )
+                    }
                   />
                 </div>
 
+                {errors[`points_${qIndex}`] && (
+                  <p className="text-red-400 text-sm mt-1">
+                    {errors[`points_${qIndex}`]}
+                  </p>
+                )}
 
-                {/* Type Selector */}
+                {/* Tipo */}
                 <div className="mt-6">
-                  <label className="block font-semibold text-slate-200 mb-3">Tipo de Questão *</label>
+                  <label className="block font-semibold text-slate-200 mb-2">
+                    Tipo de Questão *
+                  </label>
+
                   <div className="flex gap-2 flex-wrap">
                     {questionTypes.map((type) => (
                       <button
                         key={type.value}
                         type="button"
-                        onClick={() => updateQuestion(qIndex, "type", type.value)}
-                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                          question.type === type.value
-                            ? "bg-yellow-400 text-slate-900 shadow-md"
-                            : "bg-white/5 text-slate-200 hover:bg-white/10"
-                        }`}
+                        onClick={() =>
+                          updateQuestion(qIndex, "type", type.value)
+                        }
+                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all
+                          ${
+                            question.type === type.value
+                              ? "bg-yellow-400 text-black"
+                              : "bg-white/5 text-slate-200 hover:bg-white/10"
+                          }
+                        `}
                       >
                         {type.label}
                       </button>
@@ -370,36 +529,51 @@ export default function CreateQuiz() {
                   </div>
                 </div>
 
-                {/* Multipla escolha */}
+                {/* MULTIPLA ESCOLHA */}
                 {question.type === "multipla_escolha" && (
-                  <div className="space-y-3 pt-4">
+                  <div className="mt-4 space-y-3">
+
                     {question.options.map((op, i) => (
                       <div
                         key={i}
-                        className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${
-                          op.correct
-                            ? "border-green-400 bg-green-900/20"
-                            : "border-white/10 bg-white/2"
-                        }`}
+                        className={`p-3 flex items-center gap-3 rounded-lg border
+                          ${
+                            op.correct
+                              ? "border-green-500 bg-green-500/10"
+                              : "border-white/10"
+                          }
+                        `}
                       >
                         <button
                           type="button"
                           onClick={() => updateOption(qIndex, i, "correct", true)}
-                          className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all ${
-                            op.correct
-                              ? "bg-green-500 border-green-500"
-                              : "border-white/20 hover:border-indigo-400"
-                          }`}
+                          className={`w-6 h-6 rounded-full border flex items-center justify-center
+                            ${
+                              op.correct
+                                ? "bg-green-500 border-green-500"
+                                : "border-white/20"
+                            }
+                          `}
                         >
-                          {op.correct && <Check className="w-4 h-4 text-white" />}
+                          {op.correct && (
+                            <Check className="w-4 h-4 text-white" />
+                          )}
                         </button>
 
                         <input
                           type="text"
-                          className="flex-1 bg-transparent focus:outline-none text-white placeholder:text-slate-400"
-                          placeholder={`Option ${i + 1}`}
+                          className={`flex-1 bg-transparent text-white
+                            ${
+                              errors[`options_${qIndex}`]
+                                ? "border-red-500"
+                                : ""
+                            }
+                          `}
+                          placeholder={`Opção ${i + 1}`}
                           value={op.text}
-                          onChange={(e) => updateOption(qIndex, i, "text", e.target.value)}
+                          onChange={(e) =>
+                            updateOption(qIndex, i, "text", e.target.value)
+                          }
                         />
 
                         {question.options.length > 2 && (
@@ -408,36 +582,51 @@ export default function CreateQuiz() {
                             onClick={() => removeOption(qIndex, i)}
                             className="text-slate-300 hover:text-red-400"
                           >
-                            <X className="w-4 h-4 text-blue-400" />
+                            <X />
                           </button>
                         )}
                       </div>
                     ))}
 
+                    {errors[`options_${qIndex}`] && (
+                      <p className="text-red-400 text-sm">
+                        {errors[`options_${qIndex}`]}
+                      </p>
+                    )}
+
+                    {errors[`correct_${qIndex}`] && (
+                      <p className="text-red-400 text-sm">
+                        {errors[`correct_${qIndex}`]}
+                      </p>
+                    )}
+
                     <button
                       type="button"
                       onClick={() => addOption(qIndex)}
-                      className="flex items-center gap-2 text-sm text-yellow-400 hover:text-yellow-300 font-semibold mt-3"
+                      className="mt-2 flex items-center gap-2 text-yellow-400 hover:text-yellow-300"
                     >
-                      <Plus className="w-4 h-4 text-blue-400" /> Adicionar opção
+                      <Plus /> Adicionar opção
                     </button>
                   </div>
                 )}
 
-                {/* verdadeiro/Falso */}
+                {/* VERDADEIRO / FALSO */}
                 {question.type === "verdadeiro/falso" && (
-                  <div className="flex gap-4 pt-4">
-                    {["Verdadeiro", "Falso"].map((label) => (
+                  <div className="flex gap-4 mt-4">
 
+                    {["Verdadeiro", "Falso"].map((label) => (
                       <button
                         key={label}
                         type="button"
                         onClick={() => handleTrueFalseSelect(qIndex, label)}
-                        className={`flex-1 p-4 rounded-lg text-lg font-bold transition-all border-2 ${
-                          question.options.find((o) => o.text === label)?.correct
-                            ? "bg-green-500 text-white border-green-500 shadow-lg"
-                            : "bg-white/5 text-white hover:bg-white/10 border-white/10"
-                        }`}
+                        className={`flex-1 p-4 rounded-lg font-bold border
+                          ${
+                            question.options.find((o) => o.text === label)
+                              ?.correct
+                              ? "bg-green-500 text-white border-green-500"
+                              : "bg-white/5 text-white border-white/10"
+                          }
+                        `}
                       >
                         {label}
                       </button>
@@ -445,45 +634,47 @@ export default function CreateQuiz() {
                   </div>
                 )}
 
-                {/* aberta */}
+                {/* ABERTA */}
                 {question.type === "aberta" && (
-                  <div className="bg-white/2 p-4 rounded-lg text-center border-dashed border-2 border-white/10 mt-4">
+                  <div className="mt-4 p-4 text-center border border-white/10 rounded-lg bg-white/5">
                     <FileText className="w-6 h-6 mx-auto mb-2 text-blue-400" />
-                    <p className="text-sm font-semibold text-slate-200">
-                      O aluno responderá com uma resposta escrita.
-                    </p>
+                    O aluno escreverá a resposta.
                   </div>
                 )}
               </div>
             ))}
 
-            {/* Add Question */}
+            {/* Adicionar questão */}
             <div className="flex justify-center">
               <button
                 type="button"
                 onClick={addQuestion}
-                className="bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-slate-900 font-bold py-3 px-6 rounded-lg transition-all shadow-lg flex items-center gap-2 border border-yellow-300/30"
+                className="bg-yellow-400 text-black px-6 py-3 rounded-lg hover:bg-yellow-500 transition-all flex items-center gap-2 font-bold shadow-lg"
               >
-                <Plus className="w-5 h-5 text-blue-700" /> Adicionar nova questão
+                <Plus /> Adicionar nova questão
               </button>
             </div>
           </div>
 
           {/* Submit */}
-          <div className="bg-slate-800/60 p-6 rounded-2xl shadow-lg border border-white/10 flex flex-col sm:flex-row gap-4 justify-end mt-10">
+          <div className="bg-slate-800/60 p-6 rounded-xl border border-white/10 flex justify-end gap-4">
+
             <button
               type="button"
-              className="px-6 py-3 rounded-lg text-sm font-semibold text-slate-200 bg-white/5 hover:bg-white/10 transition"
+              className="px-6 py-3 rounded-lg bg-white/5 text-slate-200 hover:bg-white/10"
             >
               Salvar rascunho
             </button>
+
             <button
               type="submit"
-              className="px-8 py-3 rounded-lg text-sm font-extrabold text-slate-900 bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 transition-all hover:scale-105 shadow-lg shadow-yellow-400/30 flex items-center gap-2"
+              className="px-8 py-3 rounded-lg font-bold bg-yellow-400 text-black hover:bg-yellow-500 shadow-lg flex items-center gap-2"
             >
-              <Check className="w-5 h-5 text-blue-700" /> Publicar formulário
+              <Check /> Publicar formulário
             </button>
+
           </div>
+
         </form>
       </div>
     </div>

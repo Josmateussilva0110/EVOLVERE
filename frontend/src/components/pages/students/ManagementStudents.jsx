@@ -114,9 +114,6 @@ export default function Dashboard() {
       case "desempenho":
         navigate("/student/performance/view");
         break;
-      case "medalhas":
-        navigate("/student/medals/view");
-        break;
       default:
         break;
     }
@@ -159,8 +156,7 @@ export default function Dashboard() {
     { icon: BookOpen, label: "Meu curso", id: "curso" },
     { icon: Users, label: "Turmas", id: "turmas" },
     { icon: Folder, label: "Materiais", id: "materiais" },
-    { icon: BarChart3, label: "Desempenho", id: "desempenho" },
-    { icon: Award, label: "Medalhas", id: "medalhas" },
+    { icon: BarChart3, label: "Desempenho", id: "desempenho" }
   ];
 
   const getUrgencyClasses = (color) => {

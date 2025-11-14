@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, AlertCircle } from "lucide-react";
 
 /**
  * DateTimePicker
@@ -9,16 +9,17 @@ import { Calendar, Clock } from "lucide-react";
  * Props:
  * @param {string} deadline - Data/hora selecionada no formato "YYYY-MM-DDTHH:mm"
  * @param {function} setDeadline - Função setter para atualizar o valor
+ * @param {string} error - Mensagem de erro caso o campo não seja preenchido
  */
-export default function DateTimePicker({ deadline, setDeadline }) {
+export default function DateTimePicker({ deadline, setDeadline, error }) {
   const inputRef = useRef(null);
   const [hover, setHover] = useState(false);
 
-  // Gera a data/hora mínima (agora) no formato compatível com datetime-local
+  // Gera a data/hora mínima (agora)
   const now = new Date();
   const minDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
     .toISOString()
-    .slice(0, 16); // "YYYY-MM-DDTHH:mm"
+    .slice(0, 16);
 
   // Formata para exibição amigável
   const formattedDateTime = deadline
@@ -44,29 +45,37 @@ export default function DateTimePicker({ deadline, setDeadline }) {
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
         className={`flex items-center justify-between w-full px-4 py-2.5 rounded-lg 
-          border border-white/10 bg-white/5 text-left transition-all 
+          border bg-white/5 text-left transition-all 
           ${hover ? "bg-white/10" : ""}
+          ${error ? "border-red-500 bg-red-500/10" : "border-white/10"}
         `}
       >
         <div className="flex items-center gap-2 text-slate-200 font-medium">
-          <Calendar className="w-5 h-5 text-yellow-400" />
-          <span>{formattedDateTime}</span>
+          <Calendar className={`w-5 h-5 ${error ? "text-red-400" : "text-yellow-400"}`} />
+          <span className={error ? "text-red-300" : ""}>{formattedDateTime}</span>
         </div>
-        <Clock className="w-5 h-5 text-slate-300" />
+        <Clock className={`w-5 h-5 ${error ? "text-red-400" : "text-slate-300"}`} />
       </button>
 
-      {/* Input datetime-local oculto com min */}
+      {/* Input datetime-local oculto */}
       <input
         ref={inputRef}
         type="datetime-local"
         value={deadline}
-        min={minDateTime} // impede data/hora anterior à atual
+        min={minDateTime}
         onChange={(e) => setDeadline(e.target.value)}
         className="hidden"
-        required
       />
 
-      {deadline && (
+      {/* Aviso quando não preenchido */}
+      {error && (
+        <div className="flex items-center gap-2 text-red-400 text-sm mt-1 transition-all">
+          <AlertCircle className="w-4 h-4" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {deadline && !error && (
         <p className="text-sm text-slate-400">
           O formulário ficará disponível até{" "}
           <span className="text-yellow-400 font-semibold">
