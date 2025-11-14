@@ -51,7 +51,7 @@ function DisciplineManagement() {
 
 
   const handleVoltar = () => {
-    window.history.back()
+    navigate('/')
   }
 
   const total = data.length
@@ -59,7 +59,7 @@ function DisciplineManagement() {
   const pendentes = data.filter(d => d.status === 'Pendente').length
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 pt-4 pb-10 px-4">
+    <div className="min-h-screen bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 pt-4 pb-10 px-4">
       <div className="max-w-7xl mx-auto py-8">
 
         {/* Título e botão voltar */}

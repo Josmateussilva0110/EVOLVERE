@@ -7,7 +7,7 @@ class Performance {
      * @param {number} studentId - O ID do aluno (da tabela 'users').
      * @returns {Promise<Object>} Um objeto contendo { overallAverage, bestGrade, disciplines }
      */
-    static async getStudentReport(studentId) {
+    async getStudentReport(studentId) {
         try {
             // Consulta 1: Calcula a Média Geral (Esta consulta está correta e não muda)
             const overallAverageQuery = knex('results_form')
@@ -77,6 +77,28 @@ class Performance {
             throw new Error("Falha ao buscar dados de desempenho.");
         }
     }
+
+    async recent(student_id) {
+        try {
+            const result = await knex.raw(`
+                SELECT
+                    rf.points,
+                    rf.updated_at
+                FROM results_form rf
+                WHERE rf.student_id = ?
+                ORDER BY rf.updated_at DESC
+                LIMIT 3
+            `, [student_id])
+
+            const rows = result.rows
+            return rows.length > 0 ? rows : undefined
+        } catch (err) {
+            console.error("Erro ao buscar notas recentes:", err)
+            return undefined
+        }
+    }
+
+
 }
 
-module.exports = Performance;
+module.exports = new Performance();

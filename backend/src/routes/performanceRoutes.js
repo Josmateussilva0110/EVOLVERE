@@ -13,4 +13,6 @@ const PerformanceController = require("../controllers/PerformanceController");
 // Se não tiver middleware de 'isStudent' ainda:
 router.get('/performance/me', PerformanceController.getStudentPerformance); // <-- Correção aqui
 
+router.get('/performance/recent', PerformanceController.recentNotes)
+
 module.exports = router;
