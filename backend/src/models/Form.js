@@ -643,7 +643,7 @@ class Form {
     }
 
 
-    /**
+        /**
      * Atualiza o status de correção de uma resposta.
      *
      * @async
@@ -659,7 +659,7 @@ class Form {
             const updated_at = knex.fn.now()
             const result = await knex("answers_form")
                 .where({ id: answer_id })
-                .update({ corrected: status, updated_at})
+                .update({ corrected: status, updated_at })
             return result > 0
         } catch (err) {
             console.error("Erro ao atualizar resposta: ", err)
@@ -667,23 +667,24 @@ class Form {
         }
     }
 
-
     /**
-     * Atualiza o status geral de um formulário após uma correção.
+     * Atualiza o status geral de um formulário após a correção de um aluno específico.
      *
      * @async
      * @param {number} form_id - ID do formulário.
-     * @returns {Promise<boolean>} Retorna `true` se a atualização foi concluída.
+     * @param {number} student_id - ID do aluno relacionado ao formulário.
+     * @returns {Promise<boolean>} Retorna `true` se o status foi atualizado com sucesso.
      *
      * @example
-     * await Form.updateStatusForm(3)
+     * await Form.updateStatusForm(3, 15)
      */
     async updateStatusForm(form_id, student_id) {
         try {
             const updated_at = knex.fn.now()
             const result = await knex("form_corrections")
-                .where({ form_id }).andWhere({ student_id })
-                .update({ corrected: true, updated_at})
+                .where({ form_id })
+                .andWhere({ student_id })
+                .update({ corrected: true, updated_at })
             return result > 0
         } catch (err) {
             console.error("Erro ao atualizar status de formulário: ", err)
@@ -691,6 +692,23 @@ class Form {
         }
     }
 
+    /**
+     * Salva comentários feitos pelo professor sobre respostas corrigidas.
+     *
+     * @async
+     * @param {Object} data - Dados do comentário a ser salvo.
+     * @param {number} data.answer_id - ID da resposta comentada.
+     * @param {number} data.teacher_id - ID do professor autor do comentário.
+     * @param {string} data.comment - Texto do comentário.
+     * @returns {Promise<Object>} Retorna `{ success: true, ids }` se concluído, caso contrário `{ success: false }`.
+     *
+     * @example
+     * await Form.saveComment({
+     *   answer_id: 12,
+     *   teacher_id: 4,
+     *   comment: "Ótimo desenvolvimento!"
+     * })
+     */
     async saveComment(data) {
         try {
             const ids = await knex("comment_answers").insert(data)
@@ -701,32 +719,71 @@ class Form {
         }
     }
 
+    /**
+     * Calcula o total de acertos, erros e pontuação de um conjunto de respostas.
+     *
+     * @async
+     * @param {Array<Object>} formattedAnswers - Lista de respostas formatadas.
+     * @param {number} formattedAnswers[].question_id - ID da questão respondida.
+     * @param {number} formattedAnswers[].option_id - ID da opção selecionada.
+     * @returns {Promise<Object>} Objeto contendo `correct`, `wrong` e `total_points`.
+     *
+     * @example
+     * await Form.calculateResults([
+     *   { question_id: 1, option_id: 4 },
+     *   { question_id: 2, option_id: 7 }
+     * ])
+     */
     async calculateResults(formattedAnswers) {
         try {
-            const rowsToInsert = formattedAnswers.map(a => `(${a.question_id}, ${a.option_id})`).join(",")
+            const rowsToInsert = formattedAnswers
+                .map(a => `(${a.question_id}, ${a.option_id})`)
+                .join(",")
 
             const result = await knex.raw(`
-            WITH user_answers(question_id, option_id) AS (
-                VALUES ${rowsToInsert}
-            )
-            SELECT
-                COUNT(*) FILTER (WHERE o.correct = true) AS correct,
-                COUNT(*) FILTER (WHERE o.correct = false) AS wrong,
-                COALESCE(SUM(q.points) FILTER (WHERE o.correct = true), 0) AS total_points
-            FROM user_answers ua
-            INNER JOIN options o ON o.id = ua.option_id
-            INNER JOIN questions q ON q.id = ua.question_id
+                WITH user_answers(question_id, option_id) AS (
+                    VALUES ${rowsToInsert}
+                )
+                SELECT
+                    COUNT(*) FILTER (WHERE o.correct = true) AS correct,
+                    COUNT(*) FILTER (WHERE o.correct = false) AS wrong,
+                    COALESCE(SUM(q.points) FILTER (WHERE o.correct = true), 0) AS total_points
+                FROM user_answers ua
+                INNER JOIN options o ON o.id = ua.option_id
+                INNER JOIN questions q ON q.id = ua.question_id
             `)
 
             const rows = result.rows
-            return rows.length > 0 ? rows[0] : { correct: 0, wrong: 0, total_points: 0 }
+            return rows.length > 0
+                ? rows[0]
+                : { correct: 0, wrong: 0, total_points: 0 }
         } catch (err) {
             console.error("Erro ao calcular resultados:", err)
             return { correct: 0, wrong: 0, total_points: 0 }
         }
     }
 
-
+    /**
+     * Salva os resultados calculados de um formulário preenchido pelo aluno.
+     *
+     * @async
+     * @param {Object} data - Dados dos resultados.
+     * @param {number} data.form_id - ID do formulário.
+     * @param {number} data.student_id - ID do aluno.
+     * @param {number} data.correct - Total de acertos.
+     * @param {number} data.wrong - Total de erros.
+     * @param {number} data.points - Pontuação obtida.
+     * @returns {Promise<Object>} Retorna `{ success: true, ids }` ou `{ success: false }` em caso de erro.
+     *
+     * @example
+     * await Form.saveFormResults({
+     *   form_id: 3,
+     *   student_id: 15,
+     *   correct: 8,
+     *   wrong: 2,
+     *   points: 80
+     * })
+     */
     async saveFormResults(data) {
         try {
             const ids = await knex("results_form").insert(data)
@@ -737,11 +794,30 @@ class Form {
         }
     }
 
+    /**
+     * Retorna o resumo final dos resultados de um aluno em um formulário.
+     *
+     * @async
+     * @param {number} form_id - ID do formulário.
+     * @param {number} student_id - ID do aluno.
+     * @returns {Promise<Object|undefined>} Objeto contendo resumo do desempenho:
+     *  - form_name: Nome do formulário
+     *  - username: Nome do aluno
+     *  - total_correct: Total de acertos
+     *  - total_wrong: Total de erros
+     *  - total_points: Pontuação
+     *  - total_questions: Número total de questões respondidas
+     *  - percent_correct: Percentual de acertos
+     *  - updated_at: Data da última atualização
+     *
+     * @example
+     * await Form.resultForm(3, 15)
+     */
     async resultForm(form_id, student_id) {
         try {
             const result = await knex.raw(`
                 SELECT
-                    f.title as form_name,
+                    f.title AS form_name,
                     u.username,
                     SUM(rf.correct) AS total_correct,
                     SUM(rf.wrong) AS total_wrong,
@@ -754,21 +830,32 @@ class Form {
                     END AS percent_correct,
                     MAX(rf.updated_at) AS updated_at
                 FROM results_form rf
-                inner join form f
-                    on f.id = rf.form_id
-                inner join users u
-                    on u.id = rf.student_id
+                INNER JOIN form f ON f.id = rf.form_id
+                INNER JOIN users u ON u.id = rf.student_id
                 WHERE rf.form_id = ? AND rf.student_id = ?
                 GROUP BY f.title, u.username;
-            `, [form_id, student_id]);
+            `, [form_id, student_id])
 
-            return result.rows[0];
+            return result.rows[0]
         } catch (err) {
-            console.error("Erro ao buscar resultados do formulário: ", err);
-            return undefined;
+            console.error("Erro ao buscar resultados do formulário: ", err)
+            return undefined
         }
     }
 
+    /**
+     * Atualiza a pontuação de um aluno para uma questão específica,
+     * somando os pontos da questão à pontuação existente.
+     *
+     * @async
+     * @param {number} question_id - ID da questão.
+     * @param {number} form_id - ID do formulário.
+     * @param {number} student_id - ID do aluno.
+     * @returns {Promise<boolean>} Retorna `true` se a pontuação foi atualizada.
+     *
+     * @example
+     * await Form.updatePoints(10, 3, 15)
+     */
     async updatePoints(question_id, form_id, student_id) {
         try {
             const result = await knex.raw(`
@@ -777,16 +864,16 @@ class Form {
                 FROM questions AS q
                 WHERE rf.form_id = q.form_id
                     AND rf.student_id = ?
-                        AND q.id = ?
-                            AND q.form_id = ?;
+                    AND q.id = ?
+                    AND q.form_id = ?;
             `, [student_id, question_id, form_id])
+
             return result.rowCount > 0
         } catch (err) {
             console.error("Erro ao atualizar pontuação:", err)
             return false
         }
     }
-
 
 
 }

@@ -272,10 +272,10 @@ function About() {
             <div className="w-20 h-20 bg-gradient-to-br from-purple-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
               <span className="text-xl font-bold text-white">L</span>
             </div>
-            <h4 className="text-lg font-bold text-white mb-2">Lucas</h4>
+            <h4 className="text-lg font-bold text-white mb-2">Rai Damásio</h4>
             <p className="text-yellow-400 font-medium mb-3 text-sm">Designer UX/UI</p>
             <p className="text-gray-300 text-xs leading-relaxed">
-              Criadora de interfaces intuitivas e experiências visuais memoráveis.
+              Criador de interfaces intuitivas e experiências visuais.
             </p>
           </div>
 
@@ -284,7 +284,7 @@ function About() {
             <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
               <span className="text-xl font-bold text-white">R</span>
             </div>
-            <h4 className="text-lg font-bold text-white mb-2">Rai</h4>
+            <h4 className="text-lg font-bold text-white mb-2">Lucas Emanuel</h4>
             <p className="text-yellow-400 font-medium mb-3 text-sm">Especialista em Educação</p>
             <p className="text-gray-300 text-xs leading-relaxed">
               Pedagoga especializada em metodologias de ensino e aprendizagem digital.
