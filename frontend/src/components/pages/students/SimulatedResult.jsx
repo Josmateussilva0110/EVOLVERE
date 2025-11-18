@@ -209,6 +209,22 @@ export default function SimulatedResult() {
                                         <span className="text-2xl font-bold text-purple-600">{results.total_questions}</span>
                                     </div>
                                 </div>
+
+                                <div className="bg-linear-to-br from-blue-50 to-sky-50 p-5 rounded-2xl border-2 border-blue-200">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <Trophy className="w-6 h-6 text-blue-600" />
+                                            <div>
+                                                <div className="font-semibold text-gray-700">Pontuação Total</div>
+                                                <div className="text-sm text-gray-500">Sua pontuação no simulado</div>
+                                            </div>
+                                        </div>
+                                        <span className="text-2xl font-bold text-blue-600">
+                                            {results.total_points}
+                                        </span>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -219,7 +235,7 @@ export default function SimulatedResult() {
                 {/* Ações Rápidas */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <button 
-                        onClick={() => setIsModalOpen(true)}
+                        onClick={() => navigate(`/student/simulated/template/${form_id}`)}
                         className="bg-white p-6 rounded-2xl shadow-lg border-2 border-gray-200 hover:border-blue-400 hover:shadow-xl transition-all group"
                     >
                         <Eye className="w-8 h-8 text-blue-600 mb-3 group-hover:scale-110 transition-transform" />
