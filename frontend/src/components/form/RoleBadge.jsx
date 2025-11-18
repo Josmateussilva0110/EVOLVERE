@@ -23,14 +23,13 @@
 function RoleBadge({ profile }) {
   let role = 'Desconhecido';
 
-  // Define o papel com base nas informações do perfil.
-  if (profile.role && profile.role !== 'Desconhecido') {
-    role = profile.role;
-  } 
-  else if (profile.registration === 'admin') {
+  if (profile.registration === 'admin') {
     role = 'Admin';
   } 
-  else if (profile.registration) {
+  else if (profile.role && profile.role !== 'Desconhecido') {
+    role = profile.role;
+  } 
+  else {
     role = 'Aluno';
   }
 

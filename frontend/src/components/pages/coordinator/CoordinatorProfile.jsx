@@ -204,7 +204,7 @@ function CoordinatorProfile() {
                     size={100}
                   />
                 ) : (
-                  <div className={`h-[80px] w-[80px] rounded-full ${getAvatarColor(profile.username)} flex items-center justify-center text-white text-3xl font-bold`}>
+                  <div className={`h-20 w-20 rounded-full ${getAvatarColor(profile.username)} flex items-center justify-center text-white text-3xl font-bold`}>
                     {profile.username ? profile.username.charAt(0).toUpperCase() : "?"}
                   </div>
                 )}
