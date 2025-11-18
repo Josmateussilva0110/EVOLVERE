@@ -312,7 +312,7 @@ function DashboardPrincipal() {
               Solicitações
             </button>
             <button
-              onClick={() => navigate("/coordinator/dashboard")}
+              onClick={() => navigate("/coming")}
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-indigo-600 to-blue-600 px-6 py-3 text-base font-semibold text-white shadow-sm hover:from-indigo-700 hover:to-blue-700 hover:shadow-md transition-all hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-blue-300"
             >
               <FaFileAlt className="text-lg" />

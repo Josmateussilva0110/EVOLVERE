@@ -29,7 +29,7 @@ function App() {
     "/await/approval", "/user/account", "/student/home",
     "/student/disciplines/view",
     "/profile", "/settings", "/teacher/simulated/register",
-    "/teacher/simulated/list", "/teacher/simulated/response/list"
+    "/teacher/simulated/list", "/teacher/simulated/response/list", "/coming"
   ]
 
   // Regex para rotas dinâmicas
