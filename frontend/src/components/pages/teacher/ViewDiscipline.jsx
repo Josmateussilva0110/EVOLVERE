@@ -339,7 +339,7 @@ function ViewSubjectDetails() {
                           Capacidade: {classe.capacity} alunos
                         </p>
                         <p className="text-gray-400 text-xs mt-1">
-                          Expira em: {formatDateRequests(classe.expired)}
+                          Expira em: {formatDateRequests(classe?.expired)}
                         </p>
                       </div>
                     </div>
