@@ -49,6 +49,8 @@ function Register() {
   const [isTermsOpen, setIsTermsOpen] = useState(false) // modal
   const { register } = useContext(Context)
   const navigate = useNavigate()
+  const [error, setError] = useState("") 
+
 
 
 /**
@@ -76,9 +78,13 @@ function Register() {
  */
   async function submitForm(e) {
     e.preventDefault()
-    if (acceptedTerms) {
-      register(user)
+      if (!acceptedTerms) {
+        setError("Você precisa aceitar os termos para continuar.")
+        return
     }
+
+    setError("") // limpa erro
+    register(user)
   }
 
   return (
@@ -198,6 +204,13 @@ function Register() {
 
           {/* Modal de Termos */}
           <TermsModal isOpen={isTermsOpen} onClose={() => setIsTermsOpen(false)} />
+
+          {error && (
+            <p className="text-red-500 text-sm mt-2">
+              {error}
+            </p>
+          )}
+
         </div>
       </div>
     </div>
