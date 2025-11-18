@@ -1,4 +1,4 @@
-import { Eye, ChevronLeft, ChevronRight, BookOpen, Search, XCircle } from "lucide-react"
+import { Eye, ChevronLeft, ChevronRight, BookOpen, Search, XCircle,  ArrowLeft } from "lucide-react"
 import { useState, useEffect, useContext } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { Context } from "../../../context/UserContext"
@@ -165,11 +165,21 @@ export default function SimuladosList() {
 
         {/* Cabeçalho */}
         <header className="flex flex-col sm:flex-row justify-between sm:items-center mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-white">Meus Simulados</h1>
-            <p className="text-slate-400 mt-1">Visualize, filtre e gerencie suas avaliações.</p>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate(`/teacher/discipline/view/${subject_id }`)}
+              className="p-2 rounded-lg hover:bg-slate-700 transition-colors text-slate-300 hover:text-white"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+
+            <div>
+              <h1 className="text-3xl font-bold text-white">Meus Simulados</h1>
+              <p className="text-slate-400 mt-1">Visualize, filtre e gerencie suas avaliações.</p>
+            </div>
           </div>
         </header>
+
 
         {/* Container da Tabela e Filtros */}
         <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-lg overflow-hidden">

@@ -1,4 +1,5 @@
 import { FaChalkboardTeacher, FaFileAlt, FaGraduationCap, FaUserGraduate, FaTasks } from "react-icons/fa"
+import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect, useContext } from "react"
 import { Context } from "../../../context/UserContext"
@@ -119,9 +120,33 @@ function DashboardPrincipal() {
     return colors[index]
   }
 
+  function handleVoltar() {
+    navigate("/");
+  }
+
   return (
-    <div className="min-h-screen w-full bg-[#060060] flex items-center">
-      <div className="mx-auto w-full max-w-7xl px-4 py-8 md:px-6 md:py-10 flex justify-center">
+    <div className="min-h-screen w-full bg-[#060060] flex items-start md:items-center">
+      <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-10 flex justify-center">
+        {/* Botão Voltar */}
+        <button
+          onClick={handleVoltar}
+            className="
+              absolute 
+              left-4 top-4                 /* mobile */
+              md:left-7 md:top-5         /* telas médias */
+              lg:left-30 lg:top-12         /* telas grandes */
+              p-3 rounded-xl
+              text-gray-300 hover:text-white
+              hover:bg-gray-700/50
+              transition-all duration-200
+              border border-gray-600/30 hover:border-gray-500/50
+              z-20
+            "
+        >
+          <ArrowLeft className="w-6 h-6" />
+        </button>
+
+
         {/* Container principal */}
         <div className="w-full max-w-6xl bg-white rounded-3xl p-6 md:p-10 shadow-xl flex flex-col gap-8">
 
@@ -287,8 +312,8 @@ function DashboardPrincipal() {
               Solicitações
             </button>
             <button
-              onClick={() => navigate("/coordinator/dashboard")}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-3 text-base font-semibold text-white shadow-sm hover:from-indigo-700 hover:to-blue-700 hover:shadow-md transition-all hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              onClick={() => navigate("/coming")}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-indigo-600 to-blue-600 px-6 py-3 text-base font-semibold text-white shadow-sm hover:from-indigo-700 hover:to-blue-700 hover:shadow-md transition-all hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-blue-300"
             >
               <FaFileAlt className="text-lg" />
               Relatórios

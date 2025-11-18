@@ -7,6 +7,7 @@ import ForgotPassword from "../components/pages/auth/ForgotPassword"
 import HelpCenter from "../components/pages/auth/HelpCenter"
 import UserAccount from "../components/pages/auth/UserAccount"
 import AccountValidation from "../components/pages/auth/Waiting"
+import ComingSoon from "../components/pages/public/ComingSoon"
 
 /**
  * Define todas as rotas públicas da aplicação.
@@ -81,6 +82,8 @@ export default function PublicRoutes() {
        * @element AccountValidation
        */}
       <Route path="/await/approval" element={<AccountValidation />} />
+
+      <Route path="/coming" element={<ComingSoon />} />
     </Routes>
   )
 }
