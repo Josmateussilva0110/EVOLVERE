@@ -5,7 +5,6 @@ import { ChevronDown, User, LogOut, UserCircle2, GraduationCap, BookOpen, Shield
 import Image from '../form/Image'
 import requestData from '../../utils/requestApi'
 
-
 /**
  * Componente de navegação principal (Navbar).
  *
@@ -93,7 +92,7 @@ function Navbar() {
 
   return (
     <nav className={`w-full top-0 left-0 z-50 transition-colors duration-500 ${bgColor}`}>
-      <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+      <div className="w-full px-4 py-4 flex justify-between items-center">
 
         {/* ---------- LOGO ---------- */}
         <div className="flex items-center space-x-3">

@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom"
 import useFlashMessage from "../../../hooks/useFlashMessage"
 import DateTimePicker from "../../form/DatePicker";
 import { useParams } from "react-router-dom";
-
 /**
  * AutoResizeTextarea
  *
@@ -658,14 +657,6 @@ export default function CreateQuiz() {
 
           {/* Submit */}
           <div className="bg-slate-800/60 p-6 rounded-xl border border-white/10 flex justify-end gap-4">
-
-            <button
-              type="button"
-              className="px-6 py-3 rounded-lg bg-white/5 text-slate-200 hover:bg-white/10"
-            >
-              Salvar rascunho
-            </button>
-
             <button
               type="submit"
               className="px-8 py-3 rounded-lg font-bold bg-yellow-400 text-black hover:bg-yellow-500 shadow-lg flex items-center gap-2"

@@ -237,17 +237,6 @@ export default function Dashboard() {
               </button>
             );
           })}
-
-          <div className="pt-3 space-y-1 border-t border-blue-800 mt-3">
-            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-blue-200 hover:bg-blue-900/50 hover:text-white transition-all text-sm font-medium hover:translate-x-1">
-              <Settings size={20} />
-              <span>Configurações</span>
-            </button>
-            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-blue-200 hover:bg-blue-900/50 hover:text-white transition-all text-sm font-medium hover:translate-x-1">
-              <HelpCircle size={20} />
-              <span>Ajuda</span>
-            </button>
-          </div>
         </nav>
 
         <div className="p-3 border-t border-blue-800">
@@ -545,7 +534,7 @@ export default function Dashboard() {
               </button>
             </div>
             )}
-
+Ajuda
           </div>
         </div>
       </main>

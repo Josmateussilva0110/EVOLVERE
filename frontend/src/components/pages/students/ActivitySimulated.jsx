@@ -16,7 +16,6 @@ import requestData from "../../../utils/requestApi";
 import formatDateRequests from "../../../utils/formatDateRequests";
 import { Context } from "../../../context/UserContext"
 
-
 /**
  * ActivitySimulated
  *
@@ -350,12 +349,6 @@ export default function ActivitySimulated() {
                         <Play size={20} strokeWidth={3} />
                         Iniciar
                       </button>
-
-
-                    <button className="w-full bg-gray-50 text-gray-700 py-3 rounded-2xl font-bold hover:bg-gray-100 border-2 border-gray-200 flex items-center justify-center gap-2">
-                      <BookOpen size={18} strokeWidth={2.5} />
-                      Detalhes
-                    </button>
                   </div>
                 </div>
               </div>
