@@ -35,7 +35,9 @@ export default function TemplateForm() {
     /**
      * @constant {Object|null} form - Objeto contendo os dados do formulário retornado pela API.
      */
-    const [form, setForm] = useState(null);
+    const [form, setForm] = useState(null)
+
+    const [formStatus, setFormStatus] = useState(null);
 
     /**
      * @constant {boolean} loading - Estado de carregamento da página.
@@ -63,12 +65,40 @@ export default function TemplateForm() {
         fetchForm();
     }, [form_id]);
 
+    useEffect(() => {
+        async function fetchStatusForm() {
+            const response = await requestData(`/form/status/${form_id}`, 'GET', {}, true)
+            console.log('status: ',response)
+
+            if (response && response.success) {
+                setFormStatus(response.data.form)
+            } else {
+                setFormStatus(null)
+            }
+        }
+        fetchStatusForm()
+    }, [form_id])
+
 
 
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
                 Carregando simulado...
+            </div>
+        );
+    }
+
+    if (!formStatus) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-white-900 text-red-700">
+                <p>Simulado ainda não respondido, responda para visualizar o gabarito.</p>
+                <button
+                    onClick={() => navigate("/student/home")}
+                    className="mt-4 px-4 py-2 bg-green-900 text-white rounded-lg hover:bg-green-700"
+                >
+                    Voltar
+                </button>
             </div>
         );
     }

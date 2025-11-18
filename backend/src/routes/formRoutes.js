@@ -155,4 +155,6 @@ router.get("/form/student/pending", formController.getStudentPendingForms)
  */
 router.get("/form/results/:form_id", formController.getResultForm)
 
+router.get("/form/status/:form_id", formController.formStatus)
+
 module.exports = router
