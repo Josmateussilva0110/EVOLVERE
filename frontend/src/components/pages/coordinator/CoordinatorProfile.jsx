@@ -1,4 +1,4 @@
-import { FiArrowLeft, FiUser, FiMail, FiShield, FiLoader, FiAlertCircle, FiSettings, FiLogIn, FiCamera } from "react-icons/fi";
+import { FiArrowLeft, FiUser, FiMail, FiAlertCircle, FiSettings, FiLogIn, FiCamera } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState, useContext } from "react";
 import requestData from "../../../utils/requestApi";
@@ -12,51 +12,11 @@ import formatDate from "../../../utils/formatDate"
  * CoordinatorProfile
  *
  * Componente responsável por exibir e gerenciar o **perfil do coordenador**.
- *
- * O que faz:
- * - Mostra informações pessoais do usuário (nome, e-mail, permissões).
- * - Permite upload de avatar (foto de perfil).
- * - Exibe configurações de segurança (senha, 2FA) e sessões ativas.
- * - Possui botões de ação rápida para Configurações e Gerenciar segurança.
- * - Exibe estados de carregamento e erro durante a requisição de dados do perfil.
- *
- * Entradas:
- * - Não recebe props diretamente.
- * - Entradas dinâmicas via interação do usuário:
- *    - Alteração de avatar (upload).
- *    - Navegação via botões (Voltar, Configurações).
- *    - Dados do usuário são obtidos do backend através de `requestData`.
- *
- * Estados locais:
- * - `loading` → controla o estado de carregamento (spinner).
- * - `error` → mensagem de erro ao carregar perfil.
- * - `profile` → dados básicos do usuário (nome, email, permissão).
- * - `avatarUrl` → URL da imagem de avatar (padrão vazio).
- *
- * Saída:
- * - JSX completo exibindo o perfil do coordenador, botões de ação, avatar, informações pessoais,
- *   configurações de segurança e indicadores de carregamento/erro.
- *
- * Exemplo de uso:
- * ```jsx
- * <CoordinatorProfile />
- *
- * // Simulação de interação:
- * // O usuário faz upload do avatar ou clica em "Configurações"
- * setAvatarUrl("https://exemplo.com/avatar.jpg");
- * navigate("/coordinator/settings");
- * ```
- *
- * @component
- * @returns {JSX.Element} Página de perfil do coordenador
  */
 function CoordinatorProfile() {
   const navigate = useNavigate();
-  /** @type {[string|null, Function]} Estado de erro ao carregar perfil */
   const [error, setError] = useState(null);
-  /** @type {[Object, Function]} Dados do perfil do usuário */
   const [profile, setProfile] = useState({});
-  /** @type {[string, Function]} URL do avatar do usuário */
   const [avatarUrl, setAvatarUrl] = useState("");
   const { setFlashMessage } = useFlashMessage()
   const { user, logout } = useContext(Context)
@@ -122,18 +82,6 @@ function CoordinatorProfile() {
     const index = name ? name.charCodeAt(0) % colors.length : 0
     return colors[index]
   }
-
-
-  /**
-   * useEffect para carregar dados do perfil do usuário.
-   * 
-   * Executa uma requisição GET para '/user/me' para obter informações do usuário logado.
-   * Atualiza os estados de loading, error, profile e avatarUrl com base na resposta da API.
-   * 
-   * @async
-   * @function fetchMe
-   * @returns {Promise<void>}
-   */
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#060060] py-10 px-4">
@@ -250,10 +198,8 @@ function CoordinatorProfile() {
 
             </div>
 
-
             {/* Resumo da conta */}
             <div className="rounded-2xl ring-1 ring-gray-200 p-5 flex items-center gap-4">
-
               <div className="flex-1">
                 <div className="flex flex-col md:flex-row md:items-center md:gap-3">
                   <p className="text-sm font-semibold text-gray-900">{profile.username}</p>
@@ -276,7 +222,6 @@ function CoordinatorProfile() {
               <div className="rounded-xl ring-1 ring-gray-200 p-4">
                 <p className="text-xs text-gray-500">Nome</p>
                 <p className="text-sm font-medium text-gray-900">{profile.username}</p>
-
               </div>
               <div className="rounded-xl ring-1 ring-gray-200 p-4 flex items-start gap-3">
                 <FiMail className="text-gray-500 mt-0.5" />
@@ -287,18 +232,8 @@ function CoordinatorProfile() {
               </div>
             </div>
 
-            {/* Segurança e sessão */}
+            {/* Sessão (mantive apenas este bloco; "Segurança" foi removido conforme pedido) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="rounded-xl ring-1 ring-gray-200 p-4">
-                <p className="text-sm font-semibold text-gray-900 mb-2">Segurança</p>
-                <ul className="text-sm text-gray-700 space-y-1">
-                  <li>2FA: <span className="font-medium">Desativado</span></li>
-                  <li>Senha: <span className="font-medium">Atualizada</span></li>
-                </ul>
-                <div className="mt-3">
-                  <button onClick={() => navigate('/settings')} className="inline-flex items-center gap-2 rounded-lg ring-1 ring-gray-300 px-3 py-2 text-xs text-gray-800 hover:bg-gray-50"><FiSettings /> Gerenciar segurança</button>
-                </div>
-              </div>
               <div className="rounded-xl ring-1 ring-gray-200 p-4">
                 <p className="text-sm font-semibold text-gray-900 mb-2">Sessão</p>
                 <ul className="text-sm text-gray-700 space-y-1">
@@ -313,8 +248,7 @@ function CoordinatorProfile() {
 
             {/* Ações rápidas */}
             <div className="flex flex-wrap items-center gap-2">
-              <button onClick={() => navigate('/settings')} className="inline-flex items-center gap-2 rounded-xl bg-yellow-400 text-gray-900 px-4 py-2 text-sm font-semibold hover:bg-yellow-500"><FiSettings /> Abrir configurações</button>
-
+              {/* Botão "Abrir configurações" removido conforme solicitado */}
             </div>
           </div>
         )}

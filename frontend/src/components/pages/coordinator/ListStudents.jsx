@@ -299,6 +299,7 @@ function ListStudents() {
           <div className="flex items-center rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 shadow-sm">
             <span className="mr-2 text-slate-500">
               <FiSearch />
+              Ver
             </span>
             <input
               type="text"
@@ -505,12 +506,6 @@ function ListStudents() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex justify-center gap-3">
-                            <button
-                              className="text-slate-500 hover:text-[#060060] text-base"
-                              title="Ver"
-                            >
-                              <FaEye />
-                            </button>
                             <button
                               onClick={() => handleExcluir(u.id)}
                               className="text-slate-500 hover:text-red-600 text-base"
