@@ -238,6 +238,27 @@ class MaterialController {
         }
     }
 
+    async getRecentUpdates(request, response) {
+        try {
+            const { course_id } = request.params
+            if (!validator.isInt(course_id + '', { min: 1 })) {
+                return response.status(422).json({ success: false, message: "usuário não autenticado." })
+            }
+            
+            const materials = await Material.getUpdates(course_id)
+            console.log('m: ', materials)
+            if(!materials) {
+                return response.status(404).json({status: false, message: "Nenhuma atualização recente."})
+            }
+
+            return response.status(200).json({ status: true, updates: materials ? [materials] : [] })
+            
+            
+        } catch(err) {
+            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+        }
+    }
+
 }
 
 module.exports = new MaterialController()

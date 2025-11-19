@@ -141,6 +141,7 @@ class User {
                 u.status,
                 u.created_at,
                 u.updated_at,
+                u.course_id,
             CASE 
                 when vp.role = '1' then 'Admin'
                 when vp.role = '2' then 'Coordenador'

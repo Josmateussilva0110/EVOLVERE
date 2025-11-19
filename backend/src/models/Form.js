@@ -875,7 +875,18 @@ class Form {
         }
     }
 
+    async formResponse(form_id) {
+        try {
+            const result = await knex("answers_form")
+                .where({ form_id })
+                .first()
 
+            return !!result
+        } catch (err) {
+            console.error("Erro ao verificar status de formulário:", err)
+            return false
+        }
+    }
 }
 
 module.exports = new Form()

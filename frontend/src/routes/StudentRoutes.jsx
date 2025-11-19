@@ -12,6 +12,7 @@ import ActivitySimulated from "../components/pages/students/ActivitySimulated"
 import ResponseForm from "../components/pages/students/ResponseForm"
 import SimulatedResult from "../components/pages/students/SimulatedResult"
 import SimulatedPendingCorrection from "../components/pages/students/PendingCorrection"
+import TemplateForm from "../components/pages/students/TemplateForm"
 
 
 /**
@@ -107,6 +108,8 @@ export default function StudentRoutes() {
        * @element SimulatedResult
        */}
       <Route path="simulated/result/:form_id" element={<SimulatedResult />} />
+
+      <Route path="simulated/template/:form_id" element={<TemplateForm />} />
     </Routes>
   )
 }

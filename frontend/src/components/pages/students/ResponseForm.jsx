@@ -83,6 +83,7 @@ export default function ResponseForm() {
         async function fetchForm() {
             try {
                 const response = await requestData(`/form/view/${id}`, "GET", {}, true);
+                console.log('form: ', response)
                 if (response.success && response.data.form?.length) {
                     const formData = response.data.form[0];
                     setForm(formData);
