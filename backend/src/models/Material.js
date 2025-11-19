@@ -215,9 +215,58 @@ class Material {
         }
     }
 
+    async getUpdates(course_id) {
+        try {
+
+            // Buscar materiais
+            const materials = await knex("materials as m")
+                .join("subjects as s", "s.id", "m.subject_id")
+                .join("classes as c", "c.id", "m.class_id")
+                .join("users as u", "u.id", "s.professional_id")
+                .select(
+                    "m.id as material_id",
+                    "m.title as material_title",
+                    "s.id as subject_id",
+                    "s.name as subject_name",
+                    "c.id as class_id",
+                    "c.name as class_name",
+                    "u.username as teacher_name",
+                    "m.updated_at"
+                )
+                .where("s.course_valid_id", course_id)
+                .orderBy("m.updated_at", "desc")
+                .limit(2)
+
+            // Buscar formulários
+            const forms = await knex("form as f")
+                .join("subjects as s", "s.id", "f.subject_id")       
+                .join("classes as c", "c.id", "f.class_id")             
+                .join("users as u", "u.id", "f.created_by")    
+                .select(
+                    "f.id as form_id",
+                    "f.title as form_title",
+                    "c.id as class_id",            
+                    "c.name as class_name", 
+                    "u.username as teacher_name",
+                    "f.updated_at"
+                )
+                .where("s.course_valid_id", course_id)
+                .orderBy("f.updated_at", "desc")
+                .limit(2)
+
+            return {
+                materials,
+                forms
+            }
+
+        } catch (err) {
+            console.error("Erro ao buscar atualizações:", err)
+            return { materials: [], forms: [] }
+        }
+    }
 
 
-    
+
 }
 
 module.exports = new Material()

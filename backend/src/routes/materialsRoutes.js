@@ -141,7 +141,9 @@ router.get('/material/class/:class_id', materialController.getMaterialsClass)
  * @returns {Object} 401 - Não autorizado (aluno não logado).
  * @returns {Object} 500 - Erro interno do servidor.
  */
-router.get('/material/student', materialController.getStudentMaterials);
+router.get('/material/student', materialController.getStudentMaterials)
+
+router.get(`/material/updates/:course_id`, materialController.getRecentUpdates)
 
 
 module.exports = router

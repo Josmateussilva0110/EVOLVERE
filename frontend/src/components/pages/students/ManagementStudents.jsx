@@ -8,11 +8,12 @@ import requestData from "../../../utils/requestApi";
 import useFlashMessage from "../../../hooks/useFlashMessage";
 import { Context } from "../../../context/UserContext";
 import Image from "../../form/Image";
+import formatDateRequests from "../../../utils/formatDateRequests";
 
 export default function Dashboard() {
   const [activeSection, setActiveSection] = useState("dashboard");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const { logout, user } = useContext(Context)
 
   const [showClassModal, setShowClassModal] = useState(false);
@@ -26,7 +27,10 @@ export default function Dashboard() {
   const [class_id, setClassId] = useState(null)
   const [countClass, setCountClass] = useState(0)
   const [recentNotes, setRecentNotes] = useState([])
-  
+  const [materials, setMaterials] = useState([]);
+  const [forms, setForms] = useState([]);
+
+
   const [pendingCount, setPendingCount] = useState(0);
   const [upcomingActivities, setUpcomingActivities] = useState([]);
   const [isLoadingActivities, setIsLoadingActivities] = useState(true);
@@ -51,6 +55,38 @@ export default function Dashboard() {
     }
   }, [user])
 
+
+  useEffect(() => {
+    if (requestUser) {
+      async function fetchUpdates() {
+        const response = await requestData(
+          `/material/updates/${requestUser.course_id}`,
+          "GET",
+          {},
+          true
+        )
+
+        console.log("updates: ", response)
+
+        if (response.success) {
+          const data = response.data.updates || {}
+          console.log('data: ', data[0])
+
+          setForms(data[0].forms || [])
+          setMaterials(data[0].materials || [])
+        } else {
+          setForms([])
+          setMaterials([])
+        }
+      }
+
+      fetchUpdates()
+    }
+  }, [requestUser])
+
+
+
+
   useEffect(() => {
     async function fetchRecentNotes() {
       const response = await requestData("/performance/recent", "GET", {}, true)
@@ -66,7 +102,7 @@ export default function Dashboard() {
       setIsLoadingActivities(true);
       try {
         const response = await requestData(
-          '/form/student/pending', 
+          '/form/student/pending',
           "GET",
           {},
           true
@@ -98,7 +134,7 @@ export default function Dashboard() {
     if (user) {
       fetchPendingActivities();
     }
-  }, [user]); 
+  }, [user]);
 
   useEffect(() => {
     const onKey = (e) => {
@@ -139,8 +175,8 @@ export default function Dashboard() {
       return;
     }
 
-    setIsJoining(true); 
-    setClassError(""); 
+    setIsJoining(true);
+    setClassError("");
 
     try {
       const response = await requestData("/enrollments/join-with-code", "POST", { code }, true);
@@ -189,7 +225,7 @@ export default function Dashboard() {
           badge: "bg-amber-500",
           groupHover: "group-hover:text-amber-600"
         };
-      default: 
+      default:
         return {
           bg: "bg-linear-to-r from-blue-50 to-cyan-50",
           border: "border-blue-500",
@@ -226,10 +262,10 @@ export default function Dashboard() {
             return (
               <button
                 key={item.id}
-                onClick={() => handleNavigation(item.id)} 
+                onClick={() => handleNavigation(item.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${activeSection === item.id
-                    ? "bg-linear-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 scale-105"
-                    : "text-blue-200 hover:bg-blue-900/50 hover:text-white hover:translate-x-1"
+                  ? "bg-linear-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 scale-105"
+                  : "text-blue-200 hover:bg-blue-900/50 hover:text-white hover:translate-x-1"
                   }`}
               >
                 <Icon size={20} />
@@ -353,8 +389,8 @@ export default function Dashboard() {
                           value >= 8
                             ? "bg-green-100 text-green-700"
                             : value >= 6
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-red-100 text-red-700";
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-red-100 text-red-700";
 
                         return (
                           <motion.span
@@ -409,21 +445,21 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-            
-            <div onClick={() => navigate("/student/courses/list")}  className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all hover:-translate-y-1">
-               <div className="flex items-center gap-4 mb-4">
-                 <div className="p-3 bg-linear-to-br from-green-100 to-green-200 rounded-xl">
-                   <Users className="text-green-600" size={24} />
-                 </div>
-                 <div>
-                   <h3 className="font-bold text-gray-900 text-lg">Minhas Turmas</h3>
-                   <p className="text-sm text-gray-500">Ver progresso</p>
-                 </div>
-               </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-4xl font-bold text-green-600">{countClass}</span>
-                 <ChevronRight className="text-gray-400" size={20} />
-               </div>
+
+            <div onClick={() => navigate("/student/courses/list")} className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all hover:-translate-y-1">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 bg-linear-to-br from-green-100 to-green-200 rounded-xl">
+                  <Users className="text-green-600" size={24} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900 text-lg">Minhas Turmas</h3>
+                  <p className="text-sm text-gray-500">Ver progresso</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-4xl font-bold text-green-600">{countClass}</span>
+                <ChevronRight className="text-gray-400" size={20} />
+              </div>
             </div>
 
           </div>
@@ -433,7 +469,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-bold text-gray-900">Atividades Pendentes</h3>
               </div>
-              
+
               {isLoadingActivities ? (
                 <div className="text-center py-8 text-gray-600">
                   <Clock className="mx-auto animate-spin" size={24} />
@@ -450,7 +486,7 @@ export default function Dashboard() {
                   {upcomingActivities.map(activity => {
                     const colors = getUrgencyClasses(activity.urgencyColor);
                     return (
-                      <div 
+                      <div
                         key={activity.id}
                         className={`${colors.bg} rounded-xl p-5 border-l-4 ${colors.border} hover:shadow-md transition-all cursor-pointer group`}
                         onClick={() => navigate(`/student/simulated/view/${activity.id}`)}
@@ -480,9 +516,9 @@ export default function Dashboard() {
                               </div>
                             </div>
                           </div>
-                          <ChevronRight 
-                            className={`text-gray-400 group-hover:translate-x-2 ${colors.groupHover} transition-all`} 
-                            size={24} 
+                          <ChevronRight
+                            className={`text-gray-400 group-hover:translate-x-2 ${colors.groupHover} transition-all`}
+                            size={24}
                           />
                         </div>
                       </div>
@@ -496,54 +532,105 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
               <h3 className="text-2xl font-bold text-gray-900 mb-6">Atualizações Recentes</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-4 bg-linear-to-r from-blue-50 to-cyan-50 rounded-xl hover:shadow-md transition-all cursor-pointer group border border-blue-100">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-md">
-                      <Folder className="text-white" size={22} />
-                    </div>
-                    <div>
-                      <p className="text-gray-900 font-bold">Professor adicionou um novo material</p>
-                      <p className="text-gray-500 text-sm">Química Orgânica - Prof. Silva</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="text-gray-400 group-hover:translate-x-2 group-hover:text-blue-600 transition-all" size={24} />
-                </div>
 
-                <div className="flex items-center justify-between p-4 bg-linear-to-r from-green-50 to-emerald-50 rounded-xl hover:shadow-md transition-all cursor-pointer group border border-green-100">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-linear-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-md">
-                      <BookOpen className="text-white" size={22} />
-                    </div>
-                    <div>
-                      <p className="text-gray-900 font-bold">Curso atualizado</p>
-                      <p className="text-gray-500 text-sm">Novas aulas disponíveis</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="text-gray-400 group-hover:translate-x-2 group-hover:text-green-600 transition-all" size={24} />
+              {forms.length === 0 && materials.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <Folder className="mx-auto mb-2 text-blue-400" size={24} />
+                  <h4 className="font-bold text-lg text-gray-800">Nenhuma atualização recente</h4>
+                  <p>Quando houver novidades no seu curso, elas aparecerão aqui.</p>
                 </div>
-              </div>
+              ) : (
+                <div className="space-y-6">
+
+                  {/* ---- BLOCOS DE SIMULADOS ---- */}
+                  {forms.length > 0 && (
+                    <>
+                      <h4 className="font-semibold text-gray-800 mb-2">Novos Simulados</h4>
+
+                      {forms.map((item, index) => (
+                        <div
+                          key={`form-${index}`}
+                          className="flex items-center justify-between p-4 bg-orange-50 border border-orange-200 rounded-xl hover:shadow-md transition-all cursor-pointer"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-linear-to-br from-orange-500 to-yellow-500 rounded-xl flex items-center justify-center shadow-md">
+                              <ClipboardList className="text-white" size={22} />
+                            </div>
+
+                            <div>
+                              <p className="text-gray-900 font-bold">Novo simulado disponível</p>
+                              <p className="text-gray-500 text-sm">Professor: {item.teacher_name}</p>
+                              <p className="text-gray-500 text-xs mt-1">Simulado: {item.form_title}</p>
+                              <p className="text-gray-500 text-xs mt-1">Turma: {item.class_name}</p>
+                              <p className="text-gray-500 text-xs mt-1">Adicionado em: {formatDateRequests(item.updated_at)}</p>
+                            </div>
+                          </div>
+
+                          <ChevronRight className="text-gray-400" size={24} />
+                        </div>
+                      ))}
+                    </>
+                  )}
+
+                  {/* ---- BLOCOS DE MATERIAIS ---- */}
+                  {materials.length > 0 && (
+                    <>
+                      <h4 className="font-semibold text-gray-800 mb-2">Novos Materiais</h4>
+
+                      {materials.map((item, index) => (
+                        <div
+                          key={`material-${index}`}
+                          className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-xl hover:shadow-md transition-all cursor-pointer"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-md">
+                              <Folder className="text-white" size={22} />
+                            </div>
+
+                            <div>
+                              <p className="text-gray-900 font-bold">Novo material adicionado</p>
+                              <p className="text-gray-500 text-sm">
+                                Disciplina: {item.subject_name}
+                              </p>
+                              <p className="text-gray-500 text-sm">
+                                Professor: {item.teacher_name}
+                              </p>
+                              <p className="text-gray-500 text-xs mt-1">Material: {item.material_title}</p>
+                              <p className="text-gray-500 text-xs mt-1">Adicionado em: {formatDateRequests(item.updated_at)}</p>
+                            </div>
+                          </div>
+
+                          <ChevronRight className="text-gray-400" size={24} />
+                        </div>
+                      ))}
+                    </>
+                  )}
+
+                </div>
+              )}
             </div>
+
+
 
 
             {upcomingActivities.length > 0 && (
               <div className="bg-linear-to-br from-amber-400 via-yellow-500 to-orange-500 rounded-2xl p-6 shadow-xl flex flex-col justify-between text-white relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-12 -mt-12"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-8 -mb-8"></div>
-              <div className="relative">
-                <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center mb-4 shadow-lg">
-                  <Zap className="text-white" size={32} />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-12 -mt-12"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-8 -mb-8"></div>
+                <div className="relative">
+                  <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+                    <Zap className="text-white" size={32} />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2">Simulado Disponível!</h3>
+                  <p className="text-amber-50 mb-6">Teste seus conhecimentos 🎯</p>
                 </div>
-                <h3 className="text-2xl font-bold mb-2">Simulado Disponível!</h3>
-                <p className="text-amber-50 mb-6">Teste seus conhecimentos 🎯</p>
+                <button onClick={() => navigate(`/student/activities/view/${class_id}`)} className="relative w-full bg-white hover:bg-gray-50 text-amber-600 font-bold py-4 rounded-xl shadow-lg transition-all transform hover:scale-105 hover:-translate-y-1">
+                  <span className="flex items-center justify-center gap-2">
+                    Realizar Simulado
+                    <ChevronRight size={20} />
+                  </span>
+                </button>
               </div>
-              <button  onClick={() => navigate(`/student/activities/view/${class_id}`)} className="relative w-full bg-white hover:bg-gray-50 text-amber-600 font-bold py-4 rounded-xl shadow-lg transition-all transform hover:scale-105 hover:-translate-y-1">
-                <span className="flex items-center justify-center gap-2">
-                  Realizar Simulado
-                  <ChevronRight size={20} />
-                </span>
-              </button>
-            </div>
             )}
 
           </div>
