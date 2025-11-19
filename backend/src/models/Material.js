@@ -150,71 +150,105 @@ class Material {
         }
     }
 
-/**
+    /**
      * Retorna todos os materiais de todas as turmas em que um aluno está matriculado.
      * * @async
      * @function getAllMaterialsForStudent
      * @param {number} student_id - ID do aluno.
      * @returns {Promise<Array<Object>|undefined>} Lista de materiais formatada.
      */
- async getAllMaterialsForStudent(student_id) {
-        try {
-            const query = knex('materials as m')
-                // Junta com 'subjects' para pegar o nome da disciplina
-                .join('subjects as s', 's.id', 'm.subject_id')
-                .select(
-                    'm.id',
-                    'm.title',
-                    knex.raw(`
-                        CASE 
-                            WHEN m.type = 1 THEN 'PDF'
-                            WHEN m.type = 2 THEN 'DOC'
-                            WHEN m.type = 3 THEN 'PPT'
-                            ELSE 'Outro'
-                        END as type_file
-                    `),
-                    'm.archive',
-                    'm.updated_at',
-                    's.name as discipline_name'
-                )
+    async getAllMaterialsForStudent(student_id) {
+            try {
+                const query = knex('materials as m')
+                    // Junta com 'subjects' para pegar o nome da disciplina
+                    .join('subjects as s', 's.id', 'm.subject_id')
+                    .select(
+                        'm.id',
+                        'm.title',
+                        knex.raw(`
+                            CASE 
+                                WHEN m.type = 1 THEN 'PDF'
+                                WHEN m.type = 2 THEN 'DOC'
+                                WHEN m.type = 3 THEN 'PPT'
+                                ELSE 'Outro'
+                            END as type_file
+                        `),
+                        'm.archive',
+                        'm.updated_at',
+                        's.name as discipline_name'
+                    )
+                    
+                    // 1. Filtra APENAS materiais globais (origin = 1)
+                    .where('m.origin', 1) 
+                    
+                    // 2. CORREÇÃO AQUI:
+                    // Filtra APENAS materiais cujo 'subject_id'
+                    // esteja na lista de disciplinas que o aluno cursa.
+                    .whereIn('m.subject_id', function() { 
+                        this.select('c.subject_id') // <-- Mudamos de class_id para subject_id
+                            .distinct() 
+                            .from('class_student as cs')
+                            .join('classes as c', 'c.id', 'cs.class_id') // <-- Precisamos do JOIN com 'classes'
+                            .where('cs.student_id', student_id);
+                    })
+                    .orderBy('m.updated_at', 'desc');
+
+                const result = await query;
                 
-                // 1. Filtra APENAS materiais globais (origin = 1)
-                .where('m.origin', 1) 
-                
-                // 2. CORREÇÃO AQUI:
-                // Filtra APENAS materiais cujo 'subject_id'
-                // esteja na lista de disciplinas que o aluno cursa.
-                .whereIn('m.subject_id', function() { 
-                    this.select('c.subject_id') // <-- Mudamos de class_id para subject_id
-                        .distinct() 
-                        .from('class_student as cs')
-                        .join('classes as c', 'c.id', 'cs.class_id') // <-- Precisamos do JOIN com 'classes'
-                        .where('cs.student_id', student_id);
-                })
-                .orderBy('m.updated_at', 'desc');
+                // 3. Formatação (sem mudanças)
+                const formattedResult = result.map(material => ({
+                    id: material.id,
+                    titulo: material.title,
+                    tipo: material.type_file, 
+                    tamanho: "N/D",
+                    data: material.updated_at,
+                    disciplina: material.discipline_name,
+                    archive: material.archive,
+                    categoria: material.type_file.toLowerCase()
+                }));
 
-            const result = await query;
-            
-            // 3. Formatação (sem mudanças)
-            const formattedResult = result.map(material => ({
-                id: material.id,
-                titulo: material.title,
-                tipo: material.type_file, 
-                tamanho: "N/D",
-                data: material.updated_at,
-                disciplina: material.discipline_name,
-                archive: material.archive,
-                categoria: material.type_file.toLowerCase()
-            }));
+                return formattedResult;
 
-            return formattedResult;
-
-        } catch (err) {
-            console.error("Erro ao buscar materiais globais do aluno:", err);
-            return undefined;
+            } catch (err) {
+                console.error("Erro ao buscar materiais globais do aluno:", err);
+                return undefined;
+            }
         }
-    }
-
+    
+    
+    /**
+     * @function getUpdates
+     * @description
+     * Busca as atualizações recentes de um curso, retornando separadamente:
+     * - Materiais atualizados
+     * - Formulários atualizados
+     * 
+     * Cada categoria retorna no máximo 2 itens, ordenados por data de atualização.
+     *
+     * @async
+     * @param {number|string} course_id - ID do curso para filtrar as atualizações.
+     * 
+     * @returns {Promise<Object>} Um objeto contendo:
+     * @returns {Array<Object>} return.materials - Lista dos materiais atualizados.
+     * @returns {number} return.materials[].material_id - ID do material.
+     * @returns {string} return.materials[].material_title - Título do material.
+     * @returns {number} return.materials[].subject_id - ID da disciplina.
+     * @returns {string} return.materials[].subject_name - Nome da disciplina.
+     * @returns {number} return.materials[].class_id - ID da turma.
+     * @returns {string} return.materials[].class_name - Nome da turma.
+     * @returns {string} return.materials[].teacher_name - Nome do professor responsável.
+     * @returns {Date} return.materials[].updated_at - Data da última atualização.
+     * 
+     * @returns {Array<Object>} return.forms - Lista dos formulários atualizados.
+     * @returns {number} return.forms[].form_id - ID do formulário.
+     * @returns {string} return.forms[].form_title - Título do formulário.
+     * @returns {number} return.forms[].class_id - ID da turma.
+     * @returns {string} return.forms[].class_name - Nome da turma.
+     * @returns {string} return.forms[].teacher_name - Nome do professor que criou o formulário.
+     * @returns {Date} return.forms[].updated_at - Data da última atualização do formulário.
+     * 
+     * @throws {Error} Caso haja falha ao consultar o banco.
+     */
     async getUpdates(course_id) {
         try {
 
