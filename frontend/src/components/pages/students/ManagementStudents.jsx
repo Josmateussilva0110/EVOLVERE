@@ -1,5 +1,5 @@
 import {
-  BookOpen, Users, Folder, FileText, BarChart3, Award, Settings, HelpCircle, LogOut, ClipboardList, Zap, Clock, ChevronRight, User, GraduationCap
+  BookOpen, Users, Folder, FileText, BarChart3, LogOut, ClipboardList, Zap, Clock, ChevronRight, User, GraduationCap
 } from "lucide-react";
 import { useState, useEffect, useRef, useContext } from "react";
 import { useNavigate } from "react-router-dom";
@@ -539,24 +539,26 @@ export default function Dashboard() {
                       {forms.map((item, index) => (
                         <div
                           key={`form-${index}`}
-                          className="flex items-center justify-between p-4 bg-orange-50 border border-orange-200 rounded-xl hover:shadow-md transition-all cursor-pointer"
+                          className="group flex items-start gap-4 p-4 bg-orange-50 border border-orange-200 rounded-xl hover:shadow-lg hover:bg-orange-100/70 transition-all cursor-pointer"
                         >
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-linear-to-br from-orange-500 to-yellow-500 rounded-xl flex items-center justify-center shadow-md">
-                              <ClipboardList className="text-white" size={22} />
-                            </div>
-
-                            <div>
-                              <p className="text-gray-900 font-bold">Novo simulado disponível</p>
-                              <p className="text-gray-500 text-sm">Professor: {item.teacher_name}</p>
-                              <p className="text-gray-500 text-xs mt-1">Simulado: {item.form_title}</p>
-                              <p className="text-gray-500 text-xs mt-1">Turma: {item.class_name}</p>
-                              <p className="text-gray-500 text-xs mt-1">Adicionado em: {formatDateRequests(item.updated_at)}</p>
-                            </div>
+                          <div className="w-12 h-12 bg-linear-to-br from-orange-500 to-yellow-500 rounded-xl flex items-center justify-center shadow">
+                            <ClipboardList className="text-white" size={22} />
                           </div>
 
-                          <ChevronRight className="text-gray-400" size={24} />
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <p className="text-gray-900 font-bold">Novo Simulado</p>
+                              <span className="text-xs text-gray-500">{formatDateRequests(item.updated_at)}</span>
+                            </div>
+
+                            <div className="mt-1 space-y-1 text-sm">
+                              <p className="text-gray-700"><span className="font-semibold">Professor:</span> {item.teacher_name}</p>
+                              <p className="text-gray-700"><span className="font-semibold">Simulado:</span> {item.form_title}</p>
+                              <p className="text-gray-700"><span className="font-semibold">Turma:</span> {item.class_name}</p>
+                            </div>
+                          </div>
                         </div>
+
                       ))}
                     </>
                   )}
@@ -569,28 +571,26 @@ export default function Dashboard() {
                       {materials.map((item, index) => (
                         <div
                           key={`material-${index}`}
-                          className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-xl hover:shadow-md transition-all cursor-pointer"
+                          className="group flex items-start gap-4 p-4 bg-blue-50 border border-blue-200 rounded-xl hover:shadow-lg hover:bg-blue-100/70 transition-all cursor-pointer"
                         >
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-md">
-                              <Folder className="text-white" size={22} />
-                            </div>
-
-                            <div>
-                              <p className="text-gray-900 font-bold">Novo material adicionado</p>
-                              <p className="text-gray-500 text-sm">
-                                Disciplina: {item.subject_name}
-                              </p>
-                              <p className="text-gray-500 text-sm">
-                                Professor: {item.teacher_name}
-                              </p>
-                              <p className="text-gray-500 text-xs mt-1">Material: {item.material_title}</p>
-                              <p className="text-gray-500 text-xs mt-1">Adicionado em: {formatDateRequests(item.updated_at)}</p>
-                            </div>
+                          <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow">
+                            <Folder className="text-white" size={22} />
                           </div>
 
-                          <ChevronRight className="text-gray-400" size={24} />
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <p className="text-gray-900 font-bold">Novo Material</p>
+                              <span className="text-xs text-gray-500">{formatDateRequests(item.updated_at)}</span>
+                            </div>
+
+                            <div className="mt-1 space-y-1 text-sm">
+                              <p className="text-gray-700"><span className="font-semibold">Disciplina:</span> {item.subject_name}</p>
+                              <p className="text-gray-700"><span className="font-semibold">Professor:</span> {item.teacher_name}</p>
+                              <p className="text-gray-700"><span className="font-semibold">Material:</span> {item.material_title}</p>
+                            </div>
+                          </div>
                         </div>
+
                       ))}
                     </>
                   )}
@@ -603,7 +603,9 @@ export default function Dashboard() {
 
 
             {upcomingActivities.length > 0 && (
-              <div className="bg-linear-to-br from-amber-400 via-yellow-500 to-orange-500 rounded-2xl p-6 shadow-xl flex flex-col justify-between text-white relative overflow-hidden">
+              <div className="bg-linear-to-br from-amber-400 via-yellow-500 to-orange-500 
+  rounded-2xl p-6 shadow-xl flex flex-col justify-between 
+  text-white relative overflow-hidden h-[380px]">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-12 -mt-12"></div>
                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-8 -mb-8"></div>
                 <div className="relative">
@@ -621,7 +623,6 @@ export default function Dashboard() {
                 </button>
               </div>
             )}
-Ajuda
           </div>
         </div>
       </main>
