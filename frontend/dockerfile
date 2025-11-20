@@ -1,18 +1,31 @@
-FROM node:current-alpine3.22
+# ---- FASE DE BUILD ----
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
-# Copia package.json e package-lock.json
+# Copia configs
 COPY package*.json ./
-
-# Instala dependências
 RUN npm install
 
-# Copia o código
+# Copia todo o código
 COPY . .
 
-# Expõe a porta do Vite
-EXPOSE 5173
+# Builda o projeto para produção
+RUN npm run build
 
-# Comando para rodar o Vite dev server
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+# ---- FASE DE SERVIDOR ----
+FROM node:20-alpine AS prod
+
+WORKDIR /app
+
+# Instala servidor estático
+RUN npm install -g serve
+
+# Copia os arquivos buildados
+COPY --from=build /app/dist ./dist
+
+# Porta em que o serve vai rodar
+EXPOSE 4173
+
+# Sobe o servidor
+CMD ["serve", "-s", "dist", "-l", "4173"]
