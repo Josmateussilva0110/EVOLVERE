@@ -1,5 +1,8 @@
 import axios from 'axios'
 
+
+const BASE_URL = import.meta.env.VITE_BASE_URL;
+
 /**
  * Instância personalizada do Axios para realizar requisições HTTP.
  *
@@ -16,5 +19,5 @@ import axios from 'axios'
  * @module requestApi
  */
 export default axios.create({
-    baseURL: 'http://localhost:8080'
+    baseURL: BASE_URL
 })
