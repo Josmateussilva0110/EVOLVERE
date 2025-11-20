@@ -1,5 +1,8 @@
 FROM node:20-alpine
 
+# Instala o cliente PostgreSQL (necessário pro pg_isready)
+RUN apk add --no-cache postgresql-client
+
 WORKDIR /usr/src/app
 
 COPY package*.json ./
