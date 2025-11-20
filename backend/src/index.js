@@ -4,7 +4,7 @@ const session = require("express-session")
 const pgSession = require("connect-pg-simple")(session)
 const { Pool } = require("pg")
 const path = require("path")
-require('dotenv').config({ path: '../.env' })
+require("dotenv").config()
 const downloadRoute = require("../src/routes/downloadRoute")
 
 const router = require("./routes/routes")
@@ -29,12 +29,16 @@ const app = express()
  * @type {import('pg').Pool}
  */
 const pgPool = new Pool({
-  user: process.env.USER,
-  password: process.env.PASSWORD,
-  host: process.env.HOST,
-  port: process.env.PORT,
-  database: process.env.DATABASE,
-})
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  database: process.env.DB_DATABASE,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
 
 // Middlewares
 app.use(express.json())
@@ -46,10 +50,11 @@ app.use("/diplomas", express.static(path.join(__dirname, "..", "public", "diplom
 // CORS
 app.use(
   cors({
-    origin: "http://localhost:5173", // front-end local
-    credentials: true, 
+    origin: process.env.FRONTEND_URL, 
+    credentials: true,
   })
-)
+);
+
 
 // Configuração de sessões
 app.use(

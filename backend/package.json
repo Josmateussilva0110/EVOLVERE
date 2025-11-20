@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "nodemon src/index.js --watch src --ext js,json",
     "start": "node src/index.js",
-    "migrate": "knex migrate:latest --knexfile knexfile.js"
+    "migrate": "npx knex migrate:latest --knexfile src/knexfile.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

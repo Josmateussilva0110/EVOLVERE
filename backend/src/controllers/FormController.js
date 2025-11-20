@@ -556,6 +556,48 @@ class FormController {
         }
     }
 
+
+    /**
+     * @function getResultForm
+     * @description
+     * Controller responsável por retornar o resultado de um formulário/simulado
+     * respondido por um aluno específico.  
+     * 
+     * O método:
+     * 1. Valida o usuário logado via sessão  
+     * 2. Valida o `form_id`  
+     * 3. Verifica se o formulário existe  
+     * 4. Busca o resultado do aluno  
+     * 5. Retorna o JSON estruturado com o desempenho  
+     *
+     * @async
+     * @param {import('express').Request} request - Objeto de requisição HTTP (Express).
+     * @param {import('express').Response} response - Objeto de resposta HTTP (Express).
+     *
+     * @returns {Promise<import('express').Response>} Resposta HTTP contendo:
+     *
+     * **200 OK**
+     * ```json
+     * {
+     *   "status": true,
+     *   "results": { ... }
+     * }
+     * ```
+     *
+     * **401 Unauthorized**
+     * - Usuário não autenticado.
+     *
+     * **422 Unprocessable Entity**
+     * - `form_id` inválido.
+     *
+     * **404 Not Found**
+     * - Formulário não existe.
+     *
+     * **500 Internal Server Error**
+     * - Erro ao buscar os resultados ou erro inesperado no servidor.
+     *
+     * @throws {Error} Apenas logado no console; a resposta HTTP apropriada é enviada ao cliente.
+     */
     async getResultForm(request, response) {
         try {
             const { form_id } = request.params
@@ -590,6 +632,43 @@ class FormController {
         }
     }
 
+
+    /**
+     * @function formStatus
+     * @description
+     * Controller responsável por verificar se existe alguma resposta registrada
+     * para um formulário específico.  
+     *
+     * Este método:
+     * 1. Valida o `form_id` recebido  
+     * 2. Consulta o model `Form.formResponse()`  
+     * 3. Retorna se o formulário possui respostas ou não  
+     *
+     * @async
+     * @param {import('express').Request} request - Objeto de requisição HTTP do Express.
+     * @param {import('express').Response} response - Objeto de resposta HTTP do Express.
+     *
+     * @returns {Promise<import('express').Response>} Retorna JSON contendo:
+     *
+     * **200 OK**
+     * ```json
+     * {
+     *   "status": true,
+     *   "form": true | false
+     * }
+     * ```
+     * 
+     * **422 Unprocessable Entity**
+     * - `form_id` inválido.
+     *
+     * **404 Not Found**
+     * - Nenhuma resposta encontrada no formulário.
+     *
+     * **500 Internal Server Error**
+     * - Erro inesperado no servidor.
+     *
+     * @throws {Error} Apenas logado no console; o método retorna a resposta HTTP adequada.
+     */
     async formStatus(request, response) {
         try {
             const { form_id } = request.params

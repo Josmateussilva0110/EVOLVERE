@@ -875,6 +875,24 @@ class Form {
         }
     }
 
+
+    /**
+     * @function formResponse
+     * @description
+     * Verifica se existe alguma resposta registrada para um formulário específico.
+     * A função consulta a tabela `answers_form` e retorna **true** caso exista pelo menos
+     * um registro correspondente ao `form_id`, ou **false** caso contrário.
+     *
+     * @async
+     * @param {number|string} form_id - ID do formulário a ser verificado.
+     *
+     * @returns {Promise<boolean>}
+     * Retorna:
+     * - **true** → existe pelo menos uma resposta registrada  
+     * - **false** → nenhuma resposta encontrada ou ocorreu um erro
+     *
+     * @throws {Error} Apenas loga o erro no console, mas não lança a exceção para cima.
+     */
     async formResponse(form_id) {
         try {
             const result = await knex("answers_form")

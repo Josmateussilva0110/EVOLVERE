@@ -238,6 +238,44 @@ class MaterialController {
         }
     }
 
+
+    /**
+     * @function getRecentUpdates
+     * @description
+     * Controller responsável por retornar atualizações recentes (materiais e formulários)
+     * de um curso específico. O método valida o `course_id`, consulta o model `Material`
+     * e retorna uma resposta estruturada para o cliente.
+     *
+     * @async
+     * @param {import('express').Request} request - Objeto de requisição HTTP do Express.
+     * @param {import('express').Response} response - Objeto de resposta HTTP do Express.
+     *
+     * @returns {Promise<import('express').Response>} Retorna uma resposta HTTP contendo:
+     * 
+     * **200 OK**
+     * ```json
+     * {
+     *   "status": true,
+     *   "updates": [
+     *     {
+     *       "materials": [...],
+     *       "forms": [...]
+     *     }
+     *   ]
+     * }
+     * ```
+     * 
+     * **422 Unprocessable Entity**
+     * - `course_id` inválido.
+     *
+     * **404 Not Found**
+     * - Nenhuma atualização encontrada.
+     *
+     * **500 Internal Server Error**
+     * - Erro inesperado no servidor.
+     *
+     * @throws {Error} Caso ocorra algum erro inesperado durante a execução.
+     */
     async getRecentUpdates(request, response) {
         try {
             const { course_id } = request.params
