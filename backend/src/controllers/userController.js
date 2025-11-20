@@ -5,7 +5,7 @@ const UserFieldValidator = require("../utils/userValidator")
 const validator = require('validator')
 const path = require("path")
 const fs = require("fs")
-require('dotenv').config({ path: '../.env' })
+require("dotenv").config()
 const { customAlphabet } = require('nanoid')
 
 

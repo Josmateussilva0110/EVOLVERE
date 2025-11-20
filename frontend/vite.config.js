@@ -3,17 +3,15 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(),],
+  plugins: [react(), tailwindcss()],
 
   server: {
-    historyApiFallback: true, 
-    
-    // ADICIONEI O PROXY AQUI DENTRO
+    historyApiFallback: true,
     proxy: {
       '/api': {
-        target: 'http://backend:8080', 
+        target: 'http://localhost:8080', 
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''), // Remove /api do início
+        rewrite: (path) => path.replace(/^\/api/, ''),
       }
     }
   },
@@ -22,5 +20,9 @@ export default defineConfig({
     rollupOptions: {
       input: '/index.html'
     }
+  },
+
+  define: {
+    'import.meta.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL)
   }
 })
