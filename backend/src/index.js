@@ -71,9 +71,9 @@ app.use(
     rolling: false,
     cookie: {
       maxAge: 1000 * 60 * 60 * 2, // 2 horas em ms
-      secure: false, // true se usar https
+      secure: true, // true se usar https
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: "none",
     },
   })
 )
