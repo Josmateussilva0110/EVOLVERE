@@ -171,6 +171,14 @@ function UserAccount() {
   }
   
 
+  if (loading) {
+    return <div className="text-white text-center mt-10">Carregando...</div>;
+  }
+
+  if (user === null) {
+    return <div className="text-white text-center mt-10">Usuário não autenticado.</div>;
+  }
+  
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#060060] px-4">
       <div className="bg-white rounded-xl shadow-lg p-6 sm:p-10 md:p-14 w-full max-w-xl text-center">
