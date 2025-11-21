@@ -13,6 +13,6 @@ export default defineConfig({
 
   // Variável de ambiente que o Render vai injetar no build
   define: {
-    'import.meta.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL)
+    'import.meta.env.VITE_BASE_URL': JSON.stringify(process.env.VITE_BASE_URL)
   }
 })
