@@ -36,6 +36,7 @@ async function requestData(endpoint, method = 'get', data = {}, withCredentials 
     const config = {
       method: method.toLowerCase(),
       url: endpoint,
+      withCredentials: true
     }
 
     // Se for GET, envia como params
