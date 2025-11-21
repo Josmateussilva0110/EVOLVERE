@@ -52,10 +52,6 @@ async function requestData(endpoint, method = 'get', data = {}, withCredentials 
       }
     }
 
-    if (withCredentials) {
-      config.withCredentials = true // Axios envia cookies
-    }
-
     const response = await api(config)
 
     return {

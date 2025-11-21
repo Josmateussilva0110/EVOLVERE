@@ -19,5 +19,6 @@ const BASE_URL = import.meta.env.VITE_BASE_URL;
  * @module requestApi
  */
 export default axios.create({
-    baseURL: BASE_URL
+    baseURL: BASE_URL,
+    withCredentials: true 
 })
