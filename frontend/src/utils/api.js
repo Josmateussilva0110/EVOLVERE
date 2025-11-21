@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 
-const BASE_URL = import.meta.env.VITE_BASE_URL;
+const BASE_URL = "https://evolvere-backend.onrender.com"
 
 /**
  * Instância personalizada do Axios para realizar requisições HTTP.
