@@ -146,7 +146,8 @@ class AccountController {
 
             let users = []
 
-            if (id >= 1 && id <= 4) {
+            const isAdmin = await Account.findAdmin(id)
+            if(isAdmin) {
                 users = await Account.getAllRequests()
             }
             else {
