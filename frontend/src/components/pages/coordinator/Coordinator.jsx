@@ -63,9 +63,9 @@ function DashboardPrincipal() {
         const response = await requestData(`/user/coordinator/${user.id}`, 'GET', {}, true)
         console.log(response)
         if(response.success) {
-          setUserRequest(response.data.user)
+          setUserRequest(response.data?.user ?? {})
         } else {
-          setUserRequest(null)
+          setUserRequest({})
         }
       }
       fetchUser()
@@ -78,7 +78,7 @@ function DashboardPrincipal() {
         const response = await requestData(`/user/photo/${user.id}`, 'GET', {}, true)
         //console.log('response da foto: ', response)
         if(response.success) {
-          setPhoto(response.data.photo.photo)
+          setPhoto(response?.data?.photo?.photo ?? null)
         }
       }
       fetchPhoto()
@@ -107,7 +107,7 @@ function DashboardPrincipal() {
         const response = await requestData(`/user/coordinator/kpi/${user.id}`, 'GET', {}, true)
         if(response.success) {
           //console.log(response.data.kpi)
-          setKpi(response.data.kpi)
+          setKpi(response.data?.kpi ?? {})
         }
       }
       fetchKpi()
@@ -122,6 +122,10 @@ function DashboardPrincipal() {
 
   function handleVoltar() {
     navigate("/");
+  }
+
+  if (!user) {
+    return <div className="text-white">Carregando usuário...</div>;
   }
 
   return (
@@ -181,7 +185,7 @@ function DashboardPrincipal() {
                     />
                   ) : (
                     <div className={`h-[70px] w-[70px] rounded-full ${getAvatarColor(userRequest?.username)} flex items-center justify-center text-white text-3xl font-bold`}>
-                      {userRequest.username ? userRequest.username.charAt(0).toUpperCase() : "?"}
+                      {userRequest?.username ? userRequest?.username.charAt(0).toUpperCase() : "?"}
                     </div>
                   )}
 
