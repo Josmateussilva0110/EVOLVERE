@@ -278,12 +278,12 @@ class AccountController {
 
             let user = {}
 
-            if(id >= 1 && id <= 4) {
-                user = await Account.findAdmin(id)
-            }
-
-            else {
+            const isAdmin = await Account.findAdmin(id)
+            if(!isAdmin) {
                 user = await Account.findCoordinatorById(id)
+            }
+            else {
+                user = await Account.findAdmin(id)
             }
 
             if(!user) {
@@ -374,9 +374,11 @@ class AccountController {
 
             let teachers = []
 
-            if (id >= 1 && id <= 4) {
+            const isAdmin = await Account.findAdmin(id)
+            if(isAdmin) {
                 teachers = await Account.getAllTeachers()
             }
+
             else {
                 const coordinator = await Account.findCoordinatorById(id)
                 if(!coordinator) {
@@ -460,11 +462,13 @@ class AccountController {
             let subjects = []
             let requests = []
 
-            if (id >= 1 && id <= 4) {
+            const isAdmin = await Account.findAdmin(id)
+            if(isAdmin) {
                 teachers = await Account.countAllTeachers()
                 subjects = await Subject.countAllSubjects()
                 requests = await Account.countAllRequests()
             }
+
             else {
                 const coordinator = await Account.findCoordinatorById(id)
                 if(!coordinator) {
