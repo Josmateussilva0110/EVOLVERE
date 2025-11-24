@@ -24,11 +24,18 @@ app.use(express.json())
 
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
+  origin: "https://evolvere-frontend.onrender.com",
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }))
+
+// Forçar credenciais
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Credentials", "true")
+  next()
+})
+
 
 
 // ----------------------
@@ -48,9 +55,9 @@ app.use(
     rolling: false,
     cookie: {
       maxAge: 1000 * 60 * 60 * 2,
-      secure: true,
+      secure: true,                
       httpOnly: true,
-      sameSite: "none",
+      sameSite: "none",         
     },
   })
 )
