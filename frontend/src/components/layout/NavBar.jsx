@@ -144,7 +144,7 @@ function Navbar() {
 
               {/* ---------- DROPDOWN ---------- */}
               <div
-                className={`absolute right-0 top-[72px] w-64 rounded-xl shadow-2xl backdrop-blur-md overflow-hidden transform transition-all duration-300 ease-out origin-top-right z-[9999]
+                className={`absolute right-0 top-[72px] w-64 rounded-xl shadow-2xl backdrop-blur-md overflow-hidden transform transition-all duration-300 ease-out origin-top-right z-9999
                 ${dropdownOpen ? 'scale-100 opacity-100 translate-y-0 pointer-events-auto' : 'scale-95 opacity-0 -translate-y-2 pointer-events-none'} 
                 ${dropdownColor}`}
               >
