@@ -179,7 +179,7 @@ function DashboardPrincipal() {
                 <button onClick={() => setMenuOpen((v) => !v)}>
                   {photo ? (
                     <Image
-                      src={`${import.meta.env.VITE_BASE_URL}/${photo}`}
+                      src={`${photo}`}
                       alt={userRequest.username || "Foto do usuário"}
                       size={70}
                     />
