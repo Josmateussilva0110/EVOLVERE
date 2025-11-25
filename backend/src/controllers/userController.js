@@ -382,7 +382,9 @@ class UserController {
         try {
             const { id } = request.params
             const error = UserFieldValidator.validate({ id })
-            if (error) return response.status(422).json({ status: false, message: error })
+            if (error) {
+                return response.status(422).json({ status: false, message: error })
+            }
 
             const user = await User.findById(id)
             if (!user) {
@@ -390,34 +392,50 @@ class UserController {
             }
 
             if (!request.file) {
-                return response.status(400).json({ status: false, message: "O upload de uma imagem PNG é obrigatório." })
+                return response.status(400).json({
+                    status: false,
+                    message: "O upload de uma imagem é obrigatório."
+                })
             }
 
-            const rootDir = path.join(__dirname, "..", "..")
-            const uploadDir = path.join(rootDir, "public", "images", "users")
-            fs.mkdirSync(uploadDir, { recursive: true })
+            const uploadPromise = new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream(
+                    {
+                        folder: "evolvere/users",
+                        resource_type: "image"
+                    },
+                    (error, result) => {
+                        if (error) reject(error)
+                        else resolve(result)
+                    }
+                )
 
-            // Apaga a foto anterior (se existir)
-            if (user.photo) {
-                const oldPath = path.join(rootDir, "public", user.photo)
-                if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath)
-            }
+                uploadStream.end(request.file.buffer)
+            })
 
-            const uniqueName = Date.now() + "_" + Math.floor(Math.random() * 100) + path.extname(request.file.originalname)
-            const finalPath = path.join(uploadDir, uniqueName)
-            const photoPath = path.join("images", "users", uniqueName)
+            const uploadedImage = await uploadPromise
+            const imageUrl = uploadedImage.secure_url
 
-            fs.writeFileSync(finalPath, request.file.buffer)
-
-            const updated = await User.updatePhoto(id, photoPath)
+            const updated = await User.updatePhoto(id, imageUrl)
             if (!updated) {
-                return response.status(500).json({ status: false, message: "Erro ao atualizar a foto do usuário." })
+                return response.status(500).json({
+                    status: false,
+                    message: "Erro ao atualizar a foto do usuário."
+                })
             }
 
-            return response.status(200).json({ status: true, message: "Foto atualizada com sucesso." })
+            return response.status(200).json({
+                status: true,
+                message: "Foto atualizada com sucesso.",
+                url: imageUrl, 
+            })
+
         } catch (err) {
             console.error("Erro ao adicionar imagem:", err)
-            return response.status(500).json({ status: false, message: "Erro interno no servidor." })
+            return response.status(500).json({
+                status: false,
+                message: "Erro interno no servidor."
+            })
         }
     }
 
