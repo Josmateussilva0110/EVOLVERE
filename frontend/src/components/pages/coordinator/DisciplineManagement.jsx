@@ -189,7 +189,7 @@ function DisciplineManagement() {
                                         <option value="">Selecione o professor</option>
                                         {professores.map((prof) => (
                                             <option key={prof.id} value={prof.id}>
-                                                {prof.username} ({prof.institution})
+                                                {prof?.username} ({prof?.institution})
                                             </option>
                                         ))}
                                     </select>
