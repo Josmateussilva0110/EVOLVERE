@@ -79,11 +79,12 @@ function DisciplineManagement() {
                     // 3. Se houver um ID na URL (modo de edição), busca os dados da disciplina.
                     if (id) {
                         const disciplineRes = await requestData(`/subjects/${id}`, "GET", {}, true);
+                        console.log('disc response: ', disciplineRes)
                         
                         if (disciplineRes.success) {
-                            const disciplina = disciplineRes.data.subject;
-                            setNome(disciplina.name);
-                            setProfessor(String(disciplina.professional_id)); 
+                            const disciplina = disciplineRes.data.data;
+                            setNome(disciplina?.name);
+                            setProfessor(String(disciplina?.professional_id)); 
                         } else {
                             throw new Error(disciplineRes.message || "Disciplina não encontrada.");
                         }
@@ -189,7 +190,7 @@ function DisciplineManagement() {
                                         <option value="">Selecione o professor</option>
                                         {professores.map((prof) => (
                                             <option key={prof.id} value={prof.id}>
-                                                {prof.username} ({prof.institution})
+                                                {prof?.username} ({prof?.institution})
                                             </option>
                                         ))}
                                     </select>

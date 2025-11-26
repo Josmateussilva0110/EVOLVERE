@@ -153,11 +153,7 @@ function DisciplineList() {
                             <button onClick={() => navigate('/coordinator')} className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100/80 transition">
                                 <FiArrowLeft /> Voltar
                             </button>
-                            <div className="inline-flex rounded-xl border border-slate-200 bg-slate-50/80 p-1">
-                                <button onClick={() => setModoVisao('tabela')} className={`px-3 py-2 text-sm rounded-lg transition ${modoVisao === 'tabela' ? 'bg-[#060060] text-white' : 'text-slate-700 hover:bg-slate-100/80'}`}>▦ Tabela</button>
-                                <button onClick={() => setModoVisao('cartoes')} className={`px-3 py-2 text-sm rounded-lg transition ${modoVisao === 'cartoes' ? 'bg-[#060060] text-white' : 'text-slate-700 hover:bg-slate-100/80'}`}>▢ Cartões</button>
-                            </div>
-                            <button onClick={() => navigate('/coordinator/discipline/register')} className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 px-4 py-2 text-sm font-semibold text-slate-900 shadow-lg hover:from-amber-500 hover:to-yellow-600 transition transform hover:scale-105">
+                            <button onClick={() => navigate('/coordinator/discipline/register')} className="inline-flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-amber-400 to-yellow-500 px-4 py-2 text-sm font-semibold text-slate-900 shadow-lg hover:from-amber-500 hover:to-yellow-600 transition transform hover:scale-105">
                                 + Nova
                             </button>
                         </div>
