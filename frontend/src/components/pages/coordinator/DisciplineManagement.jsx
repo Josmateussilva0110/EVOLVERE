@@ -82,9 +82,9 @@ function DisciplineManagement() {
                         console.log('disc response: ', disciplineRes)
                         
                         if (disciplineRes.success) {
-                            const disciplina = disciplineRes.data.subject;
+                            const disciplina = disciplineRes.data.data;
                             setNome(disciplina?.name);
-                            setProfessor(String(disciplina.professional_id)); 
+                            setProfessor(String(disciplina?.professional_id)); 
                         } else {
                             throw new Error(disciplineRes.message || "Disciplina não encontrada.");
                         }
