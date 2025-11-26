@@ -198,7 +198,10 @@ class AccountController {
             }
             const subject = "Validação de conta - Evolvere"
             const { html } = formatMessageTeacherRejected(user.username)
-            await sendEmail(user.email, subject, html)
+            sendEmail(user.email, subject, html)
+            .catch(err => {
+                console.error("Erro ao enviar email:", err)
+            })
             return response.status(200).json({status: true, message: "requisição recusada com sucesso."})
         } catch(err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })

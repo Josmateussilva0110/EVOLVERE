@@ -65,6 +65,7 @@ function DisciplineManagement() {
                 try {
                     // 1. Carrega informações do coordenador.
                     const coordinatorRes = await requestData(`/user/coordinator/${user.id}`, "GET", {}, true);
+                    console.log('coor: ',coordinatorRes)
                     if (!coordinatorRes.success) throw new Error("Falha ao carregar dados do coordenador.");
                     setCoordinator(coordinatorRes.data.user);
                     
@@ -144,7 +145,7 @@ function DisciplineManagement() {
                                 </button>
                             </div>
                             <div className="flex items-center gap-4">
-                                <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 text-slate-900 flex items-center justify-center shadow-lg">
+                                <div className="h-12 w-12 rounded-2xl bg-linear-to-br from-amber-400 to-yellow-500 text-slate-900 flex items-center justify-center shadow-lg">
                                     <FiBookOpen className="w-6 h-6" />
                                 </div>
                                 <div>
@@ -202,7 +203,7 @@ function DisciplineManagement() {
                             <div className="pt-4">
                                 <button
                                     type="submit"
-                                    className="w-full inline-flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-900 font-bold rounded-xl hover:from-amber-500 hover:to-yellow-600 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
+                                    className="w-full inline-flex items-center justify-center gap-3 px-8 py-4 bg-linear-to-r from-amber-400 to-yellow-500 text-slate-900 font-bold rounded-xl hover:from-amber-500 hover:to-yellow-600 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
                                 >
                                     <FiCheck className="w-5 h-5" />
                                     {id ? "Salvar Alterações" : "Cadastrar disciplina"}
