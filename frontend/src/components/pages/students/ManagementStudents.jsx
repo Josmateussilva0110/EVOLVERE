@@ -420,7 +420,7 @@ export default function Dashboard() {
                   <p className="text-sm text-gray-500">Para fazer</p>
                 </div>
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between"> 
                 <div className="flex items-baseline gap-2">
                   <span className="text-4xl font-bold text-orange-600">
                     {isLoadingActivities ? "..." : pendingCount}

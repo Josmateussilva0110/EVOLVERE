@@ -237,8 +237,16 @@ class AccountController {
             }
             const subject = "Validação de conta - Evolvere"
             const { html } = formatMessageTeacherApproved(user.username)
-            await sendEmail(user.email, subject, html)
-            return response.status(200).json({status: true, message: "Conta aprovada com sucesso."})
+            sendEmail(user.email, subject, html)
+            .catch(err => {
+                console.error("Erro ao enviar email:", err)
+            })
+
+            return response.status(200).json({
+            status: true,
+            message: "Conta aprovada com sucesso."
+            })
+
         } catch(err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
