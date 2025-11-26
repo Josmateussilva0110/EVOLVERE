@@ -24,7 +24,7 @@ app.use(express.json())
 
 
 app.use(cors({
-  origin: "https://evolvere-frontend-1v91.onrender.com",
+  origin: "https://evolvere-frontend.onrender.com",
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"]
