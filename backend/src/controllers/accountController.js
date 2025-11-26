@@ -146,7 +146,7 @@ class AccountController {
 
             let users = []
 
-            const isAdmin = await Account.findAdmin(id)
+            const isAdmin = await User.isAdmin(id)
             if(isAdmin) {
                 users = await Account.getAllRequests()
             }
@@ -289,7 +289,8 @@ class AccountController {
 
             let user = {}
 
-            const isAdmin = await Account.findAdmin(id)
+            const isAdmin = await User.isAdmin(id)
+
             if(!isAdmin) {
                 user = await Account.findCoordinatorById(id)
             }
@@ -385,7 +386,7 @@ class AccountController {
 
             let teachers = []
 
-            const isAdmin = await Account.findAdmin(id)
+            const isAdmin = await User.isAdmin(id)
             if(isAdmin) {
                 teachers = await Account.getAllTeachers()
             }
@@ -473,7 +474,7 @@ class AccountController {
             let subjects = []
             let requests = []
 
-            const isAdmin = await Account.findAdmin(id)
+            const isAdmin = await User.isAdmin(id)
             if(isAdmin) {
                 teachers = await Account.countAllTeachers()
                 subjects = await Subject.countAllSubjects()
