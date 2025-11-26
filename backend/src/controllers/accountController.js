@@ -146,7 +146,7 @@ class AccountController {
 
             let users = []
 
-            const isAdmin = await Account.findAdmin(id)
+            const isAdmin = await User.isAdmin(id)
             if(isAdmin) {
                 users = await Account.getAllRequests()
             }
@@ -198,7 +198,10 @@ class AccountController {
             }
             const subject = "Validação de conta - Evolvere"
             const { html } = formatMessageTeacherRejected(user.username)
-            await sendEmail(user.email, subject, html)
+            sendEmail(user.email, subject, html)
+            .catch(err => {
+                console.error("Erro ao enviar email:", err)
+            })
             return response.status(200).json({status: true, message: "requisição recusada com sucesso."})
         } catch(err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
@@ -237,8 +240,16 @@ class AccountController {
             }
             const subject = "Validação de conta - Evolvere"
             const { html } = formatMessageTeacherApproved(user.username)
-            await sendEmail(user.email, subject, html)
-            return response.status(200).json({status: true, message: "Conta aprovada com sucesso."})
+            sendEmail(user.email, subject, html)
+            .catch(err => {
+                console.error("Erro ao enviar email:", err)
+            })
+
+            return response.status(200).json({
+            status: true,
+            message: "Conta aprovada com sucesso."
+            })
+
         } catch(err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
@@ -278,7 +289,8 @@ class AccountController {
 
             let user = {}
 
-            const isAdmin = await Account.findAdmin(id)
+            const isAdmin = await User.isAdmin(id)
+
             if(!isAdmin) {
                 user = await Account.findCoordinatorById(id)
             }
@@ -374,7 +386,7 @@ class AccountController {
 
             let teachers = []
 
-            const isAdmin = await Account.findAdmin(id)
+            const isAdmin = await User.isAdmin(id)
             if(isAdmin) {
                 teachers = await Account.getAllTeachers()
             }
@@ -462,7 +474,7 @@ class AccountController {
             let subjects = []
             let requests = []
 
-            const isAdmin = await Account.findAdmin(id)
+            const isAdmin = await User.isAdmin(id)
             if(isAdmin) {
                 teachers = await Account.countAllTeachers()
                 subjects = await Subject.countAllSubjects()

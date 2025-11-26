@@ -277,7 +277,7 @@ function DisciplineList() {
                                                 <div className="flex items-center gap-2">
                                                     {d.photo ? (
                                                         <Image
-                                                        src={`${import.meta.env.VITE_BASE_URL}/${d.photo}`}
+                                                        src={`${d.photo}`}
                                                         alt={d.professor_nome || "Foto do usuário"}
                                                         size={60}
                                                         />

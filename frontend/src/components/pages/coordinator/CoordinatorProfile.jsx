@@ -147,7 +147,7 @@ function CoordinatorProfile() {
                   />
                 ) : profile.photo ? (
                   <Image
-                    src={`${import.meta.env.VITE_BASE_URL}/${profile.photo}`}
+                    src={`${profile.photo}`}
                     alt={profile.username || "Foto do usuário"}
                     size={100}
                   />

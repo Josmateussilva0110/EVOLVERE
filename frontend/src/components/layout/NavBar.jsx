@@ -126,7 +126,7 @@ function Navbar() {
               >
                 {requestUser?.photo ? (
                   <Image
-                    src={`${import.meta.env.VITE_BASE_URL}/${requestUser.photo}`}
+                    src={`${requestUser.photo}`}
                     alt={requestUser.username || "Foto do usuário"}
                     size={48}
                     className="rounded-full border-2 border-white/30"

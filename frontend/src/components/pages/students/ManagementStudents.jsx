@@ -244,7 +244,7 @@ export default function Dashboard() {
             <div className="w-16 h-16 bg-linear-to-br from-blue-400 to-cyan-400 rounded-2xl flex items-center justify-center transform rotate-12 shadow-lg shadow-blue-500/50">
               {requestUser?.photo ? (
                 <Image
-                  src={`${import.meta.env.VITE_BASE_URL}/${requestUser.photo}`}
+                  src={`${requestUser.photo}`}
                   alt={requestUser.username || "Foto do usuário"}
                   size={55}
                   className="rounded-full border-2 border-white/30 -rotate-15"
@@ -420,7 +420,7 @@ export default function Dashboard() {
                   <p className="text-sm text-gray-500">Para fazer</p>
                 </div>
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between"> 
                 <div className="flex items-baseline gap-2">
                   <span className="text-4xl font-bold text-orange-600">
                     {isLoadingActivities ? "..." : pendingCount}

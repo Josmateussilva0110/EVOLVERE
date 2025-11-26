@@ -280,7 +280,7 @@ function ProfessoresManagement() {
                           <div className="flex items-center gap-3">
                             {prof?.photo ? (
                               <Image
-                                src={`${import.meta.env.VITE_BASE_URL}/${prof.photo}`}
+                                src={`${prof.photo}`}
                                 alt={prof.username || "Foto do usuário"}
                                 size={50}
                               />
