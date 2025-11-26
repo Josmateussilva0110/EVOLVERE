@@ -131,7 +131,7 @@ class subjectController {
             // ... sua validação de ID ...
 
             // Use o novo método que busca com os dados do curso
-            const subjectDetails = await Subject.findByIdWithCourse(Number(id));
+            const subjectDetails = await Subject.getById(Number(id));
 
             if (!subjectDetails) {
                 return res.status(404).json({ status: false, message: 'Disciplina não encontrada.' });
