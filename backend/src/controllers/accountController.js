@@ -132,12 +132,11 @@ class AccountController {
 
             const diplomaUrl = data.signedUrl;
 
-            // ✅ Salvar no banco
             const update = {
                 professional_id: id,
                 institution,
                 access_code,
-                diploma: diplomaUrl,
+                diploma: fileName,
                 role
             };
 
