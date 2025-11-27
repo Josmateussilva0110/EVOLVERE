@@ -256,13 +256,13 @@ function RequestsTeachers() {
                   <td className="py-3 px-4 text-sm">
                     {prof.diploma ? (
                       <a
-                        href={`${import.meta.env.VITE_BASE_URL}/diplomas/${prof.diploma}`}
+                        href={`${prof.diploma}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1 text-[#060060] hover:underline"
                       >
                         <FiFileText className="text-gray-500" />
-                        {prof.diploma}
+                        Diploma
                         <FiExternalLink className="ml-1" />
                       </a>
                     ) : (
