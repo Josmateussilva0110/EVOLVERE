@@ -100,7 +100,7 @@ async accountExists(id, role) {
         try {
             const result = await knex.raw(`
                 select 
-                    split_part(diploma, '/', 2) as diploma, 
+                    vp.diploma, 
                     u.username,
                     vp.professional_id as id,
                     vp.created_at,
@@ -173,7 +173,7 @@ async accountExists(id, role) {
         try {
             const result = await knex.raw(`
                 select 
-                    split_part(diploma, '/', 2) as diploma, 
+                    vp.diploma, 
                     u.username,
                     vp.professional_id as id,
                     vp.created_at,
