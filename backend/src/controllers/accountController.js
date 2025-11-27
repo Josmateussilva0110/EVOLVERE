@@ -94,7 +94,8 @@ class AccountController {
                     const uploadStream = cloudinary.uploader.upload_stream(
                         {
                             folder: "evolvere/diplomas",
-                            resource_type: "raw" 
+                            resource_type: "raw",
+                            public_id: `${Date.now()}.pdf`
                         },
                         (error, result) => {
                             if (error) reject(error);
