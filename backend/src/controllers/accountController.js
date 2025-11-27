@@ -7,7 +7,8 @@ const Course = require("../models/Course")
 const sendEmail = require("../utils/sendEmail")
 const formatMessageTeacherApproved = require("../utils/messageApprovedEmail")
 const formatMessageTeacherRejected = require("../utils/messageReprovedEmail")
-const cloudinary = require("../utils/cloudinary")
+const { supabase } = require("../utils/supabase")
+
 
 /**
  * Controlador de Usuários.
@@ -57,22 +58,31 @@ class AccountController {
 
             const course_valid = await Course.getCourseByCode(access_code);
             if (!course_valid) {
-                return response.status(404).json({ status: false, message: "Nenhum curso encontrado com esse código" });
+                return response.status(404).json({
+                    status: false,
+                    message: "Nenhum curso encontrado com esse código"
+                });
             }
 
             const accountAlreadyConfigured = await Account.accountExists(id, role);
             if (accountAlreadyConfigured) {
-                return response.status(422).json({ status: false, message: "A configuração desta conta já foi realizada." });
+                return response.status(422).json({
+                    status: false,
+                    message: "A configuração desta conta já foi realizada."
+                });
             }
 
-            // Se o usuário é aluno (role 4), não precisa de diploma
-            if (role === '4') {
-                const updated = await User.updateUser(id, { 
-                    course_id: course_valid.id 
+            // ✅ Aluno (não precisa de diploma)
+            if (role === "4") {
+                const updated = await User.updateUser(id, {
+                    course_id: course_valid.id
                 });
 
                 if (!updated) {
-                    return response.status(500).json({ status: false, message: "Erro ao atualizar dados do aluno." });
+                    return response.status(500).json({
+                        status: false,
+                        message: "Erro ao atualizar dados do aluno."
+                    });
                 }
 
                 return response.status(200).json({
@@ -81,45 +91,49 @@ class AccountController {
                 });
             }
 
+            // ✅ Perfis que exigem diploma
             if (!diplomaFile) {
-                return response.status(400).json({ 
-                    status: false, 
+                return response.status(400).json({
+                    status: false,
                     message: "O upload de um PDF (diploma) é obrigatório para este perfil."
                 });
             }
 
-            // Upload do PDF no Cloudinary
-            const uploadPdfToCloudinary = () => {
-                return new Promise((resolve, reject) => {
-                    const uploadStream = cloudinary.uploader.upload_stream(
-                        {
-                            folder: "evolvere/diplomas",
-                            resource_type: "raw",
-                            public_id: `${Date.now()}.pdf`
-                        },
-                        (error, result) => {
-                            if (error) reject(error);
-                            else resolve(result);
-                        }
-                    );
+            // ✅ Nome do arquivo no Storage
+            const fileName = `evolvere/${id}-${Date.now()}.pdf`;
 
-                    uploadStream.end(diplomaFile.buffer);
+            // ✅ Upload para o Supabase
+            const { error: uploadError } = await supabase.storage
+                .from("diplomas")
+                .upload(fileName, diplomaFile.buffer, {
+                    contentType: "application/pdf",
+                    upsert: true
                 });
-            };
 
-            const uploadedPdf = await uploadPdfToCloudinary();
-
-            if (!uploadedPdf || !uploadedPdf.secure_url) {
+            if (uploadError) {
+                console.error(uploadError);
                 return response.status(500).json({
                     status: false,
-                    message: "Falha ao salvar diploma."
+                    message: "Erro ao fazer upload do diploma."
                 });
             }
 
-            const diplomaUrl = uploadedPdf.secure_url;
+            const { data, error } = await supabase.storage
+                .from("diplomas")
+                .createSignedUrl(fileName, 60 * 60); // 1 hora
 
-            // Salvar no banco
-            const data = {
+            if (error) {
+                return response.status(500).json({
+                    status: false,
+                    message: "Erro ao gerar URL do diploma."
+                });
+            }
+
+
+            const diplomaUrl = data.signedUrl;
+
+            // ✅ Salvar no banco
+            const update = {
                 professional_id: id,
                 institution,
                 access_code,
@@ -127,7 +141,7 @@ class AccountController {
                 role
             };
 
-            const saved = await Account.save(data);
+            const saved = await Account.save(update);
             if (!saved) {
                 return response.status(500).json({
                     status: false,
@@ -143,14 +157,14 @@ class AccountController {
 
         } catch (err) {
             console.error("Erro interno em addRole:", err);
-            return response.status(500).json({ 
-                status: false, 
-                message: "Erro interno no servidor." 
+            return response.status(500).json({
+                status: false,
+                message: "Erro interno no servidor."
             });
         }
     }
 
-        
+
     /**
      * Retorna todas as solicitações de professores pendentes de aprovação.
      *
@@ -166,29 +180,29 @@ class AccountController {
      */
     async requests(request, response) {
         try {
-            const {id} = request.params
+            const { id } = request.params
             if (!validator.isInt(id + '', { min: 1 })) {
-                return response.status(422).json({status: false, message: "Id inválido."})
+                return response.status(422).json({ status: false, message: "Id inválido." })
             }
 
             let users = []
 
             const isAdmin = await User.isAdmin(id)
-            if(isAdmin) {
+            if (isAdmin) {
                 users = await Account.getAllRequests()
             }
             else {
                 const coordinator = await Account.findCoordinatorById(id)
-                if(!coordinator) {
-                    return response.status(404).json({status: false, message: "Coordenador não encontrado."})
+                if (!coordinator) {
+                    return response.status(404).json({ status: false, message: "Coordenador não encontrado." })
                 }
                 users = await Account.getAllRequestsByCoordinator(coordinator.access_code)
             }
-            if(users.length === 0) {
-                return response.status(404).json({status: false, message: "Nenhuma solicitação encontrada."})
+            if (users.length === 0) {
+                return response.status(404).json({ status: false, message: "Nenhuma solicitação encontrada." })
             }
-            return response.status(200).json({status: true, users})
-        } catch(err) {
+            return response.status(200).json({ status: true, users })
+        } catch (err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
@@ -209,28 +223,28 @@ class AccountController {
      */
     async removeRequest(request, response) {
         try {
-            const {id_user} = request.params
+            const { id_user } = request.params
             if (!validator.isInt(id_user + '', { min: 1 })) {
-                return response.status(422).json({status: false, message: "Id inválido."})
+                return response.status(422).json({ status: false, message: "Id inválido." })
             }
 
             const user = await User.findById(id_user)
             const valid = await Account.deleteRequest(id_user)
-            if(!valid) {
-                return response.status(500).json({status: false, message: 'Erro ao remover requisição'})
+            if (!valid) {
+                return response.status(500).json({ status: false, message: 'Erro ao remover requisição' })
             }
 
-            if(!user) {
-                return response.status(404).json({status: false, message: "Usuário não encontrado para envio de email"})
+            if (!user) {
+                return response.status(404).json({ status: false, message: "Usuário não encontrado para envio de email" })
             }
             const subject = "Validação de conta - Evolvere"
             const { html } = formatMessageTeacherRejected(user.username)
             sendEmail(user.email, subject, html)
-            .catch(err => {
-                console.error("Erro ao enviar email:", err)
-            })
-            return response.status(200).json({status: true, message: "requisição recusada com sucesso."})
-        } catch(err) {
+                .catch(err => {
+                    console.error("Erro ao enviar email:", err)
+                })
+            return response.status(200).json({ status: true, message: "requisição recusada com sucesso." })
+        } catch (err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
@@ -251,33 +265,33 @@ class AccountController {
      */
     async approve(request, response) {
         try {
-            const {id_user} = request.params
+            const { id_user } = request.params
             if (!validator.isInt(id_user + '', { min: 1 })) {
-                return response.status(422).json({status: false, message: "Id inválido."})
+                return response.status(422).json({ status: false, message: "Id inválido." })
             }
 
             const valid = await Account.approveRequest(id_user)
-            if(!valid) {
-                return response.status(500).json({status: false, message: "Erro ao aprovar."})
+            if (!valid) {
+                return response.status(500).json({ status: false, message: "Erro ao aprovar." })
             }
 
-            const user = await User.findById(id_user)   
-            if(!user) {
-                return response.status(404).json({status: false, message: "Usuário não encontrado para envio de email"})
+            const user = await User.findById(id_user)
+            if (!user) {
+                return response.status(404).json({ status: false, message: "Usuário não encontrado para envio de email" })
             }
             const subject = "Validação de conta - Evolvere"
             const { html } = formatMessageTeacherApproved(user.username)
             sendEmail(user.email, subject, html)
-            .catch(err => {
-                console.error("Erro ao enviar email:", err)
-            })
+                .catch(err => {
+                    console.error("Erro ao enviar email:", err)
+                })
 
             return response.status(200).json({
-            status: true,
-            message: "Conta aprovada com sucesso."
+                status: true,
+                message: "Conta aprovada com sucesso."
             })
 
-        } catch(err) {
+        } catch (err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
@@ -309,26 +323,26 @@ class AccountController {
      */
     async getCoordinatorData(request, response) {
         try {
-            const {id} = request.params
+            const { id } = request.params
             if (!validator.isInt(id + '', { min: 1 })) {
-                return response.status(422).json({status: false, message: "Id inválido."})
+                return response.status(422).json({ status: false, message: "Id inválido." })
             }
 
             let user = {}
 
             const isAdmin = await User.isAdmin(id)
 
-            if(!isAdmin) {
+            if (!isAdmin) {
                 user = await Account.findCoordinatorById(id)
             }
             else {
                 user = await Account.findAdmin(id)
             }
 
-            if(!user) {
+            if (!user) {
                 return response.status(404).json({ status: false, message: "Usuário não encontrado." })
             }
-            return response.status(200).json({status: true, user})
+            return response.status(200).json({ status: true, user })
 
         } catch (err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
@@ -347,23 +361,23 @@ class AccountController {
         try {
             // Busca apenas professores validados (role = 3 e approved = true)
             const professores = await User.findProfessoresValidados();
-            
+
             if (!professores || professores.length === 0) {
-                return response.status(404).json({ 
-                    status: false, 
-                    message: 'Nenhum professor validado encontrado.' 
+                return response.status(404).json({
+                    status: false,
+                    message: 'Nenhum professor validado encontrado.'
                 });
             }
-            
-            return response.status(200).json({ 
-                status: true, 
-                professores 
+
+            return response.status(200).json({
+                status: true,
+                professores
             });
         } catch (err) {
             console.error("Erro ao listar professores:", err);
-            return response.status(500).json({ 
-                status: false, 
-                message: "Erro interno no servidor." 
+            return response.status(500).json({
+                status: false,
+                message: "Erro interno no servidor."
             });
         }
     }
@@ -406,31 +420,31 @@ class AccountController {
      */
     async getTeachers(request, response) {
         try {
-            const {id} = request.params
+            const { id } = request.params
             if (!validator.isInt(id + '', { min: 1 })) {
-                return response.status(422).json({status: false, message: "Usuário invalido."})
+                return response.status(422).json({ status: false, message: "Usuário invalido." })
             }
 
             let teachers = []
 
             const isAdmin = await User.isAdmin(id)
-            if(isAdmin) {
+            if (isAdmin) {
                 teachers = await Account.getAllTeachers()
             }
 
             else {
                 const coordinator = await Account.findCoordinatorById(id)
-                if(!coordinator) {
-                    return response.status(404).json({status: false, message: "Coordenador não encontrado."})
+                if (!coordinator) {
+                    return response.status(404).json({ status: false, message: "Coordenador não encontrado." })
                 }
                 teachers = await Account.getAllTeachersByCoordinator(coordinator.access_code)
             }
 
-            if(teachers.length === 0) {
-                return response.status(404).json({status: false, message: "Nenhuma professor encontrado."})
+            if (teachers.length === 0) {
+                return response.status(404).json({ status: false, message: "Nenhuma professor encontrado." })
             }
-            return response.status(200).json({status: true, teachers})
-        } catch(err) {
+            return response.status(200).json({ status: true, teachers })
+        } catch (err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
@@ -494,7 +508,7 @@ class AccountController {
         try {
             const { id } = request.params
             if (!validator.isInt(id + '', { min: 1 })) {
-                return response.status(422).json({status: false, message: "Usuário invalido."})
+                return response.status(422).json({ status: false, message: "Usuário invalido." })
             }
 
             let teachers = []
@@ -502,7 +516,7 @@ class AccountController {
             let requests = []
 
             const isAdmin = await User.isAdmin(id)
-            if(isAdmin) {
+            if (isAdmin) {
                 teachers = await Account.countAllTeachers()
                 subjects = await Subject.countAllSubjects()
                 requests = await Account.countAllRequests()
@@ -510,23 +524,23 @@ class AccountController {
 
             else {
                 const coordinator = await Account.findCoordinatorById(id)
-                if(!coordinator) {
-                    return response.status(404).json({status: false, message: "Coordenador não encontrado."})
+                if (!coordinator) {
+                    return response.status(404).json({ status: false, message: "Coordenador não encontrado." })
                 }
                 teachers = await Account.countTeachers(coordinator.access_code)
                 subjects = await Subject.countSubjects(coordinator.access_code)
                 requests = await Account.countRequests(coordinator.access_code)
             }
-            if(!teachers) {
-                return response.status(404).json({status: false, message: "Nenhum professor encontrado."})
+            if (!teachers) {
+                return response.status(404).json({ status: false, message: "Nenhum professor encontrado." })
             }
             const kpi = {
                 teachers,
                 subjects,
                 requests,
             }
-            return response.status(200).json({status: true, kpi})
-        } catch(err) {
+            return response.status(200).json({ status: true, kpi })
+        } catch (err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
@@ -581,18 +595,18 @@ class AccountController {
         try {
             const { id } = request.params
             if (!validator.isInt(id + '', { min: 1 })) {
-                return response.status(422).json({status: false, message: "Usuário invalido."})
+                return response.status(422).json({ status: false, message: "Usuário invalido." })
             }
             const teacherExist = await Account.accountExists(id)
-            if(!teacherExist) {
-                return response.status(404).json({status: false, message: "Professor não existe"})
-            } 
-            const valid = await Account.deleteRequest(id)
-            if(!valid) {
-                return response.status(500).json({status: false, message: "Erro ao remover professor"})
+            if (!teacherExist) {
+                return response.status(404).json({ status: false, message: "Professor não existe" })
             }
-            return response.status(200).json({status: true, message: "professor removido com sucesso"})
-        } catch(err) {
+            const valid = await Account.deleteRequest(id)
+            if (!valid) {
+                return response.status(500).json({ status: false, message: "Erro ao remover professor" })
+            }
+            return response.status(200).json({ status: true, message: "professor removido com sucesso" })
+        } catch (err) {
             return response.status(500).json({ status: false, message: "Erro interno no servidor." })
         }
     }
