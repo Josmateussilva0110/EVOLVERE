@@ -1,4 +1,5 @@
 const knex = require("../database/connection")
+const { supabase } = require("../utils/supabase")
 
 /**
  * Classe responsável por gerenciar contas de profissionais.
@@ -99,33 +100,61 @@ async accountExists(id, role) {
     async getAllRequests() {
         try {
             const result = await knex.raw(`
-                select 
-                    vp.diploma, 
-                    u.username,
-                    vp.professional_id as id,
-                    vp.created_at,
-                    case 
-                        when vp.role = 2 then 'Coordenador'
-                        when vp.role = 3 then 'Professor'
-                        else 'Desconhecido'
-                    end as role,
-                    cv.name as course,
-                    cv."acronym_IES" as flag
-                from validate_professionals vp
-                inner join users u
-                    on u.id = vp.professional_id
-                inner join course_valid cv
-                    on cv.course_code::text = vp.access_code
-                where vp.approved = false
-                order by vp.updated_at desc
-            `)
-            const rows = result.rows
-            return rows.length > 0 ? rows : []
-        } catch(err) {
-            console.error('Erro ao buscar requests:', err)
-            return []
+            select 
+                vp.diploma, 
+                u.username,
+                vp.professional_id as id,
+                vp.created_at,
+                case 
+                    when vp.role = 2 then 'Coordenador'
+                    when vp.role = 3 then 'Professor'
+                    else 'Desconhecido'
+                end as role,
+                cv.name as course,
+                cv."acronym_IES" as flag
+            from validate_professionals vp
+            inner join users u
+                on u.id = vp.professional_id
+            inner join course_valid cv
+                on cv.course_code::text = vp.access_code
+            where vp.approved = false
+            order by vp.updated_at desc
+            `);
+
+            const rows = result.rows;
+            if (rows.length === 0) return [];
+
+            // ✅ GERA URL ASSINADA PARA CADA DIPLOMA
+            const usersWithUrl = await Promise.all(
+            rows.map(async (user) => {
+                if (!user.diploma) {
+                return { ...user, diploma_url: null };
+                }
+
+                const { data, error } = await supabase.storage
+                .from("diplomas")
+                .createSignedUrl(user.diploma, 60 * 10); // 10 minutos
+
+                if (error || !data?.signedUrl) {
+                console.error("Erro ao gerar signedUrl:", error);
+                return { ...user, diploma_url: null };
+                }
+
+                return {
+                ...user,
+                diploma_url: data.signedUrl
+                };
+            })
+            );
+
+            return usersWithUrl;
+
+        } catch (err) {
+            console.error("Erro ao buscar requests:", err);
+            return [];
         }
     }
+
 
     /**
      * Busca todas as solicitações de validação de professores pendentes (não aprovadas)
