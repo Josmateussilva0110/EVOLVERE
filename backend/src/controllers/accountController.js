@@ -1,14 +1,13 @@
 const Account = require("../models/Account")
 const User = require("../models/User")
 const Subject = require("../models/Subject")
-const path = require("path")
 require("dotenv").config()
-const fs = require("fs")
 const validator = require('validator')
 const Course = require("../models/Course")
 const sendEmail = require("../utils/sendEmail")
 const formatMessageTeacherApproved = require("../utils/messageApprovedEmail")
 const formatMessageTeacherRejected = require("../utils/messageReprovedEmail")
+const cloudinary = require("../utils/cloudinary")
 
 /**
  * Controlador de Usuários.
@@ -55,74 +54,101 @@ class AccountController {
         try {
             const { id, institution, access_code, role } = request.body;
             const diplomaFile = request.file;
-            let diplomaPath = null;
-            let finalPath = null; 
 
             const course_valid = await Course.getCourseByCode(access_code);
-            if(!course_valid) {
-                return response.status(404).json({status: false, message: "Nenhum curso encontrado com esse código"});
+            if (!course_valid) {
+                return response.status(404).json({ status: false, message: "Nenhum curso encontrado com esse código" });
             }
-
 
             const accountAlreadyConfigured = await Account.accountExists(id, role);
             if (accountAlreadyConfigured) {
-                return response.status(422).json({status: false, message: "A configuração desta conta já foi realizada."});
+                return response.status(422).json({ status: false, message: "A configuração desta conta já foi realizada." });
             }
 
-
-            if (role === '4') { 
-
-                
+            // Se o usuário é aluno (role 4), não precisa de diploma
+            if (role === '4') {
                 const updated = await User.updateUser(id, { 
                     course_id: course_valid.id 
                 });
 
                 if (!updated) {
-                    return response.status(500).json({status: false, message: "Erro ao atualizar dados do aluno."});
+                    return response.status(500).json({ status: false, message: "Erro ao atualizar dados do aluno." });
                 }
 
-            } else { 
-
-                if (!diplomaFile) {
-                    return response.status(400).json({ status: false, message: "O upload de um PDF (diploma) é obrigatório para este perfil." });
-                }
-
-                const rootDir = path.join(__dirname, "..", "..");
-                const uploadDir = path.join(rootDir, "public", "diplomas");
-                fs.mkdirSync(uploadDir, { recursive: true });
-                const uniqueName = Date.now() + "_" + Math.floor(Math.random() * 100) + path.extname(diplomaFile.originalname);
-                finalPath = path.join(uploadDir, uniqueName);
-                diplomaPath = path.join("diplomas", uniqueName);
-
-                const data = {
-                    professional_id: id,
-                    institution,
-                    access_code,
-                    diploma: diplomaPath,
-                    role
-                };
-
-                const valid = await Account.save(data); 
-                if(!valid) {
-                    if (finalPath && diplomaFile && fs.existsSync(finalPath)) { 
-                        fs.unlinkSync(finalPath);
-                    }
-                    return response.status(500).json({status: false, message: "Erro ao cadastrar conta profissional."});
-                }
-
-                if (finalPath && diplomaFile) {
-                    fs.writeFileSync(finalPath, diplomaFile.buffer);
-                }
+                return response.status(200).json({
+                    status: true,
+                    message: "Conta configurada com sucesso (perfil de aluno)."
+                });
             }
 
+            if (!diplomaFile) {
+                return response.status(400).json({ 
+                    status: false, 
+                    message: "O upload de um PDF (diploma) é obrigatório para este perfil."
+                });
+            }
 
-            return response.status(200).json({status: true, message: "Conta configurada com sucesso."});
+            // Upload do PDF no Cloudinary
+            const uploadPdfToCloudinary = () => {
+                return new Promise((resolve, reject) => {
+                    const uploadStream = cloudinary.uploader.upload_stream(
+                        {
+                            folder: "evolvere/diplomas",
+                            resource_type: "raw" 
+                        },
+                        (error, result) => {
+                            if (error) reject(error);
+                            else resolve(result);
+                        }
+                    );
 
-        } catch(err) {
+                    uploadStream.end(diplomaFile.buffer);
+                });
+            };
+
+            const uploadedPdf = await uploadPdfToCloudinary();
+
+            if (!uploadedPdf || !uploadedPdf.secure_url) {
+                return response.status(500).json({
+                    status: false,
+                    message: "Falha ao salvar diploma."
+                });
+            }
+
+            const diplomaUrl = uploadedPdf.secure_url;
+
+            // Salvar no banco
+            const data = {
+                professional_id: id,
+                institution,
+                access_code,
+                diploma: diplomaUrl,
+                role
+            };
+
+            const saved = await Account.save(data);
+            if (!saved) {
+                return response.status(500).json({
+                    status: false,
+                    message: "Erro ao cadastrar conta profissional."
+                });
+            }
+
+            return response.status(200).json({
+                status: true,
+                message: "Conta profissional configurada com sucesso!",
+                diploma_url: diplomaUrl
+            });
+
+        } catch (err) {
             console.error("Erro interno em addRole:", err);
-            return response.status(500).json({ status: false, message: "Erro interno no servidor." });
+            return response.status(500).json({ 
+                status: false, 
+                message: "Erro interno no servidor." 
+            });
         }
     }
+
         
     /**
      * Retorna todas as solicitações de professores pendentes de aprovação.
