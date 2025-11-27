@@ -256,14 +256,14 @@ function RequestsTeachers() {
                   <td className="py-3 px-4 text-sm">
                     {prof.diploma ? (
                       <a
-                        href={`${prof.diploma}`}
+                        href={prof.diploma_url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1 text-[#060060] hover:underline"
                       >
-                        <FiFileText className="text-gray-500" />
-                        Diploma
-                        <FiExternalLink className="ml-1" />
+                        <FiFileText />
+                        Visualizar diploma
+                        <FiExternalLink />
                       </a>
                     ) : (
                       <div className="flex items-center gap-1 text-gray-400">
