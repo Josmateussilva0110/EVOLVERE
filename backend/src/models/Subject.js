@@ -1,4 +1,5 @@
-const knex = require("../database/connection");
+const knex = require("../database/connection")
+const { supabase } = require("../utils/supabase")
 
 /**
  * Classe para manipulação de disciplinas (subjects) na base de dados.
