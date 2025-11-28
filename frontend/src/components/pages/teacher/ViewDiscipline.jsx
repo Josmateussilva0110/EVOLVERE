@@ -274,13 +274,13 @@ function ViewSubjectDetails() {
                           </a>
                         </div>
                         <button onClick={() => deleteMaterial(material.id)}
-                          href={`${material.file_url}?download=true`}
+                          href={`${material.file_url}`}
                           className="w-10 h-10 bg-red-600/80 hover:bg-red-500 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-110 shadow-lg border border-red-500/30"
                         >
                           <Trash className="w-4 h-4 text-white" />
                         </button>
                         <a
-                          href={`${material.file_url}?download=true`}
+                          href={`${material.file_url}`}
                           className="w-10 h-10 bg-blue-600/80 hover:bg-blue-500 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-110 shadow-lg border border-blue-500/30"
                         >
                           <Download className="w-4 h-4 text-white" />
