@@ -3,7 +3,8 @@ const Material = require("../models/Material")
 const Class = require("../models/Class")
 const path = require("path")
 const fs = require("fs")
-const validator = require('validator');
+const validator = require('validator')
+const { supabase } = require("../utils/supabase")
 
 
 /**
@@ -52,22 +53,31 @@ class MaterialController {
                 return response.status(400).json({ status: false, message: "O upload de um arquivo é obrigatório." })
             }
 
-            const rootDir = path.join(__dirname, "..", "..")
-            const uploadDir = path.join(rootDir, "public", "materials")
-            fs.mkdirSync(uploadDir, { recursive: true })
+            const materialFile = request.file
 
+            const fileName = `evolvere/${title}-${Date.now()}.pdf`
 
-            const uniqueName = Date.now() + "_" + Math.floor(Math.random() * 100) + path.extname(request.file.originalname)
-            const finalPath = path.join(uploadDir, uniqueName)
-            const archivePath = path.join("materials", uniqueName)
+            const { error: uploadError } = await supabase.storage
+                .from("materials")
+                .upload(fileName, materialFile.buffer, {
+                    contentType: "application/pdf",
+                    upsert: true
+                })
+            
+            if (uploadError) {
+                console.error(uploadError)
+                return response.status(500).json({
+                    status: false,
+                    message: "Erro ao fazer upload de material."
+                })
+            }
 
-            fs.writeFileSync(finalPath, request.file.buffer)
 
             const data = {
                 title, 
                 description, 
                 type, 
-                archive: archivePath, 
+                archive: fileName, 
                 created_by, 
                 subject_id
             }
