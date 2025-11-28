@@ -54,13 +54,17 @@ class MaterialController {
             }
 
             const materialFile = request.file
+            const originalName = materialFile.originalname
+            const fileExt = originalName.split(".").pop().toLowerCase()
 
-            const fileName = `evolvere/${title}-${Date.now()}.pdf`
+            const fileName = `evolvere/${title}-${Date.now()}.${fileExt}`
+
+            const mimeType = materialFile.mimetype
 
             const { error: uploadError } = await supabase.storage
                 .from("materials")
                 .upload(fileName, materialFile.buffer, {
-                    contentType: "application/pdf",
+                    contentType: mimeType,
                     upsert: true
                 })
             
