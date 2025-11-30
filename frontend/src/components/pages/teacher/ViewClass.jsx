@@ -476,12 +476,14 @@ export default function ViewClass() {
 
                                         {/* Botões de ação */}
                                         <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
-                                            <button
-                                                onClick={() => downloadMaterial(mat)}
-                                                title="Baixar"
+                                            <a
+                                                href={`${mat.file_url}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="font-semibold text-white group-hover:text-blue-400 transition-colors flex items-center gap-2 mb-1"
                                             >
                                                 <ArrowDownToLine className="w-4 h-4 text-blue-400 hover:text-blue-300" />
-                                            </button>
+                                            </a>
                                             <button
                                                 onClick={() => deleteMaterial(mat.id)}
                                                 title="Excluir"

@@ -150,8 +150,7 @@ class AccountController {
 
             return response.status(200).json({
                 status: true,
-                message: "Conta profissional configurada com sucesso!",
-                diploma_url: diplomaUrl
+                message: "Conta profissional configurada com sucesso!"
             });
 
         } catch (err) {

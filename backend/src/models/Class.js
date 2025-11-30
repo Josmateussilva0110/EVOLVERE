@@ -1,4 +1,5 @@
-const knex = require("../database/connection");
+const knex = require("../database/connection")
+const { supabase } = require("../utils/supabase")
 
 /**
  * Classe para manipulação de dados relacionados a Turmas na base de dados.
@@ -197,7 +198,26 @@ class Class {
                 order by m.updated_at desc
             `, [class_id])
             const rows = result.rows
-            return rows.length > 0 ? rows : undefined
+
+            if(rows.length === 0) return undefined
+            
+            for (let item of rows) {
+                if (item.archive) {
+
+                    const { data, error } = await supabase.storage
+                        .from("materials")
+                        .createSignedUrl(item.archive, 60 * 60) // 1 hora
+
+                    if (!error && data?.signedUrl) {
+                        item.file_url = data.signedUrl
+                    } else {
+                        item.file_url = null
+                    }
+                }
+            }
+
+            return rows
+
         } catch(err) {
             console.error("Erro ao buscar materiais da turma: ", err);
             return undefined

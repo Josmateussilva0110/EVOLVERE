@@ -1,4 +1,5 @@
-const knex = require("../database/connection");
+const knex = require("../database/connection")
+const { supabase } = require("../utils/supabase")
 
 /**
  * Classe para manipulação de disciplinas (subjects) na base de dados.
@@ -369,20 +370,42 @@ class Subject {
                     m.*
                 from subjects s
                 left join materials m
-                    on m.subject_id  = s.id
+                    on m.subject_id = s.id
                     and m.origin = 1
                 inner join course_valid cv
                     on cv.id = s.course_valid_id
                 where s.id = ?
                 order by m.updated_at desc
             `, [subject_id])
+
             const rows = result.rows
-            return rows.length > 0 ? rows : undefined
-        } catch(err) {
-            console.error("Erro ao buscar materiais globais:", err);
+
+            if (rows.length === 0) return undefined
+
+            // gerar signed URLs
+            for (let item of rows) {
+                if (item.archive) {
+
+                    const { data, error } = await supabase.storage
+                        .from("materials")
+                        .createSignedUrl(item.archive, 60 * 60) // 1 hora
+
+                    if (!error && data?.signedUrl) {
+                        item.file_url = data.signedUrl
+                    } else {
+                        item.file_url = null
+                    }
+                }
+            }
+
+            return rows
+
+        } catch (err) {
+            console.error("Erro ao buscar materiais globais:", err)
             return undefined
         }
-    } 
+    }
+
 
 
     /**

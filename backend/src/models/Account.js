@@ -222,7 +222,32 @@ async accountExists(id, role) {
                 order by vp.updated_at desc
             `, [access_code])
             const rows = result.rows
-            return rows.length > 0 ? rows : []
+            if(rows.length === 0) return []
+            
+            const usersWithUrl = await Promise.all(
+                rows.map(async (user) => {
+                    if (!user.diploma) {
+                    return { ...user, diploma_url: null };
+                    }
+
+                    const { data, error } = await supabase.storage
+                    .from("diplomas")
+                    .createSignedUrl(user.diploma, 60 * 10); // 10 minutos
+
+                    if (error || !data?.signedUrl) {
+                    console.error("Erro ao gerar signedUrl:", error);
+                    return { ...user, diploma_url: null };
+                    }
+
+                    return {
+                    ...user,
+                    diploma_url: data.signedUrl
+                    };
+                })
+            )
+
+            return usersWithUrl
+
         } catch(err) {
             console.error('Erro ao buscar requests:', err)
             return []
