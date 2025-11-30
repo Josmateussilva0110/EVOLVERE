@@ -118,6 +118,19 @@ class AccountController {
                 });
             }
 
+            const { data, error } = await supabase.storage
+                .from("diplomas")
+                .createSignedUrl(fileName, 60 * 60); // 1 hora
+
+            if (error) {
+                return response.status(500).json({
+                    status: false,
+                    message: "Erro ao gerar URL do diploma."
+                });
+            }
+
+
+            const diplomaUrl = data.signedUrl;
 
             const update = {
                 professional_id: id,
