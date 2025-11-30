@@ -102,47 +102,64 @@ class Material {
     async getMaterialsByIdClass(class_id) {
         try {
             const classInfo = await knex
-            .select("id", "name")
-            .from("classes")
-            .where({ id: class_id })
-            .first();
+                .select("id", "name")
+                .from("classes")
+                .where({ id: class_id })
+                .first();
 
             if (!classInfo) {
-            return null;
+                return null;
             }
 
-            // 2️⃣ Busca os materiais da turma
             const materialsResult = await knex.raw(`
-            select 
-                m.id,
-                m.title,
-                case 
-                    when m.type = 1 then 'PDF'
-                    when m.type = 2 then 'DOC'
-                    when m.type = 3 then 'PPT'
-                    else 'Desconhecido'
-                end as type_file,
-                m.archive,
-                m.updated_at
-            from materials m
-            where m.class_id = ? and m.origin = 2
-            order by m.updated_at desc
+                select 
+                    m.id,
+                    m.title,
+                    case 
+                        when m.type = 1 then 'PDF'
+                        when m.type = 2 then 'DOC'
+                        when m.type = 3 then 'PPT'
+                        else 'Desconhecido'
+                    end as type_file,
+                    m.archive,
+                    m.updated_at
+                from materials m
+                where m.class_id = ? and m.origin = 2
+                order by m.updated_at desc
             `, [class_id]);
 
             const materials = materialsResult.rows;
 
+            for (let material of materials) {
+                if (!material.archive) {
+                    material.file_url = null;
+                    continue;
+                }
+
+                const { data, error } = await supabase.storage
+                    .from("materials")
+                    .createSignedUrl(material.archive, 60 * 60); // 1 hora
+
+                if (error) {
+                    console.error("Erro ao gerar URL Supabase:", error);
+                    material.file_url = null;
+                } else {
+                    material.file_url = data.signedUrl;
+                }
+            }
+
             const countResult = await knex.raw(`
-            select count(*) as total_materials
-            from materials
-            where class_id = ? and origin = 2
+                select count(*) as total_materials
+                from materials
+                where class_id = ? and origin = 2
             `, [class_id]);
 
             const total = Number(countResult.rows[0]?.total_materials || 0);
 
             return {
-            class_name: classInfo.name,
-            total_materials: total,
-            materials
+                class_name: classInfo.name,
+                total_materials: total,
+                materials 
             };
 
         } catch (err) {
@@ -150,6 +167,7 @@ class Material {
             return false;
         }
     }
+
 
     /**
      * Retorna todos os materiais de todas as turmas em que um aluno está matriculado.
