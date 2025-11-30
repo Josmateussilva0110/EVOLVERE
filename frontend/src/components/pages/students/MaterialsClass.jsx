@@ -132,6 +132,7 @@ export default function MaterialsClass() {
             nome: material.title,
             type_file: material.type_file,
             archive: material.archive,
+            file_url: material.file_url, 
             class_name: material.class_name, 
             date: material.updated_at,
             cor: randomColor.cor,
