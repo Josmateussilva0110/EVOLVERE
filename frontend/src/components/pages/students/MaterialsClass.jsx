@@ -132,6 +132,7 @@ export default function MaterialsClass() {
             nome: material.title,
             type_file: material.type_file,
             archive: material.archive,
+            file_url: material.file_url, 
             class_name: material.class_name, 
             date: material.updated_at,
             cor: randomColor.cor,
@@ -307,7 +308,7 @@ export default function MaterialsClass() {
                 {/* Ações */}
                 <div className="flex gap-3">
                   <a
-                    href={`${import.meta.env.VITE_BASE_URL}/${material.archive}?download=true`}
+                    href={`${material.file_url}`}
                     download
                     className={`flex-1 bg-linear-to-r ${material.cor} text-white py-3 rounded-2xl font-bold hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 group/btn`}
                   >

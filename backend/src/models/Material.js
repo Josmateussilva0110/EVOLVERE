@@ -1,4 +1,5 @@
 const knex = require("../database/connection")
+const { supabase } = require("../utils/supabase")
 
 /**
  * Classe responsável por gerenciar operações relacionadas aos materiais no banco de dados.
@@ -101,47 +102,64 @@ class Material {
     async getMaterialsByIdClass(class_id) {
         try {
             const classInfo = await knex
-            .select("id", "name")
-            .from("classes")
-            .where({ id: class_id })
-            .first();
+                .select("id", "name")
+                .from("classes")
+                .where({ id: class_id })
+                .first();
 
             if (!classInfo) {
-            return null;
+                return null;
             }
 
-            // 2️⃣ Busca os materiais da turma
             const materialsResult = await knex.raw(`
-            select 
-                m.id,
-                m.title,
-                case 
-                    when m.type = 1 then 'PDF'
-                    when m.type = 2 then 'DOC'
-                    when m.type = 3 then 'PPT'
-                    else 'Desconhecido'
-                end as type_file,
-                m.archive,
-                m.updated_at
-            from materials m
-            where m.class_id = ? and m.origin = 2
-            order by m.updated_at desc
+                select 
+                    m.id,
+                    m.title,
+                    case 
+                        when m.type = 1 then 'PDF'
+                        when m.type = 2 then 'DOC'
+                        when m.type = 3 then 'PPT'
+                        else 'Desconhecido'
+                    end as type_file,
+                    m.archive,
+                    m.updated_at
+                from materials m
+                where m.class_id = ? and m.origin = 2
+                order by m.updated_at desc
             `, [class_id]);
 
             const materials = materialsResult.rows;
 
+            for (let material of materials) {
+                if (!material.archive) {
+                    material.file_url = null;
+                    continue;
+                }
+
+                const { data, error } = await supabase.storage
+                    .from("materials")
+                    .createSignedUrl(material.archive, 60 * 60); // 1 hora
+
+                if (error) {
+                    console.error("Erro ao gerar URL Supabase:", error);
+                    material.file_url = null;
+                } else {
+                    material.file_url = data.signedUrl;
+                }
+            }
+
             const countResult = await knex.raw(`
-            select count(*) as total_materials
-            from materials
-            where class_id = ? and origin = 2
+                select count(*) as total_materials
+                from materials
+                where class_id = ? and origin = 2
             `, [class_id]);
 
             const total = Number(countResult.rows[0]?.total_materials || 0);
 
             return {
-            class_name: classInfo.name,
-            total_materials: total,
-            materials
+                class_name: classInfo.name,
+                total_materials: total,
+                materials 
             };
 
         } catch (err) {
@@ -149,6 +167,7 @@ class Material {
             return false;
         }
     }
+
 
     /**
      * Retorna todos os materiais de todas as turmas em que um aluno está matriculado.
@@ -158,54 +177,65 @@ class Material {
      * @returns {Promise<Array<Object>|undefined>} Lista de materiais formatada.
      */
     async getAllMaterialsForStudent(student_id) {
-            try {
-                const query = knex('materials as m')
-                    // Junta com 'subjects' para pegar o nome da disciplina
-                    .join('subjects as s', 's.id', 'm.subject_id')
-                    .select(
-                        'm.id',
-                        'm.title',
-                        knex.raw(`
-                            CASE 
-                                WHEN m.type = 1 THEN 'PDF'
-                                WHEN m.type = 2 THEN 'DOC'
-                                WHEN m.type = 3 THEN 'PPT'
-                                ELSE 'Outro'
-                            END as type_file
-                        `),
-                        'm.archive',
-                        'm.updated_at',
-                        's.name as discipline_name'
-                    )
-                    
-                    // 1. Filtra APENAS materiais globais (origin = 1)
-                    .where('m.origin', 1) 
-                    
-                    // 2. CORREÇÃO AQUI:
-                    // Filtra APENAS materiais cujo 'subject_id'
-                    // esteja na lista de disciplinas que o aluno cursa.
-                    .whereIn('m.subject_id', function() { 
-                        this.select('c.subject_id') // <-- Mudamos de class_id para subject_id
-                            .distinct() 
-                            .from('class_student as cs')
-                            .join('classes as c', 'c.id', 'cs.class_id') // <-- Precisamos do JOIN com 'classes'
-                            .where('cs.student_id', student_id);
-                    })
-                    .orderBy('m.updated_at', 'desc');
+        try {
+            const query = knex('materials as m')
+                .join('subjects as s', 's.id', 'm.subject_id')
+                .select(
+                    'm.id',
+                    'm.title',
+                    knex.raw(`
+                        CASE 
+                            WHEN m.type = 1 THEN 'PDF'
+                            WHEN m.type = 2 THEN 'DOC'
+                            WHEN m.type = 3 THEN 'PPT'
+                            ELSE 'Outro'
+                        END as type_file
+                    `),
+                    'm.archive',
+                    'm.updated_at',
+                    's.name as discipline_name'
+                )
+                .where('m.origin', 1) 
+                .whereIn('m.subject_id', function() { 
+                    this.select('c.subject_id')
+                        .distinct()
+                        .from('class_student as cs')
+                        .join('classes as c', 'c.id', 'cs.class_id')
+                        .where('cs.student_id', student_id);
+                })
+                .orderBy('m.updated_at', 'desc');
 
-                const result = await query;
-                
-                // 3. Formatação (sem mudanças)
-                const formattedResult = result.map(material => ({
-                    id: material.id,
-                    titulo: material.title,
-                    tipo: material.type_file, 
-                    tamanho: "N/D",
-                    data: material.updated_at,
-                    disciplina: material.discipline_name,
-                    archive: material.archive,
-                    categoria: material.type_file.toLowerCase()
-                }));
+            const result = await query;
+
+            for (let material of result) {
+                if (!material.archive) {
+                    material.file_url = null;
+                    continue;
+                }
+
+                const { data, error } = await supabase.storage
+                    .from("materials")
+                    .createSignedUrl(material.archive, 60 * 60); // 1 hora
+
+                if (error) {
+                    console.error("Erro ao gerar URL Supabase:", error);
+                    material.file_url = null;
+                } else {
+                    material.file_url = data.signedUrl;
+                }
+            }
+
+            const formattedResult = result.map(material => ({
+                id: material.id,
+                titulo: material.title,
+                tipo: material.type_file,
+                tamanho: "N/D",
+                data: material.updated_at,
+                disciplina: material.discipline_name,
+                archive: material.archive,
+                categoria: material.type_file.toLowerCase(),
+                file_url: material.file_url 
+            }));
 
                 return formattedResult;
 
@@ -214,6 +244,8 @@ class Material {
                 return undefined;
             }
         }
+    }
+
     
     
     /**
