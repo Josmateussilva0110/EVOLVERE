@@ -298,7 +298,6 @@ class MaterialController {
             }
             
             const materials = await Material.getUpdates(course_id)
-            console.log('m: ', materials)
             if(!materials) {
                 return response.status(404).json({status: false, message: "Nenhuma atualização recente."})
             }

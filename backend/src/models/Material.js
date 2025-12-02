@@ -330,9 +330,6 @@ class Material {
             return { materials: [], forms: [] }
         }
     }
-
-
-
 }
 
 module.exports = new Material()
