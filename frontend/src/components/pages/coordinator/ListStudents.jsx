@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import requestData from "../../../utils/requestApi.js";
 import { useMemo, useState, useEffect, useContext} from "react";
-import { FaEye, FaTrash, FaArrowLeft } from "react-icons/fa";
+import { FaTrash, FaArrowLeft } from "react-icons/fa";
 import { FiSearch, FiUsers, FiUserCheck, FiPause, FiX } from "react-icons/fi";
 import { Context } from "../../../context/UserContext"
 
@@ -112,8 +112,9 @@ function ListStudents() {
   useEffect(() => {
     const fetchAlunos = async () => {
       const response = await requestData(`/users/students/${user.id}`, "GET", {}, true);
+      console.log(response)
       if (response.success) {
-        console.log(response)
+        
         const alunosComTurma = response.data.data.map((aluno) => ({
           ...aluno,
           turma: getTurmaFromDate(aluno.created_at),
@@ -354,7 +355,7 @@ function ListStudents() {
 
             <button
               onClick={handleLimparFiltros}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 px-4 py-2 text-sm font-semibold text-slate-900 shadow-lg hover:from-amber-500 hover:to-yellow-600 transition transform hover:scale-105"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-linear-to-r from-amber-400 to-yellow-500 px-4 py-2 text-sm font-semibold text-slate-900 shadow-lg hover:from-amber-500 hover:to-yellow-600 transition transform hover:scale-105"
             >
               Limpar filtros
             </button>
@@ -424,7 +425,7 @@ function ListStudents() {
                 <div className="mt-4">
                   <button
                     onClick={handleLimparFiltros}
-                    className="rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-900 px-4 py-2 text-sm font-semibold shadow-lg hover:from-amber-500 hover:to-yellow-600 transition transform hover:scale-105"
+                    className="rounded-xl bg-linear-to-r from-amber-400 to-yellow-500 text-slate-900 px-4 py-2 text-sm font-semibold shadow-lg hover:from-amber-500 hover:to-yellow-600 transition transform hover:scale-105"
                   >
                     Limpar filtros
                   </button>
