@@ -237,11 +237,12 @@ class Material {
                 file_url: material.file_url 
             }));
 
-            return formattedResult;
+                return formattedResult;
 
-        } catch (err) {
-            console.error("Erro ao buscar materiais globais do aluno:", err);
-            return undefined;
+            } catch (err) {
+                console.error("Erro ao buscar materiais globais do aluno:", err);
+                return undefined;
+            }
         }
     }
 
