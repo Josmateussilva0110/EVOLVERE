@@ -142,6 +142,7 @@ class User {
                 u.created_at,
                 u.updated_at,
                 u.course_id,
+                vp.access_code,
             CASE 
                 when vp.role = '1' then 'Admin'
                 when vp.role = '2' then 'Coordenador'
@@ -196,6 +197,43 @@ class User {
         } catch (err) {
             console.error("Erro ao buscar alunos:", err);
             return [];
+        }
+    }
+
+    async findAllStudentsByCoordinator(access_code) {
+        try {
+            const result = await knex.raw(`
+                SELECT 
+                    u.id,
+                    u.username,
+                    u.registration,
+                    u.email,
+                    u.status,
+                    u.created_at
+                FROM users u
+                
+                INNER JOIN course_valid cv
+                    ON cv.course_code::text = ?
+                
+                WHERE u.course_id = cv.id
+                
+                -- exclui usuários que são profissionais validados
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM validate_professionals vp
+                    WHERE vp.professional_id = u.id
+                )
+                
+                -- exclui registro 'admin'
+                AND u.registration <> 'admin'
+                
+                ORDER BY u.username ASC;
+            `, [access_code])
+
+            return result.rows || []
+        } catch (err) {
+            console.error("Erro ao buscar alunos:", err)
+            return []
         }
     }
 

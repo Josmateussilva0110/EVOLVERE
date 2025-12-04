@@ -286,10 +286,17 @@ class UserController {
             const error = UserFieldValidator.validate({id})
             if (error) return response.status(422).json({ status: false, message: error })
             const admin = await User.isAdmin(id)
+            let students = []
             if(!admin) {
-                return response.status(422).json({status: false, message: "Usuários indisponíveis"})
+                const coordinator = await User.findById(id)
+                if(!coordinator) {
+                    return response.status(404).json({status: false, message: "Nenhum coordenador encontrado."})
+                }
+                students = await User.findAllStudentsByCoordinator(coordinator.access_code)
             }
-            const students = await User.findAllStudents()
+            else {
+                students = await User.findAllStudents()
+            }
             return response.status(200).json({ status: true, data: students })
         } catch (err) {
             console.error("Erro ao listar alunos:", err)
