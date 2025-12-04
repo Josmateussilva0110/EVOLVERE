@@ -237,12 +237,11 @@ class Material {
                 file_url: material.file_url 
             }));
 
-                return formattedResult;
+            return formattedResult;
 
-            } catch (err) {
-                console.error("Erro ao buscar materiais globais do aluno:", err);
-                return undefined;
-            }
+        } catch (err) {
+            console.error("Erro ao buscar materiais globais do aluno:", err);
+            return undefined;
         }
     }
 
@@ -325,6 +324,7 @@ class Material {
                 forms
             }
 
+
         } catch (err) {
             console.error("Erro ao buscar atualizações:", err)
             return { materials: [], forms: [] }
@@ -335,4 +335,3 @@ class Material {
 
 
 module.exports = new Material()
-
