@@ -324,6 +324,7 @@ class Material {
                 forms
             }
 
+
         } catch (err) {
             console.error("Erro ao buscar atualizações:", err)
             return { materials: [], forms: [] }
@@ -334,4 +335,8 @@ class Material {
 
 
 module.exports = new Material()
+
+
+
+
 
